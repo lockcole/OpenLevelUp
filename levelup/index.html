@@ -1,0 +1,126 @@
+<!DOCTYPE html5>
+<html>
+<!--
+	This file is part of LevelUp!.
+
+	LevelUp! is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	any later version.
+
+	LevelUp! is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with LevelUp!.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!--
+	LevelUp!
+	Web viewer for indoor mapping (based on OpenStreetMap data).
+	Author: Adrien PAVIE
+	
+	Main page
+-->
+<head>
+	<!--
+		TODO (by priority)
+		* Display elements connected to doors
+		* Set clean styles for objects
+		* Permalinks
+	-->
+	<!-- General definitions -->
+	<title>LevelUp!</title>
+	<meta charset="utf-8" />
+	
+	<!-- Leaflet includes -->
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+	<!-- OSMtoGeoJSON include -->
+	<script src="js/osmtogeojson.js"></script>
+	
+	<!-- jQuery includes -->
+	<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+	<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+	
+	<!-- LevelUp! JS include -->
+	<script src="js/levelup.js" type="text/javascript"></script>
+	
+	<!-- CSS style -->
+	<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+	<div class="panel" id="overlay-panel">
+		<p class="rotation">&#8634;</p>
+		<p class="text-rotation">Chargement</p>
+	</div>
+
+	<div class="panel" id="side-panel">
+	
+		<!-- Header -->
+		<h1>LevelUp!</h1>
+		
+		<!-- What is it/How-to -->
+		<div id="whatisit">
+			<p>Visualisez l'intérieur des bâtiments avec LevelUp!</p>
+		</div>
+		
+		<!-- Settings -->
+		<div id="settings">
+			<h2>Réglages</h2>
+			<ul>
+				<li>Étage : <select id="level"></select> <a id="levelUp">&uarr;</a> <a id="levelDown">&darr;</a></li>
+			</ul>
+		</div>
+		
+		<!-- Message/info box -->
+		<div id="infobox">
+			<p id="infobox-label"></p>
+		</div>
+		
+		<!-- Footer -->
+		<div id="footer">
+			<p>Permalien | &copy; Adrien PAVIE 2015</p>
+		</div>
+	</div>
+	
+	<div class="panel" id="main-panel">
+	
+		<!-- Map -->
+		<div id="map" />
+
+	</div>
+	
+	<!-- JS Code for map -->
+	<script type="text/javascript">
+		/*
+		 * Leaflet map init
+		 */
+		//Init map center and zoom
+		var map = L.map('map').setView([48.1081, -1.6716], 12);
+		
+		//Set layers
+		var osmUrl='http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
+		var osmAttrib='Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a> | Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+		var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 20, attribution: osmAttrib});
+		
+		//Add layer to map
+		map.addLayer(osm);
+		
+		/*
+		 * LevelUp! controller init
+		 */
+		//Create controller object
+		var controller = new LevelUpController(map);
+		controller.mapUpdate();
+		
+		//Add triggers on HTML elements
+		$("#level").change(controller.updateLevelOnMap);
+		$("#levelUp").click(controller.levelUp);
+		$("#levelDown").click(controller.levelDown);
+		map.on('moveend', function(e) { controller.map=map; controller.mapUpdate(); });
+	</script>
+</body>
+</html>
