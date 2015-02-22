@@ -438,15 +438,31 @@ function MapData(ctrl) {
 	* @return The style
 	*/
 	function styleNodes(feature, latlng) {
-		var geojsonMarkerOptions = {
-			radius: 8,
-			fillColor: "#ff7800",
-			color: "#000",
-			weight: 1,
-			opacity: 1,
-			fillOpacity: 0.8
-		};
-		return L.circleMarker(latlng, geojsonMarkerOptions);
+		var icon = 'default';
+		
+		//Find the appropriate icon, depending of tags
+		//Door
+		if(feature.properties.tags.door != undefined) {
+			icon = 'io';
+		}
+		//Amenity
+		else if(feature.properties.tags.amenity != undefined) {
+			if(feature.properties.tags.amenity == 'ticket_validator') {
+				icon = 'ticket_valid';
+			}
+			else if(feature.properties.tags.amenity == 'vending_machine') {
+				icon = 'ticket_vending';
+			}
+		}
+		
+		//Icon definition
+		var myIcon = L.icon({
+			iconUrl: 'img/'+icon+'.svg',
+			iconSize: [32, 32],
+			iconAnchor: [16, 16],
+			popupAnchor: [0, -16]
+		});
+		return L.marker(latlng, {icon: myIcon});
 	}
 
 
