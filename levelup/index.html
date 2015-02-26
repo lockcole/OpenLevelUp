@@ -27,8 +27,8 @@
 	<!--
 		TODO (by priority)
 		* Display elements connected to doors
+		* Add a list system for messages
 		* Add a caption for icons
-		* Permalinks
 		* Create a generic file (and JS handler) describing icon association based on tags
 	-->
 	<!-- General definitions -->
@@ -53,7 +53,7 @@
 	<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-	<div class="panel" id="overlay-panel">
+	<div class="panel" id="overlay-panel" style="display: none;">
 		<p class="rotation">&#8634;</p>
 		<p class="text-rotation">Chargement</p>
 	</div>
@@ -83,7 +83,7 @@
 		
 		<!-- Footer -->
 		<div id="footer">
-			<p>Permalien | &copy; Adrien PAVIE 2015</p>
+			<p><a id="permalink" href="">Permalien</a> | &copy; Adrien PAVIE 2015</p>
 		</div>
 	</div>
 	
@@ -97,24 +97,13 @@
 	<!-- JS Code for map -->
 	<script type="text/javascript">
 		/*
-		 * Leaflet map init
-		 */
-		//Init map center and zoom
-		var map = L.map('map').setView([48.1081, -1.6716], 12);
-		
-		//Set layers
-		var osmUrl='http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
-		var osmAttrib='Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a> | Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
-		var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 20, attribution: osmAttrib});
-		
-		//Add layer to map
-		map.addLayer(osm);
-		
-		/*
 		 * LevelUp! controller init
 		 */
 		//Create controller object
-		var controller = new LevelUpController(map);
+		var controller = new LevelUpController();
+		
+		//Init map
+		var map = controller.mapInit();
 		controller.mapUpdate();
 		
 		//Add triggers on HTML elements

@@ -33,13 +33,13 @@
  * Class LevelUpController
  * Manages the application.
  */
-function LevelUpController(currentMap) {
+function LevelUpController() {
 //ATTRIBUTES
 	/** The current MapData object **/
 	var _mapdata = null;
 	
 	/** The current Leaflet map object **/
-	var _map = currentMap;
+	var _map;
 	
 	/** The current GeoJSON data layer on map **/
 	var _dataLayer = null;
@@ -49,13 +49,49 @@ function LevelUpController(currentMap) {
 
 //OTHER METHODS
 	/**
+	 * This function initializes the Leaflet map
+	 * @return The map
+	 */
+	this.mapInit = function() {
+		//Init map center and zoom
+		_map = L.map('map').setView([48.1081, -1.6716], 12);
+		
+		//If a BBox is given in URL, then make map show the wanted area
+		var bbox = getUrlParameter("bbox");
+		if(bbox != null) {
+			//Get latitude and longitude information from BBox string
+			var coordinates = bbox.split(',');
+			
+			if(coordinates.length == 4) {
+				var sw = L.latLng(coordinates[1], coordinates[0]);
+				var ne = L.latLng(coordinates[3], coordinates[2]);
+				var bounds = L.latLngBounds(sw, ne);
+				_map.fitBounds(bounds);
+			}
+			else {
+				displayMessage("Invalid bounding box", "alert");
+			}
+		}
+		
+		//Set layers
+		var osmUrl='http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
+		var osmAttrib='Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a> | Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+		var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 20, attribution: osmAttrib});
+		
+		//Add layer to map
+		_map.addLayer(osm);
+		
+		return _map;
+	}
+	
+	/**
 	 * This function is called when map was moved or zoomed in/out.
 	 */
 	this.mapUpdate = function() {
-		setLoading(true);
-		
 		//Check if zoom level is high enough to download data
 		if(_map.getZoom() >= 17) {
+			setLoading(true);
+			
 			//Get current level
 			oldLevel = parseFloat($("#level").val());
 			
@@ -70,7 +106,8 @@ function LevelUpController(currentMap) {
 			displayMessage("Zoomez plus pour afficher les informations", "info");
 		}
 		
-		setLoading(false);
+		//Update permalink
+		$("#permalink").attr('href', $(location).attr('href').split('?bbox')[0]+"?bbox="+_map.getBounds().toBBoxString());
 	}
 	
 	/**
@@ -95,6 +132,7 @@ function LevelUpController(currentMap) {
 			//Refresh leaflet map
 			_self.updateLevelOnMap();
 		}
+		setLoading(false);
 	}
 	
 	/**
@@ -481,3 +519,21 @@ function MapData(ctrl) {
 	function isFloat(val) {
 		return !isNaN(val);
 	}
+	
+	/**
+	 * Get an URL parameter
+	 * @param sParam The wanted parameter
+	 * @return The associated value
+	 */
+	function getUrlParameter(sParam) {
+		var sPageURL = window.location.search.substring(1);
+		var sURLVariables = sPageURL.split('&');
+		for (var i = 0; i < sURLVariables.length; i++) 
+		{
+			var sParameterName = sURLVariables[i].split('=');
+			if (sParameterName[0] == sParam) 
+			{
+				return sParameterName[1];
+			}
+		}
+	}  
