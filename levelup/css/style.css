@@ -1,0 +1,180 @@
+/*
+ * This file is part of LevelUp!.
+ * 
+ * LevelUp! is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ * 
+ * LevelUp! is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with LevelUp!.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * LevelUp!
+ * Web viewer for indoor mapping (based on OpenStreetMap data).
+ * Author: Adrien PAVIE
+ *
+ * Style for main page
+ */
+
+/*
+ * General style
+ */
+body {
+	font-family: Arial;
+	color: #222;
+}
+
+p {
+	line-height: 1.5em;
+}
+
+/*
+ * Panel structure
+ */
+.panel {
+	/*border: 1px solid red;*/
+	height: 100%;
+	position: relative;
+}
+
+/* Side panel */
+#side-panel {
+	width: 20%;
+	float: left;
+	padding: 5px;
+}
+
+/* Main panel */
+#main-panel {
+	width: 80%;
+	margin-left: 20%;
+}
+
+#overlay-panel {
+	height: 30%;
+	width: 30%;
+	position: absolute;
+	top: 35%;
+	left: 35%;
+	z-index: 10;
+	background-color: rgba(128,128,128,0.4);
+}
+
+/*
+ * Side panel parts
+ */
+#side-panel h1 {
+	text-align: center;
+	background-color: #D2E6FF;
+	color: #2A86FF;
+}
+
+#whatisit {
+	text-align: center;
+}
+
+#infobox {
+	font-weight: bold;
+	font-size: 90%;
+	padding: 0 10px;
+	text-align: center;
+	/*text-shadow: 0.2em 0.2em 0.2em rgba(0,0,0,0.3);*/
+}
+
+#infobox.info {
+	background-color: #D2E6FF;
+	color: #2A86FF;
+}
+
+#infobox.alert {
+	background-color: #FEFFAA;
+	color: #FF862F;
+}
+
+#infobox.error {
+	background-color: #FFD9D9;
+	color: #FF2A2A;
+}
+
+#settings a {
+	border: 1px solid grey;
+	background-color: #ddd;
+	font-weight: normal;
+	padding: 5px 10px;
+	cursor: pointer;
+}
+
+#settings a:hover {
+	background-color: #eee;
+	font-weight: bold;
+}
+
+#settings ul {
+	list-style: none;
+	list-style-type: none;
+	padding-left: 10px;
+}
+
+#footer {
+	border-top: 1px solid gray;
+	color: #333;
+	padding: 0;
+	text-align: center;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	font-size: 80%;
+	right: 0;
+}
+
+/*
+ * Overlay panel rules
+ */
+.text-rotation {
+	text-align: center;
+	font-size: 130%;
+}
+
+.rotation {
+	font-size: 60px;
+	font-weight: bold;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: -30px 0 0 -30px;
+	-webkit-animation:spin 0.7s linear infinite;
+	-moz-animation:spin 0.7s linear infinite;
+	animation:spin 0.7s linear infinite;
+}
+@-moz-keyframes spin { 100% { -moz-transform: rotate(-360deg); } }
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(-360deg); } }
+@keyframes spin { 100% { -webkit-transform: rotate(-360deg); transform:rotate(-360deg); } }
+
+/*
+ * Map related rules
+ */
+#map {
+	height: 100%;
+}
+
+/* Popup titles */
+.popup {
+	font-weight: bold;
+	margin: 0;
+}
+
+h1.popup {
+	font-size: 105%;
+	text-align: center;
+}
+
+h2.popup {
+	font-size: 100%;
+}
