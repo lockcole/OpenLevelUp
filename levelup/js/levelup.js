@@ -50,6 +50,14 @@ function LevelUpController() {
 	/** The current object **/
 	var _self = this;
 
+//ACCESSORS
+	/**
+	 * @return The current map data object
+	 */
+	this.getMapData = function() {
+		return _mapdata;
+	}
+
 //OTHER METHODS
 	/**
 	 * This function initializes the Leaflet map
@@ -247,7 +255,7 @@ function MapData(ctrl) {
 	this.getLevels = function() {
 		return _levels;
 	}
-	
+
 //OTHER METHODS
 	/**
 	 * Downloads data from Overpass API
@@ -290,6 +298,11 @@ function MapData(ctrl) {
 						levelsSet.add(parseFloat(currentLevel[i]));
 					}
 				}
+			}
+			
+			//Edit indoor areas to set them as polygons instead of polylines
+			if(feature.properties.tags.indoor != undefined && feature.properties.tags.indoor != "yes") {
+				feature = convertLineToPolygon(feature);
 			}
 		}
 		
@@ -436,35 +449,38 @@ function HTMLView() {
 	* @param layer The leaflet layer
 	*/
 	function processElements(feature, layer) {
-		//Create a readable text for each element
-		var text;
-		
-		//Determine the kind of object
-		var typeObject = "";
-		if(feature.properties.tags["indoor"] != undefined) {
-			var indoorType = feature.properties.tags["indoor"];
-			var correspondingObject = { room: "Pièce", area: "Espace", wall: "Mur", corridor: "Couloir", level: "Niveau" };
-			typeObject = (correspondingObject[indoorType] != undefined) ? correspondingObject[indoorType] : "";
+		//No popups for buildings
+		if(feature.properties.tags["building"] == undefined) {
+			//Create a readable text for each element
+			var text;
+			
+			//Determine the kind of object
+			var typeObject = "";
+			if(feature.properties.tags["indoor"] != undefined) {
+				var indoorType = feature.properties.tags["indoor"];
+				var correspondingObject = { room: "Pièce", area: "Espace", wall: "Mur", corridor: "Couloir", level: "Niveau" };
+				typeObject = (correspondingObject[indoorType] != undefined) ? correspondingObject[indoorType] : "";
+			}
+			else if(feature.properties.tags["door"] != undefined) {
+				typeObject = "Entrée/sortie";
+			}
+			else if(feature.properties.tags["amenity"] != undefined) {
+				var amenityType = feature.properties.tags["amenity"];
+				var correspondingObject = { vending_machine: "Distributeur", ticket_validator: "Composteur" };
+				typeObject = (correspondingObject[amenityType] != undefined) ? correspondingObject[amenityType] : "";
+			}
+			
+			text = '<h1 class="popup">'+typeObject+'</h1>';
+			
+			//Then, list all tags
+			text += '<h2 class="popup">Tags</h2>';
+			for(i in feature.properties.tags) {
+				text += i+" = "+feature.properties.tags[i]+"<br />";
+			}
+			
+			//And add popup to layer
+			layer.bindPopup(text);
 		}
-		else if(feature.properties.tags["door"] != undefined) {
-			typeObject = "Entrée/sortie";
-		}
-		else if(feature.properties.tags["amenity"] != undefined) {
-			var amenityType = feature.properties.tags["amenity"];
-			var correspondingObject = { vending_machine: "Distributeur", ticket_validator: "Composteur" };
-			typeObject = (correspondingObject[amenityType] != undefined) ? correspondingObject[amenityType] : "";
-		}
-		
-		text = '<h1 class="popup">'+typeObject+'</h1>';
-		
-		//Then, list all tags
-		text += '<h2 class="popup">Tags</h2>';
-		for(i in feature.properties.tags) {
-			text += i+" = "+feature.properties.tags[i]+"<br />";
-		}
-		
-		//And add popup to layer
-		layer.bindPopup(text);
 	}
 	
 	/**
@@ -474,12 +490,34 @@ function HTMLView() {
 	* @return True if should be shown
 	*/
 	function filterElements(feature, layer) {
-		//Consider level and repeat_on tags
+		var onLevels = null;
+		var addObject = false;
+		
+		//Consider repeat_on tags
 		if(feature.properties.tags.repeat_on != undefined) {
-			var repeatOn = feature.properties.tags.repeat_on;
-			var repeatOnLevels = repeatOn.split(';'); //TODO Also use syntax with "-" separator
+			onLevels = parseLevels(feature.properties.tags.repeat_on);
 		}
-		return feature.properties.tags.level == $("#level").val() || (repeatOnLevels != null && repeatOnLevels.indexOf($("#level").val()) >= 0);
+		//Consider level tags
+		else if(feature.properties.tags.level != undefined) {
+			onLevels = parseLevels(feature.properties.tags.level);
+		}
+		//Consider objects without levels but connected to door elements
+		else {
+			//Building with min and max level
+			addObject = feature.properties.tags.building != undefined
+					&& feature.properties.tags.min_level != undefined
+					&& feature.properties.tags.max_level != undefined;
+			
+			//Elevator
+			addObject = addObject || feature.properties.tags.highway == "elevator";
+			
+			//Display unrendered objects
+			if(!addObject) {
+				console.log(feature);
+			}
+		}
+
+		return addObject || (onLevels != null && onLevels.indexOf($("#level").val()) >= 0);
 	}
 
 	/**
@@ -491,16 +529,36 @@ function HTMLView() {
 		var result;
 		
 		//Indoor
-		if(feature.properties.tags.indoor != undefined) {
-			result = { color: "white", fillColor: "white" };
+		if(feature.properties.tags.indoor != undefined && feature.properties.tags.indoor != "yes") {
+			result = { color: "#AAAAAA", opacity: 1, weight: 0.5, fillColor: "#EEEEEE", fillOpacity: 1 };
 		}
-		//Door
-		else if(feature.properties.tags.door != undefined) {
-			result = { color: "black", fillColor: "green" };
-		}
-		//Amenities
+		//Amenity
 		else if(feature.properties.tags.amenity != undefined) {
 			result = { color: "black", fillColor: "red" };
+		}
+		//Building
+		else if(feature.properties.tags.building != undefined) {
+			result = { color: "#ADA5A5", opacity: 1, weight: 0.5, fillColor: "#D4CACA", fillOpacity: 1 };
+		}
+		//Highway
+		else if(feature.properties.tags.highway != undefined) {
+			var highway = feature.properties.tags.highway;
+			
+			//Stairs
+			if(highway == "steps") {
+				//Escalators
+				if(feature.properties.tags.conveying != undefined) {
+					result = { color: "#848484", opacity: 1, weight: 10, lineCap: "butt", dashArray: "3,1" };
+				}
+				//Normal stairs
+				else {
+					result = { color: "#F98072", opacity: 1, weight: 10, lineCap: "butt", dashArray: "2,1" };
+				}
+			}
+			//Default rendering
+			else {
+				result = { color: "#F98072", opacity: 1 };
+			}
 		}
 		//Other elements, keep default
 		else {
@@ -576,4 +634,24 @@ function HTMLView() {
 				return sParameterName[1];
 			}
 		}
-	}  
+	}
+	
+	/**
+	 * Parses levels list.
+	 * @param str The levels as a string (for example "1;5", "1-3" or "-1--6")
+	 * @return The parsed levels as an array
+	 */
+	function parseLevels(str) {
+		return str.split(';'); //TODO Also use syntax with "-" separator
+	}
+	
+	/**
+	 * Converts a GeoJSON LineString into a GeoJSON polygon.
+	 * @param f The GeoJSON linestring
+	 * @return The corresponding polygon
+	 */
+	function convertLineToPolygon(f) {
+		f.geometry.type = "Polygon";
+		f.geometry.coordinates = [ f.geometry.coordinates ];
+		return f;
+	}
