@@ -44,6 +44,9 @@ function LevelUpController() {
 	/** The current GeoJSON data layer on map **/
 	var _dataLayer = null;
 	
+	/** The current HTML view **/
+	var _view = new HTMLView();
+	
 	/** The current object **/
 	var _self = this;
 
@@ -69,7 +72,7 @@ function LevelUpController() {
 				_map.fitBounds(bounds);
 			}
 			else {
-				displayMessage("Invalid bounding box", "alert");
+				_view.displayMessage("Invalid bounding box", "alert");
 			}
 		}
 		
@@ -88,9 +91,12 @@ function LevelUpController() {
 	 * This function is called when map was moved or zoomed in/out.
 	 */
 	this.mapUpdate = function() {
+		//Clear messages
+		_view.clearMessages();
+		
 		//Check if zoom level is high enough to download data
 		if(_map.getZoom() >= 17) {
-			setLoading(true);
+			_view.setLoading(true);
 			
 			//Get current level
 			oldLevel = parseFloat($("#level").val());
@@ -102,8 +108,8 @@ function LevelUpController() {
 		}
 		else {
 			_self.removeDataLayer();
-			populateSelectLevels({});
-			displayMessage("Zoomez plus pour afficher les informations", "info");
+			_view.populateSelectLevels({});
+			_view.displayMessage("Zoomez plus pour afficher les informations", "info");
 		}
 		
 		//Update permalink
@@ -115,7 +121,7 @@ function LevelUpController() {
 	 */
 	this.endMapUpdate = function() {
 		if(_mapdata.getLevels() != null) {
-			populateSelectLevels(_mapdata.getLevels());
+			_view.populateSelectLevels(_mapdata.getLevels());
 			
 			//Test how many levels are available
 			if(_mapdata.getLevels().length > 0) {
@@ -126,13 +132,13 @@ function LevelUpController() {
 			}
 			//If no available level, display some message
 			else {
-				displayMessage("Pas de données sur la zone", "alert");
+				_view.displayMessage("Pas de données sur la zone", "alert");
 			}
 			
 			//Refresh leaflet map
 			_self.updateLevelOnMap();
 		}
-		setLoading(false);
+		_view.setLoading(false);
 	}
 	
 	/**
@@ -161,14 +167,14 @@ function LevelUpController() {
 		var currentLevelId = _mapdata.getLevels().indexOf(parseFloat(currentLevelValue));
 		
 		if(currentLevelId == -1) {
-			displayMessage("Étage invalide", "error");
+			_view.displayMessage("Étage invalide", "error");
 		}
 		else if(currentLevelId + 1 < _mapdata.getLevels().length) {
 			$("#level").val(_mapdata.getLevels()[currentLevelId+1]);
 			_self.updateLevelOnMap();
 		}
 		else {
-			displayMessage("Vous êtes déjà au dernier niveau disponible", "alert");
+			_view.displayMessage("Vous êtes déjà au dernier niveau disponible", "alert");
 		}
 	}
 	
@@ -180,14 +186,14 @@ function LevelUpController() {
 		var currentLevelId = _mapdata.getLevels().indexOf(parseFloat(currentLevelValue));
 		
 		if(currentLevelId == -1) {
-			displayMessage("Étage invalide", "error");
+			_view.displayMessage("Étage invalide", "error");
 		}
 		else if(currentLevelId > 0) {
 			$("#level").val(_mapdata.getLevels()[currentLevelId-1]);
 			_self.updateLevelOnMap();
 		}
 		else {
-			displayMessage("Vous êtes déjà au premier niveau disponible", "alert");
+			_view.displayMessage("Vous êtes déjà au premier niveau disponible", "alert");
 		}
 	}
 	
@@ -338,33 +344,58 @@ function MapData(ctrl) {
  * =            HTML view update functions             =
  * =====================================================
  */
+/**
+ * This class handles current HTML view updates.
+ */
+function HTMLView() {
+//ATTRIBUTES
+	/** How many messages are currently shown **/
+	var _nbMessages = 0;
+	
+	/** The current object **/
+	var _self = this;
 
+//OTHER METHODS
 	/**
 	* Displays a message in the console and in a specific area of the page.
 	* @param msg The string to display
 	* @param type The kind of message (info, alert, error)
 	*/
-	function displayMessage(msg, type) {
-		//console.log("["+type+"] "+msg);
+	this.displayMessage = function(msg, type) {
+		//Add a new child in list, corresponding to the given message
+		var newLi = document.createElement("li");
+		if(_nbMessages == 0) {
+			$("#infobox-list").append(newLi);
+		}
+		else {
+			$("#infobox-list li:first-child").before(newLi);
+		}
 		
-		//Display message on map
-		$("#infobox-label").html(msg);
+		//Add classes and text to the added child
+		$("#infobox-list li:first-child").addClass(type).html(msg);
 		
-		//Set style depending of message type
-		$("#infobox").addClass(type);
+		_nbMessages++;
 		
-		//Hide after a delay
+		//Remove that child after a delay
 		setTimeout(function() {
-			$("#infobox-label").html("");
-			$("#infobox").removeClass("alert info error");
+			$("#infobox-list li").last().remove();
+			_nbMessages--;
 		}, 5000);
+	}
+	
+	/**
+	 * Clears all messages.
+	 */
+	this.clearMessages = function() {
+		$("#infobox-list li").remove();
+		_nbMessages = 0;
 	}
 
 	/**
 	* Displays a message when the map is loading, and hides it when its done.
 	* @param isLoading True if start loading, false if loading is done
 	*/
-	function setLoading(isLoading) {
+	this.setLoading = function(isLoading) {
 		$("#overlay-panel").toggle(isLoading);
 	}
 	
@@ -372,18 +403,27 @@ function MapData(ctrl) {
 	 * This function updates the select field for levels
 	 * @param levelsArray The levels array (must be already sorted)
 	 */
-	function populateSelectLevels(levelsArray) {
+	this.populateSelectLevels = function(levelsArray) {
 		var option = '';
 
+		//Compute level and store them as select options
 		for(var i=0; i < levelsArray.length; i++) {
 			option += '<option value="'+ levelsArray[i] + '">' + levelsArray[i] + '</option>';
 		}
 		
 		$('#level').empty();
-		$('#level').append(option);
+		
+		//If levels array isn't empty, we add options
+		if(option != '') {
+			$('#level').append(option);
+			$("#level").prop("disabled", false);
+		}
+		//If not, we disable the select element
+		else {
+			$("#level").prop("disabled", true);
+		}
 	}
-
-
+}
 
 /*
  * =====================================================

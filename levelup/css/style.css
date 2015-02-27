@@ -85,20 +85,33 @@ p {
 	font-size: 90%;
 	padding: 0 10px;
 	text-align: center;
+	padding: 0;
+	margin: 0;
 	/*text-shadow: 0.2em 0.2em 0.2em rgba(0,0,0,0.3);*/
 }
 
-#infobox.info {
+#infobox-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+#infobox li {
+	padding: 5px;
+	margin-bottom: 5px;
+}
+
+#infobox li.info {
 	background-color: #D2E6FF;
 	color: #2A86FF;
 }
 
-#infobox.alert {
+#infobox li.alert {
 	background-color: #FEFFAA;
 	color: #FF862F;
 }
 
-#infobox.error {
+#infobox li.error {
 	background-color: #FFD9D9;
 	color: #FF2A2A;
 }
