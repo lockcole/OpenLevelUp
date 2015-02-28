@@ -300,8 +300,11 @@ function MapData(ctrl) {
 				}
 			}
 			
-			//Edit indoor areas to set them as polygons instead of polylines
-			if(feature.properties.tags.indoor != undefined && feature.properties.tags.indoor != "yes") {
+			//Edit indoor areas to set them as polygons instead of linestrings
+			if(feature.properties.tags.indoor != undefined
+				&& feature.properties.tags.indoor != "yes"
+				&& feature.geometry.type == "LineString") {
+				
 				feature = convertLineToPolygon(feature);
 			}
 		}
@@ -513,6 +516,7 @@ function HTMLView() {
 			
 			//Display unrendered objects
 			if(!addObject) {
+				console.log("Unrendered object:");
 				console.log(feature);
 			}
 		}
@@ -533,18 +537,24 @@ function HTMLView() {
 			var style = STYLE.styles[i];
 			
 			//For the given style, check tags
-			var applyable = true;
-			for(var key in style.onTags) {
-				var val = style.onTags[key];
-				var featureVal = feature.properties.tags[key];
-				
-				//If this rule is not applyable, stop
-				if(featureVal == undefined
-					|| (val != "*" && val != featureVal && val.split("|").indexOf(featureVal) < 0)) {
+			var applyable;
+			for(var j in style.onTags) {
+				var tagList = style.onTags[j];
+				applyable = true;
+				for(var key in tagList) {
+					var val = tagList[key];
+					var featureVal = feature.properties.tags[key];
 					
-					applyable = false;
-					break;
+					//If this rule is not applyable, stop
+					if(featureVal == undefined
+						|| (val != "*" && val != featureVal && val.split("|").indexOf(featureVal) < 0)) {
+						
+						applyable = false;
+						break;
+					}
 				}
+				//If style still applyable after looking for all tags in a taglist, then it's applyable
+				if(applyable) { break; }
 			}
 			
 			//If applyable, we update the result style
