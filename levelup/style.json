@@ -3,7 +3,7 @@
 	"styles": [
 		{
 			"type": "Style",
-			"description": "Indoor passages",
+			"description": "Indoor passages ('OR' example for values)",
 			"onTags": [ { "indoor": "area|corridor" } ],
 			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.5, "fillColor": "#EEEEEE", "fillOpacity": 1 }
 		},

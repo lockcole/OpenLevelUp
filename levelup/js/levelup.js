@@ -47,6 +47,9 @@ function LevelUpController() {
 	/** The current HTML view **/
 	var _view = new HTMLView();
 	
+	/** Should we use level parameter from URL ? **/
+	var _useLevelURL = true;
+	
 	/** The current object **/
 	var _self = this;
 
@@ -118,10 +121,8 @@ function LevelUpController() {
 			_self.removeDataLayer();
 			_view.populateSelectLevels({});
 			_view.displayMessage("Zoomez plus pour afficher les informations", "info");
+			_view.updatePermalink(_map);
 		}
-		
-		//Update permalink
-		$("#permalink").attr('href', $(location).attr('href').split('?bbox')[0]+"?bbox="+_map.getBounds().toBBoxString());
 	}
 	
 	/**
@@ -133,8 +134,15 @@ function LevelUpController() {
 			
 			//Test how many levels are available
 			if(_mapdata.getLevels().length > 0) {
+				//If we have to use the level parameter from the URL
+				var levelUrl = parseFloat(getUrlParameter("level"));
+				if(_useLevelURL && _mapdata.getLevels().indexOf(levelUrl) >= 0) {
+					$("#level").val(levelUrl);
+					_useLevelURL = false;
+				}
+				
 				//Restore old level if possible
-				if(_mapdata.getLevels().indexOf(oldLevel) >=0) {
+				if(!_useLevelURL && _mapdata.getLevels().indexOf(oldLevel) >=0) {
 					$("#level").val(oldLevel);
 				}
 			}
@@ -165,6 +173,9 @@ function LevelUpController() {
 			}
 		);
 		_dataLayer.addTo(_map);
+		
+		//Update permalink
+		_view.updatePermalink(_map);
 	}
 	
 	/**
@@ -439,6 +450,22 @@ function HTMLView() {
 			$("#level").prop("disabled", true);
 		}
 	}
+	
+	/**
+	 * Updates the permalink on page, and the URL in the browser.
+	 */
+	this.updatePermalink = function(currentMap) {
+		var link = $(location).attr('href').split('?bbox')[0]+"?bbox="+currentMap.getBounds().toBBoxString();
+		
+		if($("#level").val() != null) {
+			link += "&level="+$("#level").val();
+		}
+		
+		$("#permalink").attr('href', link);
+		
+		//Update browser URL
+		window.history.replaceState(null, window.title, link);
+	}
 }
 
 /*
@@ -575,20 +602,40 @@ function HTMLView() {
 	* @return The style
 	*/
 	function styleNodes(feature, latlng) {
-		var icon = 'img/default.svg';
+		var result;
 		
 		//Find the appropriate icon, depending of tags
 		var style = styleElements(feature);
-		if(style.icon != undefined) { icon = style.icon; }
 		
-		//Icon definition
-		var myIcon = L.icon({
-			iconUrl: icon,
-			iconSize: [32, 32],
-			iconAnchor: [16, 16],
-			popupAnchor: [0, -16]
-		});
-		return L.marker(latlng, {icon: myIcon});
+		//If defined style, we use it
+		if(Object.keys(style).length > 0) {
+			//Custom icon
+			if(style.icon != undefined) {
+				var myIcon = L.icon({
+					iconUrl: style.icon,
+					iconSize: [32, 32],
+					iconAnchor: [16, 16],
+					popupAnchor: [0, -16]
+				});
+				result = L.marker(latlng, {icon: myIcon})
+			}
+			else {
+				result = L.circleMarker(latlng, style);
+			}
+		}
+		//Else, default style
+		else {
+			//Icon definition
+			var myIcon = L.icon({
+				iconUrl: 'img/default.svg',
+				iconSize: [32, 32],
+				iconAnchor: [16, 16],
+				popupAnchor: [0, -16]
+			});
+			result = L.marker(latlng, {icon: myIcon})
+		}
+		
+		return result;
 	}
 
 
