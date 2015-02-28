@@ -1,0 +1,59 @@
+{
+	"type": "Styles",
+	"styles": [
+		{
+			"type": "Style",
+			"description": "Indoor areas",
+			"onTags": { "indoor": "room|area|wall|corridor" },
+			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.5, "fillColor": "#EEEEEE", "fillOpacity": 1 }
+		},
+		{
+			"type": "Style",
+			"description": "Door nodes",
+			"onTags": { "door": "*" },
+			"style": { "icon": "img/io.svg" }
+		},
+		{
+			"type": "Style",
+			"description": "Amenities (default)",
+			"onTags": { "amenity": "*" },
+			"style": { "color": "black", "fillColor": "red" }
+		},
+		{
+			"type": "Style",
+			"description": "Ticket validator",
+			"onTags": { "amenity": "ticket_validator" },
+			"style": { "icon": "img/ticket_valid.svg" }
+		},
+		{
+			"type": "Style",
+			"description": "Ticket vending machine",
+			"onTags": { "amenity": "vending_machine", "vending": "public_transport_tickets" },
+			"style": { "icon": "img/ticket_vending.svg" }
+		},
+		{
+			"type": "Style",
+			"description": "Buildings",
+			"onTags": { "building": "*" },
+			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 0.5, "fillColor": "#D4CACA", "fillOpacity": 1 }
+		},
+		{
+			"type": "Style",
+			"description": "Highways (default)",
+			"onTags": { "highway": "*" },
+			"style": { "color": "#F98072", "opacity": 1 }
+		},
+		{
+			"type": "Style",
+			"description": "Stairs",
+			"onTags": { "highway": "steps" },
+			"style": { "color": "#F98072", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "2,1" }
+		},
+		{
+			"type": "Style",
+			"description": "Conveying stairs",
+			"onTags": { "highway": "steps", "conveying": "yes|forward|backward" },
+			"style": { "color": "#848484", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "3,1" }
+		}
+	]
+}

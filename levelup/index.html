@@ -26,10 +26,9 @@
 <head>
 	<!--
 		TODO (by priority)
-		* Add a caption for icons
-		* Create a generic file (and JS handler) describing icon association based on tags
+		* Add more icons for objects
+		* Add a caption for icons (automatically filled with JSON style)
 		* Add level parameter in URL
-		* Handle repeat_on tag syntax entirely
 	-->
 	<!-- General definitions -->
 	<title>LevelUp!</title>
@@ -100,6 +99,10 @@
 		/*
 		 * LevelUp! controller init
 		 */
+		//Load JSON style file
+		var STYLE;
+		$.getJSON("style.json", function(data) { STYLE = data; });
+		
 		//Create controller object
 		var controller = new LevelUpController();
 		

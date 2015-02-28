@@ -526,44 +526,35 @@ function HTMLView() {
 	* @return The style
 	*/
 	function styleElements(feature) {
-		var result;
+		var result = new Array();
 		
-		//Indoor
-		if(feature.properties.tags.indoor != undefined && feature.properties.tags.indoor != "yes") {
-			result = { color: "#AAAAAA", opacity: 1, weight: 0.5, fillColor: "#EEEEEE", fillOpacity: 1 };
-		}
-		//Amenity
-		else if(feature.properties.tags.amenity != undefined) {
-			result = { color: "black", fillColor: "red" };
-		}
-		//Building
-		else if(feature.properties.tags.building != undefined) {
-			result = { color: "#ADA5A5", opacity: 1, weight: 0.5, fillColor: "#D4CACA", fillOpacity: 1 };
-		}
-		//Highway
-		else if(feature.properties.tags.highway != undefined) {
-			var highway = feature.properties.tags.highway;
+		//Find potential styles depending on tags
+		for(var i in STYLE.styles) {
+			var style = STYLE.styles[i];
 			
-			//Stairs
-			if(highway == "steps") {
-				//Escalators
-				if(feature.properties.tags.conveying != undefined) {
-					result = { color: "#848484", opacity: 1, weight: 10, lineCap: "butt", dashArray: "3,1" };
-				}
-				//Normal stairs
-				else {
-					result = { color: "#F98072", opacity: 1, weight: 10, lineCap: "butt", dashArray: "2,1" };
+			//For the given style, check tags
+			var applyable = true;
+			for(var key in style.onTags) {
+				var val = style.onTags[key];
+				var featureVal = feature.properties.tags[key];
+				
+				//If this rule is not applyable, stop
+				if(featureVal == undefined
+					|| (val != "*" && val != featureVal && val.split("|").indexOf(featureVal) < 0)) {
+					
+					applyable = false;
+					break;
 				}
 			}
-			//Default rendering
-			else {
-				result = { color: "#F98072", opacity: 1 };
+			
+			//If applyable, we update the result style
+			if(applyable) {
+				for(var param in style.style) {
+					result[param] = style.style[param];
+				}
 			}
 		}
-		//Other elements, keep default
-		else {
-			result = { };
-		}
+		
 		return result;
 	}
 
@@ -574,26 +565,15 @@ function HTMLView() {
 	* @return The style
 	*/
 	function styleNodes(feature, latlng) {
-		var icon = 'default';
+		var icon = 'img/default.svg';
 		
 		//Find the appropriate icon, depending of tags
-		//Door
-		if(feature.properties.tags.door != undefined) {
-			icon = 'io';
-		}
-		//Amenity
-		else if(feature.properties.tags.amenity != undefined) {
-			if(feature.properties.tags.amenity == 'ticket_validator') {
-				icon = 'ticket_valid';
-			}
-			else if(feature.properties.tags.amenity == 'vending_machine') {
-				icon = 'ticket_vending';
-			}
-		}
+		var style = styleElements(feature);
+		if(style.icon != undefined) { icon = style.icon; }
 		
 		//Icon definition
 		var myIcon = L.icon({
-			iconUrl: 'img/'+icon+'.svg',
+			iconUrl: icon,
 			iconSize: [32, 32],
 			iconAnchor: [16, 16],
 			popupAnchor: [0, -16]
@@ -639,10 +619,33 @@ function HTMLView() {
 	/**
 	 * Parses levels list.
 	 * @param str The levels as a string (for example "1;5", "1-3" or "-1--6")
-	 * @return The parsed levels as an array
+	 * @return The parsed levels as an array, or null if invalid
 	 */
 	function parseLevels(str) {
-		return str.split(';'); //TODO Also use syntax with "-" separator
+		var result = null;
+		
+		//Level values separated by ';'
+		var regex1 = /^-?\d+(?:\.\d+)?(?:;-?\d+(?:\.\d+)?)*$/;
+		if(regex1.test(str)) {
+			result = str.split(';');
+		}
+		
+		//Level values (only integers) in an interval, bounded with '-'
+		var regex2 = /^(-?\d+)-(-?\d+)$/;
+		var regex2result = regex2.exec(str);
+		if(regex2result != null) {
+			var min = parseInt(regex2result[1]);
+			var max = parseInt(regex2result[2]);
+			result = new Array();
+
+			//Add intermediate values
+			for(var i=min; i != max; i=i+((max-min)/Math.abs(max-min))) {
+				result.push(i.toString());
+			}
+			result.push(max.toString());
+		}
+
+		return result;
 	}
 	
 	/**
