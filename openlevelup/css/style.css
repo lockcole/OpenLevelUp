@@ -1,22 +1,22 @@
 /*
- * This file is part of LevelUp!.
+ * This file is part of OpenLevelUp!.
  * 
- * LevelUp! is free software: you can redistribute it and/or modify
+ * OpenLevelUp! is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  * 
- * LevelUp! is distributed in the hope that it will be useful,
+ * OpenLevelUp! is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with LevelUp!.  If not, see <http://www.gnu.org/licenses/>.
+ * along with OpenLevelUp!.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
- * LevelUp!
+ * OpenLevelUp!
  * Web viewer for indoor mapping (based on OpenStreetMap data).
  * Author: Adrien PAVIE
  *
