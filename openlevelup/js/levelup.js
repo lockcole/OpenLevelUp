@@ -127,7 +127,7 @@ function LevelUpController() {
 		else {
 			_self.removeDataLayer();
 			_view.populateSelectLevels({});
-			_view.displayMessage("Zoomez plus pour afficher les informations", "info");
+			_view.displayMessage("Zoom in to see more information", "info");
 			_view.updatePermalink(_map);
 		}
 	}
@@ -155,7 +155,7 @@ function LevelUpController() {
 			}
 			//If no available level, display some message
 			else {
-				_view.displayMessage("Pas de données sur la zone", "alert");
+				_view.displayMessage("There is no available data in this area", "alert");
 			}
 			
 			//Refresh leaflet map
@@ -193,14 +193,14 @@ function LevelUpController() {
 		var currentLevelId = _mapdata.getLevels().indexOf(parseFloat(currentLevelValue));
 		
 		if(currentLevelId == -1) {
-			_view.displayMessage("Étage invalide", "error");
+			_view.displayMessage("Invalid level", "error");
 		}
 		else if(currentLevelId + 1 < _mapdata.getLevels().length) {
 			$("#level").val(_mapdata.getLevels()[currentLevelId+1]);
 			_self.updateLevelOnMap();
 		}
 		else {
-			_view.displayMessage("Vous êtes déjà au dernier niveau disponible", "alert");
+			_view.displayMessage("You are already at the last available level", "alert");
 		}
 	}
 	
@@ -212,14 +212,14 @@ function LevelUpController() {
 		var currentLevelId = _mapdata.getLevels().indexOf(parseFloat(currentLevelValue));
 		
 		if(currentLevelId == -1) {
-			_view.displayMessage("Étage invalide", "error");
+			_view.displayMessage("Invalid level", "error");
 		}
 		else if(currentLevelId > 0) {
 			$("#level").val(_mapdata.getLevels()[currentLevelId-1]);
 			_self.updateLevelOnMap();
 		}
 		else {
-			_view.displayMessage("Vous êtes déjà au premier niveau disponible", "alert");
+			_view.displayMessage("You are already at the first available level", "alert");
 		}
 	}
 	
