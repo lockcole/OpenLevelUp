@@ -68,7 +68,7 @@ function LevelUpController() {
 	 */
 	this.mapInit = function() {
 		//Init map center and zoom
-		_map = L.map('map').setView([48.1081, -1.6716], 12);
+		_map = L.map('map', {maxZoom: 22}).setView([48.1081, -1.6716], 12);
 		
 		//If a BBox is given in URL, then make map show the wanted area
 		var bbox = getUrlParameter("bbox");
@@ -90,7 +90,7 @@ function LevelUpController() {
 		//Set layers
 		var osmUrl='http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
 		var osmAttrib='Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a> | Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
-		var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 20, attribution: osmAttrib});
+		var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 20, attribution: osmAttrib });
 		
 		//Add layer to map
 		_map.addLayer(osm);
@@ -107,15 +107,22 @@ function LevelUpController() {
 		
 		//Check if zoom level is high enough to download data
 		if(_map.getZoom() >= 17) {
-			_view.setLoading(true);
-			
-			//Get current level
-			oldLevel = parseFloat($("#level").val());
-			
-			//Download data
-			_mapdata = new MapData(_self);
-			_mapdata.downloadData(_map.getBounds().getSouth()+","+_map.getBounds().getWest()+","+_map.getBounds().getNorth()+","+_map.getBounds().getEast());
-			//When download is done, endMapUpdate() will be called.
+			//Download data only if new BBox isn't contained in previous one
+			if(_mapdata == null || _mapdata.getBBox() == null || !_mapdata.getBBox().contains(_map.getBounds())) {
+				_view.setLoading(true);
+				
+				//Get current level
+				oldLevel = parseFloat($("#level").val());
+				
+				//Download data
+				_mapdata = new MapData(_self);
+				_mapdata.downloadData(_map.getBounds());
+				//When download is done, endMapUpdate() will be called.
+			}
+			//Else, we just update permalink
+			else {
+				_view.updatePermalink(_map);
+			}
 		}
 		else {
 			_self.removeDataLayer();
@@ -246,6 +253,9 @@ function MapData(ctrl) {
 	/** Data as GeoJSON **/
 	var _geojson = null;
 	
+	/** Bounding box for current data **/
+	var _bbox = null;
+	
 	/** The application controller **/
 	var _ctrl = ctrl;
 	
@@ -261,6 +271,13 @@ function MapData(ctrl) {
 	}
 	
 	/**
+	 * @return The bounding box (see LatLngBounds in Leaflet API)
+	 */
+	this.getBBox = function() {
+		return _bbox;
+	}
+	
+	/**
 	 * @return The data, as GeoJSON
 	 */
 	this.getLevels = function() {
@@ -271,10 +288,12 @@ function MapData(ctrl) {
 	/**
 	 * Downloads data from Overpass API
 	 * Then calls another function to process it.
-	 * @param bounds The map bounds (South, West, North, East)
+	 * @param bounds The map bounds
 	 */
-	this.downloadData = function(bounds) {
+	this.downloadData = function(mapBounds) {
 		//Download from Overpass API
+		var bounds = mapBounds.getSouth()+","+mapBounds.getWest()+","+mapBounds.getNorth()+","+mapBounds.getEast();
+		_bbox = mapBounds;
 		var oapiRequest = '[out:json][timeout:25];(node["indoor"]('+bounds+');way["indoor"]('+bounds+');node["door"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+'););out body;';
 		var oapiResponse = $.get("http://www.overpass-api.de/api/interpreter?data="+encodeURIComponent(oapiRequest), _self.parseOsmData, "text");
 	}
@@ -479,30 +498,27 @@ function HTMLView() {
 	* @param layer The leaflet layer
 	*/
 	function processElements(feature, layer) {
-		//No popups for buildings
-		if(feature.properties.tags["building"] == undefined) {
-			//Create a readable text for each element
-			var text;
+		var name = "Object";
+		var popup = "yes";
+		
+		//Find object info, looking in style rules
+		for(var i in STYLE.styles) {
+			var style = STYLE.styles[i];
 			
-			//Determine the kind of object
-			var typeObject = "";
-			if(feature.properties.tags["indoor"] != undefined) {
-				var indoorType = feature.properties.tags["indoor"];
-				var correspondingObject = { room: "Pièce", area: "Espace", wall: "Mur", corridor: "Couloir", level: "Niveau" };
-				typeObject = (correspondingObject[indoorType] != undefined) ? correspondingObject[indoorType] : "";
+			//If applyable, we update the result style
+			if(isStyleApplyable(feature, style)) {
+				name = style.name;
+				if(style.style.popup != undefined) {
+					popup = style.style.popup;
+				}
 			}
-			else if(feature.properties.tags["door"] != undefined) {
-				typeObject = "Entrée/sortie";
-			}
-			else if(feature.properties.tags["amenity"] != undefined) {
-				var amenityType = feature.properties.tags["amenity"];
-				var correspondingObject = { vending_machine: "Distributeur", ticket_validator: "Composteur" };
-				typeObject = (correspondingObject[amenityType] != undefined) ? correspondingObject[amenityType] : "";
-			}
+		}
+		
+		//Create popup if necessary
+		if(popup == "yes") {
+			var text = '<h1 class="popup">'+name+'</h1>';
 			
-			text = '<h1 class="popup">'+typeObject+'</h1>';
-			
-			//Then, list all tags
+			//List all tags
 			text += '<h2 class="popup">Tags</h2>';
 			for(i in feature.properties.tags) {
 				text += i+" = "+feature.properties.tags[i]+"<br />";
@@ -563,29 +579,8 @@ function HTMLView() {
 		for(var i in STYLE.styles) {
 			var style = STYLE.styles[i];
 			
-			//For the given style, check tags
-			var applyable;
-			for(var j in style.onTags) {
-				var tagList = style.onTags[j];
-				applyable = true;
-				for(var key in tagList) {
-					var val = tagList[key];
-					var featureVal = feature.properties.tags[key];
-					
-					//If this rule is not applyable, stop
-					if(featureVal == undefined
-						|| (val != "*" && val != featureVal && val.split("|").indexOf(featureVal) < 0)) {
-						
-						applyable = false;
-						break;
-					}
-				}
-				//If style still applyable after looking for all tags in a taglist, then it's applyable
-				if(applyable) { break; }
-			}
-			
 			//If applyable, we update the result style
-			if(applyable) {
+			if(isStyleApplyable(feature, style)) {
 				for(var param in style.style) {
 					result[param] = style.style[param];
 				}
@@ -593,6 +588,37 @@ function HTMLView() {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Checks if a given style is applyable on a given feature
+	 * @param feature The feature to test
+	 * @param style The JSON style to test
+	 * @return True if the style is applyable
+	 */
+	function isStyleApplyable(feature, style) {
+		var applyable;
+		
+		for(var j in style.onTags) {
+			var tagList = style.onTags[j];
+			applyable = true;
+			for(var key in tagList) {
+				var val = tagList[key];
+				var featureVal = feature.properties.tags[key];
+				
+				//If this rule is not applyable, stop
+				if(featureVal == undefined
+					|| (val != "*" && val != featureVal && val.split("|").indexOf(featureVal) < 0)) {
+					
+					applyable = false;
+				break;
+					}
+			}
+			//If style still applyable after looking for all tags in a taglist, then it's applyable
+			if(applyable) { break; }
+		}
+		
+		return applyable;
 	}
 
 	/**
@@ -613,9 +639,9 @@ function HTMLView() {
 			if(style.icon != undefined) {
 				var myIcon = L.icon({
 					iconUrl: style.icon,
-					iconSize: [32, 32],
-					iconAnchor: [16, 16],
-					popupAnchor: [0, -16]
+					iconSize: [24, 24],
+					iconAnchor: [12, 12],
+					popupAnchor: [0, -12]
 				});
 				result = L.marker(latlng, {icon: myIcon})
 			}
@@ -628,9 +654,9 @@ function HTMLView() {
 			//Icon definition
 			var myIcon = L.icon({
 				iconUrl: 'img/default.svg',
-				iconSize: [32, 32],
-				iconAnchor: [16, 16],
-				popupAnchor: [0, -16]
+				iconSize: [24, 24],
+				iconAnchor: [12, 12],
+				popupAnchor: [0, -12]
 			});
 			result = L.marker(latlng, {icon: myIcon})
 		}

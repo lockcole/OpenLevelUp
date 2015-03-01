@@ -3,69 +3,164 @@
 	"styles": [
 		{
 			"type": "Style",
-			"description": "Indoor passages ('OR' example for values)",
+			"name": "Area",
+			"description": "Indoor areas ('OR' example for values)",
 			"onTags": [ { "indoor": "area|corridor" } ],
 			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.5, "fillColor": "#EEEEEE", "fillOpacity": 1 }
 		},
 		{
 			"type": "Style",
+			"name": "Room",
 			"description": "Indoor rooms",
 			"onTags": [ { "indoor": "room|wall" } ],
 			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.5, "fillColor": "#E0E0E0", "fillOpacity": 1 }
 		},
 		{
 			"type": "Style",
+			"name": "Door",
 			"description": "Door nodes ('OR' example for tags)",
 			"onTags": [ { "door": "*" }, { "entrance": "*" } ],
-			"style": { "icon": "img/io.svg" }
+			"style": { "icon": "img/door.svg" }
 		},
 		{
 			"type": "Style",
-			"description": "Amenities (default)",
-			"onTags": [ { "amenity": "*" } ],
-			"style": { "color": "black", "fillColor": "#EC989A" }
+			"name": "Passage",
+			"description": "Door=no nodes",
+			"onTags": [ { "door": "no" } ],
+			"style": { "icon": "img/door_no.svg" }
 		},
 		{
 			"type": "Style",
+			"name": "Sliding door",
+			"description": "Door=sliding nodes",
+			"onTags": [ { "door": "sliding" } ],
+			"style": { "icon": "img/door_sliding.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Subway entrance",
+			"description": "Subway entrance",
+			"onTags": [ { "railway": "subway_entrance" } ],
+			"style": { "icon": "img/subway.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Amenity",
+			"description": "Amenities, shops (default)",
+			"onTags": [ { "amenity": "*" }, { "shop": "*" } ],
+			"style": { "color": "red", "fillColor": "orange" }
+		},
+		{
+			"type": "Style",
+			"name": "Waste basket",
+			"description": "Waste basket",
+			"onTags": [ { "amenity": "waste_basket" } ],
+			"style": { "icon": "img/Trash_can.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Bench",
+			"description": "Bench",
+			"onTags": [ { "amenity": "bench" } ],
+			"style": { "icon": "img/bench.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Ticket validator",
 			"description": "Ticket validator",
 			"onTags": [ { "amenity": "ticket_validator" } ],
-			"style": { "icon": "img/ticket_valid.svg" }
+			"style": { "icon": "img/tickets_valid.svg" }
 		},
 		{
 			"type": "Style",
+			"name": "Ticket vending",
 			"description": "Ticket vending machine ('AND' example for tags)",
 			"onTags": [ { "amenity": "vending_machine", "vending": "public_transport_tickets" } ],
-			"style": { "icon": "img/ticket_vending.svg" }
+			"style": { "icon": "img/tickets_vending.svg" }
 		},
 		{
 			"type": "Style",
+			"name": "Newspapers vending",
+			"description": "Newspapers vending machine",
+			"onTags": [ { "amenity": "vending_machine", "vending": "newspapers" },  { "amenity": "vending_machine", "vending": "news_papers" } ],
+			"style": { "icon": "img/Farm-Fresh_newspaper.png" }
+		},
+		{
+			"type": "Style",
+			"name": "Building",
 			"description": "Buildings",
 			"onTags": [ { "building": "*" } ],
-			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 0.5, "fillColor": "#D4CACA", "fillOpacity": 1 }
+			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 0.5, "fillColor": "#D4CACA", "fillOpacity": 1, "popup": "no" }
 		},
 		{
 			"type": "Style",
+			"name": "Path",
 			"description": "Highways (default)",
 			"onTags": [ { "highway": "*" } ],
 			"style": { "color": "#F98072", "opacity": 1 }
 		},
 		{
 			"type": "Style",
+			"name": "Stairs",
 			"description": "Stairs",
 			"onTags": [ { "highway": "steps" } ],
 			"style": { "color": "#F98072", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "2,1" }
 		},
 		{
 			"type": "Style",
+			"name": "Conveying stairs",
 			"description": "Conveying stairs",
 			"onTags": [ { "highway": "steps", "conveying": "yes|forward|backward" } ],
 			"style": { "color": "#848484", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "3,1" }
 		},
 		{
 			"type": "Style",
+			"name": "Subway",
 			"description": "Subway rails",
 			"onTags": [ { "railway": "subway" } ],
 			"style": { "color": "#888888", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "5,5" }
+		},
+		{
+			"type": "Style",
+			"name": "Guard rail",
+			"description": "Guard rail",
+			"onTags": [ { "barrier": "fence", "fence_type": "railing" } ],
+			"style": { "color": "#5B5B5B", "opacity": 1, "weight": 5, "lineCap": "butt" }
+		},
+		{
+			"type": "Style",
+			"name": "Information",
+			"description": "Information for travelers",
+			"onTags": [ { "tourism": "information" } ],
+			"style": { "icon": "img/Infobox_info_icon.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Map",
+			"description": "Map",
+			"onTags": [ { "tourism": "information", "information": "map" } ],
+			"style": { "icon": "img/map.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Advert",
+			"description": "Advertising",
+			"onTags": [ { "advertising": "*" } ],
+			"style": { "icon": "img/advertising.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Emergency phone",
+			"description": "Emergency phone",
+			"onTags": [ { "emergency": "phone" } ],
+			"style": { "icon": "img/PublicInformationSymbol_EmergencyTelephone.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "CCTV",
+			"description": "Surveillance",
+			"onTags": [ { "man_made": "surveillance" } ],
+			"style": { "icon": "img/Video_surveillance_logo.svg" }
 		}
 	]
 }
