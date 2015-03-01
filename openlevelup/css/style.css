@@ -31,26 +31,76 @@ body {
 	color: #222;
 	padding: 0;
 	margin: 0;
+	overflow: hidden;
 }
 
 p {
 	line-height: 1.5em;
 }
 
+a {
+	color: #007BFE;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #51A5FE;
+}
+
 /*
  * Panel structure
  */
 .panel {
-	/*border: 1px solid red;*/
 	height: 100%;
 	position: relative;
+}
+
+.panel.overlay {
+	height: 30%;
+	width: 30%;
+	position: absolute;
+	top: 35%;
+	left: 35%;
+	z-index: 10;
+	background-color: rgba(128,128,128,0.8);
+	color: white;
+	text-align: center;
+}
+
+#op-about * {
+	margin: 0;
+	padding: 0;
+}
+
+#op-about h2 {
+	background-color: #ddd;
+	color: #222;
+	padding: 5px;
+	margin: 5px;
+}
+
+#op-about a {
+	color: #D2E2FF;
+}
+
+#op-about a:hover {
+	color: #B3CEFF;
+}
+
+#about-close {
+	position: absolute;
+	bottom: 10px;
+	right: 20px;
 }
 
 /* Side panel */
 #side-panel {
 	width: 20%;
 	float: left;
-	padding: 5px;
+	padding: 10px;
+	background-color: #81ADFF;
+	text-align: center;
+	color: white;
 }
 
 /* Main panel */
@@ -59,26 +109,17 @@ p {
 	margin-left: 20%;
 }
 
-#overlay-panel {
-	height: 30%;
-	width: 30%;
-	position: absolute;
-	top: 35%;
-	left: 35%;
-	z-index: 10;
-	background-color: rgba(128,128,128,0.4);
-}
-
 /*
  * Side panel parts
  */
 #side-panel h1 {
 	text-align: center;
-	background-color: #D2E6FF;
+	/*background-color: #D2E6FF;*/
 	color: #2A86FF;
+	margin-bottom: 0;
 }
 
-#whatisit {
+#header {
 	text-align: center;
 }
 
@@ -118,12 +159,19 @@ p {
 	color: #FF2A2A;
 }
 
+#settings {
+	border-bottom: 1px solid #2A75FF;
+	border-top: 1px solid #2A75FF;
+	margin: 10px 0;
+}
+
 #settings a {
 	border: 1px solid grey;
 	background-color: #ddd;
 	font-weight: normal;
 	padding: 5px 10px;
 	cursor: pointer;
+	color: #222;
 }
 
 #settings a:hover {
@@ -140,13 +188,13 @@ p {
 #footer {
 	border-top: 1px solid gray;
 	color: #333;
-	padding: 0;
 	text-align: center;
-	position: absolute;
-	bottom: 0;
-	left: 0;
 	font-size: 80%;
-	right: 0;
+	position: absolute;
+	bottom: 20px;
+	left: 0;
+	width: 100%;
+	background-color: #E9F1FE;
 }
 
 /*

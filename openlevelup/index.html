@@ -26,7 +26,6 @@
 <head>
 	<!--
 		TODO (by priority)
-		* Improve side panel style (use a logo ?)
 		* Add possibility to put icons on polygons (elevator)
 		* Add a caption for icons (automatically filled with JSON style)
 		* At low zoom levels, show cluster maps where indoor data is available
@@ -54,26 +53,29 @@
 	<link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-	<div class="panel" id="overlay-panel" style="display: none;">
+	<div class="panel overlay" id="op-loading" style="display: none;">
 		<p class="rotation">&#8634;</p>
-		<p class="text-rotation">Chargement</p>
+		<p class="text-rotation">Loading</p>
+	</div>
+	
+	<div class="panel overlay" id="op-about" style="display: none;">
+		<h2>About OpenLevelUp!</h2>
+		<p>This website allows you to see <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project. You can navigate through the building levels with the buttons on the left panel.<br />Want to know more about the project ? Look at the <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup">GitHub repository</a>. Want to contact the author ? <a href="mailto:panieravide@riseup.net">Here you go</a>.<br />This website is licensed under <a href="https://www.gnu.org/licenses/gpl.html">GPL v3</a>.</p>
+		<p><a id="about-close" href="#">Close</a></p>
 	</div>
 
 	<div class="panel" id="side-panel">
 	
 		<!-- Header -->
-		<h1>OpenLevelUp!</h1>
-		
-		<!-- What is it/How-to -->
-		<div id="whatisit">
-			<p>Visualisez l'intérieur des bâtiments avec OpenLevelUp!</p>
+		<div id="header">
+			<h1><a href="index.html" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a></h1>
+			<p>See inside buildings<br />with OpenLevelUp!</p>
 		</div>
 		
 		<!-- Settings -->
 		<div id="settings">
-			<h2>Réglages</h2>
 			<ul>
-				<li>Étage : <select id="level"></select> <a id="levelUp">&uarr;</a> <a id="levelDown">&darr;</a></li>
+				<li>Level <select id="level"></select> <a id="levelUp">&uarr;</a> <a id="levelDown">&darr;</a></li>
 			</ul>
 		</div>
 		
@@ -85,7 +87,7 @@
 		
 		<!-- Footer -->
 		<div id="footer">
-			<p><a id="permalink" href="">Permalien</a> | &copy; Adrien PAVIE 2015</p>
+			<p><a href="#" id="about-link">About</a> | <a id="permalink" href="">Permalink</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
 		</div>
 	</div>
 	
@@ -116,6 +118,8 @@
 		$("#level").change(controller.updateLevelOnMap);
 		$("#levelUp").click(controller.levelUp);
 		$("#levelDown").click(controller.levelDown);
+		$("#about-link").click(function() { $("#op-about").toggle(); });
+		$("#about-close").click(function() { $("#op-about").hide(); });
 		map.on('moveend', function(e) { controller.map=map; controller.mapUpdate(); });
 	</script>
 </body>

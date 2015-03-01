@@ -442,7 +442,7 @@ function HTMLView() {
 	* @param isLoading True if start loading, false if loading is done
 	*/
 	this.setLoading = function(isLoading) {
-		$("#overlay-panel").toggle(isLoading);
+		$("#op-loading").toggle(isLoading);
 	}
 	
 	/**
