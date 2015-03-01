@@ -471,7 +471,7 @@ function HTMLView() {
 	}
 	
 	/**
-	 * Updates the permalink on page, and the URL in the browser.
+	 * Updates the permalink on page.
 	 */
 	this.updatePermalink = function(currentMap) {
 		var link = $(location).attr('href').split('?bbox')[0]+"?bbox="+currentMap.getBounds().toBBoxString();
@@ -481,9 +481,6 @@ function HTMLView() {
 		}
 		
 		$("#permalink").attr('href', link);
-		
-		//Update browser URL
-		window.history.replaceState(null, window.title, link);
 	}
 }
 
