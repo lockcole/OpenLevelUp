@@ -145,8 +145,8 @@ function LevelUpController() {
 				var levelUrl = parseFloat(getUrlParameter("level"));
 				if(_useLevelURL && _mapdata.getLevels().indexOf(levelUrl) >= 0) {
 					$("#level").val(levelUrl);
-					_useLevelURL = false;
 				}
+				_useLevelURL = false;
 				
 				//Restore old level if possible
 				if(!_useLevelURL && _mapdata.getLevels().indexOf(oldLevel) >=0) {
