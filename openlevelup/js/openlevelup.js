@@ -26,6 +26,23 @@
 
 /*
  * =====================================================
+ * =               Application includes                =
+ * =====================================================
+ */
+	//Global conf (cache enabled)
+	$.ajaxSetup({ cache: true });
+	
+	//Load JSON style file
+	var STYLE;
+	$.ajax({
+		url: 'style.json',
+		async: false,
+		dataType: 'json',
+		success: function(data) { STYLE = data; }
+	});
+
+/*
+ * =====================================================
  * =         Application controller functions          =
  * =====================================================
  */
@@ -33,7 +50,8 @@
  * Class LevelUpController
  * Manages the application.
  */
-function LevelUpController() {
+OLvlUp = function() {}
+OLvlUp.Controller = function() {
 //ATTRIBUTES
 	/** The current MapData object **/
 	var _mapdata = null;
@@ -105,6 +123,13 @@ function LevelUpController() {
 		
 		//Create mapdata object
 		_mapdata = new MapData(_self);
+		
+		//Add triggers on HTML elements
+		$("#level").change(controller.updateLevelOnMap);
+		$("#levelUp").click(controller.levelUp);
+		$("#levelDown").click(controller.levelDown);
+		$("#about-link").click(function() { $("#op-about").toggle(); });
+		$("#about-close").click(function() { $("#op-about").hide(); });
 		
 		return _map;
 	}

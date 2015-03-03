@@ -51,9 +51,6 @@
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.Default.css" />
 	<script src="lib/markercluster/leaflet.markercluster-src.js"></script>
 	
-	<!-- OpenLevelUp! JS include -->
-	<script src="js/levelup.js" type="text/javascript"></script>
-	
 	<!-- CSS style -->
 	<link rel="stylesheet" href="css/style.css" />
 </head>
@@ -103,28 +100,15 @@
 
 	</div>
 	
-	<!-- JS Code for map -->
+	<!-- OpenLevelUp! JS startup code -->
+	<script src="js/openlevelup.js" type="text/javascript"></script>
 	<script type="text/javascript">
-		/*
-		 * OpenLevelUp! controller init
-		 */
-		//Load JSON style file
-		var STYLE;
-		$.getJSON("style.json", function(data) { STYLE = data; });
-		
 		//Create controller object
-		var controller = new LevelUpController();
+		var controller = new OLvlUp.Controller(); //new LevelUpController();
 		
 		//Init map
 		var map = controller.mapInit();
 		controller.mapUpdate();
-		
-		//Add triggers on HTML elements
-		$("#level").change(controller.updateLevelOnMap);
-		$("#levelUp").click(controller.levelUp);
-		$("#levelDown").click(controller.levelDown);
-		$("#about-link").click(function() { $("#op-about").toggle(); });
-		$("#about-close").click(function() { $("#op-about").hide(); });
 		map.on('moveend', function(e) { controller.map=map; controller.mapUpdate(); });
 	</script>
 </body>
