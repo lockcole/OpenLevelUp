@@ -55,6 +55,13 @@ function LevelUpController() {
 
 //ACCESSORS
 	/**
+	 * @return The current view
+	 */
+	this.getView = function() {
+		return _view;
+	}
+	
+	/**
 	 * @return The current map data object
 	 */
 	this.getMapData = function() {
@@ -68,7 +75,7 @@ function LevelUpController() {
 	 */
 	this.mapInit = function() {
 		//Init map center and zoom
-		_map = L.map('map', {maxZoom: 22}).setView([48.1081, -1.6716], 12);
+		_map = L.map('map', {maxZoom: 22}).setView([47, 2], 6);
 		
 		//If a BBox is given in URL, then make map show the wanted area
 		var bbox = getUrlParameter("bbox");
@@ -89,6 +96,7 @@ function LevelUpController() {
 		
 		//Set layers
 		var osmUrl='http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
+		//var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 		var osmAttrib='Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a> | Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
 		var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 20, attribution: osmAttrib });
 		
@@ -125,8 +133,27 @@ function LevelUpController() {
 			}
 		}
 		else {
-			_self.removeDataLayer();
-			_view.populateSelectLevels({});
+			//Check if zoom level is high enough to download cluster data
+			if(_map.getZoom() >= 4) {
+				//Download data only if new BBox isn't contained in previous one
+				if(_mapdata == null || _mapdata.getClusterBBox() == null || !_mapdata.getClusterBBox().contains(_map.getBounds())) {
+					_view.setLoading(true);
+					
+					//Remove old data
+					_self.removeDataLayer();
+					_view.populateSelectLevels({});
+					
+					_mapdata = new MapData(_self);
+					_mapdata.downloadClusterData(_map.getBounds());
+				}
+			}
+			else {
+				//Remove old data
+				_mapdata = null;
+				_self.removeDataLayer();
+				_view.populateSelectLevels({});
+			}
+			
 			_view.displayMessage("Zoom in to see more information", "info");
 			_view.updatePermalink(_map);
 		}
@@ -165,6 +192,26 @@ function LevelUpController() {
 	}
 	
 	/**
+	 * This function is called after cluster data download finishes
+	 */
+	this.endMapClusterUpdate = function() {
+		_self.removeDataLayer();
+		
+		//Create cluster group from GeoJSON data
+		_dataLayer = new L.MarkerClusterGroup({
+			singleMarkerMode: true,
+			spiderfyOnMaxZoom: false,
+			maxClusterRadius: 30
+		});
+		_dataLayer.addLayer(L.geoJson(_mapdata.getClusterData()));
+		_dataLayer.addTo(_map);
+		
+		//Update permalink
+		_view.updatePermalink(_map);
+		_view.setLoading(false);
+	}
+	
+	/**
 	 * Changes the shown level on map
 	 */
 	this.updateLevelOnMap = function() {
@@ -172,12 +219,7 @@ function LevelUpController() {
 		
 		_dataLayer = L.geoJson(
 			_mapdata.getData(),
-			{
-				filter: filterElements,
-				style: styleElements,
-				pointToLayer: styleNodes,
-				onEachFeature: processElements
-			}
+			{ filter: filterElements, style: styleElements, pointToLayer: styleNodes, onEachFeature: processElements }
 		);
 		_dataLayer.addTo(_map);
 		
@@ -189,18 +231,20 @@ function LevelUpController() {
 	 * Makes the level increase of one step
 	 */
 	this.levelUp = function() {
-		var currentLevelValue = $("#level").val();
-		var currentLevelId = _mapdata.getLevels().indexOf(parseFloat(currentLevelValue));
-		
-		if(currentLevelId == -1) {
-			_view.displayMessage("Invalid level", "error");
-		}
-		else if(currentLevelId + 1 < _mapdata.getLevels().length) {
-			$("#level").val(_mapdata.getLevels()[currentLevelId+1]);
-			_self.updateLevelOnMap();
-		}
-		else {
-			_view.displayMessage("You are already at the last available level", "alert");
+		if(!$("#level").prop("disabled")) {
+			var currentLevelValue = $("#level").val();
+			var currentLevelId = _mapdata.getLevels().indexOf(parseFloat(currentLevelValue));
+			
+			if(currentLevelId == -1) {
+				_view.displayMessage("Invalid level", "error");
+			}
+			else if(currentLevelId + 1 < _mapdata.getLevels().length) {
+				$("#level").val(_mapdata.getLevels()[currentLevelId+1]);
+				_self.updateLevelOnMap();
+			}
+			else {
+				_view.displayMessage("You are already at the last available level", "alert");
+			}
 		}
 	}
 	
@@ -208,18 +252,20 @@ function LevelUpController() {
 	 * Makes the level decrease of one step
 	 */
 	this.levelDown = function() {
-		var currentLevelValue = $("#level").val();
-		var currentLevelId = _mapdata.getLevels().indexOf(parseFloat(currentLevelValue));
-		
-		if(currentLevelId == -1) {
-			_view.displayMessage("Invalid level", "error");
-		}
-		else if(currentLevelId > 0) {
-			$("#level").val(_mapdata.getLevels()[currentLevelId-1]);
-			_self.updateLevelOnMap();
-		}
-		else {
-			_view.displayMessage("You are already at the first available level", "alert");
+		if(!$("#level").prop("disabled")) {
+			var currentLevelValue = $("#level").val();
+			var currentLevelId = _mapdata.getLevels().indexOf(parseFloat(currentLevelValue));
+			
+			if(currentLevelId == -1) {
+				_view.displayMessage("Invalid level", "error");
+			}
+			else if(currentLevelId > 0) {
+				$("#level").val(_mapdata.getLevels()[currentLevelId-1]);
+				_self.updateLevelOnMap();
+			}
+			else {
+				_view.displayMessage("You are already at the first available level", "alert");
+			}
 		}
 	}
 	
@@ -246,6 +292,10 @@ function LevelUpController() {
  * Handles data download, conversion and access.
  */
 function MapData(ctrl) {
+//CONSTANTS
+	/** Overpass API server URL **/
+	var _API_URL = "http://www.overpass-api.de/api/interpreter?data=";
+
 //ATTRIBUTES
 	/** Levels array, ordered **/
 	var _levels = null;
@@ -253,8 +303,14 @@ function MapData(ctrl) {
 	/** Data as GeoJSON **/
 	var _geojson = null;
 	
+	/** Cluster data as GeoJSON **/
+	var _geojsonCluster = null;
+	
 	/** Bounding box for current data **/
 	var _bbox = null;
+	
+	/** Bounding box for cluster data **/
+	var _bboxCluster = null;
 	
 	/** The application controller **/
 	var _ctrl = ctrl;
@@ -271,10 +327,24 @@ function MapData(ctrl) {
 	}
 	
 	/**
+	 * @return The cluster data, as GeoJSON
+	 */
+	this.getClusterData = function() {
+		return _geojsonCluster;
+	}
+	
+	/**
 	 * @return The bounding box (see LatLngBounds in Leaflet API)
 	 */
 	this.getBBox = function() {
 		return _bbox;
+	}
+	
+	/**
+	 * @return The bounding box for cluster data (see LatLngBounds in Leaflet API)
+	 */
+	this.getClusterBBox = function() {
+		return _bboxCluster;
 	}
 	
 	/**
@@ -286,23 +356,44 @@ function MapData(ctrl) {
 
 //OTHER METHODS
 	/**
+	 * @return The bounds as string for Overpass API
+	 */
+	function _getBoundsString(mapBounds) {
+		return mapBounds.getSouth()+","+mapBounds.getWest()+","+mapBounds.getNorth()+","+mapBounds.getEast();
+	}
+	
+	/**
 	 * Downloads data from Overpass API
 	 * Then calls another function to process it.
 	 * @param bounds The map bounds
 	 */
 	this.downloadData = function(mapBounds) {
 		//Download from Overpass API
-		var bounds = mapBounds.getSouth()+","+mapBounds.getWest()+","+mapBounds.getNorth()+","+mapBounds.getEast();
+		var bounds = _getBoundsString(mapBounds);
 		_bbox = mapBounds;
-		var oapiRequest = '[out:json][timeout:25];(node["indoor"]('+bounds+');way["indoor"]('+bounds+');node["door"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+'););out body;';
-		var oapiResponse = $.get("http://www.overpass-api.de/api/interpreter?data="+encodeURIComponent(oapiRequest), _self.parseOsmData, "text");
+		var oapiRequest = '[out:json][timeout:25];(node["indoor"]('+bounds+');way["indoor"]('+bounds+');node["door"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+'););out body;>;out skel qt;';
+		var oapiResponse = $.get(_API_URL+encodeURIComponent(oapiRequest), _self.handleOapiResponse, "text");
 	}
 	
 	/**
-	 * Parses raw OSM XML data, and stores the result in geojson attribute.
-	 * @param data The OSM XML data.
+	 * Downloads global data from Overpass API (data used for low zoom clusters)
+	 * Then calls another function to process it.
+	 * @param bounds The map bounds
 	 */
-	this.parseOsmData = function(data) {
+	this.downloadClusterData = function(mapBounds) {
+		//Download from Overpass API
+		var bounds = _getBoundsString(mapBounds);
+		_bboxCluster = mapBounds;
+		var oapiRequest = '[out:json][timeout:25];(way["indoor"="area"]["level"]('+bounds+');way["indoor"="room"]["level"]('+bounds+');way["indoor"="level"]["level"]('+bounds+');way["indoor"="corridor"]["level"]('+bounds+'););out body center;';
+		var oapiResponse = $.get(_API_URL+encodeURIComponent(oapiRequest), _self.handleOapiClusterResponse, "text");
+	}
+	
+	/**
+	 * Parses raw OSM XML data, and return result.
+	 * @param data The OSM XML data.
+	 * @return The OSM parsed data (GeoJSON)
+	 */
+	function _parseOsmData(data) {
 		//Convert XML to GeoJSON
 		data = data || "<osm></osm>";
 		try {
@@ -310,7 +401,16 @@ function MapData(ctrl) {
 		} catch(e) {
 			data = JSON.parse(data);
 		}
-		_geojson = osmtogeojson(data);
+		return osmtogeojson(data);
+	}
+	
+	/**
+	 * Handles OAPI response.
+	 * @param data The OAPI data
+	 */
+	this.handleOapiResponse = function(data) {
+		//Parse data
+		_geojson = _parseOsmData(data);
 		
 		//Retrieve level informations
 		var levelsSet = new Set();
@@ -320,13 +420,17 @@ function MapData(ctrl) {
 			//Parse level value (could be an integer, a float, a list of those, ...)
 			if(feature.properties['tags']['level'] != undefined) {
 				//Separate different values
-				var currentLevel = feature.properties['tags']['level'].split(';');
+				var currentLevel = parseLevels(feature.properties['tags']['level']);
 				
 				//Add each value in list
-				for(var i=0; i < currentLevel.length; i++) {
-					if(isFloat(currentLevel[i])) {
-						levelsSet.add(parseFloat(currentLevel[i]));
+				if(currentLevel != null) {
+					for(var i=0; i < currentLevel.length; i++) {
+						if(isFloat(currentLevel[i])) {
+							levelsSet.add(parseFloat(currentLevel[i]));
+						}
 					}
+				} else {
+					console.log("Invalid level: "+feature.properties['tags']['level']);
 				}
 			}
 			
@@ -345,7 +449,7 @@ function MapData(ctrl) {
 		}
 		catch(error) {
 			//An error is possible if browser doesn't support Set.values()
-			_levels = _self.legacyProcessLevels();
+			_levels = _legacyProcessLevels();
 		}
 		_levels.sort(function (a,b) { return a-b;});
 
@@ -354,11 +458,23 @@ function MapData(ctrl) {
 	}
 	
 	/**
+	 * Handles OAPI response for cluster data.
+	 * @param data The OAPI data
+	 */
+	this.handleOapiClusterResponse = function(data) {
+		//Parse data
+		_geojsonCluster = _parseOsmData(data);
+		
+		//Call this method to notify controller that download is done
+		_ctrl.endMapClusterUpdate();
+	}
+	
+	/**
 	 * This function parses levels values from GeoJSON.
 	 * @deprecated Created only because of the lack of support of Set, to delete when it will be wide supported.
 	 * @return The parsed levels as an array (unsorted)
 	 */
-	this.legacyProcessLevels = function() {
+	function _legacyProcessLevels() {
 		levelsAsArray = new Array();
 		for(var i in _geojson.features) {
 			var feature = _geojson.features[i];
@@ -366,16 +482,20 @@ function MapData(ctrl) {
 			//Parse level value (could be an integer, a float, a list of those, ...)
 			if(feature.properties['tags']['level'] != undefined) {
 				//Separate different values
-				var currentLevel = feature.properties['tags']['level'].split(';');
+				var currentLevel = parseLevels(feature.properties['tags']['level']);
 				
 				//Add each value in list
-				for(var i=0; i < currentLevel.length; i++) {
-					if(isFloat(currentLevel[i])) {
-						var lvl = parseFloat(currentLevel[i]);
-						if(levelsAsArray.indexOf(lvl) < 0) {
-							levelsAsArray[levelsAsArray.length] = lvl;
+				if(currentLevel != null) {
+					for(var i=0; i < currentLevel.length; i++) {
+						if(isFloat(currentLevel[i])) {
+							var lvl = parseFloat(currentLevel[i]);
+							if(levelsAsArray.indexOf(lvl) < 0) {
+								levelsAsArray[levelsAsArray.length] = lvl;
+							}
 						}
 					}
+				} else {
+					console.log("Invalid level: "+feature.properties['tags']['level']);
 				}
 			}
 		}
@@ -555,10 +675,10 @@ function HTMLView() {
 			addObject = addObject || feature.properties.tags.highway == "elevator";
 			
 			//Display unrendered objects
-			if(!addObject) {
+			/*if(!addObject) {
 				console.log("Unrendered object:");
 				console.log(feature);
-			}
+			}*/
 		}
 
 		return addObject || (onLevels != null && onLevels.indexOf($("#level").val()) >= 0);
@@ -572,16 +692,21 @@ function HTMLView() {
 	function styleElements(feature) {
 		var result = new Array();
 		
-		//Find potential styles depending on tags
-		for(var i in STYLE.styles) {
-			var style = STYLE.styles[i];
-			
-			//If applyable, we update the result style
-			if(isStyleApplyable(feature, style)) {
-				for(var param in style.style) {
-					result[param] = style.style[param];
+		if(STYLE != undefined) {
+			//Find potential styles depending on tags
+			for(var i in STYLE.styles) {
+				var style = STYLE.styles[i];
+				
+				//If applyable, we update the result style
+				if(isStyleApplyable(feature, style)) {
+					for(var param in style.style) {
+						result[param] = style.style[param];
+					}
 				}
 			}
+		}
+		else {
+			controller.getView().displayMessage("Error while loading style file", "error");
 		}
 		
 		return result;
@@ -709,20 +834,21 @@ function HTMLView() {
 		if(regex1.test(str)) {
 			result = str.split(';');
 		}
-		
-		//Level values (only integers) in an interval, bounded with '-'
-		var regex2 = /^(-?\d+)-(-?\d+)$/;
-		var regex2result = regex2.exec(str);
-		if(regex2result != null) {
-			var min = parseInt(regex2result[1]);
-			var max = parseInt(regex2result[2]);
-			result = new Array();
+		else {
+			//Level values (only integers) in an interval, bounded with '-'
+			var regex2 = /^(-?\d+)-(-?\d+)$/;
+			var regex2result = regex2.exec(str);
+			if(regex2result != null) {
+				var min = parseInt(regex2result[1]);
+				var max = parseInt(regex2result[2]);
+				result = new Array();
 
-			//Add intermediate values
-			for(var i=min; i != max; i=i+((max-min)/Math.abs(max-min))) {
-				result.push(i.toString());
+				//Add intermediate values
+				for(var i=min; i != max; i=i+((max-min)/Math.abs(max-min))) {
+					result.push(i.toString());
+				}
+				result.push(max.toString());
 			}
-			result.push(max.toString());
 		}
 
 		return result;
