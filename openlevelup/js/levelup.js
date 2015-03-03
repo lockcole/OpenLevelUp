@@ -103,6 +103,9 @@ function LevelUpController() {
 		//Add layer to map
 		_map.addLayer(osm);
 		
+		//Create mapdata object
+		_mapdata = new MapData(_self);
+		
 		return _map;
 	}
 	
@@ -113,8 +116,54 @@ function LevelUpController() {
 		//Clear messages
 		_view.clearMessages();
 		
+		//Check if zoom is high enough to download data
+		if(_map.getZoom() >= 4) {
+			//High zoom data download
+			if(_map.getZoom() >= 17) {
+				//Download data only if new BBox isn't contained in previous one
+				if(_mapdata.getBBox() == null || !_mapdata.getBBox().contains(_map.getBounds())) {
+					_view.setLoading(true);
+					
+					//Get current level
+					oldLevel = parseFloat($("#level").val());
+					
+					//Download data
+					_mapdata.cleanData();
+					_mapdata.downloadData(_map.getBounds());
+					//When download is done, endMapUpdate() will be called.
+				}
+				//Else, we just update permalink
+				else {
+					_self.updateLevelOnMap();
+				}
+			}
+			//Low zoom data download (cluster)
+			else {
+				//Download data only if new BBox isn't contained in previous one
+				if(_mapdata.getClusterBBox() == null || !_mapdata.getClusterBBox().contains(_map.getBounds())) {
+					_view.setLoading(true);
+					
+					//Download data
+					_mapdata.cleanClusterData();
+					_mapdata.downloadClusterData(_map.getBounds());
+					//When download is done, endMapClusterUpdate() will be called.
+				}
+				//Else, we just update permalink
+				else {
+					_self.endMapClusterUpdate();
+				}
+			}
+		}
+		//Else, clean map
+		else {
+			_self.removeDataLayer();
+			_view.populateSelectLevels({});
+			_view.displayMessage("Zoom in to see more information", "info");
+			_view.updatePermalink(_map);
+		}
+		
 		//Check if zoom level is high enough to download data
-		if(_map.getZoom() >= 17) {
+		/*if(_map.getZoom() >= 17) {
 			//Download data only if new BBox isn't contained in previous one
 			if(_mapdata == null || _mapdata.getBBox() == null || !_mapdata.getBBox().contains(_map.getBounds())) {
 				_view.setLoading(true);
@@ -156,7 +205,7 @@ function LevelUpController() {
 			
 			_view.displayMessage("Zoom in to see more information", "info");
 			_view.updatePermalink(_map);
-		}
+		}*/
 	}
 	
 	/**
@@ -196,6 +245,7 @@ function LevelUpController() {
 	 */
 	this.endMapClusterUpdate = function() {
 		_self.removeDataLayer();
+		_view.populateSelectLevels({});
 		
 		//Create cluster group from GeoJSON data
 		_dataLayer = new L.MarkerClusterGroup({
@@ -354,6 +404,23 @@ function MapData(ctrl) {
 		return _levels;
 	}
 
+//MODIFIERS
+	/**
+	* This functions deletes all information related to data (but not cluster data).
+	*/
+	this.cleanData = function() {
+		_geojson = null;
+		_bbox = null;
+	}
+	
+	/**
+	 * This functions deletes all information related to cluster data.
+	 */
+	this.cleanClusterData = function() {
+		_geojsonCluster = null;
+		_bboxCluster = null;
+	}
+	
 //OTHER METHODS
 	/**
 	 * @return The bounds as string for Overpass API
