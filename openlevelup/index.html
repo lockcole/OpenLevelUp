@@ -101,15 +101,30 @@
 	</div>
 	
 	<!-- OpenLevelUp! JS startup code -->
-	<script src="js/openlevelup.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		//Global conf (cache enabled)
+		$.ajaxSetup({ cache: true });
+		
+		//Load JSON style file
+		var STYLE;
+		$.ajax({ url: 'style.json', async: false, dataType: 'json', success: function(data) { STYLE = data; } });
+		
+		//Application core handler
+		OLvlUp = function() {};
+	</script>
+	<script src="js/utils.js" type="text/javascript"></script>
+	<script src="js/model.js" type="text/javascript"></script>
+	<script src="js/view.js" type="text/javascript"></script>
+	<script src="js/controller.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		//Create controller object
-		var controller = new OLvlUp.Controller(); //new LevelUpController();
+		var controller = new OLvlUp.controller.Ctrl();
 		
 		//Init map
-		var map = controller.mapInit();
-		controller.mapUpdate();
-		map.on('moveend', function(e) { controller.map=map; controller.mapUpdate(); });
+		controller.init();
+		
+		//Trigger for map movements
+		controller.getView().getMap().on('moveend', function(e) { controller.onMapUpdate(); });
 	</script>
 </body>
 </html>
