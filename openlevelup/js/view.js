@@ -147,17 +147,22 @@ Web: function(ctrl) {
 		}
 		
 		//Set layers
-		var osmFrUrl='http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
-		var osmFrAttrib='Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a>';
-		var osmFr = new L.TileLayer(osmFrUrl, {minZoom: 20, maxZoom: 20, attribution: osmFrAttrib });
-		
 		var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 		var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
 		var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 19, attribution: osmAttrib });
 		
+		var osmFrUrl='http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
+		var osmFrAttrib='Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a>';
+		var osmFr = new L.TileLayer(osmFrUrl, {minZoom: 20, maxZoom: 20, attribution: osmFrAttrib+" | "+osmAttrib });
+		
+		var stamenTonerUrl='http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
+		var stamenTonerAttrib='Tiles <a href="http://maps.stamen.com/">Stamen Toner</a>';
+		var stamenToner = new L.TileLayer(stamenTonerUrl, {minZoom: 1, maxZoom: 20, attribution: stamenTonerAttrib+" | "+osmAttrib });
+		
 		//Add layer to map
+		var tileLayers = { "OSM": osm, "OSM FR": osmFr, "Stamen Toner": stamenToner };
 		_map.addLayer(osm);
-		_map.addLayer(osmFr);
+		L.control.layers(tileLayers).addTo(_map);
 		
 		//Add triggers on HTML elements
 		$("#level").change(controller.updateLevelOnMap);
