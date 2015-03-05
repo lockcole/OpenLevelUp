@@ -40,7 +40,7 @@ Ctrl: function() {
 	var _mapdata = null;
 	
 	/** The current HTML view **/
-	var _view = new OLvlUp.view.Web();
+	var _view;
 	
 	/** The previous level value (before a map update) **/
 	var _oldLevel;
@@ -71,6 +71,8 @@ Ctrl: function() {
 	 * This function initializes the controller
 	 */
 	this.init = function() {
+		_view = new OLvlUp.view.Web(_self);
+		
 		//Init leaflet map
 		_view.mapInit();
 		
@@ -92,6 +94,13 @@ Ctrl: function() {
 	 */
 	this.levelDown = function() {
 		_view.levelDown(_mapdata);
+	}
+	
+	/**
+	 * This function is called when a minor change on map happens (transcendent change, base layer change, ...)
+	 */
+	this.onMapChange = function() {
+		_view.refreshMap(_mapdata);
 	}
 	
 	/**

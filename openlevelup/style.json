@@ -89,7 +89,7 @@
 			"type": "Style",
 			"name": "Building",
 			"description": "Buildings",
-			"onTags": [ { "building": "*" } ],
+			"onTags": [ { "building": "*" }, { "building:part": "*" } ],
 			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 0.5, "fillColor": "#D4CACA", "fillOpacity": 1, "popup": "no" }
 		},
 		{

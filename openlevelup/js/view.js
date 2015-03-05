@@ -31,6 +31,38 @@ CLUSTER_MIN_ZOOM: 5,
 /** The minimal zoom to display actual data on map **/
 DATA_MIN_ZOOM: 17,
 
+/** The minimal tiles opacity (between 0 and 1) **/
+TILES_MIN_OPACITY: 0.2,
+
+/** The available tile layers **/
+TILE_LAYERS:
+	{
+		OSM: {
+			name: "OpenStreetMap",
+			URL: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+			attribution: '',
+			minZoom: 1,
+			maxZoom: 19
+		},
+		OSMFR: {
+			name: "OpenStreetMap FR",
+			URL: "http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
+			attribution: 'Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a>',
+			minZoom: 1,
+			maxZoom: 20
+		},
+		TONER: {
+			name: "Stamen Toner",
+			URL: 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png',
+			attribution: 'Tiles <a href="http://maps.stamen.com/">Stamen Toner</a>',
+			minZoom: 1,
+			maxZoom: 20
+		}
+	},
+
+/** The default attribution, refering to OSM data **/
+ATTRIBUTION: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+
 
 // ======= CLASSES =======
 /**
@@ -92,6 +124,13 @@ Web: function(ctrl) {
 	this.getMapBounds = function() {
 		return _map.getBounds().getSouth()+","+_map.getBounds().getWest()+","+_map.getBounds().getNorth()+","+_map.getBounds().getEast();
 	}
+	
+	/**
+	 * @return Must we show transcendent objects ?
+	 */
+	this.showTranscendent = function() {
+		return $("#show-transcendent").prop("checked");
+	}
 
 //MODIFIERS
 	/**
@@ -129,8 +168,13 @@ Web: function(ctrl) {
 		//Init map center and zoom
 		_map = L.map('map', {minZoom: 1, maxZoom: 22}).setView([47, 2], 6);
 		
-		//If a BBox is given in URL, then make map show the wanted area
+		//If coordinates are given in URL, then make map show the wanted area
 		var bbox = _self.getUrlParameter("bbox");
+		var lat = _self.getUrlParameter("lat");
+		var lon = _self.getUrlParameter("lon");
+		var zoom = _self.getUrlParameter("zoom");
+		
+		//BBox
 		if(bbox != null) {
 			//Get latitude and longitude information from BBox string
 			var coordinates = bbox.split(',');
@@ -145,31 +189,45 @@ Web: function(ctrl) {
 				_self.displayMessage("Invalid bounding box", "alert");
 			}
 		}
+		//Lat, lon, zoom
+		else if(lat != null && lon != null && zoom != null) {
+			_map.setView(L.latLng(lat, lon), zoom);
+		}
+		//If missing parameter
+		else if(lat != null || lon != null || zoom != null) {
+			_self.displayMessage("Missing parameter in permalink", "error");
+		}
 		
-		//Set layers
-		var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-		var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
-		var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 19, attribution: osmAttrib });
+		//Create tile layers
+		var tileLayers = new Array();
+		var firstLayer = true;
 		
-		var osmFrUrl='http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
-		var osmFrAttrib='Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a>';
-		var osmFr = new L.TileLayer(osmFrUrl, {minZoom: 20, maxZoom: 20, attribution: osmFrAttrib+" | "+osmAttrib });
-		
-		var stamenTonerUrl='http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
-		var stamenTonerAttrib='Tiles <a href="http://maps.stamen.com/">Stamen Toner</a>';
-		var stamenToner = new L.TileLayer(stamenTonerUrl, {minZoom: 1, maxZoom: 20, attribution: stamenTonerAttrib+" | "+osmAttrib });
-		
-		//Add layer to map
-		var tileLayers = { "OSM": osm, "OSM FR": osmFr, "Stamen Toner": stamenToner };
-		_map.addLayer(osm);
+		for(var l in OLvlUp.view.TILE_LAYERS) {
+			var currentLayer = OLvlUp.view.TILE_LAYERS[l];
+			tileLayers[currentLayer.name] = new L.TileLayer(
+				currentLayer.URL,
+				{
+					minZoom: currentLayer.minZoom,
+					maxZoom: currentLayer.maxZoom,
+					attribution: currentLayer.attribution+" | "+OLvlUp.view.ATTRIBUTION
+				}
+			);
+			
+			if(firstLayer) {
+				_map.addLayer(tileLayers[currentLayer.name]);
+				firstLayer = false;
+			}
+		}
 		L.control.layers(tileLayers).addTo(_map);
 		
 		//Add triggers on HTML elements
-		$("#level").change(controller.updateLevelOnMap);
+		$("#level").change(controller.onMapChange);
 		$("#levelUp").click(controller.levelUp);
 		$("#levelDown").click(controller.levelDown);
 		$("#about-link").click(function() { $("#op-about").toggle(); });
 		$("#about-close").click(function() { $("#op-about").hide(); });
+		$("#show-transcendent").change(controller.onMapChange);
+		_map.on("baselayerchange", controller.onMapChange);
 	}
 	
 	/**
@@ -205,8 +263,47 @@ Web: function(ctrl) {
 			_dataLayer.addTo(_map);
 		}
 		
+		_changeTilesOpacity();
+		
 		//Update permalink
 		_self.updatePermalink(_map);
+	}
+	
+	/**
+	 * Changes the tiles opacity, depending of shown level
+	 */
+	function _changeTilesOpacity() {
+		var newOpacity = 1;
+		var levelsArray = _ctrl.getMapData().getLevels();
+		
+		 if(levelsArray != null) {
+			//Find level 0 index in levels array
+			var levelZero = levelsArray.indexOf(0);
+			var midLevel = (levelZero >= 0) ? midLevel = levelZero : Math.floor(levelsArray.length / 2);
+			
+			//Extract level sub-arrays
+			var levelsNegative = levelsArray.slice(0, midLevel);
+			var levelsPositive = levelsArray.slice(midLevel+1);
+			
+			//Calculate new opacity, depending of level position in levels array
+			var idNeg = levelsNegative.indexOf(_self.getCurrentLevel());
+			var idPos = levelsPositive.indexOf(_self.getCurrentLevel());
+			if(idNeg >= 0) {
+				var coef = idNeg / levelsNegative.length * (1 - OLvlUp.view.TILES_MIN_OPACITY);
+				newOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
+			}
+			else if(idPos >= 0) {
+				var coef = (levelsPositive.length - 1 - idPos) / levelsPositive.length * (1 - OLvlUp.view.TILES_MIN_OPACITY);
+				newOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
+			}
+		}
+		
+		//Update tiles opacity
+		_map.eachLayer(function(layer) {
+			if(layer instanceof L.TileLayer) {
+				layer.setOpacity(newOpacity);
+			}
+		} );
 	}
 
 /*
@@ -270,10 +367,12 @@ Web: function(ctrl) {
 		//Consider objects without levels but connected to door elements
 		else {
 			//Building with min and max level
+			//TODO
 			addObject = feature.properties.tags.building != undefined
 			&& feature.properties.tags.min_level != undefined
 			&& feature.properties.tags.max_level != undefined;
 			
+			//addObject = Object.keys(feature.properties.tags).length > 0;
 			//Elevator
 			addObject = addObject || feature.properties.tags.highway == "elevator";
 			
@@ -283,8 +382,8 @@ Web: function(ctrl) {
 			*	console.log(feature);
 			}*/
 		}
-		
-		return addObject || (onLevels != null && onLevels.indexOf($("#level").val()) >= 0);
+
+		return addObject || (onLevels != null && onLevels.indexOf($("#level").val()) >= 0 && (_self.showTranscendent() || onLevels.length == 1));
 	}
 
 	/**
@@ -451,10 +550,12 @@ Web: function(ctrl) {
 		if(option != '') {
 			$('#level').append(option);
 			$("#level").prop("disabled", false);
+			$("#show-transcendent").prop("disabled", false);
 		}
 		//If not, we disable the select element
 		else {
 			$("#level").prop("disabled", true);
+			$("#show-transcendent").prop("disabled", true);
 		}
 	}
 
@@ -492,7 +593,8 @@ Web: function(ctrl) {
 	 * Updates the permalink on page.
 	 */
 	this.updatePermalink = function() {
-		var link = $(location).attr('href').split('?bbox')[0]+"?bbox="+_map.getBounds().toBBoxString();
+		//var link = $(location).attr('href').split('?')[0]+"?bbox="+_map.getBounds().toBBoxString();
+		var link = $(location).attr('href').split('?')[0]+"?lat="+_map.getCenter().lat+"&lon="+_map.getCenter().lng+"&zoom="+_map.getZoom();
 		
 		if($("#level").val() != null) {
 			link += "&level="+$("#level").val();

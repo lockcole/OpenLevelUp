@@ -165,7 +165,7 @@ a:hover {
 	margin: 10px 0;
 }
 
-#settings a {
+#settings a.button {
 	border: 1px solid grey;
 	background-color: #ddd;
 	font-weight: normal;
@@ -174,9 +174,21 @@ a:hover {
 	color: #222;
 }
 
-#settings a:hover {
+#settings a.button:hover {
 	background-color: #eee;
 	font-weight: bold;
+}
+
+#settings a.help {
+	font-weight: normal;
+	cursor: help;
+	text-decoration: underline;
+	text-decoration-style: dotted;
+	color: #eee;
+}
+
+#settings a.help:hover {
+	color: #ccc;
 }
 
 #settings ul {

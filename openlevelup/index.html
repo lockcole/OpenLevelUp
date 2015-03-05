@@ -26,11 +26,12 @@
 <head>
 	<!--
 		TODO (by priority)
-		* Add the ability to display only strict level elements (not repeatable between levels)
-		* Tiles visibility reduced as we go far from level 0
-		* Generic tile description and handler
+		* Make cluster recognize more indoor situations
+		* Restore base layer when using permalink
+		* Improve browser compatibility
 		* Add a caption for icons (automatically filled with JSON style)
 		* Add possibility to put icons on polygons (elevator)
+		* Go up/down stairs by clicking a button in a popup for stairs
 		* Page translation system
 	-->
 	<!-- General definitions -->
@@ -87,7 +88,8 @@
 		<!-- Settings -->
 		<div id="settings">
 			<ul>
-				<li>Level <select id="level"></select> <a id="levelUp">&uarr;</a> <a id="levelDown">&darr;</a></li>
+				<li>Level <select id="level"></select> <a class="button" id="levelUp">&uarr;</a> <a class="button" id="levelDown">&darr;</a></li>
+				<li><label><input type="checkbox" id="show-transcendent" checked="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
 			</ul>
 		</div>
 		
