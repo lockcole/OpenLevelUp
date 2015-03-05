@@ -494,6 +494,9 @@ Web: function(ctrl) {
 		}
 		
 		$("#permalink").attr('href', link);
+		
+		//Update browser URL
+		window.history.replaceState({}, "OpenLevelUp!", link);
 	}
 }
 
