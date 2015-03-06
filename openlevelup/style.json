@@ -3,17 +3,24 @@
 	"styles": [
 		{
 			"type": "Style",
-			"name": "Area",
-			"description": "Indoor areas ('OR' example for values)",
-			"onTags": [ { "indoor": "area|corridor" } ],
-			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.5, "fillColor": "#EEEEEE", "fillOpacity": 1 }
+			"name": "Building",
+			"description": "Buildings",
+			"onTags": [ { "building": "*" }, { "building:part": "*" } ],
+			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 0.5, "fillColor": "#D4CACA", "fillOpacity": 1, "popup": "no" }
 		},
 		{
 			"type": "Style",
 			"name": "Room",
 			"description": "Indoor rooms",
-			"onTags": [ { "indoor": "room|wall" }, { "room": "*" } ],
+			"onTags": [ { "indoor": "room|wall" }, { "room": "*" }, { "buildingpart": "*" } ],
 			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.5, "fillColor": "#E0E0E0", "fillOpacity": 1 }
+		},
+		{
+			"type": "Style",
+			"name": "Area",
+			"description": "Indoor areas ('OR' example for values)",
+			"onTags": [ { "indoor": "area|corridor" }, { "highway": "pedestrian|footway", "area": "yes" }, { "buildingpart": "corridor|hall" } ],
+			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.5, "fillColor": "#EEEEEE", "fillOpacity": 1 }
 		},
 		{
 			"type": "Style",
@@ -84,13 +91,6 @@
 			"description": "Newspapers vending machine",
 			"onTags": [ { "amenity": "vending_machine", "vending": "newspapers" },  { "amenity": "vending_machine", "vending": "news_papers" } ],
 			"style": { "icon": "img/Farm-Fresh_newspaper.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Building",
-			"description": "Buildings",
-			"onTags": [ { "building": "*" }, { "building:part": "*" } ],
-			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 0.5, "fillColor": "#D4CACA", "fillOpacity": 1, "popup": "no" }
 		},
 		{
 			"type": "Style",

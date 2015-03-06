@@ -47,6 +47,9 @@ MapData: function(ctrl) {
 	/** Bounding box for cluster data **/
 	var _bboxCluster = null;
 	
+	/** Does the cluster contain legacy data ? **/
+	var _legacyCluster = false;
+	
 	/** The application controller **/
 	var _ctrl = ctrl;
 	
@@ -59,6 +62,13 @@ MapData: function(ctrl) {
 	 */
 	this.getData = function() {
 		return _geojson;
+	}
+	
+	/**
+	 * @return True if the cluster contains legacy data
+	 */
+	this.isClusterLegacy = function() {
+		return _legacyCluster;
 	}
 	
 	/**
@@ -104,6 +114,14 @@ MapData: function(ctrl) {
 	 */
 	this.setClusterBBox = function(bbox) {
 		_bboxCluster = bbox;
+	}
+	
+	/**
+	 * Sets if the current cluster data contains legacy objects
+	 * @param l True if legacy
+	 */
+	this.setClusterLegacy = function(l) {
+		_legacyCluster = l;
 	}
 	
 	/**
@@ -157,8 +175,9 @@ MapData: function(ctrl) {
 			}
 			
 			//Edit indoor areas to set them as polygons instead of linestrings
-			if(feature.properties.tags.indoor != undefined
-				&& feature.properties.tags.indoor != "yes"
+			if(((feature.properties.tags.indoor != undefined
+				&& feature.properties.tags.indoor != "yes")
+				|| feature.properties.tags.buildingpart != undefined)
 				&& feature.geometry.type == "LineString") {
 				
 				feature = _convertLineToPolygon(feature);

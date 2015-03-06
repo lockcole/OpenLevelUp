@@ -104,11 +104,33 @@ Ctrl: function() {
 	}
 	
 	/**
-	 * This function is called when map was moved or zoomed in/out.
+	 * This function is called when map should display legacy objects (or not)
 	 */
-	this.onMapUpdate = function() {
+	this.onMapLegacyChange = function() {
+		//If in data zooms, only change shown objects
+		if(_view.getMap().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
+			_view.refreshMap(_mapdata);
+		}
+		//If in cluster zooms, re-download data
+		else if(_view.getMap().getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
+			_self.onMapUpdate(true);
+		}
+	}
+	
+	/**
+	 * This function is called when map was moved or zoomed in/out.
+	 * @param force Force data download (optional, default: false)
+	 */
+	this.onMapUpdate = function(force) {
+		force = force || false;
+
 		//Clear messages
 		_view.clearMessages();
+		
+		//Recreate mapdata if null
+		if(_mapdata == null) {
+			_mapdata = new OLvlUp.model.MapData(_self);
+		}
 		
 		//Check if zoom is high enough to download data
 		if(_view.getMap().getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
@@ -117,7 +139,7 @@ Ctrl: function() {
 				_oldLevel = _view.getCurrentLevel();
 				
 				//Download data only if new BBox isn't contained in previous one
-				if(_mapdata.getBBox() == null || !_mapdata.getBBox().contains(_view.getMap().getBounds())) {
+				if(force || _mapdata.getBBox() == null || !_mapdata.getBBox().contains(_view.getMap().getBounds())) {
 					_view.setLoading(true);
 					
 					//Download data
@@ -133,11 +155,16 @@ Ctrl: function() {
 			//Low zoom data download (cluster)
 			else {
 				//Download data only if new BBox isn't contained in previous one
-				if(_mapdata.getClusterBBox() == null || !_mapdata.getClusterBBox().contains(_view.getMap().getBounds())) {
+				if(force
+					|| _mapdata.isClusterLegacy() != _view.showLegacy()
+					|| _mapdata.getClusterBBox() == null
+					|| !_mapdata.getClusterBBox().contains(_view.getMap().getBounds())) {
+
 					_view.setLoading(true);
 					
 					//Download data
 					_mapdata.cleanClusterData();
+					_mapdata.setClusterLegacy(_view.showLegacy());
 					_self.downloadData("cluster", _mapdata.handleOapiClusterResponse);
 					//When download is done, endMapClusterUpdate() will be called.
 				}
@@ -211,11 +238,14 @@ Ctrl: function() {
 		//Prepare request depending of type
 		if(type == "cluster") {
 			_mapdata.setClusterBBox(_view.getMap().getBounds());
-			oapiRequest = '[out:json][timeout:25];(way["indoor"="area"]["level"]('+bounds+');way["indoor"="room"]["level"]('+bounds+');way["indoor"="level"]["level"]('+bounds+');way["indoor"="corridor"]["level"]('+bounds+'););out body center;';
+			oapiRequest = '[out:json][timeout:25];(way["indoor"]["indoor"!="yes"]["level"]('+bounds+');';
+			if(_view.showLegacy()) { oapiRequest += 'way["buildingpart"]["level"]('+bounds+');'; }
+			oapiRequest += ');out body center;';
 		}
 		else {
 			_mapdata.setBBox(_view.getMap().getBounds());
-			oapiRequest = '[out:json][timeout:25];(node["indoor"]('+bounds+');way["indoor"]('+bounds+');node["door"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+'););out body;>;out skel qt;';
+			//oapiRequest = '[out:json][timeout:25];(node["indoor"]('+bounds+');way["indoor"]('+bounds+');node["door"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+'););out body;>;out skel qt;';
+			oapiRequest = '[out:json][timeout:25];(node["door"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+');node["repeat_on"]('+bounds+');way["repeat_on"]('+bounds+');way["min_level"]('+bounds+');way["max_level"]('+bounds+'););out body;>;out skel qt;';
 		}
 
 		//Download data

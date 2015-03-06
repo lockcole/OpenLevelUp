@@ -131,6 +131,13 @@ Web: function(ctrl) {
 	this.showTranscendent = function() {
 		return $("#show-transcendent").prop("checked");
 	}
+	
+	/**
+	 * @return Must we show objects with legacy tagging (buildingpart) ?
+	 */
+	this.showLegacy = function() {
+		return $("#show-legacy").prop("checked");
+	}
 
 //MODIFIERS
 	/**
@@ -220,6 +227,17 @@ Web: function(ctrl) {
 		}
 		L.control.layers(tileLayers).addTo(_map);
 		
+		//Restore settings from URL
+		var legacy = parseInt(_self.getUrlParameter("legacy"));
+		if(legacy != null && (legacy == 0 || legacy == 1)) {
+			$("#show-legacy").prop("checked", legacy == 1);
+		}
+		
+		var transcend = parseInt(_self.getUrlParameter("transcend"));
+		if(transcend != null && (transcend == 0 || transcend == 1)) {
+			$("#show-transcendent").prop("checked", transcend == 1);
+		}
+		
 		//Add triggers on HTML elements
 		$("#level").change(controller.onMapChange);
 		$("#levelUp").click(controller.levelUp);
@@ -227,6 +245,7 @@ Web: function(ctrl) {
 		$("#about-link").click(function() { $("#op-about").toggle(); });
 		$("#about-close").click(function() { $("#op-about").hide(); });
 		$("#show-transcendent").change(controller.onMapChange);
+		$("#show-legacy").change(controller.onMapLegacyChange);
 		_map.on("baselayerchange", controller.onMapChange);
 	}
 	
@@ -356,25 +375,26 @@ Web: function(ctrl) {
 		var onLevels = null;
 		var addObject = false;
 		
-		//Consider repeat_on tags
-		if(feature.properties.tags.repeat_on != undefined) {
-			onLevels = parseLevels(feature.properties.tags.repeat_on);
-		}
 		//Consider level tags
-		else if(feature.properties.tags.level != undefined) {
-			onLevels = parseLevels(feature.properties.tags.level);
+		if(feature.properties.tags.level != undefined || feature.properties.tags.repeat_on != undefined) {
+			onLevels = (feature.properties.tags.repeat_on != undefined) ?
+					parseLevels(feature.properties.tags.repeat_on)
+					: parseLevels(feature.properties.tags.level);
+			addObject = onLevels.indexOf($("#level").val()) >= 0
+					&& (_self.showTranscendent() || onLevels.length == 1)
+					&& (_self.showLegacy() || feature.properties.tags.buildingpart == undefined);
 		}
 		//Consider objects without levels but connected to door elements
 		else {
 			//Building with min and max level
-			//TODO
 			addObject = feature.properties.tags.building != undefined
 			&& feature.properties.tags.min_level != undefined
 			&& feature.properties.tags.max_level != undefined;
 			
-			//addObject = Object.keys(feature.properties.tags).length > 0;
 			//Elevator
-			addObject = addObject || feature.properties.tags.highway == "elevator";
+			if(_self.showTranscendent()) {
+				addObject = addObject || feature.properties.tags.highway == "elevator";
+			}
 			
 			//Display unrendered objects
 			/*if(!addObject) {
@@ -383,7 +403,7 @@ Web: function(ctrl) {
 			}*/
 		}
 
-		return addObject || (onLevels != null && onLevels.indexOf($("#level").val()) >= 0 && (_self.showTranscendent() || onLevels.length == 1));
+		return addObject; // || (onLevels != null && onLevels.indexOf($("#level").val()) >= 0 && (_self.showTranscendent() || onLevels.length == 1));
 	}
 
 	/**
@@ -599,6 +619,9 @@ Web: function(ctrl) {
 		if($("#level").val() != null) {
 			link += "&level="+$("#level").val();
 		}
+		
+		link += "&transcend="+((_self.showTranscendent()) ? "1" : "0");
+		link += "&legacy="+((_self.showLegacy()) ? "1" : "0");
 		
 		$("#permalink").attr('href', link);
 		

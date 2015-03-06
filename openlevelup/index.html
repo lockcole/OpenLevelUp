@@ -26,9 +26,10 @@
 <head>
 	<!--
 		TODO (by priority)
-		* Make cluster recognize more indoor situations
 		* Restore base layer when using permalink
+		* Export data of a given level
 		* Improve browser compatibility
+		* Add more icons (shops, amenities, ...)
 		* Add a caption for icons (automatically filled with JSON style)
 		* Add possibility to put icons on polygons (elevator)
 		* Go up/down stairs by clicking a button in a popup for stairs
@@ -87,9 +88,10 @@
 		
 		<!-- Settings -->
 		<div id="settings">
+			<p>Level <select id="level" disabled="true"></select> <a class="button" id="levelUp">&uarr;</a> <a class="button" id="levelDown">&darr;</a></p>
 			<ul>
-				<li>Level <select id="level"></select> <a class="button" id="levelUp">&uarr;</a> <a class="button" id="levelDown">&darr;</a></li>
-				<li><label><input type="checkbox" id="show-transcendent" checked="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
+				<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
+				<li><label><input type="checkbox" id="show-legacy" checked="true" /> Show <a class="help" title="Objects that uses legacy indoor schemes, that are now deprecated">objects with legacy tagging</a></label></li>
 			</ul>
 		</div>
 		
@@ -101,7 +103,7 @@
 		
 		<!-- Footer -->
 		<div id="footer">
-			<p><a href="#" id="about-link">About</a> | <a id="permalink" href="">Permalink</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
+			<p><!--a id="export-link" href="">Export this level</a> | --><a id="permalink" href="">Permalink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
 		</div>
 	</div>
 	
