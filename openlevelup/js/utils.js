@@ -64,3 +64,23 @@ function parseLevels(str) {
 	
 	return result;
 }
+
+/**
+ * @return The centroid of given GeoJSON polygon
+ */
+function centroidPolygon(geom) {
+	var centroid = [0, 0];
+	var first = true;
+	
+	for(var i in geom.coordinates[0]) {
+		if(i < geom.coordinates[0].length - 1) {
+			centroid[0] += geom.coordinates[0][i][0];
+			centroid[1] += geom.coordinates[0][i][1];
+		}
+	}
+	
+	centroid[0] = centroid[0] / (geom.coordinates[0].length -1);
+	centroid[1] = centroid[1] / (geom.coordinates[0].length -1);
+	
+	return centroid;
+}

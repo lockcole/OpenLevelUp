@@ -1,6 +1,12 @@
 Changes history
 ===============
 
+7 march 2015
+------------
+* Link to openstreetmap.org added
+* Link for level export in GeoJSON
+* Polygons can have icons in their style definition
+
 6 march 2015
 ------------
 * Legacy indoor tagging schemes supported (buildingpart=*)

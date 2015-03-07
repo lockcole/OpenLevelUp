@@ -34,6 +34,9 @@ DATA_MIN_ZOOM: 17,
 /** The minimal tiles opacity (between 0 and 1) **/
 TILES_MIN_OPACITY: 0.2,
 
+/** The icon size for objects **/
+ICON_SIZE: 24,
+
 /** The available tile layers **/
 TILE_LAYERS:
 	{
@@ -76,6 +79,12 @@ Web: function(ctrl) {
 	/** The leaflet map object **/
 	var _map;
 	
+	/** The array which contains markers for polygon icons **/
+	var _markersPolygons = null;
+	
+	/** The layer group that contains all overlay markers **/
+	var _markersLayer = null;
+	
 	/** The current GeoJSON data layer on map **/
 	var _dataLayer = null;
 	
@@ -115,7 +124,8 @@ Web: function(ctrl) {
 	 * @return The currently shown level
 	 */
 	this.getCurrentLevel = function() {
-		return parseFloat($("#level").val());
+		var level = parseFloat($("#level").val());
+		return (isNaN(level)) ? null : level;
 	}
 	
 	/**
@@ -123,6 +133,13 @@ Web: function(ctrl) {
 	 */
 	this.getMapBounds = function() {
 		return _map.getBounds().getSouth()+","+_map.getBounds().getWest()+","+_map.getBounds().getNorth()+","+_map.getBounds().getEast();
+	}
+	
+	/**
+	 * @return The current data layer
+	 */
+	this.getDataLayer = function() {
+		return _dataLayer;
 	}
 	
 	/**
@@ -246,6 +263,7 @@ Web: function(ctrl) {
 		$("#about-close").click(function() { $("#op-about").hide(); });
 		$("#show-transcendent").change(controller.onMapChange);
 		$("#show-legacy").change(controller.onMapLegacyChange);
+		$("#export-link").click(controller.onExportLevel);
 		_map.on("baselayerchange", controller.onMapChange);
 	}
 	
@@ -259,14 +277,28 @@ Web: function(ctrl) {
 			_map.removeLayer(_dataLayer);
 			_dataLayer = null;
 		}
+		if(_markersLayer != null) {
+			_map.removeLayer(_markersLayer);
+			_markersLayer = null;
+		}
 		
 		//Recreate data layer and add it to map
 		//The shown data depends of current zoom level
 		if(_map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
+			_markersPolygons = new Object();
 			_dataLayer = L.geoJson(
 				mapData.getData(),
 				{ filter: _filterElements, style: _styleElements, pointToLayer: _styleNodes, onEachFeature: _processElements }
 			);
+			
+			//Add eventual polygon icons
+			if(_markersPolygons != null && Object.keys(_markersPolygons).length > 0) {
+				_markersLayer = L.layerGroup();
+				for(var i in _markersPolygons) {
+					_markersLayer.addLayer(_markersPolygons[i]);
+				}
+				_markersLayer.addTo(_map);
+			}
 		}
 		else if(_map.getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
 			_dataLayer = new L.MarkerClusterGroup({
@@ -362,6 +394,9 @@ Web: function(ctrl) {
 			
 			//And add popup to layer
 			layer.bindPopup(text);
+			if(_markersPolygons[feature.properties.type+feature.properties.id] != undefined) {
+				_markersPolygons[feature.properties.type+feature.properties.id].bindPopup(text);
+			}
 		}
 	}
 
@@ -431,6 +466,19 @@ Web: function(ctrl) {
 			controller.getView().displayMessage("Error while loading style file", "error");
 		}
 		
+		//This add a marker if a polygon has its "icon" property defined
+		if(result.icon != undefined && feature.geometry.type == "Polygon") {
+			var myIcon = L.icon({
+				iconUrl: result.icon,
+				iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
+				iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
+				popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
+			});
+			var centroid = centroidPolygon(feature.geometry);
+			var marker = L.marker(L.latLng(centroid[1], centroid[0]), {icon: myIcon, zIndexOffset: 1000});
+			_markersPolygons[feature.properties.type+feature.properties.id] = marker;
+		}
+		
 		return result;
 	}
 
@@ -483,11 +531,11 @@ Web: function(ctrl) {
 			if(style.icon != undefined) {
 				var myIcon = L.icon({
 					iconUrl: style.icon,
-					iconSize: [24, 24],
-					iconAnchor: [12, 12],
-					popupAnchor: [0, -12]
+					iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
+					iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
+					popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
 				});
-				result = L.marker(latlng, {icon: myIcon})
+				result = L.marker(latlng, {icon: myIcon});
 			}
 			else {
 				result = L.circleMarker(latlng, style);
@@ -498,11 +546,11 @@ Web: function(ctrl) {
 			//Icon definition
 			var myIcon = L.icon({
 				iconUrl: 'img/default.svg',
-				iconSize: [24, 24],
-				iconAnchor: [12, 12],
-				popupAnchor: [0, -12]
+				iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
+				iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
+				popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
 			});
-			result = L.marker(latlng, {icon: myIcon})
+			result = L.marker(latlng, {icon: myIcon});
 		}
 		
 		return result;
@@ -627,6 +675,9 @@ Web: function(ctrl) {
 		
 		//Update browser URL
 		window.history.replaceState({}, "OpenLevelUp!", link);
+		
+		//Update OSM link
+		$("#osm-link").attr('href', "http://openstreetmap.org/#map="+_map.getZoom()+"/"+_map.getCenter().lat+"/"+_map.getCenter().lng);
 	}
 }
 

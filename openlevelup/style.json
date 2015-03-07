@@ -115,6 +115,13 @@
 		},
 		{
 			"type": "Style",
+			"name": "Elevator",
+			"description": "Elevator",
+			"onTags": [ { "highway": "elevator" } ],
+			"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "icon": "img/Elevator_icon.png" }
+		},
+		{
+			"type": "Style",
 			"name": "Subway",
 			"description": "Subway rails",
 			"onTags": [ { "railway": "subway" } ],

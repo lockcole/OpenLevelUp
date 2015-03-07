@@ -27,12 +27,10 @@
 	<!--
 		TODO (by priority)
 		* Restore base layer when using permalink
-		* Export data of a given level
 		* Improve browser compatibility
 		* Add more icons (shops, amenities, ...)
 		* Add a caption for icons (automatically filled with JSON style)
-		* Add possibility to put icons on polygons (elevator)
-		* Go up/down stairs by clicking a button in a popup for stairs
+		* Go up/down stairs/elevators by clicking a button in a popup
 		* Page translation system
 	-->
 	<!-- General definitions -->
@@ -46,6 +44,9 @@
 
 	<!-- OSMtoGeoJSON include -->
 	<script src="lib/osmtogeojson.js"></script>
+	
+	<!-- FileSaver include -->
+	<script src="lib/FileSaver.js"></script>
 	
 	<!-- jQuery includes -->
 	<script src="lib/jquery-1.11.2.min.js"></script>
@@ -103,7 +104,7 @@
 		
 		<!-- Footer -->
 		<div id="footer">
-			<p><!--a id="export-link" href="">Export this level</a> | --><a id="permalink" href="">Permalink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
+			<p><a id="osm-link" href="http://openstreetmap.org">See this on OpenStreetMap</a><br /><a id="export-link" href="#">Export this level</a> | <a id="permalink" href="">Permalink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
 		</div>
 	</div>
 	

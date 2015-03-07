@@ -226,6 +226,22 @@ Ctrl: function() {
 	}
 	
 	/**
+	 * This function is called when user wants to export the currently shown level
+	 */
+	this.onExportLevel = function() {
+		if(_view.getCurrentLevel() != null && _view.getDataLayer() != null) {
+			var data = new Blob(
+				[JSON.stringify(_view.getDataLayer().toGeoJSON(), null, '\t')],
+				{ type: "application/json;charset=tf-8;" }
+			);
+			saveAs(data, "level_"+_view.getCurrentLevel()+".geojson");
+		}
+		else {
+			_view.displayMessage("No level available for export", "alert");
+		}
+	}
+	
+	/**
 	 * Downloads data from Overpass API
 	 * Then calls another function to process it.
 	 * @param type The kind of request ("data" or "cluster")
