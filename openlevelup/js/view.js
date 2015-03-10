@@ -440,7 +440,11 @@ Web: function(ctrl) {
 					text += '<img src="'+iconUrl+'" /> ';
 				}
 			}
-			text += name+'</h1>';
+			
+			//Object name (its name tag or its type)
+			text += (feature.properties.tags.name != undefined) ? feature.properties.tags.name : name;
+			
+			text += '</h1>';
 			
 			//Link to osm.org object
 			text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+feature.properties.type+'/'+feature.properties.id+'">See this on OSM.org</a></p>';

@@ -13,6 +13,7 @@ Changes history
 * Building and buildingpart/indoor elements sent to back of other objects
 * Several icons added (amenity, shop, barrier, ...)
 * Generic style joker for icons ( ${tag} syntax )
+* Actual name of object shown in pop-up title if defined
 
 7 march 2015
 ------------
