@@ -34,16 +34,23 @@ function isFloat(val) {
 
 /**
  * Parses levels list.
- * @param str The levels as a string (for example "1;5", "1-3", "-1--6" or "-2 to 6")
- * @return The parsed levels as an array, or null if invalid
+ * @param str The levels as a string (for example "1;5", "1,3", "1-3", "-1--6", "from 1 to 42" or "-2 to 6")
+ * @return The parsed levels as a string array, or null if invalid
  */
-function parseLevels(str) {
+function parseLevelsStr(str) {
 	var result = null;
 	
 	//Level values separated by ';'
 	var regex1 = /^-?\d+(?:\.\d+)?(?:;-?\d+(?:\.\d+)?)*$/;
+	
+	//Level values separated by ','
+	var regex2 = /^-?\d+(?:\.\d+)?(?:,-?\d+(?:\.\d+)?)*$/;
+	
 	if(regex1.test(str)) {
 		result = str.split(';');
+	}
+	else if(regex2.test(str)) {
+		result = str.split(',');
 	}
 	//Level intervals
 	else {
@@ -51,25 +58,25 @@ function parseLevels(str) {
 		var min = null;
 		var max = null;
 		
-		//Level values from start to end (example: "-3 to 2")
-		var regex3 = /^-?\d+ to -?\d+$/;
-		
 		//Level values (only integers) in an interval, bounded with '-'
-		var regex2 = /^(-?\d+)-(-?\d+)$/;
+		var regex3 = /^(-?\d+)-(-?\d+)$/;
+		
+		//Level values from start to end (example: "-3 to 2")
+		var regex4 = /^(?:\w+ )?(-?\d+) to (-?\d+)$/;
 		
 		if(regex3.test(str)) {
-			regexResult = str.split(' to ');
-			min = parseInt(regexResult[0]);
-			max = parseInt(regexResult[1]);
+			regexResult = regex3.exec(str);
+			min = parseInt(regexResult[1]);
+			max = parseInt(regexResult[2]);
 		}
-		else if(regex2.test(str)) {
-			regexResult = regex2.exec(str);
+		else if(regex4.test(str)) {
+			regexResult = regex4.exec(str);
 			min = parseInt(regexResult[1]);
 			max = parseInt(regexResult[2]);
 		}
 		
 		//Add values between min and max
-		if(regexResult != null && min != undefined && max != undefined) {
+		if(regexResult != null && min != null && max != null) {
 			result = new Array();
 			
 			//Add intermediate values
@@ -80,6 +87,21 @@ function parseLevels(str) {
 		}
 	}
 	
+	return result;
+}
+
+/**
+ * Parses levels list.
+ * @param str The levels as a string (for example "1;5", "1,3", "1-3", "-1--6", "from 1 to 42" or "-2 to 6")
+ * @return The parsed levels as a float array, or null if invalid
+ */
+function parseLevelsFloat(str) {
+	var result = parseLevelsStr(str);
+	if(result != null) {
+		for(var i in result) {
+			result[i] = parseFloat(result[i]);
+		}
+	}
 	return result;
 }
 
@@ -101,20 +123,4 @@ function centroidPolygon(geom) {
 	centroid[1] = centroid[1] / (geom.coordinates[0].length -1);
 	
 	return centroid;
-}
-
-function addZero(x,n) {
-	if (x.toString().length < n) {
-		x = "0" + x;
-	}
-	return x;
-}
-
-function getTimeMilliseconds() {
-	var d = new Date();
-	var h = addZero(d.getHours(), 2);
-	var m = addZero(d.getMinutes(), 2);
-	var s = addZero(d.getSeconds(), 2);
-	var ms = addZero(d.getMilliseconds(), 3);
-	return h + ":" + m + ":" + s + ":" + ms;
 }

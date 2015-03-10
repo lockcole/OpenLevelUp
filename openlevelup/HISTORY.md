@@ -1,6 +1,8 @@
 Changes history
 ===============
 
+10 march 2015
+-------------
 * Better buildingpart=verticalpassage handling and rendering
 * Pop-up shows image if corresponding tag defined
 * Link tags (image, website, contact:website, url) are shown as HTML links in pop-ups

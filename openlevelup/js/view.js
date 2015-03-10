@@ -496,16 +496,17 @@ Web: function(ctrl) {
 			|| feature.properties.tags["buildingpart:verticalpassage:floorrange"] != undefined) {
 
 			if(feature.properties.tags.level != undefined) {
-				onLevels = parseLevels(feature.properties.tags.level);
+				onLevels = parseLevelsFloat(feature.properties.tags.level);
 			}
 			else if(feature.properties.tags.repeat_on != undefined) {
-				onLevels = parseLevels(feature.properties.tags.repeat_on);
+				onLevels = parseLevelsFloat(feature.properties.tags.repeat_on);
 			}
 			else {
-				onLevels = parseLevels(feature.properties.tags["buildingpart:verticalpassage:floorrange"]);
+				onLevels = parseLevelsFloat(feature.properties.tags["buildingpart:verticalpassage:floorrange"]);
 			}
 			
-			addObject = onLevels.indexOf($("#level").val()) >= 0
+			addObject = onLevels != null
+					&& onLevels.indexOf(_self.getCurrentLevel()) >= 0
 					&& (_self.showTranscendent() || onLevels.length == 1)
 					&& (_self.showLegacy() || feature.properties.tags.buildingpart == undefined);
 		}
@@ -523,12 +524,12 @@ Web: function(ctrl) {
 			
 			//Display unrendered objects
 			/*if(!addObject) {
-			*	console.log("Unrendered object:");
-			*	console.log(feature);
+				console.log("Unrendered object:");
+				console.log(feature);
 			}*/
 		}
 
-		return addObject; // || (onLevels != null && onLevels.indexOf($("#level").val()) >= 0 && (_self.showTranscendent() || onLevels.length == 1));
+		return addObject;
 	}
 	
 	/**

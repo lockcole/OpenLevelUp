@@ -188,7 +188,7 @@ Ctrl: function() {
 			_view.populateSelectLevels(_mapdata.getLevels());
 			
 			//Test how many levels are available
-			if(_mapdata.getLevels().length > 0) {
+			if(_mapdata.getLevels() != null && _mapdata.getLevels().length > 0) {
 				//If we have to use the level parameter from the URL
 				var levelUrl = parseFloat(_view.getUrlParameter("level"));
 				if(_useLevelURL && _mapdata.getLevels().indexOf(levelUrl) >= 0) {

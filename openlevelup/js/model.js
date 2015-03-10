@@ -160,7 +160,7 @@ MapData: function(ctrl) {
 			//Parse level value (could be an integer, a float, a list of those, ...)
 			if(feature.properties['tags']['level'] != undefined) {
 				//Separate different values
-				var currentLevel = parseLevels(feature.properties['tags']['level']);
+				var currentLevel = parseLevelsStr(feature.properties['tags']['level']);
 				
 				//Add each value in list
 				if(currentLevel != null) {
@@ -243,7 +243,7 @@ MapData: function(ctrl) {
 			//Parse level value (could be an integer, a float, a list of those, ...)
 			if(feature.properties['tags']['level'] != undefined) {
 				//Separate different values
-				var currentLevel = parseLevels(feature.properties['tags']['level']);
+				var currentLevel = parseLevelsStr(feature.properties['tags']['level']);
 				
 				//Add each value in list
 				if(currentLevel != null) {
