@@ -11,6 +11,8 @@ Changes history
 * Rendering of transport platforms
 * OSM link to current object in pop-ups
 * Building and buildingpart/indoor elements sent to back of other objects
+* Several icons added (amenity, shop, barrier, ...)
+* Generic style joker for icons ( ${tag} syntax )
 
 7 march 2015
 ------------

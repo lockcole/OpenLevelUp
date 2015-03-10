@@ -104,6 +104,9 @@ Web: function(ctrl) {
 	/** The object that should be put in back of others **/
 	var _objectLayered = null;
 	
+	/** Already checked icons URL **/
+	var _checkedUrl = new Object();
+	
 	/** The application controller **/
 	var _ctrl = ctrl;
 	
@@ -429,7 +432,14 @@ Web: function(ctrl) {
 		//Create popup if necessary
 		if(styleRules.popup == undefined || styleRules.popup == "yes") {
 			var text = '<h1 class="popup">';
-			if(styleRules.icon != undefined) { text += '<img src="'+styleRules.icon+'" /> '; }
+			
+			//Add icon in title
+			if(styleRules.icon != undefined) {
+				var iconUrl = _getIconUrl(feature, styleRules.icon);
+				if(iconUrl != null) {
+					text += '<img src="'+iconUrl+'" /> ';
+				}
+			}
 			text += name+'</h1>';
 			
 			//Link to osm.org object
@@ -569,14 +579,8 @@ Web: function(ctrl) {
 		
 		//This add a marker if a polygon has its "icon" property defined
 		if(result.icon != undefined && feature.geometry.type == "Polygon") {
-			var myIcon = L.icon({
-				iconUrl: result.icon,
-				iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
-				iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
-				popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
-			});
 			var centroid = centroidPolygon(feature.geometry);
-			var marker = L.marker(L.latLng(centroid[1], centroid[0]), {icon: myIcon, zIndexOffset: 1000});
+			var marker = _createMarker(L.latLng(centroid[1], centroid[0]), feature, result.icon);
 			_markersPolygons[feature.properties.type+feature.properties.id] = marker;
 		}
 		
@@ -630,13 +634,7 @@ Web: function(ctrl) {
 		if(Object.keys(style).length > 0) {
 			//Custom icon
 			if(style.icon != undefined) {
-				var myIcon = L.icon({
-					iconUrl: style.icon,
-					iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
-					iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
-					popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
-				});
-				result = L.marker(latlng, {icon: myIcon});
+				result = _createMarker(latlng, feature, style.icon);
 			}
 			else {
 				result = L.circleMarker(latlng, style);
@@ -645,13 +643,59 @@ Web: function(ctrl) {
 		//Else, default style
 		else {
 			//Icon definition
-			var myIcon = L.icon({
-				iconUrl: 'img/default.svg',
-				iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
-				iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
-				popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
-			});
-			result = L.marker(latlng, {icon: myIcon});
+			result = _createMarker(latlng, feature, null);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Creates a marker
+	 * @param latlng The latitude and longitude of the marker
+	 * @param feature The feature which will be represented
+	 * @param iconStyle The icon URL from JSON style
+	 * @return The leaflet marker
+	 */
+	function _createMarker(latlng, feature, iconStyle) {
+		var iconUrl = 'img/default.svg';
+		
+		if(iconStyle != null || iconStyle != '') {
+			var tmpUrl = _getIconUrl(feature, iconStyle);
+			if(tmpUrl != null) { iconUrl = tmpUrl; }
+		}
+		
+		var myIcon = L.icon({
+			iconUrl: iconUrl,
+			iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
+			iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
+			popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
+		});
+		return L.marker(latlng, {icon: myIcon});
+	}
+	
+	/**
+	 * Get the complete icon name, in particular when style contains a tag variable.
+	 * @param feature The GeoJSON feature
+	 * @param iconStyle The icon string from JSON style
+	 * @return The icon URL
+	 */
+	function _getIconUrl(feature, iconStyle) {
+		var result = iconStyle;
+		
+		var regex = /\$\{(\w+)\}/;
+		if(regex.test(iconStyle)) {
+			//Replace tag name with actual tag value
+			var tagName = regex.exec(iconStyle)[1];
+			result = iconStyle.replace(regex, feature.properties.tags[tagName]);
+			
+			//Check if icon file exists (to avoid exotic values)
+			if(Object.keys(_checkedUrl).indexOf(result) < 0) {
+				_checkedUrl[result] = fileExists(result);
+			}
+			
+			if(!_checkedUrl[result]) {
+				result = null;
+			}
 		}
 		
 		return result;
