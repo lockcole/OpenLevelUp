@@ -351,7 +351,9 @@ Web: function(ctrl) {
 
 					for(var i in objectLayeredKeys) {
 						for(var j in _objectLayered[objectLayeredKeys[i]]) {
-							_objectLayered[objectLayeredKeys[i]][j].bringToBack();
+							if(_objectLayered[objectLayeredKeys[i]][j] instanceof L.Path) {
+								_objectLayered[objectLayeredKeys[i]][j].bringToBack();
+							}
 						}
 					}
 				}
