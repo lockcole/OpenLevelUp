@@ -134,14 +134,14 @@ Ctrl: function() {
 		
 		//Check if zoom is high enough to download data
 		if(_view.getMap().getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
+			_view.setLoading(true);
+			
 			//High zoom data download
 			if(_view.getMap().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
 				_oldLevel = _view.getCurrentLevel();
 				
 				//Download data only if new BBox isn't contained in previous one
 				if(force || _mapdata.getBBox() == null || !_mapdata.getBBox().contains(_view.getMap().getBounds())) {
-					_view.setLoading(true);
-					
 					//Download data
 					_mapdata.cleanData();
 					_self.downloadData("data", _mapdata.handleOapiResponse);
@@ -160,8 +160,6 @@ Ctrl: function() {
 					|| _mapdata.getClusterBBox() == null
 					|| !_mapdata.getClusterBBox().contains(_view.getMap().getBounds())) {
 
-					_view.setLoading(true);
-					
 					//Download data
 					_mapdata.cleanClusterData();
 					_mapdata.setClusterLegacy(_view.showLegacy());
@@ -261,7 +259,7 @@ Ctrl: function() {
 		else {
 			_mapdata.setBBox(_view.getMap().getBounds());
 			//oapiRequest = '[out:json][timeout:25];(node["indoor"]('+bounds+');way["indoor"]('+bounds+');node["door"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+'););out body;>;out skel qt;';
-			oapiRequest = '[out:json][timeout:25];(node["door"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+');node["repeat_on"]('+bounds+');way["repeat_on"]('+bounds+');way["min_level"]('+bounds+');way["max_level"]('+bounds+'););out body;>;out skel qt;';
+			oapiRequest = '[out:json][timeout:25];(node["door"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+');node["repeat_on"]('+bounds+');way["repeat_on"]('+bounds+');way["min_level"]('+bounds+');way["max_level"]('+bounds+');way["buildingpart"]('+bounds+'));out body;>;out skel qt;';
 		}
 
 		//Download data

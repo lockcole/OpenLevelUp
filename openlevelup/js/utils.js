@@ -34,7 +34,7 @@ function isFloat(val) {
 
 /**
  * Parses levels list.
- * @param str The levels as a string (for example "1;5", "1-3" or "-1--6")
+ * @param str The levels as a string (for example "1;5", "1-3", "-1--6" or "-2 to 6")
  * @return The parsed levels as an array, or null if invalid
  */
 function parseLevels(str) {
@@ -45,13 +45,31 @@ function parseLevels(str) {
 	if(regex1.test(str)) {
 		result = str.split(';');
 	}
+	//Level intervals
 	else {
+		var regexResult = null;
+		var min = null;
+		var max = null;
+		
+		//Level values from start to end (example: "-3 to 2")
+		var regex3 = /^-?\d+ to -?\d+$/;
+		
 		//Level values (only integers) in an interval, bounded with '-'
 		var regex2 = /^(-?\d+)-(-?\d+)$/;
-		var regex2result = regex2.exec(str);
-		if(regex2result != null) {
-			var min = parseInt(regex2result[1]);
-			var max = parseInt(regex2result[2]);
+		
+		if(regex3.test(str)) {
+			regexResult = str.split(' to ');
+			min = parseInt(regexResult[0]);
+			max = parseInt(regexResult[1]);
+		}
+		else if(regex2.test(str)) {
+			regexResult = regex2.exec(str);
+			min = parseInt(regexResult[1]);
+			max = parseInt(regexResult[2]);
+		}
+		
+		//Add values between min and max
+		if(regexResult != null && min != undefined && max != undefined) {
 			result = new Array();
 			
 			//Add intermediate values
@@ -83,4 +101,20 @@ function centroidPolygon(geom) {
 	centroid[1] = centroid[1] / (geom.coordinates[0].length -1);
 	
 	return centroid;
+}
+
+function addZero(x,n) {
+	if (x.toString().length < n) {
+		x = "0" + x;
+	}
+	return x;
+}
+
+function getTimeMilliseconds() {
+	var d = new Date();
+	var h = addZero(d.getHours(), 2);
+	var m = addZero(d.getMinutes(), 2);
+	var s = addZero(d.getSeconds(), 2);
+	var ms = addZero(d.getMilliseconds(), 3);
+	return h + ":" + m + ":" + s + ":" + ms;
 }

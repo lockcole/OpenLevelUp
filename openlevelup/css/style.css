@@ -251,6 +251,28 @@ h1.popup {
 	text-align: center;
 }
 
+h1.popup img {
+	width: 24px;
+	vertical-align: middle;
+}
+
 h2.popup {
 	font-size: 100%;
+}
+
+.leaflet-popup-content p.popup-txt {
+	margin: 0;
+}
+
+p.popup-txt.centered {
+	text-align: center;
+}
+
+.popup-img {
+	position: relative;
+}
+
+.popup-img img {
+	width: 100%;
+	display: block;
 }

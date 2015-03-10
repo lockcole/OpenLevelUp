@@ -1,6 +1,15 @@
 Changes history
 ===============
 
+* Better buildingpart=verticalpassage handling and rendering
+* Pop-up shows image if corresponding tag defined
+* Link tags (image, website, contact:website, url) are shown as HTML links in pop-ups
+* Object icon shown in pop-up titles
+* French cadastre TMS added
+* Rendering of transport platforms
+* OSM link to current object in pop-ups
+* Building and buildingpart/indoor elements sent to back of other objects
+
 7 march 2015
 ------------
 * Link to openstreetmap.org added

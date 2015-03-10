@@ -28,11 +28,17 @@ OLvlUp.view = {
 /** The minimal zoom to display cluster data on map, should be less than DATA_MIN_ZOOM **/
 CLUSTER_MIN_ZOOM: 5,
 
+/** The maximal zoom to display building general information (minimal zoom is DATA_MIN_ZOOM) **/
+BUILDING_MAX_ZOOM: 0,
+
 /** The minimal zoom to display actual data on map **/
 DATA_MIN_ZOOM: 17,
 
 /** The minimal tiles opacity (between 0 and 1) **/
-TILES_MIN_OPACITY: 0.2,
+TILES_MIN_OPACITY: 0.1,
+
+/** The maximal tiles opacity (between 0 and 1) **/
+TILES_MAX_OPACITY: 0.3,
 
 /** The icon size for objects **/
 ICON_SIZE: 24,
@@ -43,7 +49,7 @@ TILE_LAYERS:
 		OSM: {
 			name: "OpenStreetMap",
 			URL: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-			attribution: '',
+			attribution: 'Tiles <a href="http://openstreetmap.org/">OSM</a>',
 			minZoom: 1,
 			maxZoom: 19
 		},
@@ -58,6 +64,13 @@ TILE_LAYERS:
 			name: "Stamen Toner",
 			URL: 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png',
 			attribution: 'Tiles <a href="http://maps.stamen.com/">Stamen Toner</a>',
+			minZoom: 1,
+			maxZoom: 20
+		},
+		CADASTRE: {
+			name: "Cadastre FR",
+			URL: "http://tms.cadastre.openstreetmap.fr/*/tout/{z}/{x}/{y}.png",
+			attribution: 'Cadastre (DGFiP)',
 			minZoom: 1,
 			maxZoom: 20
 		}
@@ -87,6 +100,9 @@ Web: function(ctrl) {
 	
 	/** The current GeoJSON data layer on map **/
 	var _dataLayer = null;
+	
+	/** The object that should be put in back of others **/
+	var _objectLayered = null;
 	
 	/** The application controller **/
 	var _ctrl = ctrl;
@@ -281,14 +297,23 @@ Web: function(ctrl) {
 			_map.removeLayer(_markersLayer);
 			_markersLayer = null;
 		}
+		if(_objectLayered != null) {
+			_objectLayered = null;
+		}
 		
 		//Recreate data layer and add it to map
 		//The shown data depends of current zoom level
 		if(_map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
+			_objectLayered = new Object();
 			_markersPolygons = new Object();
 			_dataLayer = L.geoJson(
 				mapData.getData(),
-				{ filter: _filterElements, style: _styleElements, pointToLayer: _styleNodes, onEachFeature: _processElements }
+				{
+					filter: (_map.getZoom() <= OLvlUp.view.BUILDING_MAX_ZOOM) ? _filterBuildingElements : _filterElements,
+					style: _styleElements,
+					pointToLayer: _styleNodes,
+					onEachFeature: _processElements
+				}
 			);
 			
 			//Add eventual polygon icons
@@ -312,6 +337,22 @@ Web: function(ctrl) {
 		//Add data layer to map
 		if(_dataLayer != null) {
 			_dataLayer.addTo(_map);
+			
+			//Rearrange object depending of their layer value
+			if(_objectLayered != null) {
+				//Arrange objects regarding to layers in style
+				var objectLayeredKeys = Object.keys(_objectLayered);
+
+				if(objectLayeredKeys.length > 0) {
+					objectLayeredKeys.sort(function (a,b) { return parseFloat(b)-parseFloat(a);});
+
+					for(var i in objectLayeredKeys) {
+						for(var j in _objectLayered[objectLayeredKeys[i]]) {
+							_objectLayered[objectLayeredKeys[i]][j].bringToBack();
+						}
+					}
+				}
+			}
 		}
 		
 		_changeTilesOpacity();
@@ -340,12 +381,15 @@ Web: function(ctrl) {
 			var idNeg = levelsNegative.indexOf(_self.getCurrentLevel());
 			var idPos = levelsPositive.indexOf(_self.getCurrentLevel());
 			if(idNeg >= 0) {
-				var coef = idNeg / levelsNegative.length * (1 - OLvlUp.view.TILES_MIN_OPACITY);
+				var coef = idNeg / levelsNegative.length * (OLvlUp.view.TILES_MAX_OPACITY - OLvlUp.view.TILES_MIN_OPACITY);
 				newOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
 			}
 			else if(idPos >= 0) {
-				var coef = (levelsPositive.length - 1 - idPos) / levelsPositive.length * (1 - OLvlUp.view.TILES_MIN_OPACITY);
+				var coef = (levelsPositive.length - 1 - idPos) / levelsPositive.length * (OLvlUp.view.TILES_MAX_OPACITY - OLvlUp.view.TILES_MIN_OPACITY);
 				newOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
+			}
+			else {
+				newOpacity = OLvlUp.view.TILES_MAX_OPACITY;
 			}
 		}
 		
@@ -367,7 +411,7 @@ Web: function(ctrl) {
 	*/
 	function _processElements(feature, layer) {
 		var name = "Object";
-		var popup = "yes";
+		var styleRules = new Array();
 		
 		//Find object info, looking in style rules
 		for(var i in STYLE.styles) {
@@ -376,20 +420,47 @@ Web: function(ctrl) {
 			//If applyable, we update the result style
 			if(_isStyleApplyable(feature, style)) {
 				name = style.name;
-				if(style.style.popup != undefined) {
-					popup = style.style.popup;
+				for(var param in style.style) {
+					styleRules[param] = style.style[param];
 				}
 			}
 		}
 		
 		//Create popup if necessary
-		if(popup == "yes") {
-			var text = '<h1 class="popup">'+name+'</h1>';
+		if(styleRules.popup == undefined || styleRules.popup == "yes") {
+			var text = '<h1 class="popup">';
+			if(styleRules.icon != undefined) { text += '<img src="'+styleRules.icon+'" /> '; }
+			text += name+'</h1>';
+			
+			//Link to osm.org object
+			text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+feature.properties.type+'/'+feature.properties.id+'">See this on OSM.org</a></p>';
 			
 			//List all tags
-			text += '<h2 class="popup">Tags</h2>';
+			text += '<h2 class="popup">Tags</h2><p class="popup-txt">';
 			for(i in feature.properties.tags) {
-				text += i+" = "+feature.properties.tags[i]+"<br />";
+				//Render specific tags
+				//URLs
+				var urlTags = ["image", "website", "contact:website", "url"];
+				if(urlTags.indexOf(i) >= 0) {
+					text += i+' = <a href="'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
+				}
+				//Wikimedia commons
+				else if(i == "wikimedia_commons") {
+					text += i+' = <a href="https://commons.wikimedia.org/wiki/'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
+				}
+				else {
+					text += i+" = "+feature.properties.tags[i];
+				}
+				text += "<br />";
+			}
+			
+			text += "</p>";
+			
+			//Image rendering
+			if(feature.properties.tags.image != undefined) {
+				var url = feature.properties.tags.image;
+				
+				text += '<p class="popup-img"><a href="'+url+'"><img src="'+url+'" alt="Image of this object" /></a></p>';
 			}
 			
 			//And add popup to layer
@@ -397,6 +468,15 @@ Web: function(ctrl) {
 			if(_markersPolygons[feature.properties.type+feature.properties.id] != undefined) {
 				_markersPolygons[feature.properties.type+feature.properties.id].bindPopup(text);
 			}
+		}
+		
+		//Send this object to back of other layers
+		styleRules.layer = parseFloat(styleRules.layer);
+		if(!isNaN(styleRules.layer)) {
+			if(_objectLayered[styleRules.layer] == undefined) {
+				_objectLayered[styleRules.layer] = new Array();
+			}
+			_objectLayered[styleRules.layer].push(layer);
 		}
 	}
 
@@ -410,11 +490,21 @@ Web: function(ctrl) {
 		var onLevels = null;
 		var addObject = false;
 		
-		//Consider level tags
-		if(feature.properties.tags.level != undefined || feature.properties.tags.repeat_on != undefined) {
-			onLevels = (feature.properties.tags.repeat_on != undefined) ?
-					parseLevels(feature.properties.tags.repeat_on)
-					: parseLevels(feature.properties.tags.level);
+		//Consider level-related tags
+		if(feature.properties.tags.level != undefined
+			|| feature.properties.tags.repeat_on != undefined
+			|| feature.properties.tags["buildingpart:verticalpassage:floorrange"] != undefined) {
+
+			if(feature.properties.tags.level != undefined) {
+				onLevels = parseLevels(feature.properties.tags.level);
+			}
+			else if(feature.properties.tags.repeat_on != undefined) {
+				onLevels = parseLevels(feature.properties.tags.repeat_on);
+			}
+			else {
+				onLevels = parseLevels(feature.properties.tags["buildingpart:verticalpassage:floorrange"]);
+			}
+			
 			addObject = onLevels.indexOf($("#level").val()) >= 0
 					&& (_self.showTranscendent() || onLevels.length == 1)
 					&& (_self.showLegacy() || feature.properties.tags.buildingpart == undefined);
@@ -439,6 +529,16 @@ Web: function(ctrl) {
 		}
 
 		return addObject; // || (onLevels != null && onLevels.indexOf($("#level").val()) >= 0 && (_self.showTranscendent() || onLevels.length == 1));
+	}
+	
+	/**
+	 * Filter building contained in GeoJSON elements.
+	 * @param feature The GeoJSON feature to analyse
+	 * @param layer The leaflet layer
+	 * @return True if should be shown
+	 */
+	function _filterBuildingElements(feature, layer) {
+		return feature.properties.tags.building != undefined;
 	}
 
 	/**
