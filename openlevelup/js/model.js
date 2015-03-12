@@ -291,8 +291,6 @@ MapData: function(ctrl) {
 						}
 					}
 				}
-			} else {
-				console.log("Invalid level: "+feature.properties['tags']['level']);
 			}
 		}
 		return levelsAsArray;

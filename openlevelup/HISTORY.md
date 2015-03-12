@@ -1,6 +1,8 @@
 Changes history
 ===============
 
+12 march 2015
+-------------
 * Emergency stairs/exits, hedges and pillars are now rendered
 * Entrances and multipolygons objects are now properly requested in Overpass API query
 * Type=level relations handled, better level management
