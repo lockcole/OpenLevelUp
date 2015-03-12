@@ -174,6 +174,13 @@ Web: function(ctrl) {
 	this.showLegacy = function() {
 		return $("#show-legacy").prop("checked");
 	}
+	
+	/**
+	 * @return Must we show unrendered objects ?
+	 */
+	this.showUnrendered = function() {
+		return $("#show-unrendered").prop("checked");
+	}
 
 //MODIFIERS
 	/**
@@ -274,6 +281,11 @@ Web: function(ctrl) {
 			$("#show-transcendent").prop("checked", transcend == 1);
 		}
 		
+		var unrendered = parseInt(_self.getUrlParameter("unrendered"));
+		if(unrendered != null && (unrendered == 0 || unrendered == 1)) {
+			$("#show-unrendered").prop("checked", unrendered == 1);
+		}
+		
 		//Add triggers on HTML elements
 		$("#level").change(controller.onMapChange);
 		$("#levelUp").click(controller.levelUp);
@@ -282,7 +294,9 @@ Web: function(ctrl) {
 		$("#about-close").click(function() { $("#op-about").hide(); });
 		$("#show-transcendent").change(controller.onMapChange);
 		$("#show-legacy").change(controller.onMapLegacyChange);
+		$("#show-unrendered").change(controller.onMapChange);
 		$("#export-link").click(controller.onExportLevel);
+		$("#export-link-img").click(controller.onExportLevelImage);
 		_map.on("baselayerchange", controller.onMapChange);
 	}
 	
@@ -415,21 +429,8 @@ Web: function(ctrl) {
 	* @param layer The leaflet layer
 	*/
 	function _processElements(feature, layer) {
-		var name = "Object";
-		var styleRules = new Array();
-		
-		//Find object info, looking in style rules
-		for(var i in STYLE.styles) {
-			var style = STYLE.styles[i];
-			
-			//If applyable, we update the result style
-			if(_isStyleApplyable(feature, style)) {
-				name = style.name;
-				for(var param in style.style) {
-					styleRules[param] = style.style[param];
-				}
-			}
-		}
+		var name = feature.properties.name;
+		var styleRules = feature.properties.style;
 		
 		//Create popup if necessary
 		if(styleRules.popup == undefined || styleRules.popup == "yes") {
@@ -487,12 +488,14 @@ Web: function(ctrl) {
 		}
 		
 		//Send this object to back of other layers
-		styleRules.layer = parseFloat(styleRules.layer);
-		if(!isNaN(styleRules.layer)) {
-			if(_objectLayered[styleRules.layer] == undefined) {
-				_objectLayered[styleRules.layer] = new Array();
+		if(styleRules.layer != undefined) {
+			styleRules.layer = parseFloat(styleRules.layer);
+			if(!isNaN(styleRules.layer)) {
+				if(_objectLayered[styleRules.layer] == undefined) {
+					_objectLayered[styleRules.layer] = new Array();
+				}
+				_objectLayered[styleRules.layer].push(layer);
 			}
-			_objectLayered[styleRules.layer].push(layer);
 		}
 	}
 
@@ -503,35 +506,23 @@ Web: function(ctrl) {
 	* @return True if should be shown
 	*/
 	function _filterElements(feature, layer) {
-		var onLevels = null;
 		var addObject = false;
 		
 		//Consider level-related tags
-		if(feature.properties.tags.level != undefined
-			|| feature.properties.tags.repeat_on != undefined
-			|| feature.properties.tags["buildingpart:verticalpassage:floorrange"] != undefined) {
-
-			if(feature.properties.tags.level != undefined) {
-				onLevels = parseLevelsFloat(feature.properties.tags.level);
-			}
-			else if(feature.properties.tags.repeat_on != undefined) {
-				onLevels = parseLevelsFloat(feature.properties.tags.repeat_on);
-			}
-			else {
-				onLevels = parseLevelsFloat(feature.properties.tags["buildingpart:verticalpassage:floorrange"]);
-			}
-			
-			addObject = onLevels != null
-					&& onLevels.indexOf(_self.getCurrentLevel()) >= 0
-					&& (_self.showTranscendent() || onLevels.length == 1)
-					&& (_self.showLegacy() || feature.properties.tags.buildingpart == undefined);
+		if(feature.properties.levels != undefined) {
+			addObject = Object.keys(feature.properties.tags).length > 0
+					&& (Object.keys(feature.properties.tags).length > 1 || feature.properties.tags.area == undefined)
+					&& feature.properties.levels.indexOf(_self.getCurrentLevel().toString()) >= 0
+					&& (_self.showTranscendent() || feature.properties.levels.length == 1)
+					&& (_self.showLegacy() || feature.properties.tags.buildingpart == undefined)
+					&& (_self.showUnrendered() || Object.keys(_getStyle(feature)).length > 0);
 		}
 		//Consider objects without levels but connected to door elements
 		else {
 			//Building with min and max level
 			addObject = feature.properties.tags.building != undefined
-			&& feature.properties.tags.min_level != undefined
-			&& feature.properties.tags.max_level != undefined;
+					&& feature.properties.tags.min_level != undefined
+					&& feature.properties.tags.max_level != undefined;
 			
 			//Elevator
 			if(_self.showTranscendent()) {
@@ -559,35 +550,62 @@ Web: function(ctrl) {
 	}
 
 	/**
-	* Returns the appropriate style for a given OSM element (depending of its tags)
+	* Applies the appropriate style on the given feature.
 	* @param feature The GeoJSON element to decorate
 	* @return The style
 	*/
 	function _styleElements(feature) {
-		var result = new Array();
-		
-		if(STYLE != undefined) {
-			//Find potential styles depending on tags
-			for(var i in STYLE.styles) {
-				var style = STYLE.styles[i];
-				
-				//If applyable, we update the result style
-				if(_isStyleApplyable(feature, style)) {
-					for(var param in style.style) {
-						result[param] = style.style[param];
-					}
-				}
-			}
-		}
-		else {
-			controller.getView().displayMessage("Error while loading style file", "error");
-		}
+		var result = _getStyle(feature);
 		
 		//This add a marker if a polygon has its "icon" property defined
 		if(result.icon != undefined && feature.geometry.type == "Polygon") {
 			var centroid = centroidPolygon(feature.geometry);
 			var marker = _createMarker(L.latLng(centroid[1], centroid[0]), feature, result.icon);
 			_markersPolygons[feature.properties.type+feature.properties.id] = marker;
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Returns the appropriate style for a given OSM element (depending of its tags)
+	 * @param feature The GeoJSON feature
+	 * @return The appropriate style
+	 */
+	function _getStyle(feature) {
+		var result = new Object();
+		
+		//Process style
+		if(feature.properties.style == undefined) {
+			if(STYLE != undefined) {
+				var name = "Object";
+				
+				//Find potential styles depending on tags
+				for(var i in STYLE.styles) {
+					var style = STYLE.styles[i];
+					
+					//If applyable, we update the result style
+					if(_isStyleApplyable(feature, style)) {
+						name = style.name;
+						for(var param in style.style) {
+							result[param] = style.style[param];
+						}
+					}
+				}
+				
+				//Change icon=no into undefined
+				if(result.icon == "no") { result.icon = undefined; }
+				
+				feature.properties.style = result;
+				feature.properties.name = name;
+			}
+			else {
+				controller.getView().displayMessage("Error while loading style file", "error");
+			}
+		}
+		//If already processed, retrieve style
+		else {
+			result = feature.properties.style;
 		}
 		
 		return result;
@@ -634,7 +652,7 @@ Web: function(ctrl) {
 		var result;
 		
 		//Find the appropriate icon, depending of tags
-		var style = _styleElements(feature);
+		var style = (feature.properties.style == undefined) ? _styleElements(feature) : feature.properties.style;
 		
 		//If defined style, we use it
 		if(Object.keys(style).length > 0) {
@@ -770,11 +788,13 @@ Web: function(ctrl) {
 			$('#level').append(option);
 			$("#level").prop("disabled", false);
 			$("#show-transcendent").prop("disabled", false);
+			$("#show-unrendered").prop("disabled", false);
 		}
 		//If not, we disable the select element
 		else {
 			$("#level").prop("disabled", true);
 			$("#show-transcendent").prop("disabled", true);
+			$("#show-unrendered").prop("disabled", true);
 		}
 	}
 
@@ -821,6 +841,7 @@ Web: function(ctrl) {
 		
 		link += "&transcend="+((_self.showTranscendent()) ? "1" : "0");
 		link += "&legacy="+((_self.showLegacy()) ? "1" : "0");
+		link += "&unrendered="+((_self.showUnrendered()) ? "1" : "0");
 		
 		$("#permalink").attr('href', link);
 		

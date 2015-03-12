@@ -1,6 +1,13 @@
 Changes history
 ===============
 
+* Emergency stairs/exits, hedges and pillars are now rendered
+* Entrances and multipolygons objects are now properly requested in Overpass API query
+* Type=level relations handled, better level management
+* Better style management (processed a single time only)
+* "How ?" label added under title
+* Setting for hiding unrendered objects added
+
 10 march 2015
 -------------
 * Better buildingpart=verticalpassage handling and rendering

@@ -119,6 +119,18 @@ a:hover {
 	margin-bottom: 0;
 }
 
+#side-panel a.help {
+	font-weight: normal;
+	cursor: help;
+	text-decoration: underline;
+	text-decoration-style: dotted;
+	color: #eee;
+}
+
+#side-panel a.help:hover {
+	color: #ccc;
+}
+
 #header {
 	text-align: center;
 }
@@ -159,10 +171,13 @@ a:hover {
 	color: #FF2A2A;
 }
 
-#settings {
+#settings, #export {
 	border-bottom: 1px solid #2A75FF;
-	border-top: 1px solid #2A75FF;
 	margin: 10px 0;
+}
+
+#settings {
+	border-top: 1px solid #2A75FF;
 }
 
 #settings a.button {
@@ -179,23 +194,35 @@ a:hover {
 	font-weight: bold;
 }
 
-#settings a.help {
-	font-weight: normal;
-	cursor: help;
-	text-decoration: underline;
-	text-decoration-style: dotted;
-	color: #eee;
-}
-
-#settings a.help:hover {
-	color: #ccc;
-}
-
 #settings ul {
 	list-style: none;
 	list-style-type: none;
 	padding-left: 10px;
 	text-align: left;
+}
+
+#export {
+	padding-bottom: 10px;
+}
+
+#export * {
+	margin: 0;
+	padding: 0;
+}
+
+#export h2 {
+	font-size: 110%;
+}
+
+#export a {
+	font-weight: normal;
+	text-decoration: underline;
+	text-decoration-style: dotted;
+	color: #eee;
+}
+
+#export a:hover {
+	color: #ccc;
 }
 
 #footer {

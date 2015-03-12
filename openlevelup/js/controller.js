@@ -240,6 +240,13 @@ Ctrl: function() {
 	}
 	
 	/**
+	 * This function is called when user wants to export the currently shown level as an image
+	 */
+	this.onExportLevelImage = function() {
+		//TODO
+	}
+	
+	/**
 	 * Downloads data from Overpass API
 	 * Then calls another function to process it.
 	 * @param type The kind of request ("data" or "cluster")
@@ -258,8 +265,7 @@ Ctrl: function() {
 		}
 		else {
 			_mapdata.setBBox(_view.getMap().getBounds());
-			//oapiRequest = '[out:json][timeout:25];(node["indoor"]('+bounds+');way["indoor"]('+bounds+');node["door"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+'););out body;>;out skel qt;';
-			oapiRequest = '[out:json][timeout:25];(node["door"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+');node["repeat_on"]('+bounds+');way["repeat_on"]('+bounds+');way["min_level"]('+bounds+');way["max_level"]('+bounds+');way["buildingpart"]('+bounds+'));out body;>;out skel qt;';
+			oapiRequest = '[out:json][timeout:25];(node["door"]('+bounds+');<;>;node["entrance"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+');relation["type"="multipolygon"]["level"]('+bounds+');node["repeat_on"]('+bounds+');way["repeat_on"]('+bounds+');way["min_level"]('+bounds+');way["max_level"]('+bounds+');relation["type"="level"]('+bounds+'));out body;>;out skel qt;';
 		}
 
 		//Download data

@@ -17,10 +17,31 @@
 		},
 		{
 			"type": "Style",
+			"name": "Path",
+			"description": "Highways (default)",
+			"onTags": [ { "highway": "*" } ],
+			"style": { "color": "#F98072", "opacity": 0.2 }
+		},
+		{
+			"type": "Style",
 			"name": "Area",
 			"description": "Indoor areas ('OR' example for values)",
 			"onTags": [ { "indoor": "area|corridor" }, { "highway": "pedestrian|footway", "area": "yes" }, { "buildingpart": "corridor|hall" } ],
 			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": "-1" }
+		},
+		{
+			"type": "Style",
+			"name": "Grass",
+			"description": "Grass landuse",
+			"onTags": [ { "landuse": "grass" } ],
+			"style": { "opacity": 0, "weight": 0, "fillColor": "#CFECA8", "fillOpacity": 1, "layer": "-1" }
+		},
+		{
+			"type": "Style",
+			"name": "Historic",
+			"description": "Historic element",
+			"onTags": [ { "historic": "yes" } ],
+			"style": { "color": "#C0B0A2", "opacity": 0.5, "weight": 0.5, "fillColor": "#C0B0A2", "fillOpacity": 0.5, "layer": "-1" }
 		},
 		{
 			"type": "Style",
@@ -49,6 +70,13 @@
 			"description": "Door=sliding nodes",
 			"onTags": [ { "door": "sliding" } ],
 			"style": { "icon": "img/door_sliding.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Emergency exit",
+			"description": "Emergency exit",
+			"onTags": [ { "entrance": "emergency" } ],
+			"style": { "icon": "img/emergency_door.svg" }
 		},
 		{
 			"type": "Style",
@@ -129,13 +157,6 @@
 		},
 		{
 			"type": "Style",
-			"name": "Path",
-			"description": "Highways (default)",
-			"onTags": [ { "highway": "*" } ],
-			"style": { "color": "#F98072", "opacity": 1 }
-		},
-		{
-			"type": "Style",
 			"name": "Bus stop",
 			"description": "Bus stop",
 			"onTags": [ { "highway": "bus_stop" } ],
@@ -178,6 +199,13 @@
 		},
 		{
 			"type": "Style",
+			"name": "Emergency stairs",
+			"description": "Stairs for emergency only (as polygons)",
+			"onTags": [ { "buildingpart": "verticalpassage", "access": "emergency" } ],
+			"style": { "color": "#009262", "fillColor": "#C0FFCB", "icon": "img/Emergency_stairs.svg" }
+		},
+		{
+			"type": "Style",
 			"name": "Subway",
 			"description": "Subway rails",
 			"onTags": [ { "railway": "subway" } ],
@@ -188,7 +216,21 @@
 			"name": "Fence",
 			"description": "Fence",
 			"onTags": [ { "barrier": "fence" } ],
-			"style": { "color": "#5B5B5B", "opacity": 1, "weight": 5, "lineCap": "butt" }
+			"style": { "color": "#5B5B5B", "opacity": 1, "weight": 5, "lineCap": "butt", "icon": "no" }
+		},
+		{
+			"type": "Style",
+			"name": "Hedge",
+			"description": "Hedge",
+			"onTags": [ { "barrier": "hedge" } ],
+			"style": { "color": "#8CD16E", "opacity": 1, "weight": 5, "lineCap": "butt", "icon": "no" }
+		},
+		{
+			"type": "Style",
+			"name": "Pillar",
+			"description": "Pillar",
+			"onTags": [ { "man_made": "pillar" }, { "buildingpart": "pillar" }, { "building:part": "column" }, { "indoor": "column" } ],
+			"style": { "color": "#A8A8A8", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#A8A8A8", "fillOpacity": 1, "radius": 4, "layer": 0 }
 		},
 		{
 			"type": "Style",
@@ -224,6 +266,13 @@
 			"description": "Surveillance",
 			"onTags": [ { "man_made": "surveillance" } ],
 			"style": { "icon": "img/Video_surveillance_logo.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Tomb",
+			"description": "Tomb",
+			"onTags": [ { "historic": "tomb" } ],
+			"style": { "icon": "img/sjjb/historic_tomb.png" }
 		}
 	]
 }

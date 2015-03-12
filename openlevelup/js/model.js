@@ -157,21 +157,55 @@ MapData: function(ctrl) {
 		for(var i in _geojson.features) {
 			var feature = _geojson.features[i];
 			
-			//Parse level value (could be an integer, a float, a list of those, ...)
-			if(feature.properties['tags']['level'] != undefined) {
-				//Separate different values
-				var currentLevel = parseLevelsStr(feature.properties['tags']['level']);
+			//try to find levels for this feature
+			var currentLevel = null;
+			
+			//Tag level
+			if(feature.properties.tags.level != undefined) {
+				currentLevel = parseLevelsStr(feature.properties.tags.level);
+			}
+			//Tag repeat_on
+			else if(feature.properties.tags.repeat_on != undefined) {
+				currentLevel = parseLevelsStr(feature.properties.tags.repeat_on);
+			}
+			//Tag buildingpart:verticalpassage:floorrange
+			else if(feature.properties.tags["buildingpart:verticalpassage:floorrange"] != undefined) {
+				currentLevel = parseLevelsStr(feature.properties.tags["buildingpart:verticalpassage:floorrange"]);
+			}
+			//Relations type=level
+			else if(feature.properties.relations != undefined && feature.properties.relations.length > 0) {
+				currentLevel = new Array();
 				
-				//Add each value in list
-				if(currentLevel != null) {
-					for(var i=0; i < currentLevel.length; i++) {
-						if(isFloat(currentLevel[i])) {
-							levelsSet.add(parseFloat(currentLevel[i]));
+				//Try to find type=level relations, and add level value in level array
+				for(var i in feature.properties.relations) {
+					var rel = feature.properties.relations[i];
+					if(rel.reltags.type == "level" && rel.reltags.level != undefined) {
+						var relLevel = parseLevelsStr(rel.reltags.level);
+						
+						//Test if level value in relation is unique
+						if(relLevel.length == 1) {
+							currentLevel.push(relLevel[0]);
+						}
+						else {
+							console.log("Invalid level value for relation "+rel.rel);
 						}
 					}
-				} else {
-					console.log("Invalid level: "+feature.properties['tags']['level']);
 				}
+				
+				//Reset currentLevel if no level found
+				if(currentLevel.length == 0) { currentLevel = null; }
+			}
+			
+			//Add each level value in list, and create levels property in feature
+			if(currentLevel != null) {
+				for(var i=0; i < currentLevel.length; i++) {
+					if(isFloat(currentLevel[i])) {
+						levelsSet.add(parseFloat(currentLevel[i]));
+					}
+				}
+				feature.properties.levels = currentLevel;
+			} else {
+				//console.log("No valid level found for "+feature.properties.type+" "+feature.properties.id);
 			}
 			
 			//Edit indoor areas to set them as polygons instead of linestrings
@@ -182,6 +216,13 @@ MapData: function(ctrl) {
 				&& feature.geometry.type == "LineString") {
 				
 				feature = _convertLineToPolygon(feature);
+			}
+			
+			//Edit some polygons that should be linestrings
+			if(feature.properties.tags.barrier != undefined
+				&& feature.geometry.type == "Polygon") {
+				
+				feature = _convertPolygonToLine(feature);
 			}
 		}
 		
@@ -240,24 +281,18 @@ MapData: function(ctrl) {
 		for(var i in _geojson.features) {
 			var feature = _geojson.features[i];
 			
-			//Parse level value (could be an integer, a float, a list of those, ...)
-			if(feature.properties['tags']['level'] != undefined) {
-				//Separate different values
-				var currentLevel = parseLevelsStr(feature.properties['tags']['level']);
-				
-				//Add each value in list
-				if(currentLevel != null) {
-					for(var i=0; i < currentLevel.length; i++) {
-						if(isFloat(currentLevel[i])) {
-							var lvl = parseFloat(currentLevel[i]);
-							if(levelsAsArray.indexOf(lvl) < 0) {
-								levelsAsArray[levelsAsArray.length] = lvl;
-							}
+			//Add each value in list
+			if(feature.properties.levels != null) {
+				for(var i=0; i < feature.properties.levels.length; i++) {
+					if(isFloat(feature.properties.levels[i])) {
+						var lvl = parseFloat(feature.properties.levels[i]);
+						if(levelsAsArray.indexOf(lvl) < 0) {
+							levelsAsArray[levelsAsArray.length] = lvl;
 						}
 					}
-				} else {
-					console.log("Invalid level: "+feature.properties['tags']['level']);
 				}
+			} else {
+				console.log("Invalid level: "+feature.properties['tags']['level']);
 			}
 		}
 		return levelsAsArray;
@@ -271,6 +306,17 @@ MapData: function(ctrl) {
 	function _convertLineToPolygon(f) {
 		f.geometry.type = "Polygon";
 		f.geometry.coordinates = [ f.geometry.coordinates ];
+		return f;
+	}
+	
+	/**
+	 * Converts a GeoJSON Polygon into a GeoJSON LineString.
+	 * @param f The GeoJSON polygon
+	 * @return The corresponding linestring
+	 */
+	function _convertPolygonToLine(f) {
+		f.geometry.type = "LineString";
+		f.geometry.coordinates = f.geometry.coordinates[0];
 		return f;
 	}
 }

@@ -26,12 +26,14 @@
 <head>
 	<!--
 		TODO (by priority)
+		* Go up/down stairs/elevators by clicking a button in a popup
+		* Distinguish room values
 		* Restore base layer when using permalink
 		* Make loading popup more verbose
 		* Display building infos between cluster and data zooms
+		* Export a level as a printable map
 		* Improve browser compatibility
-		* Add a caption for icons (automatically filled with JSON style)
-		* Go up/down stairs/elevators by clicking a button in a popup
+		* Path finding in a building
 		* Page translation system
 	-->
 	<!-- General definitions -->
@@ -85,16 +87,23 @@
 		<!-- Header -->
 		<div id="header">
 			<h1><a href="index.html" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a></h1>
-			<p>See inside buildings<br />with OpenLevelUp!</p>
+			<p>See inside buildings<br />with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
 		</div>
 		
 		<!-- Settings -->
 		<div id="settings">
 			<p>Level <select id="level" disabled="true"></select> <a class="button" id="levelUp">&uarr;</a> <a class="button" id="levelDown">&darr;</a></p>
 			<ul>
-				<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
 				<li><label><input type="checkbox" id="show-legacy" checked="true" /> Show <a class="help" title="Objects that uses legacy indoor schemes, that are now deprecated">objects with legacy tagging</a></label></li>
+				<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
+				<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> Show <a class="help" title="Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.">unrendered objects</a></label></li>
 			</ul>
+		</div>
+		
+		<!-- Export -->
+		<div id="export">
+			<h2>Export level</h2>
+			<p><a id="export-link" href="#">As GeoJSON</a><!-- | <a id="export-link-img" href="#">As an image</a>--></p>
 		</div>
 		
 		<!-- Message/info box list -->
@@ -105,7 +114,7 @@
 		
 		<!-- Footer -->
 		<div id="footer">
-			<p><a id="osm-link" href="http://openstreetmap.org">See this on OpenStreetMap</a><br /><a id="export-link" href="#">Export this level</a> | <a id="permalink" href="">Permalink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
+			<p><a id="osm-link" href="http://openstreetmap.org">See this on OpenStreetMap</a><br /><a id="permalink" href="">Permalink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
 		</div>
 	</div>
 	
