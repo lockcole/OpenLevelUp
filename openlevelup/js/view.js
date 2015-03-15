@@ -390,25 +390,27 @@ Web: function(ctrl) {
 		 if(levelsArray != null) {
 			//Find level 0 index in levels array
 			var levelZero = levelsArray.indexOf(0);
-			var midLevel = (levelZero >= 0) ? midLevel = levelZero : Math.floor(levelsArray.length / 2);
+			var midLevel = (levelZero >= 0) ? levelZero : Math.floor(levelsArray.length / 2);
 			
 			//Extract level sub-arrays
 			var levelsNegative = levelsArray.slice(0, midLevel);
 			var levelsPositive = levelsArray.slice(midLevel+1);
 			
 			//Calculate new opacity, depending of level position in levels array
-			var idNeg = levelsNegative.indexOf(_self.getCurrentLevel());
-			var idPos = levelsPositive.indexOf(_self.getCurrentLevel());
-			if(idNeg >= 0) {
-				var coef = idNeg / levelsNegative.length * (OLvlUp.view.TILES_MAX_OPACITY - OLvlUp.view.TILES_MIN_OPACITY);
-				newOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
-			}
-			else if(idPos >= 0) {
-				var coef = (levelsPositive.length - 1 - idPos) / levelsPositive.length * (OLvlUp.view.TILES_MAX_OPACITY - OLvlUp.view.TILES_MIN_OPACITY);
-				newOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
-			}
-			else {
-				newOpacity = OLvlUp.view.TILES_MAX_OPACITY;
+			if(_self.getCurrentLevel() != null) {
+				var idNeg = levelsNegative.indexOf(_self.getCurrentLevel());
+				var idPos = levelsPositive.indexOf(_self.getCurrentLevel());
+				if(idNeg >= 0) {
+					var coef = idNeg / levelsNegative.length * (OLvlUp.view.TILES_MAX_OPACITY - OLvlUp.view.TILES_MIN_OPACITY);
+					newOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
+				}
+				else if(idPos >= 0) {
+					var coef = (levelsPositive.length - 1 - idPos) / levelsPositive.length * (OLvlUp.view.TILES_MAX_OPACITY - OLvlUp.view.TILES_MIN_OPACITY);
+					newOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
+				}
+				else {
+					newOpacity = OLvlUp.view.TILES_MAX_OPACITY;
+				}
 			}
 		}
 		
