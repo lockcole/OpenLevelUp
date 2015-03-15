@@ -168,6 +168,10 @@ MapData: function(ctrl) {
 			else if(feature.properties.tags.repeat_on != undefined) {
 				currentLevel = parseLevelsStr(feature.properties.tags.repeat_on);
 			}
+			//Tag min_level and max_level
+			else if(feature.properties.tags.min_level != undefined && feature.properties.tags.max_level != undefined) {
+				currentLevel = parseLevelsStr(feature.properties.tags.min_level+"-"+feature.properties.tags.max_level);
+			}
 			//Tag buildingpart:verticalpassage:floorrange
 			else if(feature.properties.tags["buildingpart:verticalpassage:floorrange"] != undefined) {
 				currentLevel = parseLevelsStr(feature.properties.tags["buildingpart:verticalpassage:floorrange"]);
@@ -212,7 +216,8 @@ MapData: function(ctrl) {
 			if(((feature.properties.tags.indoor != undefined
 				&& feature.properties.tags.indoor != "yes")
 				|| feature.properties.tags.buildingpart != undefined
-				|| feature.properties.tags.highway == "elevator")
+				|| feature.properties.tags.highway == "elevator"
+				|| feature.properties.tags.room != undefined)
 				&& feature.geometry.type == "LineString") {
 				
 				feature = _convertLineToPolygon(feature);

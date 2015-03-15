@@ -576,7 +576,7 @@ Web: function(ctrl) {
 		//This add a marker if a polygon has its "icon" property defined
 		if(result.icon != undefined && feature.geometry.type == "Polygon") {
 			var centroid = centroidPolygon(feature.geometry);
-			var marker = _createMarker(L.latLng(centroid[1], centroid[0]), feature, result.icon);
+			var marker = _createMarker(L.latLng(centroid[1], centroid[0]), feature, result);
 			_markersPolygons[feature.properties.type+feature.properties.id] = marker;
 		}
 		
@@ -670,21 +670,7 @@ Web: function(ctrl) {
 		//Find the appropriate icon, depending of tags
 		var style = (feature.properties.style == undefined) ? _styleElements(feature) : feature.properties.style;
 		
-		//If defined style, we use it
-		if(Object.keys(style).length > 0) {
-			//Custom icon
-			if(style.icon != undefined) {
-				result = _createMarker(latlng, feature, style.icon);
-			}
-			else {
-				result = L.circleMarker(latlng, style);
-			}
-		}
-		//Else, default style
-		else {
-			//Icon definition
-			result = _createMarker(latlng, feature, null);
-		}
+		result = _createMarker(latlng, feature, style);
 		
 		return result;
 	}
@@ -693,24 +679,41 @@ Web: function(ctrl) {
 	 * Creates a marker
 	 * @param latlng The latitude and longitude of the marker
 	 * @param feature The feature which will be represented
-	 * @param iconStyle The icon URL from JSON style
-	 * @return The leaflet marker
+	 * @param style The feature style
+	 * @return The leaflet marker, or null
 	 */
-	function _createMarker(latlng, feature, iconStyle) {
-		var iconUrl = 'img/default.svg';
+	function _createMarker(latlng, feature, style) {
+		var result = null;
+		var iconUrl = null;
 		
-		if(iconStyle != null || iconStyle != '') {
-			var tmpUrl = _getIconUrl(feature, iconStyle);
-			if(tmpUrl != null) { iconUrl = tmpUrl; }
+		if(style.icon != undefined && style.icon != null && style.icon != '') {
+			var tmpUrl = _getIconUrl(feature, style.icon);
+			
+			if(tmpUrl != null) {
+				iconUrl = tmpUrl;
+			}
+			else if(style.showMissingIcon == undefined || style.showMissingIcon) {
+				iconUrl = 'img/default.svg';
+			}
+		}
+		else if(style.showMissingIcon == undefined || style.showMissingIcon) {
+			result = L.circleMarker(latlng, style);
 		}
 		
-		var myIcon = L.icon({
-			iconUrl: iconUrl,
-			iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
-			iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
-			popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
-		});
-		return L.marker(latlng, {icon: myIcon});
+		if(iconUrl != null) {
+			var myIcon = L.icon({
+				iconUrl: iconUrl,
+				iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
+				iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
+				popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
+			});
+			result = L.marker(latlng, {icon: myIcon});
+		}
+		else {
+			result = L.circleMarker(latlng, { opacity: 0, fillOpacity: 0 });
+		}
+		
+		return result;
 	}
 	
 	/**
@@ -848,16 +851,19 @@ Web: function(ctrl) {
 	 * Updates the permalink on page.
 	 */
 	this.updatePermalink = function() {
-		//var link = $(location).attr('href').split('?')[0]+"?bbox="+_map.getBounds().toBBoxString();
-		var link = $(location).attr('href').split('?')[0]+"?lat="+_map.getCenter().lat+"&lon="+_map.getCenter().lng+"&zoom="+_map.getZoom();
+		var baseURL = $(location).attr('href').split('?')[0]+"?";
+		var params = "lat="+_map.getCenter().lat+"&lon="+_map.getCenter().lng+"&zoom="+_map.getZoom();
 		
 		if($("#level").val() != null) {
-			link += "&level="+$("#level").val();
+			params += "&level="+$("#level").val();
 		}
 		
-		link += "&transcend="+((_self.showTranscendent()) ? "1" : "0");
-		link += "&legacy="+((_self.showLegacy()) ? "1" : "0");
-		link += "&unrendered="+((_self.showUnrendered()) ? "1" : "0");
+		params += "&transcend="+((_self.showTranscendent()) ? "1" : "0");
+		params += "&legacy="+((_self.showLegacy()) ? "1" : "0");
+		params += "&unrendered="+((_self.showUnrendered()) ? "1" : "0");
+		
+		var link = baseURL + params;
+		var linkB = baseURL + "s=" + _shortlink();
 		
 		$("#permalink").attr('href', link);
 		
@@ -866,6 +872,20 @@ Web: function(ctrl) {
 		
 		//Update OSM link
 		$("#osm-link").attr('href', "http://openstreetmap.org/#map="+_map.getZoom()+"/"+_map.getCenter().lat+"/"+_map.getCenter().lng);
+	}
+	
+	/**
+	 * Creates short links
+	 * @return The short link for current view
+	 */
+	function _shortlink() {
+		var short = _map.getCenter().lat.toFixed(5); //Latitude
+		short += "l"+_map.getCenter().lng.toFixed(5); //Longitude
+		short += "z"+_map.getZoom(); //Zoom
+		short += "o"+((_self.showTranscendent()) ? "1" : "0"); //Show transcendant
+		short += ((_self.showLegacy()) ? "1" : "0");
+		short += ((_self.showUnrendered()) ? "1" : "0");
+		return short;
 	}
 }
 

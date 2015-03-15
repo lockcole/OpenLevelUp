@@ -4,16 +4,23 @@
 		{
 			"type": "Style",
 			"name": "Building",
+			"description": "No pop-ups for buildings",
+			"onTags": [ { "building": "*" } ],
+			"style": { "popup": "no" }
+		},
+		{
+			"type": "Style",
+			"name": "Building",
 			"description": "Buildings",
 			"onTags": [ { "building": "*" }, { "building:part": "*" } ],
-			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 1, "fillColor": "#D4CACA", "fillOpacity": 1, "popup": "no", "layer": -2 }
+			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 1, "fillColor": "#D4CACA", "fillOpacity": 1, "layer": -2 }
 		},
 		{
 			"type": "Style",
 			"name": "Room",
 			"description": "Indoor rooms",
 			"onTags": [ { "indoor": "room|wall" }, { "room": "*" }, { "buildingpart": "room|wall" }, { "barrier": "wall" } ],
-			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -1 }
+			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -1, "popup": "yes" }
 		},
 		{
 			"type": "Style",
@@ -26,8 +33,43 @@
 			"type": "Style",
 			"name": "Area",
 			"description": "Indoor areas ('OR' example for values)",
-			"onTags": [ { "indoor": "area|corridor" }, { "highway": "pedestrian|footway", "area": "yes" }, { "buildingpart": "corridor|hall" } ],
+			"onTags": [ { "indoor": "area|corridor" }, { "highway": "pedestrian|footway", "area": "yes" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|entrance|hall" } ],
 			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -1 }
+		},
+		{
+			"type": "Style",
+			"name": "Room",
+			"description": "Room icons",
+			"onTags": [ { "room": "*" } ],
+			"style": { "icon": "img/room_${room}.svg", "showMissingIcon": false }
+		},
+		{
+			"type": "Style",
+			"name": "Computer lab",
+			"description": "Computer laboratory icon",
+			"onTags": [ { "room": "laboratory", "laboratory": "computer" } ],
+			"style": { "icon": "img/room_computer.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Amphitheatre",
+			"description": "Amphitheatre",
+			"onTags": [ { "room": "amphitheatre" } ],
+			"style": { "icon": "img/room_auditorium.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Reception",
+			"description": "Reception",
+			"onTags": [ { "room": "reception" } ],
+			"style": { "icon": "img/room_administration.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Refectory",
+			"description": "Refectory",
+			"onTags": [ { "room": "refectory" } ],
+			"style": { "icon": "img/room_restaurant.svg" }
 		},
 		{
 			"type": "Style",
@@ -152,7 +194,7 @@
 			"type": "Style",
 			"name": "Newspapers vending",
 			"description": "Newspapers vending machine",
-			"onTags": [ { "amenity": "vending_machine", "vending": "newspapers" },  { "amenity": "vending_machine", "vending": "news_papers" } ],
+			"onTags": [ { "amenity": "vending_machine", "vending": "newspapers" },  { "amenity": "vending_machine", "vending": "news_papers" }, { "shop": "newsagent" } ],
 			"style": { "icon": "img/Farm-Fresh_newspaper.png" }
 		},
 		{
@@ -180,21 +222,21 @@
 			"type": "Style",
 			"name": "Vertical passage",
 			"description": "Elevetor, stairs (as polygons)",
-			"onTags": [ { "highway": "elevator|lift" }, { "buildingpart": "verticalpassage" } ],
+			"onTags": [ { "highway": "elevator|lift" }, { "buildingpart": "verticalpassage" }, { "room": "stairs" } ],
 			"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true }
 		},
 		{
 			"type": "Style",
 			"name": "Elevator",
 			"description": "Elevator",
-			"onTags": [ { "highway": "elevator|lift" } ],
+			"onTags": [ { "highway": "elevator|lift" }, { "buildingpart:verticalpassage": "elevator" } ],
 			"style": { "icon": "img/Elevator_icon.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Stairs",
 			"description": "Stairs (verticalpassage)",
-			"onTags": [ { "buildingpart": "verticalpassage", "buildingpart:verticalpassage": "stairway" } ],
+			"onTags": [ { "buildingpart:verticalpassage": "stairway" }, { "room": "stairs" } ],
 			"style": { "icon": "img/NingboRT_Stairs_Logo.svg" }
 		},
 		{

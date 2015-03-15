@@ -3,6 +3,9 @@ Changes history
 
 * Opacity restored to 1 when returning to cluster zooms
 * Buttons to go up and down added in pop-up titles for stairs and elevators
+* Min_level and max_level tags handled in levels parsing
+* Room=* rendered with icons (administration, reception, auditorium, amphitheatre, chapel, class, laboratory, computer, conference, crypt, kitchen, library, nursery, office, restaurant, sport, storage, toilets, waiting, technical)
+* Closed polylines with only room=* tag rendered as polygons
 
 12 march 2015
 -------------

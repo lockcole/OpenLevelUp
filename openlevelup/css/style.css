@@ -303,6 +303,7 @@ p.popup-txt.centered {
 }
 
 .popup-img img {
-	width: 100%;
+	height: 100px;
 	display: block;
+	margin: 0 auto;
 }
