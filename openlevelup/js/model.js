@@ -93,7 +93,7 @@ MapData: function(ctrl) {
 	}
 	
 	/**
-	 * @return The data, as GeoJSON
+	 * @return The levels, as an array
 	 */
 	this.getLevels = function() {
 		return _levels;

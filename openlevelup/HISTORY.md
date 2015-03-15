@@ -1,6 +1,9 @@
 Changes history
 ===============
 
+* Opacity restored to 1 when returning to cluster zooms
+* Buttons to go up and down added in pop-up titles for stairs and elevators
+
 12 march 2015
 -------------
 * Emergency stairs/exits, hedges and pillars are now rendered

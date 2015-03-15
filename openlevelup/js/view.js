@@ -442,13 +442,27 @@ Web: function(ctrl) {
 			if(styleRules.icon != undefined) {
 				var iconUrl = _getIconUrl(feature, styleRules.icon);
 				if(iconUrl != null) {
-					text += '<img src="'+iconUrl+'" /> ';
+					text += '<img class="icon" src="'+iconUrl+'" /> ';
 				}
 			}
 			
 			//Object name (its name tag or its type)
 			text += (feature.properties.tags.name != undefined) ? feature.properties.tags.name : name;
 			
+			//Add up and down icons if levelup property == true
+			if(styleRules.levelup && feature.properties.levels != undefined) {
+				//Able to go up ?
+				var levelId = feature.properties.levels.indexOf(_self.getCurrentLevel().toString());
+				if(levelId < feature.properties.levels.length -1) {
+					text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId+1]+')" href="#"><img src="img/arrow_up.png" title="Go up" alt="Up!" /></a>';
+				}
+				//Able to go down ?
+				if(levelId > 0) {
+					text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId-1]+')" href="#"><img src="img/arrow_down.png" title="Go down" alt="Down!" /></a>';
+				}
+			}
+			
+			//End title
 			text += '</h1>';
 			
 			//Link to osm.org object

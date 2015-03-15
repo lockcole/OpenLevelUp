@@ -97,6 +97,19 @@ Ctrl: function() {
 	}
 	
 	/**
+	 * Makes the map go to the given level
+	 * @param lvl The new level to display
+	 */
+	this.toLevel = function(lvl) {
+		console.log(_mapdata.getLevels().indexOf(lvl));
+		if(_mapdata != null && _mapdata.getLevels() != null && _mapdata.getLevels().indexOf(lvl) >= 0) {
+			//Change level
+			_view.setCurrentLevel(lvl);
+			_view.refreshMap(_mapdata);
+		}
+	}
+	
+	/**
 	 * This function is called when a minor change on map happens (transcendent change, base layer change, ...)
 	 */
 	this.onMapChange = function() {

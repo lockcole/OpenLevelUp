@@ -103,6 +103,11 @@ function parseLevelsStr(str) {
 		}
 	}
 	
+	//If levels available, sort them
+	if(result != null) {
+		result.sort(function (a,b) { return parseFloat(a)-parseFloat(b); });
+	}
+	
 	return result;
 }
 

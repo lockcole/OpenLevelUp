@@ -6,7 +6,7 @@
 			"name": "Building",
 			"description": "Buildings",
 			"onTags": [ { "building": "*" }, { "building:part": "*" } ],
-			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 1, "fillColor": "#D4CACA", "fillOpacity": 1, "popup": "yes", "layer": -2 }
+			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 1, "fillColor": "#D4CACA", "fillOpacity": 1, "popup": "no", "layer": -2 }
 		},
 		{
 			"type": "Style",
@@ -167,7 +167,7 @@
 			"name": "Stairs",
 			"description": "Stairs",
 			"onTags": [ { "highway": "steps" } ],
-			"style": { "color": "#F98072", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "2,1" }
+			"style": { "color": "#F98072", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "2,1", "levelup": true }
 		},
 		{
 			"type": "Style",
@@ -180,8 +180,8 @@
 			"type": "Style",
 			"name": "Vertical passage",
 			"description": "Elevetor, stairs (as polygons)",
-			"onTags": [ { "highway": "elevator" }, { "buildingpart": "verticalpassage" } ],
-			"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1 }
+			"onTags": [ { "highway": "elevator|lift" }, { "buildingpart": "verticalpassage" } ],
+			"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true }
 		},
 		{
 			"type": "Style",
