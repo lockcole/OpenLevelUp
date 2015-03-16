@@ -43,31 +43,31 @@ TILES_MAX_OPACITY: 0.3,
 /** The icon size for objects **/
 ICON_SIZE: 24,
 
-/** The available tile layers **/
+/** The available tile layers (IDs must be integers and constant in time) **/
 TILE_LAYERS:
 	{
-		OSM: {
+		0: {
 			name: "OpenStreetMap",
 			URL: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 			attribution: 'Tiles <a href="http://openstreetmap.org/">OSM</a>',
 			minZoom: 1,
 			maxZoom: 19
 		},
-		OSMFR: {
+		1: {
 			name: "OpenStreetMap FR",
 			URL: "http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
 			attribution: 'Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a>',
 			minZoom: 1,
 			maxZoom: 20
 		},
-		TONER: {
+		2: {
 			name: "Stamen Toner",
 			URL: 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png',
 			attribution: 'Tiles <a href="http://maps.stamen.com/">Stamen Toner</a>',
 			minZoom: 1,
 			maxZoom: 20
 		},
-		CADASTRE: {
+		3: {
 			name: "Cadastre FR",
 			URL: "http://tms.cadastre.openstreetmap.fr/*/tout/{z}/{x}/{y}.png",
 			attribution: 'Cadastre (DGFiP)',
@@ -109,6 +109,9 @@ Web: function(ctrl) {
 	
 	/** Level parameter in URL **/
 	var _urlLevel = null;
+	
+	/** Currently shown tile layer ID **/
+	var _tileLayer = null;
 	
 	/** The application controller **/
 	var _ctrl = ctrl;
@@ -231,6 +234,19 @@ Web: function(ctrl) {
 	this.setCurrentLevel = function(lvl) {
 		$("#level").val(lvl);
 	}
+	
+	/**
+	 * Changes the currently shown tile layer
+	 * @param name The tile layer name
+	 */
+	this.setTileLayer = function(name) {
+		for(var i in OLvlUp.view.TILE_LAYERS) {
+			if(OLvlUp.view.TILE_LAYERS[i].name == name) {
+				_tileLayer = i;
+				break;
+			}
+		}
+	}
 
 //OTHER METHODS
 /*
@@ -243,28 +259,6 @@ Web: function(ctrl) {
 		//Init map center and zoom
 		_map = L.map('map', {minZoom: 1, maxZoom: 22}).setView([47, 2], 6);
 		
-		//Create tile layers
-		var tileLayers = new Array();
-		var firstLayer = true;
-		
-		for(var l in OLvlUp.view.TILE_LAYERS) {
-			var currentLayer = OLvlUp.view.TILE_LAYERS[l];
-			tileLayers[currentLayer.name] = new L.TileLayer(
-				currentLayer.URL,
-				{
-					minZoom: currentLayer.minZoom,
-					maxZoom: currentLayer.maxZoom,
-					attribution: currentLayer.attribution+" | "+OLvlUp.view.ATTRIBUTION
-				}
-			);
-			
-			if(firstLayer) {
-				_map.addLayer(tileLayers[currentLayer.name]);
-				firstLayer = false;
-			}
-		}
-		L.control.layers(tileLayers).addTo(_map);
-		
 		//If coordinates are given in URL, then make map show the wanted area
 		var bbox = _self.getUrlParameter("bbox");
 		var lat = _self.getUrlParameter("lat");
@@ -275,10 +269,11 @@ Web: function(ctrl) {
 		var transcend = parseInt(_self.getUrlParameter("transcend"));
 		var unrendered = parseInt(_self.getUrlParameter("unrendered"));
 		var lvl = _self.getUrlParameter("level");
+		var tiles = _self.getUrlParameter("tiles");
 		
 		//Read shortlink
 		if(short != null) {
-			var regex = /^(-?)([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)\+(-?)([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)\+([A-Z])([a-zA-Z0-9]+)\+(?:(-?)([a-zA-Z0-9]+)\.([a-zA-Z0-9]+))?$/;
+			var regex = /^(-?)([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)\+(-?)([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)\+([A-Z])([a-zA-Z0-9]+)\+(?:(-?)([a-zA-Z0-9]+)\.([a-zA-Z0-9]+))?(?:\+([a-zA-Z0-9]+))?$/;
 			if(regex.test(short)) {
 				var shortRes = regex.exec(short);
 				lat = base62toDec(shortRes[2]) + base62toDec(shortRes[3]) / 100000;
@@ -299,6 +294,11 @@ Web: function(ctrl) {
 				if(shortRes[10] != undefined && shortRes[11] != undefined) {
 					lvl = base62toDec(shortRes[10]) + base62toDec(shortRes[11]) / 100;
 					if(shortRes[9] == "-") { lvl = -lvl; }
+				}
+				
+				//Get tiles if available
+				if(shortRes[12] != undefined) {
+					tiles = base62toDec(shortRes[12]);
 				}
 			}
 			else {
@@ -344,6 +344,33 @@ Web: function(ctrl) {
 		}
 		
 		_urlLevel = lvl;
+		
+		//Create tile layers
+		var tileLayers = new Array();
+		var firstLayer = true;
+		
+		for(var l in OLvlUp.view.TILE_LAYERS) {
+			var currentLayer = OLvlUp.view.TILE_LAYERS[l];
+			tileLayers[currentLayer.name] = new L.TileLayer(
+				currentLayer.URL,
+				{
+					minZoom: currentLayer.minZoom,
+					maxZoom: currentLayer.maxZoom,
+					attribution: currentLayer.attribution+" | "+OLvlUp.view.ATTRIBUTION
+				}
+			);
+			
+			if(firstLayer && tiles == undefined) {
+				_map.addLayer(tileLayers[currentLayer.name]);
+				firstLayer = false;
+				_tileLayer = l;
+			}
+			else if(l == tiles) {
+				_map.addLayer(tileLayers[currentLayer.name]);
+				_tileLayer = l;
+			}
+		}
+		L.control.layers(tileLayers).addTo(_map);
 		
 		//Add triggers on HTML elements
 		$("#level").change(controller.onMapChange);
@@ -924,7 +951,7 @@ Web: function(ctrl) {
 	 */
 	this.updatePermalink = function() {
 		var baseURL = $(location).attr('href').split('?')[0]+"?";
-		var params = "lat="+_self.getLatitude()+"&lon="+_self.getLongitude()+"&zoom="+_map.getZoom();
+		var params = "lat="+_self.getLatitude()+"&lon="+_self.getLongitude()+"&zoom="+_map.getZoom()+"&tiles="+_tileLayer;
 		
 		if($("#level").val() != null) {
 			params += "&level="+$("#level").val();
@@ -949,11 +976,11 @@ Web: function(ctrl) {
 	
 	/**
 	 * Creates short links
-	 * Format: lat+lon+zoomoptions
+	 * Format: lat+lon+zoomoptions+level+tiles
 	 * Lat and lon are the latitude and longitude, encoded in base 62
 	 * Zoom is the map zoom encoded as a letter (A=1, Z=26)
 	 * Options are a bit array, encoded as base 62
-	 * Example: 10.AQ3+-2j.64S+E6
+	 * Example: 10.AQ3+-2j.64S+E6+F+2
 	 * @return The short link for current view
 	 */
 	function _shortlink() {
@@ -963,6 +990,7 @@ Web: function(ctrl) {
 		var shortLat = ((lat < 0) ? "-" : "") + decToBase62(Math.floor(Math.abs(lat))) + "." + decToBase62((Math.abs((lat % 1).toFixed(5)) * 100000).toFixed(0)); //Latitude
 		var shortLon = ((lon < 0) ? "-" : "") + decToBase62(Math.floor(Math.abs(lon))) + "." + decToBase62((Math.abs((lon % 1).toFixed(5)) * 100000).toFixed(0)); //Longitude
 		var shortZoom = intToLetter(_map.getZoom()); //Zoom
+		var shortTiles = decToBase62(_tileLayer);
 		
 		//Level
 		var lvl = _self.getCurrentLevel();
@@ -983,7 +1011,7 @@ Web: function(ctrl) {
 					((_self.showUnrendered()) ? "1" : "0")
 				]);
 		
-		var short = shortLat+"+"+shortLon+"+"+shortZoom+shortOptions+"+"+shortLvl;
+		var short = shortLat+"+"+shortLon+"+"+shortZoom+shortOptions+"+"+shortLvl+"+"+shortTiles;
 		
 		return short;
 	}

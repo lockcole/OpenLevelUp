@@ -112,7 +112,10 @@ Ctrl: function() {
 	/**
 	 * This function is called when a minor change on map happens (transcendent change, base layer change, ...)
 	 */
-	this.onMapChange = function() {
+	this.onMapChange = function(e) {
+		if(e.name != undefined) {
+			_view.setTileLayer(e.name);
+		}
 		_view.refreshMap(_mapdata);
 	}
 	
