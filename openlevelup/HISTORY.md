@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+* Latitude and longitude are now bounded in URL
+* Short links system added
+
+15 march 2015
+-------------
 * Opacity restored to 1 when returning to cluster zooms
 * Buttons to go up and down added in pop-up titles for stairs and elevators
 * Min_level and max_level tags handled in levels parsing

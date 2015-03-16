@@ -107,6 +107,9 @@ Web: function(ctrl) {
 	/** Already checked icons URL **/
 	var _checkedUrl = new Object();
 	
+	/** Level parameter in URL **/
+	var _urlLevel = null;
+	
 	/** The application controller **/
 	var _ctrl = ctrl;
 	
@@ -140,6 +143,27 @@ Web: function(ctrl) {
 	}
 	
 	/**
+	 * @return The level parameter in URL
+	 */
+	this.getUrlLevel = function() {
+		return _urlLevel;
+	}
+	
+	/**
+	 * @return The current map latitude
+	 */
+	this.getLatitude = function() {
+		return normLat(_map.getCenter().lat);
+	}
+	
+	/**
+	 * @return The current map longitude
+	 */
+	this.getLongitude = function() {
+		return normLon(_map.getCenter().lng);
+	}
+	
+	/**
 	 * @return The currently shown level
 	 */
 	this.getCurrentLevel = function() {
@@ -151,7 +175,7 @@ Web: function(ctrl) {
 	 * @return The map bounds as string for Overpass API
 	 */
 	this.getMapBounds = function() {
-		return _map.getBounds().getSouth()+","+_map.getBounds().getWest()+","+_map.getBounds().getNorth()+","+_map.getBounds().getEast();
+		return normLat(_map.getBounds().getSouth())+","+normLon(_map.getBounds().getWest())+","+normLat(_map.getBounds().getNorth())+","+normLon(_map.getBounds().getEast());
 	}
 	
 	/**
@@ -218,11 +242,68 @@ Web: function(ctrl) {
 		//Init map center and zoom
 		_map = L.map('map', {minZoom: 1, maxZoom: 22}).setView([47, 2], 6);
 		
+		//Create tile layers
+		var tileLayers = new Array();
+		var firstLayer = true;
+		
+		for(var l in OLvlUp.view.TILE_LAYERS) {
+			var currentLayer = OLvlUp.view.TILE_LAYERS[l];
+			tileLayers[currentLayer.name] = new L.TileLayer(
+				currentLayer.URL,
+				{
+					minZoom: currentLayer.minZoom,
+					maxZoom: currentLayer.maxZoom,
+					attribution: currentLayer.attribution+" | "+OLvlUp.view.ATTRIBUTION
+				}
+			);
+			
+			if(firstLayer) {
+				_map.addLayer(tileLayers[currentLayer.name]);
+				firstLayer = false;
+			}
+		}
+		L.control.layers(tileLayers).addTo(_map);
+		
 		//If coordinates are given in URL, then make map show the wanted area
 		var bbox = _self.getUrlParameter("bbox");
 		var lat = _self.getUrlParameter("lat");
 		var lon = _self.getUrlParameter("lon");
 		var zoom = _self.getUrlParameter("zoom");
+		var short = _self.getUrlParameter("s");
+		var legacy = parseInt(_self.getUrlParameter("legacy"));
+		var transcend = parseInt(_self.getUrlParameter("transcend"));
+		var unrendered = parseInt(_self.getUrlParameter("unrendered"));
+		var lvl = _self.getUrlParameter("level");
+		
+		//Read shortlink
+		if(short != null) {
+			var regex = /^(-?)([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)\+(-?)([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)\+([A-Z])([a-zA-Z0-9]+)\+(?:(-?)([a-zA-Z0-9]+)\.([a-zA-Z0-9]+))?$/;
+			if(regex.test(short)) {
+				var shortRes = regex.exec(short);
+				lat = base62toDec(shortRes[2]) + base62toDec(shortRes[3]) / 100000;
+				if(shortRes[1] == "-") { lat = -lat; }
+				
+				lon = base62toDec(shortRes[5]) + base62toDec(shortRes[6]) / 100000;
+				if(shortRes[4] == "-") { lon = -lon; }
+				
+				zoom = letterToInt(shortRes[7]);
+				
+				var options = intToBitArray(base62toDec(shortRes[8]));
+				while(options.length < 3) { options = "0" + options; }
+				unrendered = options[options.length - 1];
+				legacy = options[options.length - 2];
+				transcend = options[options.length - 3];
+				
+				//Get level if available
+				if(shortRes[10] != undefined && shortRes[11] != undefined) {
+					lvl = base62toDec(shortRes[10]) + base62toDec(shortRes[11]) / 100;
+					if(shortRes[9] == "-") { lvl = -lvl; }
+				}
+			}
+			else {
+				_self.displayMessage("Invalid short link", "alert");
+			}
+		}
 		
 		//BBox
 		if(bbox != null) {
@@ -248,43 +329,20 @@ Web: function(ctrl) {
 			_self.displayMessage("Missing parameter in permalink", "error");
 		}
 		
-		//Create tile layers
-		var tileLayers = new Array();
-		var firstLayer = true;
-		
-		for(var l in OLvlUp.view.TILE_LAYERS) {
-			var currentLayer = OLvlUp.view.TILE_LAYERS[l];
-			tileLayers[currentLayer.name] = new L.TileLayer(
-				currentLayer.URL,
-				{
-					minZoom: currentLayer.minZoom,
-					maxZoom: currentLayer.maxZoom,
-					attribution: currentLayer.attribution+" | "+OLvlUp.view.ATTRIBUTION
-				}
-			);
-			
-			if(firstLayer) {
-				_map.addLayer(tileLayers[currentLayer.name]);
-				firstLayer = false;
-			}
-		}
-		L.control.layers(tileLayers).addTo(_map);
-		
 		//Restore settings from URL
-		var legacy = parseInt(_self.getUrlParameter("legacy"));
 		if(legacy != null && (legacy == 0 || legacy == 1)) {
 			$("#show-legacy").prop("checked", legacy == 1);
 		}
 		
-		var transcend = parseInt(_self.getUrlParameter("transcend"));
 		if(transcend != null && (transcend == 0 || transcend == 1)) {
 			$("#show-transcendent").prop("checked", transcend == 1);
 		}
 		
-		var unrendered = parseInt(_self.getUrlParameter("unrendered"));
 		if(unrendered != null && (unrendered == 0 || unrendered == 1)) {
 			$("#show-unrendered").prop("checked", unrendered == 1);
 		}
+		
+		_urlLevel = lvl;
 		
 		//Add triggers on HTML elements
 		$("#level").change(controller.onMapChange);
@@ -852,7 +910,7 @@ Web: function(ctrl) {
 	 */
 	this.updatePermalink = function() {
 		var baseURL = $(location).attr('href').split('?')[0]+"?";
-		var params = "lat="+_map.getCenter().lat+"&lon="+_map.getCenter().lng+"&zoom="+_map.getZoom();
+		var params = "lat="+_self.getLatitude()+"&lon="+_self.getLongitude()+"&zoom="+_map.getZoom();
 		
 		if($("#level").val() != null) {
 			params += "&level="+$("#level").val();
@@ -863,9 +921,10 @@ Web: function(ctrl) {
 		params += "&unrendered="+((_self.showUnrendered()) ? "1" : "0");
 		
 		var link = baseURL + params;
-		var linkB = baseURL + "s=" + _shortlink();
+		var linkShort = baseURL + "s=" + _shortlink();
 		
 		$("#permalink").attr('href', link);
+		$("#shortlink").attr('href', linkShort);
 		
 		//Update browser URL
 		window.history.replaceState({}, "OpenLevelUp!", link);
@@ -876,15 +935,42 @@ Web: function(ctrl) {
 	
 	/**
 	 * Creates short links
+	 * Format: lat+lon+zoomoptions
+	 * Lat and lon are the latitude and longitude, encoded in base 62
+	 * Zoom is the map zoom encoded as a letter (A=1, Z=26)
+	 * Options are a bit array, encoded as base 62
+	 * Example: 10.AQ3+-2j.64S+E6
 	 * @return The short link for current view
 	 */
 	function _shortlink() {
-		var short = _map.getCenter().lat.toFixed(5); //Latitude
-		short += "l"+_map.getCenter().lng.toFixed(5); //Longitude
-		short += "z"+_map.getZoom(); //Zoom
-		short += "o"+((_self.showTranscendent()) ? "1" : "0"); //Show transcendant
-		short += ((_self.showLegacy()) ? "1" : "0");
-		short += ((_self.showUnrendered()) ? "1" : "0");
+		var lat = _self.getLatitude();
+		var lon = _self.getLongitude();
+		
+		var shortLat = ((lat < 0) ? "-" : "") + decToBase62(Math.floor(Math.abs(lat))) + "." + decToBase62((Math.abs((lat % 1).toFixed(5)) * 100000).toFixed(0)); //Latitude
+		var shortLon = ((lon < 0) ? "-" : "") + decToBase62(Math.floor(Math.abs(lon))) + "." + decToBase62((Math.abs((lon % 1).toFixed(5)) * 100000).toFixed(0)); //Longitude
+		var shortZoom = intToLetter(_map.getZoom()); //Zoom
+		
+		//Level
+		var lvl = _self.getCurrentLevel();
+		var shortLvl = "";
+		if(lvl != null) {
+			if(lvl < 0) {
+				shortLvl += "-";
+			}
+			
+			shortLvl += decToBase62(Math.floor(Math.abs(lvl)));
+			shortLvl += ".";
+			shortLvl += decToBase62((Math.abs((lvl % 1).toFixed(2)) * 100).toFixed(0));
+		}
+		
+		var shortOptions = bitArrayToBase62([
+					((_self.showTranscendent()) ? "1" : "0"),
+					((_self.showLegacy()) ? "1" : "0"),
+					((_self.showUnrendered()) ? "1" : "0")
+				]);
+		
+		var short = shortLat+"+"+shortLon+"+"+shortZoom+shortOptions+"+"+shortLvl;
+		
 		return short;
 	}
 }

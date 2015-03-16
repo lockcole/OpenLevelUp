@@ -145,3 +145,124 @@ function centroidPolygon(geom) {
 	
 	return centroid;
 }
+
+/**
+ * Contains characters used in base 62
+ */
+var base62 = [ "0","1","2","3","4","5","6","7","8","9",
+		"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+		"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z" ];
+
+/**
+ * Converts an integer from base 10 (decimal) to base 62 (0-9 + a-z + A-Z)
+ * @param val The integer to convert
+ * @return The integer in base 62
+ */
+function decToBase62(val) {
+	var result = "";
+	
+	var i = 0;
+	var qi = val;
+	var r = new Array();
+	
+	while(qi > 0) {
+		r[i+1] = qi % 62;
+		qi = Math.floor(qi / 62);
+		i++;
+	}
+	
+	for(var i in r) {
+		result = base62[r[i]] + result;
+	}
+	
+	if(result == "") { result = "0"; }
+	
+	return result;
+}
+
+/**
+ * Converts a string in base 62 into an integer (base 10, decimal)
+ * This is based on the Horner method
+ * @param val The string in base 62
+ * @return The integer in base 10
+ */
+function base62toDec(val) {
+	var result = 0;
+	
+	for(var i=0; i < val.length; i++) {
+		result += base62.indexOf(val[i]) * Math.pow(62, val.length - 1 - i);
+	}
+	
+	return result;
+}
+
+/**
+ * Contains all characters used in 1-26 interval conversion
+ */
+var letters = [ "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z" ];
+
+/**
+ * Converts an integer from 1 to 26 as a letter
+ * @param val The integer to convert
+ * @return The corresponding letter
+ */
+function intToLetter(val) {
+	return letters[val-1];
+}
+
+/**
+ * Converts a letter into an integer between 1 and 26
+ * @param val The letter to convert
+ * @return The integer
+ */
+function letterToInt(val) {
+	return letters.indexOf(val) + 1;
+}
+
+/**
+ * Converts an integer into a bit array
+ * @param val The integer to convert
+ * @return The integer as a bit array
+ */
+function intToBitArray(val) {
+	return val.toString(2);
+}
+
+/**
+ * Converts a bit array into a value in base 62
+ * @param val The bit array
+ * @return The value in base 62
+ */
+function bitArrayToBase62(val) {
+	var valInt = 0;
+	
+	for(var i=0; i < val.length; i++) {
+		valInt += parseInt(val[i]) * Math.pow(2, val.length - 1 - i);
+	}
+	
+	return decToBase62(valInt);
+}
+
+/**
+ * @param val The latitude
+ * @return The normalized latitude (between -90 and 90)
+ */
+function normLat(val) {
+	return normAbs(val, 90);
+}
+
+/**
+ * @param val The longitude
+ * @return The normalized longitude (between -180 and 180)
+ */
+function normLon(val) {
+	return normAbs(val, 180);
+}
+
+function normAbs(val, mod) {
+	while(val < -mod) { val += 2*mod; }
+	while(val > mod) { val -= 2*mod; }
+	var neg = val < 0;
+	val = Math.abs(val) % mod;
+	return (neg) ? -val : val;
+}

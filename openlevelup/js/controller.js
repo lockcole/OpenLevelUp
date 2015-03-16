@@ -203,7 +203,7 @@ Ctrl: function() {
 			//Test how many levels are available
 			if(_mapdata.getLevels() != null && _mapdata.getLevels().length > 0) {
 				//If we have to use the level parameter from the URL
-				var levelUrl = parseFloat(_view.getUrlParameter("level"));
+				var levelUrl = parseFloat(_view.getUrlLevel());
 				if(_useLevelURL && _mapdata.getLevels().indexOf(levelUrl) >= 0) {
 					_view.setCurrentLevel(levelUrl);
 				}
