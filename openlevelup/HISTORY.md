@@ -3,6 +3,7 @@ Changes history
 
 * Latitude and longitude are now bounded in URL
 * Short links system added
+* Loading pop-up more verbose (display loading step by step)
 
 15 march 2015
 -------------

@@ -67,14 +67,14 @@ a:hover {
 	text-align: center;
 }
 
-#op-about * {
+.panel.overlay * {
 	margin: 0;
 	padding: 0;
 }
 
-#op-about h2 {
+.panel.overlay h2 {
 	background-color: #ddd;
-	color: #222;
+	color: #444;
 	padding: 5px;
 	margin: 5px;
 }
@@ -240,22 +240,37 @@ a:hover {
 /*
  * Overlay panel rules
  */
-.text-rotation {
-	text-align: center;
-	font-size: 130%;
+#op-loading div {
+	position: relative;
+	text-align: left;
 }
 
-.rotation {
-	font-size: 60px;
+#op-loading h2 {
+	padding-left: 45px;
+}
+
+#op-loading ul {
+	margin-left: 30px;
+	margin-top: 10px;
+}
+
+#op-loading ul li {
+	margin-bottom: 5px;
+}
+
+#rotation {
+	font-size: 50px;
 	font-weight: bold;
 	position: absolute;
-	top: 50%;
-	left: 50%;
-	margin: -30px 0 0 -30px;
+	left: 35px;
+	top: 10px;
+	color: #444;
+	margin: -30px 0 0 -30px; 
 	-webkit-animation:spin 0.7s linear infinite;
 	-moz-animation:spin 0.7s linear infinite;
 	animation:spin 0.7s linear infinite;
 }
+
 @-moz-keyframes spin { 100% { -moz-transform: rotate(-360deg); } }
 @-webkit-keyframes spin { 100% { -webkit-transform: rotate(-360deg); } }
 @keyframes spin { 100% { -webkit-transform: rotate(-360deg); transform:rotate(-360deg); } }

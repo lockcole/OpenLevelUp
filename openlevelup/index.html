@@ -27,7 +27,6 @@
 	<!--
 		TODO (by priority)
 		* Restore base layer when using permalink
-		* Make loading popup more verbose
 		* Display building infos between cluster and data zooms
 		* Export a level as a printable map
 		* Improve browser compatibility
@@ -70,8 +69,12 @@
 </head>
 <body>
 	<div class="panel overlay" id="op-loading" style="display: none;">
-		<p class="rotation">&#8634;</p>
-		<p class="text-rotation">Loading</p>
+		<div>
+			<p id="rotation">&#8634;</p>
+			<h2>Loading</h2>
+			<ul id="op-loading-info">
+			</ul>
+		</div>
 	</div>
 	
 	<div class="panel overlay" id="op-about" style="display: none;">

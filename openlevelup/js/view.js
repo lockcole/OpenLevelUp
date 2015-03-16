@@ -221,6 +221,7 @@ Web: function(ctrl) {
 	*/
 	this.setLoading = function(isLoading) {
 		$("#op-loading").toggle(isLoading);
+		$("#op-loading-info li").remove();
 	}
 	
 	/**
@@ -903,6 +904,19 @@ Web: function(ctrl) {
 			$("#infobox-list li").last().remove();
 			_nbMessages--;
 		}, 5000);
+	}
+	
+	/**
+	 * Displays a message in the loading info box, to know the current step.
+	 * @param msg The string to display
+	 */
+	this.addLoadingInfo = function(msg) {
+		//Add a new child in list, corresponding to the given message
+		var newLi = document.createElement("li");
+		$("#op-loading-info").append(newLi);
+		
+		//Add text to the added child
+		$("#op-loading-info li:last-child").html(msg);
 	}
 	
 	/**

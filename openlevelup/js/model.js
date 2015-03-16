@@ -149,6 +149,8 @@ MapData: function(ctrl) {
 	 * @param data The OAPI data
 	 */
 	this.handleOapiResponse = function(data) {
+		_ctrl.getView().addLoadingInfo("Process received data");
+		
 		//Parse data
 		_geojson = _parseOsmData(data);
 		
@@ -250,6 +252,8 @@ MapData: function(ctrl) {
 	 * @param data The OAPI data
 	 */
 	this.handleOapiClusterResponse = function(data) {
+		_ctrl.getView().addLoadingInfo("Process received data");
+		
 		//Parse data
 		_geojsonCluster = _parseOsmData(data);
 		

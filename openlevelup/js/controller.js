@@ -148,6 +148,7 @@ Ctrl: function() {
 		//Check if zoom is high enough to download data
 		if(_view.getMap().getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
 			_view.setLoading(true);
+			_view.addLoadingInfo("Clear map");
 			
 			//High zoom data download
 			if(_view.getMap().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
@@ -197,6 +198,8 @@ Ctrl: function() {
 	 * This function is called after data download finishes
 	 */
 	this.endMapUpdate = function() {
+		_view.addLoadingInfo("Refresh map");
+		
 		if(_mapdata.getLevels() != null) {
 			_view.populateSelectLevels(_mapdata.getLevels());
 			
@@ -229,6 +232,8 @@ Ctrl: function() {
 	 * This function is called after cluster data download finishes
 	 */
 	this.endMapClusterUpdate = function() {
+		_view.addLoadingInfo("Refresh map");
+		
 		_view.populateSelectLevels({});
 		
 		//Update view
@@ -268,6 +273,8 @@ Ctrl: function() {
 	this.downloadData = function(type, handler) {
 		var bounds = _view.getMapBounds();
 		var oapiRequest = null;
+		
+		_view.addLoadingInfo("Request Overpass API");
 		
 		//Prepare request depending of type
 		if(type == "cluster") {
