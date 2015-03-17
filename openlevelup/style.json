@@ -129,6 +129,13 @@
 		},
 		{
 			"type": "Style",
+			"name": "Subway entrance",
+			"description": "Subway entrance",
+			"onTags": [ { "railway": "subway_entrance" } ],
+			"style": { "icon": "img/subway.svg" }
+		},
+		{
+			"type": "Style",
 			"name": "Sliding door",
 			"description": "Door=sliding nodes",
 			"onTags": [ { "door": "sliding" } ],
@@ -140,13 +147,6 @@
 			"description": "Emergency exit",
 			"onTags": [ { "entrance": "emergency" } ],
 			"style": { "icon": "img/emergency_door.svg" }
-		},
-		{
-			"type": "Style",
-			"name": "Subway entrance",
-			"description": "Subway entrance",
-			"onTags": [ { "railway": "subway_entrance" } ],
-			"style": { "icon": "img/subway.svg" }
 		},
 		{
 			"type": "Style",
