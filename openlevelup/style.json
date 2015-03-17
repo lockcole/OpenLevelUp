@@ -52,6 +52,27 @@
 		},
 		{
 			"type": "Style",
+			"name": "Biology laboratory",
+			"description": "Biology laboratory",
+			"onTags": [ { "room": "laboratory", "laboratory": "biology|biological" } ],
+			"style": { "icon": "img/Biohazard_symbol.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Physics laboratory",
+			"description": "Physics laboratory",
+			"onTags": [ { "room": "laboratory", "laboratory": "physical" } ],
+			"style": { "icon": "img/physics.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Electronics laboratory",
+			"description": "Electronics laboratory",
+			"onTags": [ { "room": "laboratory", "laboratory": "electronics|electronic" } ],
+			"style": { "icon": "img/Octicons-circuit-board.svg" }
+		},
+		{
+			"type": "Style",
 			"name": "Amphitheatre",
 			"description": "Amphitheatre",
 			"onTags": [ { "room": "amphitheatre" } ],

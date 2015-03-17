@@ -1,6 +1,13 @@
 Changes history
 ===============
 
+17 march 2015
+-------------
+* New icons for laboratory=physical, biology, biological, electronics, electronic
+* New icon for railway=subway_entrance (more discrete)
+
+16 march 2015
+-------------
 * Latitude and longitude are now bounded in URL
 * Short links system added
 * Loading pop-up more verbose (display loading step by step)
