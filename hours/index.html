@@ -1,0 +1,231 @@
+<!doctype html5>
+<html>
+<head>
+	<title>Convertisseur opening_hours > TimeManager</title>
+	<meta charset="utf-8" />
+	
+	<!-- Libaries includes -->
+	<script type="text/javascript" src="lib/opening_hours.js"></script>
+	<script type="text/javascript" src="lib/jquery-1.11.2.min.js"></script>
+	<script type="text/javascript" src="lib/jquery-migrate-1.2.1.min.js"></script>
+	
+	<!-- CSS -->
+	<style type="text/css">
+		body {
+			margin: 0;
+			padding: 0;
+		}
+		
+		textarea {
+			width: 100%;
+		}
+		
+		div {
+			margin: 10px;
+		}
+		
+		#output {
+			display: none;
+		}
+		
+		#message {
+			display: none;
+			color: red;
+			font-weight: bold;
+		}
+		
+		footer {
+			position: absolute;
+			bottom: 0;
+			width: 100%;
+			padding: 10px 0;
+			border-top: 1px solid gray;
+		}
+	</style>
+</head>
+<body>
+	<div id="input">
+		<h1>Convertisseur opening_hours > TimeManager</h1>
+		<p>Cette page vous permet de convertir des données CSV contenant une information d'horaires d'ouverture (au format opening_hours d'OpenStreetMap) en des données CSV exploitables via le plugin Time Manager de QGIS.</p>
+		<h2>Données CSV</h2>
+		<p id="message"></p>
+		<textarea id="input_csv" rows="10"></textarea>
+		<p>Délimiteur CSV : <input type="text" id="input_delim" /> | Champ horaires : <select id="input_field"></select> | Date de début (AAAA-MM-JJ) : <input type="date" id="input_date" /> | Durée : <input type="number" step="1" id="input_duration" value="7" /><br /><input type="submit" id="input_submit" value="Convertir" /></p>
+	</div>
+	
+	<div id="output">
+		<h2>Données de sortie</h2>
+		<p>Les données sont les mêmes qu'en entrées, avec une répétition des lignes du fichier CSV à chaque heure où l'objet est ouvert. Les heures commencent le jour donné en entrée, et sont produites pour le nombre de jours donné.</p>
+		<textarea id="output_csv" rows="10"></textarea>
+	</div>
+	
+	<footer>&copy; Adrien PAVIE 2015</footer>
+	
+	<script type="text/javascript">
+		/*
+		 * Constants
+		 */
+		var NOMINATIM_RESPONSE = {"place_id":"127636125","licence":"Data \u00a9 OpenStreetMap contributors, ODbL 1.0. http:\/\/www.openstreetmap.org\/copyright","osm_type":"relation","osm_id":"102740","lat":"48.2640845","lon":"-2.9202408","display_name":"Bretagne, France m\u00e9tropolitaine, France","address":{"state":"Bretagne","country":"France","country_code":"fr"}};
+		
+		/*
+		 * General functions
+		 */
+		/**
+		 * Show a message on page
+		 */
+		function message(txt) {
+			$("#message").empty();
+			$("#message").html(txt);
+			$("#message").show();
+		}
+		
+		/**
+		 * Changes the hours field select when a CSV is loaded
+		 */
+		function updateHoursSelect() {
+			if($("#input_csv").val() != "" && $("#input_delim").val() != "") {
+				var header = $("#input_csv").val().split('\n')[0].split($("#input_delim").val());
+				
+				$('#input_field').empty();
+				var options = "";
+				for(var i in header) {
+					options += '<option value="'+ header[i] + '">' + header[i] + '</option>';
+				}
+				$('#input_field').append(options);
+			}
+		}
+		
+		/**
+		 * Checks date format AAAA-MM-JJ
+		 * @return True if format is OK
+		 */
+		function checkDate() {
+			var regex = /^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/;
+			var result = true;
+			if(!regex.test($("#input_date").val()) && $("#input_date").val() != "") {
+				message("Le format de la date est invalide");
+				result = false;
+			}
+			else {
+				$("#message").hide();
+			}
+			return result;
+		}
+		
+		/**
+		 * @param val An integer
+		 * @return The value on two digits as a string
+		 */
+		function normVal(val) {
+			return (val.toString().length >= 2) ? val : "0"+val;
+		}
+		
+		/**
+		 * @param date The date to convert
+		 * @return The date in format YYYY-MM-DD HH:MM
+		 */
+		function getDateTM(date) {
+			return date.getFullYear()+"-"+normVal(date.getMonth()+1)+"-"+normVal(date.getDate())+" "+normVal(date.getHours())+":"+normVal(date.getMinutes());
+		}
+		
+		/**
+		 * Converts CSV
+		 */
+		function convert() {
+			$("#message").hide();
+			$("#output").hide();
+			
+			var csv = $("#input_csv").val().split("\n");
+			//Check input parameters
+			var paramsOK = checkDate();
+			
+			if($("#input_field").val() == "") {
+				message("Aucun champ horaire défini");
+				paramsOK = false;
+			}
+			else if($("#input_duration").val() == "") {
+				message("Aucune durée définie");
+				paramsOK = false;
+			}
+			else if(csv.length < 2) {
+				message("Aucune donnée valide dans le CSV");
+				paramsOK = false;
+			}
+			
+			//Start converting
+			if(paramsOK) {
+				var duration = parseInt($("#input_duration").val());
+				var delim = $("#input_delim").val();
+				var idOhField = csv[0].split(delim).indexOf($("#input_field").val());
+				
+				var date = $("#input_date").val().split("-");
+				var year = parseInt(date[0]);
+				var month = parseInt(date[1]);
+				var day = parseInt(date[2]);
+				//console.log(year+" "+month+" "+day);
+				
+				var out_csv = csv[0]+delim+"date_open\n";
+				
+				if(idOhField >= 0) {
+					try {
+						//Read CSV line by line
+						for(var i = 1; i < csv.length; i++) {
+							var line = $.trim(csv[i]);
+							var values = line.split(delim);
+							
+							if(line != "" && values.length > 0) {
+								//Parse opening hours
+								//console.log(i+" - "+line+" - "+values[idOhField]);
+								var oh = new opening_hours(values[idOhField], NOMINATIM_RESPONSE);
+								
+								//Add dates for opening hours
+								for(var j=0; j < duration; j++) {
+									for(var h=0; h < 24; h++) {
+										var currentDate = new Date(year, month-1, day+j, h, 0);
+										var isOpen = oh.getState(currentDate);
+										
+										if(isOpen) {
+											out_csv += line+delim+getDateTM(currentDate)+"\n";
+										}
+									}
+								}
+							}
+							else {
+								console.log("Line "+i+" is empty");
+							}
+						}
+						
+						//Output CSV
+						$("#output_csv").val(out_csv);
+						$("#output").show();
+						
+					}
+					catch(e) {
+						console.log(e);
+						message("Erreur, vérifiez que le champ d'horaires est bien formaté<br />Ligne d'erreur : "+line[idOhField]);
+						$("#output").hide();
+					}
+				}
+				else {
+					message("Le champ d'horaires n'a pas été trouvé");
+				}
+			}
+		}
+		
+		/*
+		 * Main code
+		 */
+		//If fields are already filled
+		updateHoursSelect();
+		checkDate();
+		
+		/*
+		 * Triggers
+		 */
+		$("#input_csv").bind('input propertychange', updateHoursSelect);
+		$("#input_delim").bind('input propertychange', updateHoursSelect);
+		$("#input_date").change(checkDate);
+		$("#input_submit").click(convert);
+	</script>
+</body>
+</html>
