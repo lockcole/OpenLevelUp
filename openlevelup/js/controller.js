@@ -134,6 +134,16 @@ Ctrl: function() {
 	}
 	
 	/**
+	 * This function is called when a layer was added on map
+	 */
+	this.onLayerAdd = function(e) {
+		//Stop loading when cluster is added
+		if(e.layer._childClusters != undefined) {
+			_view.setLoading(false);
+		}
+	}
+	
+	/**
 	 * This function is called when map was moved or zoomed in/out.
 	 * @param force Force data download (optional, default: false)
 	 */
@@ -241,7 +251,7 @@ Ctrl: function() {
 		
 		//Update view
 		_view.refreshMap(_mapdata);
-		_view.setLoading(false);
+		//_view.setLoading(false);
 	}
 	
 	/**

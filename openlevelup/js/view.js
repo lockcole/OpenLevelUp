@@ -384,6 +384,7 @@ Web: function(ctrl) {
 		$("#export-link").click(controller.onExportLevel);
 		$("#export-link-img").click(controller.onExportLevelImage);
 		_map.on("baselayerchange", controller.onMapChange);
+		_map.on("layeradd", controller.onLayerAdd);
 	}
 	
 	/**

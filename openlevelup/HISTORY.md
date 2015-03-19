@@ -4,6 +4,7 @@ Changes history
 19 march 2015
 -------------
 * Better style for walls (wider and a bit darker)
+* Loading pop-up hides when cluster has done loading
 
 17 march 2015
 -------------
