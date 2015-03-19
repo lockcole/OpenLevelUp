@@ -216,8 +216,10 @@ MapData: function(ctrl) {
 			
 			//Edit indoor areas to set them as polygons instead of linestrings
 			if(((feature.properties.tags.indoor != undefined
-				&& feature.properties.tags.indoor != "yes")
-				|| feature.properties.tags.buildingpart != undefined
+				&& feature.properties.tags.indoor != "yes"
+				&& feature.properties.tags.indoor != "wall")
+				|| (feature.properties.tags.buildingpart != undefined
+				&& feature.properties.tags.buildingpart != "wall")
 				|| feature.properties.tags.highway == "elevator"
 				|| feature.properties.tags.room != undefined)
 				&& feature.geometry.type == "LineString") {

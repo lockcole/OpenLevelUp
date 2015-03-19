@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+19 march 2015
+-------------
+* Better style for walls (wider and a bit darker)
+
 17 march 2015
 -------------
 * New icons for laboratory=physical, biology, biological, electronics, electronic

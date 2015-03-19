@@ -19,8 +19,15 @@
 			"type": "Style",
 			"name": "Room",
 			"description": "Indoor rooms",
-			"onTags": [ { "indoor": "room|wall" }, { "room": "*" }, { "buildingpart": "room|wall" }, { "barrier": "wall" } ],
+			"onTags": [ { "indoor": "room" }, { "room": "*" }, { "buildingpart": "room" } ],
 			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -1, "popup": "yes" }
+		},
+		{
+			"type": "Style",
+			"name": "Wall",
+			"description": "Indoor rooms",
+			"onTags": [ { "indoor": "wall" }, { "buildingpart": "wall" }, { "barrier": "wall" } ],
+			"style": { "color": "#999999", "opacity": 1, "weight": 2, "fillColor": "red", "fillOpacity": 1, "popup": "yes" }
 		},
 		{
 			"type": "Style",
