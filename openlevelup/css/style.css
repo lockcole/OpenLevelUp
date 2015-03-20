@@ -51,8 +51,8 @@ a:hover {
  * Panel structure
  */
 .panel {
-	height: 100%;
 	position: relative;
+	height: 100%;
 }
 
 .panel.overlay {
@@ -97,10 +97,29 @@ a:hover {
 #side-panel {
 	width: 20%;
 	float: left;
-	padding: 10px;
 	background-color: #81ADFF;
 	text-align: center;
 	color: white;
+	display: table;
+	table-layout: fixed;
+	border-collapse: separate;
+	border-spacing: 0;
+}
+
+#upper, #lower {
+	display: table-row;
+	width: 100%;
+}
+
+#upper { height: 90%; }
+#lower { height: 10%; }
+
+#upper-cell, footer {
+	display: table-cell;
+}
+
+#upper-cell-content {
+	padding: 10px;
 }
 
 /* Main panel */
@@ -129,6 +148,10 @@ a:hover {
 
 #side-panel a.help:hover {
 	color: #ccc;
+}
+
+#side-panel div h2 {
+	font-size: 110%;
 }
 
 #header {
@@ -171,7 +194,7 @@ a:hover {
 	color: #FF2A2A;
 }
 
-#settings, #export {
+#settings, #export, #names {
 	border-bottom: 1px solid #2A75FF;
 	margin: 10px 0;
 }
@@ -201,17 +224,13 @@ a:hover {
 	text-align: left;
 }
 
-#export {
+#export, #names {
 	padding-bottom: 10px;
 }
 
 #export * {
 	margin: 0;
 	padding: 0;
-}
-
-#export h2 {
-	font-size: 110%;
 }
 
 #export a {
@@ -225,15 +244,21 @@ a:hover {
 	color: #ccc;
 }
 
-#footer {
+#names #search-room {
+	width: 100%;
+}
+
+#rooms {
+	width: 100%;
+	background-color: white;
+	border: 1px solid gray;
+}
+
+footer {
 	border-top: 1px solid gray;
 	color: #333;
 	text-align: center;
 	font-size: 80%;
-	position: absolute;
-	bottom: 20px;
-	left: 0;
-	width: 100%;
 	background-color: #E9F1FE;
 }
 

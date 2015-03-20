@@ -28,6 +28,7 @@
 		TODO (by priority)
 		* Icon for oneway=yes
 		* List available rooms on bbox, click make correct level appear and zoom on room
+		* Messages and alerts on bottom-right of map
 		* Export a level as a printable map
 		* Improve browser compatibility
 		* Display building infos between cluster and data zooms
@@ -85,38 +86,55 @@
 	</div>
 
 	<div class="panel" id="side-panel">
-	
-		<!-- Header -->
-		<div id="header">
-			<h1><a href="index.html" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a></h1>
-			<p>See inside buildings<br />with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
-		</div>
-		
-		<!-- Settings -->
-		<div id="settings">
-			<p>Level <select id="level" disabled="true"></select> <a class="button" id="levelUp">&uarr;</a> <a class="button" id="levelDown">&darr;</a></p>
-			<ul>
-				<li><label><input type="checkbox" id="show-legacy" checked="true" /> Show <a class="help" title="Objects that uses legacy indoor schemes, that are now deprecated">objects with legacy tagging</a></label></li>
-				<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
-				<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> Show <a class="help" title="Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.">unrendered objects</a></label></li>
-			</ul>
-		</div>
-		
-		<!-- Export -->
-		<div id="export">
-			<h2>Export level</h2>
-			<p><a id="export-link" href="#">As GeoJSON</a><!-- | <a id="export-link-img" href="#">As an image</a>--></p>
-		</div>
-		
-		<!-- Message/info box list -->
-		<div id="infobox">
-			<ul id="infobox-list">
-			</ul>
+		<div id="upper">
+			<div id="upper-cell">
+				<div id="upper-cell-content">
+					<!-- Header -->
+					<div id="header">
+						<h1><a href="index.html" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a></h1>
+						<p>See inside buildings<br />with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
+					</div>
+					
+					<!-- Settings -->
+					<div id="settings">
+						<p>Level <select id="level" disabled="true"></select> <a class="button" id="levelUp">&uarr;</a> <a class="button" id="levelDown">&darr;</a></p>
+						<ul>
+							<li><label><input type="checkbox" id="show-legacy" checked="true" /> Show <a class="help" title="Objects that uses legacy indoor schemes, that are now deprecated">objects with legacy tagging</a></label></li>
+							<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
+							<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> Show <a class="help" title="Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.">unrendered objects</a></label></li>
+						</ul>
+					</div>
+					
+					<!-- Export -->
+					<div id="export">
+						<h2>Export level</h2>
+						<p><a id="export-link" href="#">As GeoJSON</a><!-- | <a id="export-link-img" href="#">As an image</a>--></p>
+					</div>
+					
+					<!-- Room names -->
+					<div id="names">
+						<h2>List of rooms</h2>
+						<input type="text" id="search-room" value="Search" />
+						<ul id="rooms">
+							<li>Level 0</li>
+							<li>Level 1</li>
+						</ul>
+					</div>
+					
+					<!-- Message/info box list -->
+					<div id="infobox">
+						<ul id="infobox-list">
+						</ul>
+					</div>
+				</div>
+			</div>
 		</div>
 		
 		<!-- Footer -->
-		<div id="footer">
-			<p><a id="osm-link" href="http://openstreetmap.org">See this on OpenStreetMap</a><br /><a id="shortlink" href="">Shortlink</a> | <a id="permalink" href="">Permalink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
+		<div id="lower">
+			<footer>
+				<p><a id="osm-link" href="http://openstreetmap.org">See this on OpenStreetMap</a><br /><a id="shortlink" href="">Shortlink</a> | <a id="permalink" href="">Permalink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
+			</footer>
 		</div>
 	</div>
 	
