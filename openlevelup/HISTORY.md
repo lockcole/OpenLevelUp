@@ -1,6 +1,14 @@
 Changes history
 ===============
 
+21 march 2015
+-------------
+* Clickable room list added
+
+20 march 2015
+-------------
+* Better CSS rules for side panel and footer
+
 19 march 2015
 -------------
 * Better style for walls (wider and a bit darker)

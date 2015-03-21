@@ -29,6 +29,7 @@
 		* Icon for oneway=yes
 		* List available rooms on bbox, click make correct level appear and zoom on room
 		* Messages and alerts on bottom-right of map
+		* Hide export menu when not in data zooms
 		* Export a level as a printable map
 		* Improve browser compatibility
 		* Display building infos between cluster and data zooms
@@ -115,10 +116,19 @@
 					<div id="names">
 						<h2>List of rooms</h2>
 						<input type="text" id="search-room" value="Search" />
-						<ul id="rooms">
-							<li>Level 0</li>
-							<li>Level 1</li>
-						</ul>
+						<div id="rooms-container">
+							<div id="rooms">
+								<!--div class="lvl-row">
+									<div class="lvl-name">0</div>
+									<div class="lvl-rooms">
+										<ul>
+											<li class="ref">B 015</li>
+											<li class="ref">B 016</li>
+										</ul>
+									</div>
+								</div-->
+							</div>
+						</div>
 					</div>
 					
 					<!-- Message/info box list -->

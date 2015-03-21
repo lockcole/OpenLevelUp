@@ -147,6 +147,26 @@ function centroidPolygon(geom) {
 }
 
 /**
+ * @return The centroid of given GeoJSON linestring
+ */
+function centroidLineString(geom) {
+	var centroid = [0, 0];
+	var first = true;
+	
+	for(var i in geom.coordinates) {
+		if(i < geom.coordinates.length) {
+			centroid[0] += geom.coordinates[i][0];
+			centroid[1] += geom.coordinates[i][1];
+		}
+	}
+	
+	centroid[0] = centroid[0] / (geom.coordinates.length);
+	centroid[1] = centroid[1] / (geom.coordinates.length);
+	
+	return centroid;
+}
+
+/**
  * Contains characters used in base 62
  */
 var base62 = [ "0","1","2","3","4","5","6","7","8","9",

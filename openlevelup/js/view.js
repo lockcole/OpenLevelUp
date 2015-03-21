@@ -208,6 +208,13 @@ Web: function(ctrl) {
 	this.showUnrendered = function() {
 		return $("#show-unrendered").prop("checked");
 	}
+	
+	/**
+	 * @return True if something is loading
+	 */
+	this.isLoading = function() {
+		return $("#op-loading").is(":visible");
+	}
 
 //MODIFIERS
 	/**
@@ -465,6 +472,8 @@ Web: function(ctrl) {
 		
 		//Update permalink
 		_self.updatePermalink(_map);
+		
+		$.event.trigger({ type: "donerefresh" });
 	}
 	
 	/**
@@ -973,6 +982,80 @@ Web: function(ctrl) {
 		
 		//Update OSM link
 		$("#osm-link").attr('href', "http://openstreetmap.org/#map="+_map.getZoom()+"/"+_map.getCenter().lat+"/"+_map.getCenter().lng);
+	}
+	
+	/**
+	 * Updates the room names list
+	 * @param roomNames The room names (from model), or null to hide
+	 */
+	this.populateRoomNames = function(roomNames) {
+		if(roomNames != null) {
+			$("#names").show();
+			$("#rooms").empty();
+			
+			for(var lvl in roomNames) {
+				//Create new level row
+				var newRow = document.createElement("div");
+				
+				//Add class
+				$("#rooms").append(newRow);
+				$("#rooms div:last").addClass("lvl-row").attr("id", "lvl"+lvl);
+				
+				//Create cell for level name
+				var newLvlName = document.createElement("div");
+				$("#lvl"+lvl).append(newLvlName);
+				$("#lvl"+lvl+" div").addClass("lvl-name").html(lvl);
+				
+				//Create cell for level rooms
+				var newLvlRooms = document.createElement("div");
+				$("#lvl"+lvl).append(newLvlRooms);
+				$("#lvl"+lvl+" div:last").addClass("lvl-rooms").attr("id", "lvl"+lvl+"-rooms");
+				
+				//Init room list
+				var newRoomList = document.createElement("ul");
+				$("#lvl"+lvl+"-rooms").append(newRoomList);
+				
+				//Add each room
+				for(var room in roomNames[lvl]) {
+					var newRoom = document.createElement("li");
+					$("#lvl"+lvl+"-rooms ul").append(newRoom);
+					$("#lvl"+lvl+"-rooms ul li:last").addClass("ref");
+					
+					var roomLink = document.createElement("a");
+					$("#lvl"+lvl+"-rooms ul li:last").append(roomLink);
+					$("#lvl"+lvl+"-rooms ul li:last a").html(room).attr("href", "#").attr("onclick", "controller.goTo('"+lvl+"', "+_coordinates(roomNames[lvl][room])+")");
+				}
+			}
+		}
+		else {
+			$("#names").hide();
+		}
+	}
+	
+	/**
+	 * Returns the centroid coordinates of given object as a string
+	 * @param geom The feature geometry
+	 * @return The coordinates, as a string with format "lat, lon"
+	 */
+	function _coordinates(geom) {
+		var result = "";
+		
+		if(geom.type == "Point") {
+			result = geom.coordinates[1]+", "+geom.coordinates[0];
+		}
+		else if(geom.type == "LineString") {
+			var centroid = centroidLineString(geom);
+			result = centroid[1]+", "+centroid[0];
+		}
+		else if(geom.type == "Polygon") {
+			var centroid = centroidPolygon(geom);
+			result = centroid[1]+", "+centroid[0];
+		}
+		else {
+			console.log("Invalid geometry type");
+		}
+		
+		return result;
 	}
 	
 	/**

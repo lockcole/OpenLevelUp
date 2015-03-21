@@ -228,7 +228,7 @@ a:hover {
 	padding-bottom: 10px;
 }
 
-#export * {
+#export *, #names * {
 	margin: 0;
 	padding: 0;
 }
@@ -244,14 +244,51 @@ a:hover {
 	color: #ccc;
 }
 
+#names {
+	display: none;
+}
+
 #names #search-room {
 	width: 100%;
 }
 
+#rooms-container {
+	height: 100px;
+	overflow-y: scroll;
+	background-color: #E9F1FE;
+	margin: 10px 0;
+}
+
 #rooms {
+	color: #333;
+	display: table;
+	border-collapse: separate;
+	border-spacing: 10px;
 	width: 100%;
-	background-color: white;
-	border: 1px solid gray;
+}
+
+.lvl-row {
+	display: table-row;
+}
+
+.lvl-name, .lvl-rooms {
+	display: table-cell;
+}
+
+.lvl-name {
+	vertical-align: top;
+	border-right: 1px solid #2A75FF;
+	font-weight: bold;
+}
+
+.lvl-rooms {
+	vertical-align: middle;
+}
+
+.lvl-rooms ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
 }
 
 footer {

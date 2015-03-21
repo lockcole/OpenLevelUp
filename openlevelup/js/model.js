@@ -50,6 +50,9 @@ MapData: function(ctrl) {
 	/** Does the cluster contain legacy data ? **/
 	var _legacyCluster = false;
 	
+	/** The names of all rooms in data **/
+	var _roomNames = null;
+	
 	/** The application controller **/
 	var _ctrl = ctrl;
 	
@@ -99,6 +102,13 @@ MapData: function(ctrl) {
 		return _levels;
 	}
 	
+	/**
+	 * @return The room names, as an object[level][roomName] = featureGeometry
+	 */
+	this.getRoomNames = function() {
+		return _roomNames;
+	}
+	
 //MODIFIERS
 	/**
 	 * Changes the data bounding box.
@@ -130,6 +140,8 @@ MapData: function(ctrl) {
 	this.cleanData = function() {
 		_geojson = null;
 		_bbox = null;
+		_roomNames = null;
+		_levels = null;
 	}
 	
 	/**
@@ -153,6 +165,9 @@ MapData: function(ctrl) {
 		
 		//Parse data
 		_geojson = _parseOsmData(data);
+		
+		//Create _roomNames object
+		_roomNames = new Object();
 		
 		//Retrieve level informations
 		var levelsSet = new Set();
@@ -210,6 +225,7 @@ MapData: function(ctrl) {
 					}
 				}
 				feature.properties.levels = currentLevel;
+				_addName(feature);
 			} else {
 				//console.log("No valid level found for "+feature.properties.type+" "+feature.properties.id);
 			}
@@ -245,6 +261,11 @@ MapData: function(ctrl) {
 		}
 		_levels.sort(function (a,b) { return a-b;});
 		
+		//Reset room names if no levels found
+		if(Object.keys(_roomNames).length == 0) {
+			_roomNames = null;
+		}
+		
 		//Call this method to notify controller that download is done
 		_ctrl.endMapUpdate();
 	}
@@ -261,6 +282,36 @@ MapData: function(ctrl) {
 		
 		//Call this method to notify controller that download is done
 		_ctrl.endMapClusterUpdate();
+	}
+	
+	/**
+	 * Adds a feature in _roomNames
+	 * @param feature The feature name
+	 */
+	function _addName(feature) {
+		//Look if the feature has a name or ref
+		var name = null;
+		
+		if(feature.properties.tags.name != undefined) {
+			name = feature.properties.tags.name;
+		}
+		else if(feature.properties.tags.ref != undefined) {
+			name = feature.properties.tags.ref;
+		}
+		
+		//If a name was found, add feature
+		if(name != null) {
+			//Add object for each level
+			for(var i in feature.properties.levels) {
+				//Check if _roomNames as already an array for the given level
+				if(_roomNames[feature.properties.levels[i]] == undefined) {
+					_roomNames[feature.properties.levels[i]] = new Object();
+				}
+				
+				//Add this feature
+				_roomNames[feature.properties.levels[i]][name] = feature.geometry;
+			}
+		}
 	}
 
 /*

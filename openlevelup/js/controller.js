@@ -48,6 +48,9 @@ Ctrl: function() {
 	/** Should we use level parameter from URL ? **/
 	var _useLevelURL = true;
 	
+	/** Is the map going to somewhere (goTo() method called) ? **/
+	var _isGoingTo = false;
+	
 	/** The current object **/
 	var _self = this;
 	
@@ -66,6 +69,21 @@ Ctrl: function() {
 		return _mapdata;
 	}
 	
+	/**
+	 * @return True if goTo() method just called
+	 */
+	this.isGoingTo = function() {
+		return _isGoingTo;
+	}
+
+//MODIFIERS
+	/**
+	 * Called when goTo ends
+	 */
+	this.endGoTo = function() {
+		_isGoingTo = false;
+	}
+
 //OTHER METHODS
 	/**
 	 * This function initializes the controller
@@ -101,8 +119,7 @@ Ctrl: function() {
 	 * @param lvl The new level to display
 	 */
 	this.toLevel = function(lvl) {
-		console.log(_mapdata.getLevels().indexOf(lvl));
-		if(_mapdata != null && _mapdata.getLevels() != null && _mapdata.getLevels().indexOf(lvl) >= 0) {
+		if(_mapdata != null && _mapdata.getLevels() != null && _mapdata.getLevels().indexOf(parseFloat(lvl)) >= 0) {
 			//Change level
 			_view.setCurrentLevel(lvl);
 			_view.refreshMap(_mapdata);
@@ -202,6 +219,7 @@ Ctrl: function() {
 		//Else, clean map
 		else {
 			_view.populateSelectLevels({});
+			_view.populateRoomNames(null);
 			_view.displayMessage("Zoom in to see more information", "info");
 			_view.refreshMap(_mapdata);
 		}
@@ -215,6 +233,7 @@ Ctrl: function() {
 		
 		if(_mapdata.getLevels() != null) {
 			_view.populateSelectLevels(_mapdata.getLevels());
+			_view.populateRoomNames(_mapdata.getRoomNames());
 			
 			//Test how many levels are available
 			if(_mapdata.getLevels() != null && _mapdata.getLevels().length > 0) {
@@ -248,6 +267,7 @@ Ctrl: function() {
 		_view.addLoadingInfo("Refresh map");
 		
 		_view.populateSelectLevels({});
+		_view.populateRoomNames(null);
 		
 		//Update view
 		_view.refreshMap(_mapdata);
@@ -275,6 +295,24 @@ Ctrl: function() {
 	 */
 	this.onExportLevelImage = function() {
 		//TODO
+	}
+	
+	/**controller.endGoTo();
+	 * This functions makes map go to given coordinates, at given level
+	 * @param lvl The level
+	 * @param lat The latitude
+	 * @param lon The longitude
+	 */
+	this.goTo = function(lvl, lat, lon) {
+		_view.getMap().setView(L.latLng(lat, lon), _view.getMap().getMaxZoom());
+		
+		if(_view.isLoading()) {
+			_isGoingTo = true;
+			$(document).on("donerefresh", function() { if(controller.isGoingTo()) { controller.endGoTo(); controller.toLevel(lvl); } });
+		}
+		else {
+			_self.toLevel(lvl);
+		}
 	}
 	
 	/**
