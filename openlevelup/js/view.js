@@ -1035,17 +1035,19 @@ Web: function(ctrl) {
 	 */
 	this.populateRoomNames = function(roomNames) {
 		var filter = (_self.isSearchRoomLongEnough()) ? $("#search-room").val() : null;
-		var roomNamesFiltered = null;
 		
 		//Filter room names
-		if(filter != null) {
-			roomNamesFiltered = new Object();
+		if(roomNames != null) {
+			var roomNamesFiltered = new Object();
 			
 			for(var lvl in roomNames) {
 				roomNamesFiltered[lvl] = new Object();
 				
 				for(var room in roomNames[lvl]) {
-					if(room.toLowerCase().indexOf(filter.toLowerCase()) >= 0) {
+					if((filter == null || room.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
+						&& (_getStyle(roomNames[lvl][room]).popup == undefined
+						|| _getStyle(roomNames[lvl][room]).popup == "yes")) {
+
 						roomNamesFiltered[lvl][room] = roomNames[lvl][room];
 					}
 				}
@@ -1056,15 +1058,16 @@ Web: function(ctrl) {
 				}
 			}
 		}
-		else {
-			roomNamesFiltered = roomNames;
-		}
 		
-		if(roomNamesFiltered != null) {
+		if(roomNames != null && roomNamesFiltered != null) {
 			$("#names").show();
 			$("#rooms").empty();
 			
-			for(var lvl in roomNamesFiltered) {
+			var levelsKeys = Object.keys(roomNamesFiltered);
+			levelsKeys.sort(function (a,b) { return parseFloat(a)-parseFloat(b);});
+			
+			for(var i in levelsKeys) {
+				var lvl = levelsKeys[i];
 				//Create new level row
 				var newRow = document.createElement("div");
 				
@@ -1097,7 +1100,7 @@ Web: function(ctrl) {
 					$("#lvl"+lvl+"-rooms ul li:last a")
 						.html(room)
 						.attr("href", "#")
-						.attr("onclick", "controller.goTo('"+lvl+"', "+_coordinates(roomNamesFiltered[lvl][room])+")");
+						.attr("onclick", "controller.goTo('"+lvl+"', "+_coordinates(roomNamesFiltered[lvl][room].geometry)+")");
 				}
 			}
 		}

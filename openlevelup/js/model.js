@@ -309,7 +309,7 @@ MapData: function(ctrl) {
 				}
 				
 				//Add this feature
-				_roomNames[feature.properties.levels[i]][name] = feature.geometry;
+				_roomNames[feature.properties.levels[i]][name] = feature;
 			}
 		}
 	}
