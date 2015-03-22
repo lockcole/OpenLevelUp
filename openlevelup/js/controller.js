@@ -161,6 +161,23 @@ Ctrl: function() {
 	}
 	
 	/**
+	 * When search room input is changed
+	 */
+	this.onSearchRoomChange = function() {
+		if(_view.getSearchRoom().length == 0 || _view.isSearchRoomLongEnough()) {
+			_self.resetRoomNames();
+		}
+	}
+	
+	/**
+	 * Resets the room names list
+	 */
+	this.resetRoomNames = function() {
+		_view.resetSearchRoom();
+		_view.populateRoomNames(_mapdata.getRoomNames());
+	}
+	
+	/**
 	 * This function is called when map was moved or zoomed in/out.
 	 * @param force Force data download (optional, default: false)
 	 */

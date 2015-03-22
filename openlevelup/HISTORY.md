@@ -1,9 +1,10 @@
 Changes history
 ===============
 
-21 march 2015
+22 march 2015
 -------------
-* Clickable room list added
+* Clickable room list added (with search field)
+* Alert messages moved to bottom right corner of the page
 
 20 march 2015
 -------------

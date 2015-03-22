@@ -65,6 +65,7 @@ a:hover {
 	background-color: rgba(128,128,128,0.8);
 	color: white;
 	text-align: center;
+	display: none;
 }
 
 .panel.overlay * {
@@ -91,6 +92,49 @@ a:hover {
 	position: absolute;
 	bottom: 10px;
 	right: 20px;
+}
+
+/* Infobox */
+#infobox {
+	position: absolute;
+	bottom: 20px;
+	right: 10px;
+	z-index: 10;
+	display: none;
+	
+	font-weight: bold;
+	font-size: 90%;
+	padding: 0 10px;
+	text-align: center;
+	padding: 0;
+	margin: 0;
+	/*text-shadow: 0.2em 0.2em 0.2em rgba(0,0,0,0.3);*/
+}
+
+#infobox-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+#infobox li {
+	padding: 5px;
+	margin-bottom: 5px;
+}
+
+#infobox li.info {
+	background-color: #D2E6FF;
+	color: #2A86FF;
+}
+
+#infobox li.alert {
+	background-color: #FEFFAA;
+	color: #FF862F;
+}
+
+#infobox li.error {
+	background-color: #FFD9D9;
+	color: #FF2A2A;
 }
 
 /* Side panel */
@@ -158,42 +202,6 @@ a:hover {
 	text-align: center;
 }
 
-#infobox {
-	font-weight: bold;
-	font-size: 90%;
-	padding: 0 10px;
-	text-align: center;
-	padding: 0;
-	margin: 0;
-	/*text-shadow: 0.2em 0.2em 0.2em rgba(0,0,0,0.3);*/
-}
-
-#infobox-list {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-}
-
-#infobox li {
-	padding: 5px;
-	margin-bottom: 5px;
-}
-
-#infobox li.info {
-	background-color: #D2E6FF;
-	color: #2A86FF;
-}
-
-#infobox li.alert {
-	background-color: #FEFFAA;
-	color: #FF862F;
-}
-
-#infobox li.error {
-	background-color: #FFD9D9;
-	color: #FF2A2A;
-}
-
 #settings, #export, #names {
 	border-bottom: 1px solid #2A75FF;
 	margin: 10px 0;
@@ -244,11 +252,20 @@ a:hover {
 	color: #ccc;
 }
 
-#names {
+#names, #export {
 	display: none;
 }
 
-#names #search-room {
+.input-max {
+	display: table;
+}
+
+.input-max .text {
+	display: table-cell;
+	width: 100%;
+}
+
+.input-max .text input {
 	width: 100%;
 }
 
@@ -283,6 +300,7 @@ a:hover {
 
 .lvl-rooms {
 	vertical-align: middle;
+	width: 100%;
 }
 
 .lvl-rooms ul {
@@ -297,6 +315,7 @@ footer {
 	text-align: center;
 	font-size: 80%;
 	background-color: #E9F1FE;
+	vertical-align: middle;
 }
 
 /*

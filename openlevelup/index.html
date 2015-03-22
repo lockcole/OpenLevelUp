@@ -27,9 +27,6 @@
 	<!--
 		TODO (by priority)
 		* Icon for oneway=yes
-		* List available rooms on bbox, click make correct level appear and zoom on room
-		* Messages and alerts on bottom-right of map
-		* Hide export menu when not in data zooms
 		* Export a level as a printable map
 		* Improve browser compatibility
 		* Display building infos between cluster and data zooms
@@ -71,7 +68,7 @@
 	<link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-	<div class="panel overlay" id="op-loading" style="display: none;">
+	<div class="panel overlay" id="op-loading">
 		<div>
 			<p id="rotation">&#8634;</p>
 			<h2>Loading</h2>
@@ -80,10 +77,16 @@
 		</div>
 	</div>
 	
-	<div class="panel overlay" id="op-about" style="display: none;">
+	<div class="panel overlay" id="op-about">
 		<h2>About OpenLevelUp!</h2>
 		<p>This website allows you to see <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project. You can navigate through the building levels with the buttons on the left panel.<br />Want to know more about the project ? Look at the <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup">GitHub repository</a>. Want to contact the author ? <a href="mailto:panieravide@riseup.net">Here you go</a>.<br />This website is licensed under <a href="https://www.gnu.org/licenses/gpl.html">GPL v3</a>.</p>
 		<p><a id="about-close" href="#">Close</a></p>
+	</div>
+	
+	<!-- Message/info box list -->
+	<div id="infobox">
+		<ul id="infobox-list">
+		</ul>
 	</div>
 
 	<div class="panel" id="side-panel">
@@ -106,35 +109,20 @@
 						</ul>
 					</div>
 					
-					<!-- Export -->
-					<div id="export">
-						<h2>Export level</h2>
-						<p><a id="export-link" href="#">As GeoJSON</a><!-- | <a id="export-link-img" href="#">As an image</a>--></p>
-					</div>
-					
 					<!-- Room names -->
 					<div id="names">
 						<h2>List of rooms</h2>
-						<input type="text" id="search-room" value="Search" />
+						<p class="input-max"><span class="text"><input type="text" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
 						<div id="rooms-container">
 							<div id="rooms">
-								<!--div class="lvl-row">
-									<div class="lvl-name">0</div>
-									<div class="lvl-rooms">
-										<ul>
-											<li class="ref">B 015</li>
-											<li class="ref">B 016</li>
-										</ul>
-									</div>
-								</div-->
 							</div>
 						</div>
 					</div>
 					
-					<!-- Message/info box list -->
-					<div id="infobox">
-						<ul id="infobox-list">
-						</ul>
+					<!-- Export -->
+					<div id="export">
+						<h2>Export level</h2>
+						<p><a id="export-link" href="#">As GeoJSON</a><!-- | <a id="export-link-img" href="#">As an image</a>--></p>
 					</div>
 				</div>
 			</div>

@@ -215,6 +215,20 @@ Web: function(ctrl) {
 	this.isLoading = function() {
 		return $("#op-loading").is(":visible");
 	}
+	
+	/**
+	 * @return True if the searched string for filtering rooms is long enough
+	 */
+	this.isSearchRoomLongEnough = function() {
+		return $("#search-room").val() != "Search" && $("#search-room").val().length >= 3;
+	}
+	
+	/**
+	 * @return The search room string
+	 */
+	this.getSearchRoom = function() {
+		return ($("#search-room").val() != "Search") ? $("#search-room").val() : "";
+	}
 
 //MODIFIERS
 	/**
@@ -252,6 +266,18 @@ Web: function(ctrl) {
 				_tileLayer = i;
 				break;
 			}
+		}
+	}
+	
+	/**
+	 * Resets search room field
+	 */
+	this.resetSearchRoom = function() {
+		if($("#search-room").val() == "Search" && $("#search-room").is(":focus")) {
+			$("#search-room").val("");
+		}
+		else if(!$("#search-room").is(":focus")) {
+			$("#search-room").val("Search");
 		}
 	}
 
@@ -390,8 +416,16 @@ Web: function(ctrl) {
 		$("#show-unrendered").change(controller.onMapChange);
 		$("#export-link").click(controller.onExportLevel);
 		$("#export-link-img").click(controller.onExportLevelImage);
+		$("#search-room").click(controller.getView().onSearchRoomFocusChange);
+		$("#search-room").focus(controller.getView().onSearchRoomFocusChange);
+		$("#search-room").focusout(controller.getView().onSearchRoomFocusChange);
+		$("#search-room").bind("input propertychange", controller.onSearchRoomChange);
+		$("#search-room-reset").click(controller.resetRoomNames);
 		_map.on("baselayerchange", controller.onMapChange);
 		_map.on("layeradd", controller.onLayerAdd);
+		
+		//Reset search room field
+		_self.resetSearchRoom();
 	}
 	
 	/**
@@ -435,6 +469,8 @@ Web: function(ctrl) {
 				}
 				_markersLayer.addTo(_map);
 			}
+			
+			$("#export").show();
 		}
 		else if(_map.getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
 			_dataLayer = new L.MarkerClusterGroup({
@@ -443,6 +479,11 @@ Web: function(ctrl) {
 				maxClusterRadius: 30
 			});
 			_dataLayer.addLayer(L.geoJson(mapData.getClusterData()));
+			
+			$("#export").hide();
+		}
+		else {
+			$("#export").hide();
 		}
 		
 		//Add data layer to map
@@ -925,6 +966,7 @@ Web: function(ctrl) {
 		//Add a new child in list, corresponding to the given message
 		var newLi = document.createElement("li");
 		if(_nbMessages == 0) {
+			$("#infobox").show();
 			$("#infobox-list").append(newLi);
 		}
 		else {
@@ -940,6 +982,9 @@ Web: function(ctrl) {
 		setTimeout(function() {
 			$("#infobox-list li").last().remove();
 			_nbMessages--;
+			if(_nbMessages == 0) {
+				$("#infobox").hide();
+			}
 		}, 5000);
 	}
 	
@@ -989,11 +1034,37 @@ Web: function(ctrl) {
 	 * @param roomNames The room names (from model), or null to hide
 	 */
 	this.populateRoomNames = function(roomNames) {
-		if(roomNames != null) {
+		var filter = (_self.isSearchRoomLongEnough()) ? $("#search-room").val() : null;
+		var roomNamesFiltered = null;
+		
+		//Filter room names
+		if(filter != null) {
+			roomNamesFiltered = new Object();
+			
+			for(var lvl in roomNames) {
+				roomNamesFiltered[lvl] = new Object();
+				
+				for(var room in roomNames[lvl]) {
+					if(room.toLowerCase().indexOf(filter.toLowerCase()) >= 0) {
+						roomNamesFiltered[lvl][room] = roomNames[lvl][room];
+					}
+				}
+				
+				//Remove level if empty
+				if(Object.keys(roomNamesFiltered[lvl]).length == 0) {
+					delete roomNamesFiltered[lvl];
+				}
+			}
+		}
+		else {
+			roomNamesFiltered = roomNames;
+		}
+		
+		if(roomNamesFiltered != null) {
 			$("#names").show();
 			$("#rooms").empty();
 			
-			for(var lvl in roomNames) {
+			for(var lvl in roomNamesFiltered) {
 				//Create new level row
 				var newRow = document.createElement("div");
 				
@@ -1016,19 +1087,34 @@ Web: function(ctrl) {
 				$("#lvl"+lvl+"-rooms").append(newRoomList);
 				
 				//Add each room
-				for(var room in roomNames[lvl]) {
+				for(var room in roomNamesFiltered[lvl]) {
 					var newRoom = document.createElement("li");
 					$("#lvl"+lvl+"-rooms ul").append(newRoom);
 					$("#lvl"+lvl+"-rooms ul li:last").addClass("ref");
 					
 					var roomLink = document.createElement("a");
 					$("#lvl"+lvl+"-rooms ul li:last").append(roomLink);
-					$("#lvl"+lvl+"-rooms ul li:last a").html(room).attr("href", "#").attr("onclick", "controller.goTo('"+lvl+"', "+_coordinates(roomNames[lvl][room])+")");
+					$("#lvl"+lvl+"-rooms ul li:last a")
+						.html(room)
+						.attr("href", "#")
+						.attr("onclick", "controller.goTo('"+lvl+"', "+_coordinates(roomNamesFiltered[lvl][room])+")");
 				}
 			}
 		}
 		else {
 			$("#names").hide();
+		}
+	}
+	
+	/**
+	 * When search room input is changed
+	 */
+	this.onSearchRoomFocusChange = function() {
+		if($("#search-room").val() == "Search" && $("#search-room").is(":focus")) {
+			$("#search-room").val("");
+		}
+		else if($("#search-room").val() == "" && !$("#search-room").is(":focus")) {
+			_ctrl.resetRoomNames();
 		}
 	}
 	
