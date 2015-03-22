@@ -32,7 +32,7 @@ Some other parameters are available there.
 License
 -------
 
-Copyright 2014 Adrien PAVIE
+Copyright 2015 Adrien PAVIE
 
 See LICENSE for complete GPL3 license.
 

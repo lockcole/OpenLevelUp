@@ -95,6 +95,9 @@ Web: function(ctrl) {
 	/** The array which contains markers for polygon icons **/
 	var _markersPolygons = null;
 	
+	/** The array which contains all polyline decorators **/
+	var _markersLinestrings = null;
+	
 	/** The layer group that contains all overlay markers **/
 	var _markersLayer = null;
 	
@@ -451,6 +454,7 @@ Web: function(ctrl) {
 		if(_map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
 			_objectLayered = new Object();
 			_markersPolygons = new Object();
+			_markersLinestrings = new Object();
 			_dataLayer = L.geoJson(
 				mapData.getData(),
 				{
@@ -461,14 +465,23 @@ Web: function(ctrl) {
 				}
 			);
 			
+			_markersLayer = L.layerGroup();
+			
 			//Add eventual polygon icons
 			if(_markersPolygons != null && Object.keys(_markersPolygons).length > 0) {
-				_markersLayer = L.layerGroup();
 				for(var i in _markersPolygons) {
 					_markersLayer.addLayer(_markersPolygons[i]);
 				}
-				_markersLayer.addTo(_map);
 			}
+			
+			//Add eventual linestring icons
+			if(_markersLinestrings != null && Object.keys(_markersLinestrings).length > 0) {
+				for(var i in _markersLinestrings) {
+					_markersLayer.addLayer(_markersLinestrings[i]);
+				}
+			}
+			
+			_markersLayer.addTo(_map);
 			
 			$("#export").show();
 		}
@@ -715,6 +728,35 @@ Web: function(ctrl) {
 			var centroid = centroidPolygon(feature.geometry);
 			var marker = _createMarker(L.latLng(centroid[1], centroid[0]), feature, result);
 			_markersPolygons[feature.properties.type+feature.properties.id] = marker;
+		}
+		else if(result.icon != undefined && feature.geometry.type == "LineString") {
+			var nbSegments = feature.geometry.coordinates.length - 1;
+			
+			//For each segment, add an icon
+			for(var i=0; i < nbSegments; i++) {
+				var coord1 = feature.geometry.coordinates[i];
+				var coord2 = feature.geometry.coordinates[i+1];
+				var coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
+				
+				var myIcon = L.icon({
+					iconUrl: result.icon,
+					iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
+					iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
+					popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
+				});
+				
+				var marker = null;
+				
+				if(result.rotateIcon) {
+					var angle = azimuth({lat: coord1[1], lng: coord1[0], elv: 0}, {lat: coord2[1], lng: coord2[0], elv: 0}).azimuth;
+					marker = L.rotatedMarker(L.latLng(coordMid[1], coordMid[0]), {icon: myIcon, angle: angle});
+				}
+				else {
+					marker = _createMarker(L.latLng(coordMid[1], coordMid[0]), feature, result);
+				}
+
+				_markersLinestrings[feature.properties.type+feature.properties.id+"-"+i] = marker;
+			}
 		}
 		
 		return result;

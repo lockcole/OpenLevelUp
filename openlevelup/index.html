@@ -26,7 +26,6 @@
 <head>
 	<!--
 		TODO (by priority)
-		* Icon for oneway=yes
 		* Export a level as a printable map
 		* Improve browser compatibility
 		* Display building infos between cluster and data zooms
@@ -48,14 +47,22 @@
 	<!-- FileSaver include -->
 	<script src="lib/FileSaver.js"></script>
 	
+	<!-- Azimuth include -->
+	<script src="lib/azimuth.js"></script>
+	
 	<!-- jQuery includes -->
 	<script src="lib/jquery-1.11.2.min.js"></script>
 	<script src="lib/jquery-migrate-1.2.1.min.js"></script>
 	
-	<!-- Leaflet.Markercluster includes -->
+	<!-- Leaflet plugin includes -->
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.css" />
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.Default.css" />
 	<script src="lib/markercluster/leaflet.markercluster-src.js"></script>
+	<!--script src="lib/polylinedecorator/L.LineUtil.PolylineDecorator.js"></script-->
+	<script src="lib/polylinedecorator/L.RotatedMarker.js"></script>
+	<!--script src="lib/polylinedecorator/L.Symbol.js"></script>
+	<script src="lib/polylinedecorator/L.PolylineDecorator.js"></script>
+	<script src="lib/polylinedecorator/leaflet.polylineDecorator.min.js"></script-->
 	
 	<!-- OpenLevelUp includes -->
 	<script src="js/openlevelup.js" type="text/javascript"></script>
@@ -155,6 +162,13 @@
 		
 		//Trigger for map movements
 		controller.getView().getMap().on('moveend', function(e) { controller.onMapUpdate(); });
+		
+		//var pd = L.polylineDecorator([[54, -6], [55, -7], [56, -2], [55, 1], [53, 0], [54, -6]], { patterns: [ { offset: 0, repeat: 20, symbol: L.Symbol.dash({pixelSize: 1}) } ] });
+		//pd.addTo(controller.getView().getMap());
+        /*patterns: [
+            {offset: 0, repeat: 10, symbol: L.Symbol.dash({pixelSize: 0})}
+        ]
+    }).addTo(controller.getView().getMap());*/
 	</script>
 </body>
 </html>

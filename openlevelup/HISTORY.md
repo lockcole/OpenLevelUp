@@ -5,6 +5,8 @@ Changes history
 -------------
 * Clickable room list added (with search field)
 * Alert messages moved to bottom right corner of the page
+* Icons on polylines now supported
+* Icons on polylines with rotation also supported (oneway)
 
 20 march 2015
 -------------

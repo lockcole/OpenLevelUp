@@ -38,6 +38,20 @@
 		},
 		{
 			"type": "Style",
+			"name": "Oneway path",
+			"description": "Oneway path",
+			"onTags": [ { "oneway": "yes" }, { "conveying": "forward" } ],
+			"style": { "icon": "img/arrow1_up.svg", "rotateIcon": true }
+		},
+		{
+			"type": "Style",
+			"name": "Oneway path",
+			"description": "Oneway path",
+			"onTags": [ { "oneway": "-1" }, { "conveying": "backward" } ],
+			"style": { "icon": "img/arrow1_down.svg", "rotateIcon": true }
+		},
+		{
+			"type": "Style",
 			"name": "Area",
 			"description": "Indoor areas ('OR' example for values)",
 			"onTags": [ { "indoor": "area|corridor" }, { "highway": "pedestrian|footway", "area": "yes" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|entrance|hall" } ],
