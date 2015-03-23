@@ -195,7 +195,7 @@
 			"name": "Barrier",
 			"description": "Barrier icons",
 			"onTags": [ { "barrier": "*" } ],
-			"style": { "icon": "img/sjjb/barrier_${barrier}.png" }
+			"style": { "icon": "img/sjjb/barrier_${barrier}.png", "showMissingIcon": false }
 		},
 		{
 			"type": "Style",
