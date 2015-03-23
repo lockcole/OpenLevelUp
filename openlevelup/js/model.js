@@ -225,6 +225,7 @@ MapData: function(ctrl) {
 					}
 				}
 				feature.properties.levels = currentLevel;
+				feature.properties.levels.sort(function(a,b) { return parseFloat(a) - parseFloat(b); });
 				_addName(feature);
 			} else {
 				//console.log("No valid level found for "+feature.properties.type+" "+feature.properties.id);

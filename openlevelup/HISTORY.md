@@ -1,12 +1,17 @@
 Changes history
 ===============
 
+23 march 2015
+-------------
+* Minor fix for level up and down buttons in pop-ups (levels not sorted)
+
 22 march 2015
 -------------
 * Clickable room list added (with search field)
 * Alert messages moved to bottom right corner of the page
 * Icons on polylines now supported
 * Icons on polylines with rotation also supported (oneway)
+* Crypt icon edited (more generic)
 
 20 march 2015
 -------------
