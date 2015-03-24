@@ -272,9 +272,12 @@ Ctrl: function() {
 			}
 			
 			//Refresh leaflet map
+			$(document).on("donerefresh", controller.onDoneRefresh);
 			_view.refreshMap(_mapdata);
 		}
-		_view.setLoading(false);
+		else {
+			_view.setLoading(false);
+		}
 	}
 	
 	/**
@@ -287,6 +290,7 @@ Ctrl: function() {
 		_view.populateRoomNames(null);
 		
 		//Update view
+		$(document).on("donerefresh", controller.onDoneRefresh);
 		_view.refreshMap(_mapdata);
 		//_view.setLoading(false);
 	}
@@ -314,6 +318,22 @@ Ctrl: function() {
 		//TODO
 	}
 	
+	/**
+	 * This function is called when map has done refreshing data
+	 * @param lvl Set the level to display (can be null)
+	 */
+	this.onDoneRefresh = function(lvl) {
+		lvl = lvl || null;
+		
+		if(_self.isGoingTo()) {
+			_self.endGoTo();
+			_self.toLevel(lvl);
+		}
+		else {
+			_view.setLoading(false);
+		}
+	}
+	
 	/**controller.endGoTo();
 	 * This functions makes map go to given coordinates, at given level
 	 * @param lvl The level
@@ -325,7 +345,7 @@ Ctrl: function() {
 		
 		if(_view.isLoading()) {
 			_isGoingTo = true;
-			$(document).on("donerefresh", function() { if(controller.isGoingTo()) { controller.endGoTo(); controller.toLevel(lvl); } });
+			$(document).on("donerefresh", function() { controller.onDoneRefresh(lvl); });
 		}
 		else {
 			_self.toLevel(lvl);

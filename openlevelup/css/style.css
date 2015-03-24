@@ -120,6 +120,7 @@ a:hover {
 #infobox li {
 	padding: 5px;
 	margin-bottom: 5px;
+	border: 3px outset gray;
 }
 
 #infobox li.info {

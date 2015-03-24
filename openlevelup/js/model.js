@@ -380,6 +380,49 @@ MapData: function(ctrl) {
 		f.geometry.coordinates = f.geometry.coordinates[0];
 		return f;
 	}
+},
+
+/**
+ * LevelData represents all the GeoJSON features of a given level
+ * It allows data reprojecting and SVG export
+ */
+LevelData: function(data) {
+//ATTRIBUTES
+	/** The GeoJSON features **/
+	var _geojson = data;
+
+	/** The current object **/
+	var _self = this;
+
+//OTHER METHODS
+	/**
+	 * Reprojects level data in web mercator
+	 * @return The GeoJSON data, in web mercator (EPSG:3857)
+	 */
+	this.reprojectWebMercator = function() {
+		//TODO
+		return null;
+	}
+	
+	/**
+	 * Reprojects coordinates in web mercator
+	 * @see http://www.gal-systems.com/2011/07/convert-coordinates-between-web.html
+	 * @return Reprojected coordinates, as an array [ X, Y ], or null if invalid coordinates
+	 */
+	function _toWebMercator(lon, lat) {
+		var result = null;
+		
+		if(Math.abs(lon) <= 180 && Math.abs(lat) <= 90) {
+			var num = lon * 0.017453292519943295;
+			var x = 6378137.0 * num;
+			var a = lat * 0.017453292519943295;
+			var latWM = 3189068.5 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)));
+			
+			result = [ x, latWM ];
+		}
+		
+		return result;
+	}
 }
 
 };

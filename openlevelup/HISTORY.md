@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+24 march 2015
+-------------
+* Minor fix for loading pop-up not closing on empty areas
+* Better style for messages
+
 23 march 2015
 -------------
 * Minor fix for level up and down buttons in pop-ups (levels not sorted)
