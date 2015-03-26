@@ -290,6 +290,13 @@
 		},
 		{
 			"type": "Style",
+			"name": "Escalator",
+			"description": "Escalator (verticalpassage)",
+			"onTags": [ { "buildingpart:verticalpassage": "escalator" }, { "room": "escalator" } ],
+			"style": { "icon": "img/Aiga_escalator_mirror.svg" }
+		},
+		{
+			"type": "Style",
 			"name": "Subway",
 			"description": "Subway rails",
 			"onTags": [ { "railway": "subway" } ],
@@ -308,6 +315,13 @@
 			"description": "Hedge",
 			"onTags": [ { "barrier": "hedge" } ],
 			"style": { "color": "#8CD16E", "opacity": 1, "weight": 5, "lineCap": "butt", "icon": "no" }
+		},
+		{
+			"type": "Style",
+			"name": "Turnstile",
+			"description": "Turnstile",
+			"onTags": [ { "barrier": "turnstile" } ],
+			"style": { "icon": "img/barrier_turnstile.svg" }
 		},
 		{
 			"type": "Style",

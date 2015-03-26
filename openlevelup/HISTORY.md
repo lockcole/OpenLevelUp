@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+26 march 2015
+-------------
+* Icon added for escalators as vertical passages
+* Icon added for barrier=turnstile
+
 24 march 2015
 -------------
 * Minor fix for loading pop-up not closing on empty areas
