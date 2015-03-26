@@ -341,8 +341,22 @@
 			"type": "Style",
 			"name": "Map",
 			"description": "Map",
-			"onTags": [ { "tourism": "information", "information": "map" } ],
-			"style": { "icon": "img/map.svg" }
+			"onTags": [ { "information": "map" } ],
+			"style": { "icon": "img/map_default.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Street map",
+			"description": "Map",
+			"onTags": [ { "information": "map", "map_type": "street" } ],
+			"style": { "icon": "img/map_street.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Scheme map",
+			"description": "Map",
+			"onTags": [ { "information": "map", "map_type": "scheme" } ],
+			"style": { "icon": "img/map_scheme.svg" }
 		},
 		{
 			"type": "Style",
