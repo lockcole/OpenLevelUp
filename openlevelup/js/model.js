@@ -383,46 +383,107 @@ MapData: function(ctrl) {
 },
 
 /**
- * LevelData represents all the GeoJSON features of a given level
- * It allows data reprojecting and SVG export
+ * This class represents a feature style, defined from JSON rules
  */
-LevelData: function(data) {
+FeatureStyle: function(feature, jsonStyle) {
 //ATTRIBUTES
-	/** The GeoJSON features **/
-	var _geojson = data;
-
+	/** The feature tags **/
+	var _tags = feature.properties.tags;
+	
+	/** The style **/
+	var _style = new Object();
+	
+	/** The feature icon **/
+	var _icon = undefined;
+	
 	/** The current object **/
 	var _self = this;
 
-//OTHER METHODS
-	/**
-	 * Reprojects level data in web mercator
-	 * @return The GeoJSON data, in web mercator (EPSG:3857)
-	 */
-	this.reprojectWebMercator = function() {
-		//TODO
-		return null;
+//CONSTRUCTOR
+	var name = "Object";
+	
+	//Find potential styles depending on tags
+	for(var i in jsonStyle.styles) {
+		var style = jsonStyle.styles[i];
+		
+		//If applyable, we update the result style
+		if(_isStyleApplyable(feature, style)) {
+			name = style.name;
+			for(var param in style.style) {
+				_style[param] = style.style[param];
+			}
+		}
 	}
 	
+	//Change icon=no into undefined
+	if(_style.icon == "no") { _style.icon = undefined; }
+	
+	feature.properties.name = name;
+//--CONSTRUCTOR
+
+//ACCESSORS
 	/**
-	 * Reprojects coordinates in web mercator
-	 * @see http://www.gal-systems.com/2011/07/convert-coordinates-between-web.html
-	 * @return Reprojected coordinates, as an array [ X, Y ], or null if invalid coordinates
+	 * @return The style which is applyable on the feature
 	 */
-	function _toWebMercator(lon, lat) {
-		var result = null;
-		
-		if(Math.abs(lon) <= 180 && Math.abs(lat) <= 90) {
-			var num = lon * 0.017453292519943295;
-			var x = 6378137.0 * num;
-			var a = lat * 0.017453292519943295;
-			var latWM = 3189068.5 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)));
+	this.getStyle = function() {
+		return _style;
+	}
+
+	/**
+	 * Get the complete icon name, in particular when style contains a tag variable.
+	 * @return The icon URL
+	 */
+	this.getIconUrl = function() {
+		if(_icon == undefined) {
+			var _icon = _style.icon;
 			
-			result = [ x, latWM ];
+			var regex = /\$\{(\w+)\}/;
+			if(regex.test(_icon)) {
+				//Replace tag name with actual tag value
+				var tagName = regex.exec(_icon)[1];
+				_icon = _icon.replace(regex, _tags[tagName]);
+				
+				//Check if icon file exists (to avoid exotic values)
+				if(!checkUrl(_icon)) {
+					_icon = null;
+				}
+			}
 		}
 		
-		return result;
+		return _icon;
+	}
+
+//OTHER METHODS
+	/**
+	 * Checks if a given style is applyable on a given feature
+	 * @param feature The feature to test
+	 * @param style The JSON style to test
+	 * @return True if the style is applyable
+	 * @deprecated
+	 */
+	function _isStyleApplyable(feature, style) {
+		var applyable;
+		
+		for(var j in style.onTags) {
+			var tagList = style.onTags[j];
+			applyable = true;
+			for(var key in tagList) {
+				var val = tagList[key];
+				var featureVal = feature.properties.tags[key];
+				
+				//If this rule is not applyable, stop
+				if(featureVal == undefined
+					|| (val != "*" && val != featureVal && val.split("|").indexOf(featureVal) < 0)) {
+					
+					applyable = false;
+				break;
+					}
+			}
+			//If style still applyable after looking for all tags in a taglist, then it's applyable
+			if(applyable) { break; }
+		}
+		
+		return applyable;
 	}
 }
-
 };

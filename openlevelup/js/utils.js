@@ -33,6 +33,21 @@ function isFloat(val) {
 }
 
 /**
+ * @return The current page URL
+ */
+function myUrl() {
+	return $(location).attr('href').split('?')[0];
+}
+
+/**
+ * @return The current folder URL
+ */
+function myFolderUrl() {
+	var pos = $(location).attr('href').lastIndexOf('/');
+	return $(location).attr('href').substring(0, pos);
+}
+
+/**
  * Checks if a file exists on the server
  * @param url The URL of the file to check
  * @return True if it exists
@@ -46,6 +61,22 @@ function fileExists(url) {
 	} else {
 		return false;
 	}
+}
+
+/** Checked URL **/
+var checkedUrl = new Object();
+
+/**
+ * Checks if an URL exists (once)
+ * @param url The URL to check
+ * @return True if URL is correct
+ */
+function checkUrl(url) {
+	if(Object.keys(checkedUrl).indexOf(url) < 0) {
+		checkedUrl[url] = fileExists(url);
+	}
+	
+	return checkedUrl[url];
 }
 
 /**

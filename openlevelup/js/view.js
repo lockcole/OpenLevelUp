@@ -107,9 +107,6 @@ Web: function(ctrl) {
 	/** The object that should be put in back of others **/
 	var _objectLayered = null;
 	
-	/** Already checked icons URL **/
-	var _checkedUrl = new Object();
-	
 	/** Level parameter in URL **/
 	var _urlLevel = null;
 	
@@ -582,7 +579,7 @@ Web: function(ctrl) {
 	*/
 	function _processElements(feature, layer) {
 		var name = feature.properties.name;
-		var styleRules = feature.properties.style;
+		var styleRules = _getStyle(feature);
 		
 		//Create popup if necessary
 		if(styleRules.popup == undefined || styleRules.popup == "yes") {
@@ -768,73 +765,16 @@ Web: function(ctrl) {
 	 * @return The appropriate style
 	 */
 	function _getStyle(feature) {
-		var result = new Object();
-		
-		//Process style
 		if(feature.properties.style == undefined) {
 			if(STYLE != undefined) {
-				var name = "Object";
-				
-				//Find potential styles depending on tags
-				for(var i in STYLE.styles) {
-					var style = STYLE.styles[i];
-					
-					//If applyable, we update the result style
-					if(_isStyleApplyable(feature, style)) {
-						name = style.name;
-						for(var param in style.style) {
-							result[param] = style.style[param];
-						}
-					}
-				}
-				
-				//Change icon=no into undefined
-				if(result.icon == "no") { result.icon = undefined; }
-				
-				feature.properties.style = result;
-				feature.properties.name = name;
+				feature.properties.style = new OLvlUp.model.FeatureStyle(feature, STYLE);
 			}
 			else {
 				controller.getView().displayMessage("Error while loading style file", "error");
 			}
 		}
-		//If already processed, retrieve style
-		else {
-			result = feature.properties.style;
-		}
 		
-		return result;
-	}
-
-	/**
-	* Checks if a given style is applyable on a given feature
-	* @param feature The feature to test
-	* @param style The JSON style to test
-	* @return True if the style is applyable
-	*/
-	function _isStyleApplyable(feature, style) {
-		var applyable;
-		
-		for(var j in style.onTags) {
-			var tagList = style.onTags[j];
-			applyable = true;
-			for(var key in tagList) {
-				var val = tagList[key];
-				var featureVal = feature.properties.tags[key];
-				
-				//If this rule is not applyable, stop
-				if(featureVal == undefined
-					|| (val != "*" && val != featureVal && val.split("|").indexOf(featureVal) < 0)) {
-					
-					applyable = false;
-				break;
-					}
-			}
-			//If style still applyable after looking for all tags in a taglist, then it's applyable
-			if(applyable) { break; }
-		}
-		
-		return applyable;
+		return feature.properties.style.getStyle();
 	}
 
 	/**
@@ -847,7 +787,7 @@ Web: function(ctrl) {
 		var result;
 		
 		//Find the appropriate icon, depending of tags
-		var style = (feature.properties.style == undefined) ? _styleElements(feature) : feature.properties.style;
+		var style = _styleElements(feature);
 		
 		result = _createMarker(latlng, feature, style);
 		
@@ -900,27 +840,11 @@ Web: function(ctrl) {
 	 * @param feature The GeoJSON feature
 	 * @param iconStyle The icon string from JSON style
 	 * @return The icon URL
+	 * @deprecated
 	 */
 	function _getIconUrl(feature, iconStyle) {
-		var result = iconStyle;
-		
-		var regex = /\$\{(\w+)\}/;
-		if(regex.test(iconStyle)) {
-			//Replace tag name with actual tag value
-			var tagName = regex.exec(iconStyle)[1];
-			result = iconStyle.replace(regex, feature.properties.tags[tagName]);
-			
-			//Check if icon file exists (to avoid exotic values)
-			if(Object.keys(_checkedUrl).indexOf(result) < 0) {
-				_checkedUrl[result] = fileExists(result);
-			}
-			
-			if(!_checkedUrl[result]) {
-				result = null;
-			}
-		}
-		
-		return result;
+		_getStyle(feature);
+		return feature.properties.style.getIconUrl();
 	}
 /*
  * Levels management
@@ -1047,7 +971,7 @@ Web: function(ctrl) {
 	 * Updates the permalink on page.
 	 */
 	this.updatePermalink = function() {
-		var baseURL = $(location).attr('href').split('?')[0]+"?";
+		var baseURL = myUrl()+"?";
 		var params = "lat="+_self.getLatitude()+"&lon="+_self.getLongitude()+"&zoom="+_map.getZoom()+"&tiles="+_tileLayer;
 		
 		if($("#level").val() != null) {
@@ -1167,6 +1091,7 @@ Web: function(ctrl) {
 	 * Returns the centroid coordinates of given object as a string
 	 * @param geom The feature geometry
 	 * @return The coordinates, as a string with format "lat, lon"
+	 * @deprecated
 	 */
 	function _coordinates(geom) {
 		var result = "";

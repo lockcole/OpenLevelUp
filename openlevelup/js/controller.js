@@ -27,7 +27,7 @@ OLvlUp.controller = {
 // ====== CONSTANTS ====== 
 /** Overpass API server URL **/
 API_URL: "http://www.overpass-api.de/api/interpreter?data=",
-
+//API_URL: ' http://api.openstreetmap.fr/oapi/interpreter?data=',
 
 // ======= CLASSES =======
 /**
@@ -315,7 +315,17 @@ Ctrl: function() {
 	 * This function is called when user wants to export the currently shown level as an image
 	 */
 	this.onExportLevelImage = function() {
-		//TODO
+		$("#svg-area").empty();
+		if(_view.getCurrentLevel() != null && _view.getDataLayer() != null) {
+			var levelExporter = new OLvlUp.controller.LevelExporter(_view.getDataLayer().toGeoJSON());
+			levelExporter.exportAsSVG(_view.getMap());
+			
+			var data = new Blob([$("#svg-area").html()],{ type: "image/svg+xml;" });
+			saveAs(data, "level_"+_view.getCurrentLevel()+".svg");
+		}
+		else {
+			_view.displayMessage("No level available for export", "alert");
+		}
 	}
 	
 	/**
@@ -378,6 +388,175 @@ Ctrl: function() {
 
 		//Download data
 		var oapiResponse = $.get(OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest), handler, "text");
+	}
+},
+
+/**
+ * LevelExporter allows level data export.
+ */
+LevelExporter: function(data) {
+	//ATTRIBUTES
+	/** The GeoJSON features **/
+	var _geojson = data;
+	
+	/** The current object **/
+	var _self = this;
+	
+	//OTHER METHODS
+	/**
+	 * Exports the current level as a SVG
+	 * @return The SVG
+	 */
+	this.exportAsSVG = function(map) {
+		//Create SVG area
+		var draw = SVG('svg-area').size("100%", "100%");
+		
+		var ftSvg = new Object();
+		
+		//Draw each feature
+		for(var i in _geojson.features) {
+			var feature = _geojson.features[i];
+			var ftStyle = feature.properties.style.getStyle();
+			
+			var img = null;
+			if(feature.properties.style.getIconUrl() != null) {
+				var img = myFolderUrl()+"/"+feature.properties.style.getIconUrl();
+			}
+			
+			//Create SVG object depending of feature type
+			if(feature.geometry.type == "Point") {
+				var coords = map.latLngToLayerPoint(L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]));
+				
+				var point;
+				
+				if(img != null) {
+					point = draw.image(img, OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE)
+						.move(coords.x - OLvlUp.view.ICON_SIZE/2, coords.y - OLvlUp.view.ICON_SIZE/2)
+						.front();
+				}
+				else {
+					point = draw.circle(10)
+						.stroke({ color: ftStyle.color, opacity: ftStyle.opacity, width: ftStyle.weight })
+						.fill({ color: ftStyle.fillColor, opacity: ftStyle.fillOpacity })
+						.move(coords.x, coords.y)
+						.front();
+				}
+				
+				//Add to layer list
+				if(ftStyle.layer != undefined) {
+					if(ftSvg[ftStyle.layer] == undefined) {
+						ftSvg[ftStyle.layer] = new Array();
+					}
+					
+					ftSvg[ftStyle.layer].push(point);
+				}
+			}
+			else if(feature.geometry.type == "LineString") {
+				var coordsStr = "";
+				
+				for(var i in feature.geometry.coordinates) {
+					var coords = map.latLngToLayerPoint(L.latLng(feature.geometry.coordinates[i][1], feature.geometry.coordinates[i][0]));
+					coordsStr += coords.x+","+coords.y+" ";
+				}
+				
+				var polyline = draw.polyline(coordsStr)
+					.stroke({ color: ftStyle.color, opacity: ftStyle.opacity, width: ftStyle.weight })
+					.fill({ color: ftStyle.fillColor, opacity: ftStyle.fillOpacity });
+				polyline.attr("stroke-linecap", ftStyle.lineCap);
+				polyline.attr("stroke-dasharray", ftStyle.dashArray);
+				
+				//Add to layer list
+				if(ftStyle.layer != undefined) {
+					if(ftSvg[ftStyle.layer] == undefined) {
+						ftSvg[ftStyle.layer] = new Array();
+					}
+					
+					ftSvg[ftStyle.layer].push(polyline);
+				}
+				
+				//Add icon
+				if(img != null) {
+					var nbSegments = feature.geometry.coordinates.length - 1;
+					
+					//For each segment, add an icon
+					for(var i=0; i < nbSegments; i++) {
+						var coord1 = feature.geometry.coordinates[i];
+						var coord2 = feature.geometry.coordinates[i+1];
+						var coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
+						var coordsIcon = map.latLngToLayerPoint(L.latLng(coordMid[1], coordMid[0]));
+						
+						var icon = draw.image(img, OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE)
+							.move(coordsIcon.x - OLvlUp.view.ICON_SIZE/2, coordsIcon.y - OLvlUp.view.ICON_SIZE/2);
+						
+						if(ftStyle.rotateIcon) {
+							var angle = azimuth({lat: coord1[1], lng: coord1[0], elv: 0}, {lat: coord2[1], lng: coord2[0], elv: 0}).azimuth;
+							icon.rotate(angle, icon.x() + OLvlUp.view.ICON_SIZE/2, icon.y() + OLvlUp.view.ICON_SIZE/2);
+						}
+					}
+				}
+			}
+			else if(feature.geometry.type == "Polygon") {
+				for(var i in feature.geometry.coordinates) {
+					var coordsStr = "";
+					
+					for(var j in feature.geometry.coordinates[i]) {
+						var coords = map.latLngToLayerPoint(L.latLng(feature.geometry.coordinates[i][j][1], feature.geometry.coordinates[i][j][0]));
+						coordsStr += coords.x+","+coords.y+" ";
+					}
+					
+					var polygon = draw.polygon(coordsStr)
+						.stroke({ color: ftStyle.color, opacity: ftStyle.opacity, width: ftStyle.weight })
+						.fill({ color: ftStyle.fillColor, opacity: ftStyle.fillOpacity });
+					polygon.attr("stroke-linecap", ftStyle.lineCap);
+					polygon.attr("stroke-dasharray", ftStyle.dashArray);
+					
+					//Add to layer list
+					if(ftStyle.layer != undefined) {
+						if(ftSvg[ftStyle.layer] == undefined) {
+							ftSvg[ftStyle.layer] = new Array();
+						}
+						
+						ftSvg[ftStyle.layer].push(polygon);
+					}
+				}
+				
+				//Add icon
+				if(img != null) {
+					var centroid = centroidPolygon(feature.geometry);
+					var coordsIcon = map.latLngToLayerPoint(L.latLng(centroid[1], centroid[0]));
+					draw.image(img, OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE)
+						.move(coordsIcon.x - OLvlUp.view.ICON_SIZE/2, coordsIcon.y - OLvlUp.view.ICON_SIZE/2);
+				}
+			}
+		}
+		
+		//Order them by JSON style layer
+		var ftSvgKeys = Object.keys(ftSvg).sort(function (a,b) { return parseFloat(b)-parseFloat(a);});
+		for(var i in ftSvgKeys) {
+			for(var obj in ftSvg[ftSvgKeys[i]]) {
+				ftSvg[ftSvgKeys[i]][obj].back();
+			}
+		}
+		
+		//Add north arrow
+		var northArrowCoords = map.latLngToLayerPoint(map.getBounds().getNorthEast());
+		draw.image(myFolderUrl()+"/img/North_Pointer.svg", 45, 70)
+			.move(northArrowCoords.x - 45, northArrowCoords.y);
+		
+		//Add logo
+		draw.image(myFolderUrl()+"/img/logo.jpg", 139, 50);
+		
+		//Add level
+		draw.text("Level "+controller.getView().getCurrentLevel())
+			.move(0, 55);
+
+		//Add attribution
+		var sourceCoords = map.latLngToLayerPoint(map.getBounds().getSouthWest());
+		draw.text("Map data © OpenStreetMap contributors")
+			.move(sourceCoords.x, sourceCoords.y - 30);
+		
+		//Export
+		return draw.exportSvg();
 	}
 }
 

@@ -1,5 +1,8 @@
 Changes history
 ===============
+27 march 2015
+-------------
+* Level export as image added
 
 26 march 2015
 -------------
