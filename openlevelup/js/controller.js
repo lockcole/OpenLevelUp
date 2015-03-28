@@ -498,6 +498,7 @@ LevelExporter: function(data) {
 			else if(feature.geometry.type == "Polygon") {
 				for(var i in feature.geometry.coordinates) {
 					var coordsStr = "";
+					var fillOpacity = (ftStyle.fillOpacity != undefined) ? ftStyle.fillOpacity : 0.2;
 					
 					for(var j in feature.geometry.coordinates[i]) {
 						var coords = map.latLngToLayerPoint(L.latLng(feature.geometry.coordinates[i][j][1], feature.geometry.coordinates[i][j][0]));
@@ -506,7 +507,7 @@ LevelExporter: function(data) {
 					
 					var polygon = draw.polygon(coordsStr)
 						.stroke({ color: ftStyle.color, opacity: ftStyle.opacity, width: ftStyle.weight })
-						.fill({ color: ftStyle.fillColor, opacity: ftStyle.fillOpacity });
+						.fill({ color: ftStyle.fillColor, opacity: fillOpacity });
 					polygon.attr("stroke-linecap", ftStyle.lineCap);
 					polygon.attr("stroke-dasharray", ftStyle.dashArray);
 					
