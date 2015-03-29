@@ -26,8 +26,8 @@
 <head>
 	<!--
 		TODO (by priority)
-		* Better use of FeatureLevel in view.js
-		* Redesign panels
+		* Add SEO markups
+		* Change room names panel
 		* Improve browser compatibility
 		* Display building infos between cluster and data zooms
 		* Path finding in a building
@@ -80,7 +80,100 @@
 	<link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-	<div class="panel overlay" id="op-loading">
+	<!--
+	Map area
+	-->
+	<div id="map"></div>
+
+	
+	<!--
+	Main panels
+	-->
+	<div id="main-panel">
+		<div class="row">
+			<!-- Header -->
+			<header>
+				<div id="header-content">
+					<div id="header-title" class="cell">
+						<h1><a href="index.html" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a></h1>
+						<p>See inside buildings<br />with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
+					</div>
+					<div id="header-levels" class="cell">
+						<p>
+							<a class="button-level" id="levelUp"><img src="img/arrow2_up.png" alt="&uarr;" /></a><br />
+							<select id="level" disabled="true"></select><br />
+							<a class="button-level" id="levelDown"><img src="img/arrow2_down.png" alt="&darr;" /></a>
+						</p>
+					</div>
+				</div>
+			</header>
+		</div>
+		
+		<div class="row">
+			<div id="central">
+				<div id="central-close">x</div>
+				
+				<!-- General settings -->
+				<div class="part" id="settings">
+					<h2>Settings</h2>
+					<ul>
+						<li><label><input type="checkbox" id="show-legacy" checked="true" /> Show <a class="help" title="Objects that uses legacy indoor schemes, that are now deprecated">objects with legacy tagging</a></label></li>
+						<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
+						<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> Show <a class="help" title="Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.">unrendered objects</a></label></li>
+					</ul>
+				</div>
+				
+				<!-- Room names -->
+				<div class="part" id="room-names">
+					<h2>List of rooms</h2>
+					<p class="input-max"><span class="text"><input type="text" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
+					<div id="rooms-container">
+						<div id="rooms">
+						</div>
+					</div>
+				</div>
+				
+				<!-- Export -->
+				<div class="part" id="export">
+					<h2>Export level</h2>
+					<p><a id="export-link" href="#">As GeoJSON</a> | <a id="export-link-img" href="#">As an image</a></p>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<!-- Footer -->
+			<footer>
+				<p><a id="osm-link" href="http://openstreetmap.org">OSM.org</a> | <a id="shortlink" href="">Shortlink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
+			</footer>
+		</div>
+	</div>
+	
+	<!-- Buttons for main panel settings -->
+	<div id="main-buttons">
+		<div class="row">
+			<div id="button-settings" class="button">
+				<p><img src="img/settings.svg" title="Settings" alt="Settings" /></p>
+			</div>
+		</div>
+		<div class="row">
+			<div id="button-rooms" class="button">
+				<p><img src="img/rooms.svg" title="Rooms" alt="Rooms" /></p>
+			</div>
+		</div>
+		<div class="row">
+			<div id="button-export" class="button">
+				<p><img src="img/export.svg" title="Export" alt="Export" /></p>
+			</div>
+		</div>
+	</div>
+
+
+	<!--
+	Overlay optional panels
+	-->
+	<!-- Loading panel -->
+	<div class="overlay-panel" id="op-loading">
 		<div>
 			<p id="rotation">&#8634;</p>
 			<h2>Loading</h2>
@@ -89,7 +182,8 @@
 		</div>
 	</div>
 	
-	<div class="panel overlay" id="op-about">
+	<!-- About panel -->
+	<div class="overlay-panel" id="op-about">
 		<h2>About OpenLevelUp!</h2>
 		<p>This website allows you to see <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project. You can navigate through the building levels with the buttons on the left panel.<br />Want to know more about the project ? Look at the <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup">GitHub repository</a>. Want to contact the author ? <a href="mailto:panieravide@riseup.net">Here you go</a>.<br />This website is licensed under <a href="https://www.gnu.org/licenses/gpl.html">GPL v3</a>.</p>
 		<p><a id="about-close" href="#">Close</a></p>
@@ -101,63 +195,17 @@
 		</ul>
 	</div>
 
-	<div class="panel" id="side-panel">
-		<div id="upper">
-			<div id="upper-cell">
-				<div id="upper-cell-content">
-					<!-- Header -->
-					<div id="header">
-						<h1><a href="index.html" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a></h1>
-						<p>See inside buildings<br />with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
-					</div>
-					
-					<!-- Settings -->
-					<div id="settings">
-						<p>Level <select id="level" disabled="true"></select> <a class="button" id="levelUp">&uarr;</a> <a class="button" id="levelDown">&darr;</a></p>
-						<ul>
-							<li><label><input type="checkbox" id="show-legacy" checked="true" /> Show <a class="help" title="Objects that uses legacy indoor schemes, that are now deprecated">objects with legacy tagging</a></label></li>
-							<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
-							<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> Show <a class="help" title="Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.">unrendered objects</a></label></li>
-						</ul>
-					</div>
-					
-					<!-- Room names -->
-					<div id="names">
-						<h2>List of rooms</h2>
-						<p class="input-max"><span class="text"><input type="text" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
-						<div id="rooms-container">
-							<div id="rooms">
-							</div>
-						</div>
-					</div>
-					
-					<!-- Export -->
-					<div id="export">
-						<h2>Export level</h2>
-						<p><a id="export-link" href="#">As GeoJSON</a> | <a id="export-link-img" href="#">As an image</a></p>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<!-- Footer -->
-		<div id="lower">
-			<footer>
-				<p><a id="osm-link" href="http://openstreetmap.org">See this on OpenStreetMap</a><br /><a id="shortlink" href="">Shortlink</a> | <a id="permalink" href="">Permalink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
-			</footer>
-		</div>
-	</div>
-	
-	<div class="panel" id="main-panel">
-	
-		<!-- Map -->
-		<div id="map" />
 
-	</div>
-	
+	<!--
+	SVG area (hidden)
+	-->
 	<div id="svg-area">
 	</div>
-	
+
+
+	<!--
+	JS init code
+	-->
 	<script type="text/javascript">
 		/*
 		 * OpenLevelUp init

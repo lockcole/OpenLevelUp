@@ -23,19 +23,19 @@
  * Style for main page
  */
 
-/*
- * General style
- */
+/**********
+ * Global *
+ **********/
 body {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
 	font-family: Arial;
 	color: #222;
-	padding: 0;
-	margin: 0;
-	overflow: hidden;
 }
 
 p {
-	line-height: 1.5em;
+	line-height: 1.4em;
 }
 
 a {
@@ -47,153 +47,51 @@ a:hover {
 	color: #51A5FE;
 }
 
-/*
- * Panel structure
- */
-.panel {
-	position: relative;
-	height: 100%;
-}
-
-.panel.overlay {
-	height: 30%;
-	width: 30%;
-	position: absolute;
-	top: 35%;
-	left: 35%;
-	z-index: 10;
-	background-color: rgba(128,128,128,0.8);
-	color: white;
-	text-align: center;
-	display: none;
-}
-
-.panel.overlay * {
-	margin: 0;
-	padding: 0;
-}
-
-.panel.overlay h2 {
-	background-color: #ddd;
-	color: #444;
-	padding: 5px;
-	margin: 5px;
-}
-
-#svg-area, #svg-canvas {
-	display: none;
-	position: absolute;
-	top: 0;
-	right: 0;
+/*******
+ * Map *
+ *******/
+#map, #svg-area {
 	width: 100%;
 	height: 100%;
-	background-color: white;
 }
 
-#op-about a {
-	color: #D2E2FF;
-}
-
-#op-about a:hover {
-	color: #B3CEFF;
-}
-
-#about-close {
-	position: absolute;
-	bottom: 10px;
-	right: 20px;
-}
-
-/* Infobox */
-#infobox {
-	position: absolute;
-	bottom: 20px;
-	right: 10px;
-	z-index: 10;
+/* SVG area for map export */
+#svg-area {
 	display: none;
-	
-	font-weight: bold;
-	font-size: 90%;
-	padding: 0 10px;
-	text-align: center;
-	padding: 0;
-	margin: 0;
-	/*text-shadow: 0.2em 0.2em 0.2em rgba(0,0,0,0.3);*/
+	position: absolute;
 }
 
-#infobox-list {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-}
-
-#infobox li {
-	padding: 5px;
-	margin-bottom: 5px;
-	border: 3px outset gray;
-}
-
-#infobox li.info {
-	background-color: #D2E6FF;
-	color: #2A86FF;
-}
-
-#infobox li.alert {
-	background-color: #FEFFAA;
-	color: #FF862F;
-}
-
-#infobox li.error {
-	background-color: #FFD9D9;
-	color: #FF2A2A;
-}
-
-/* Side panel */
-#side-panel {
+/***************
+ * Main panels *
+ ***************/
+#main-panel {
+	position: absolute;
+	z-index: 1000;
+	left: 0;
+	top: 0;
+	bottom: 0;
 	width: 20%;
-	float: left;
-	background-color: #81ADFF;
+	height: 100%;
 	text-align: center;
-	color: white;
 	display: table;
-	table-layout: fixed;
 	border-collapse: separate;
 	border-spacing: 0;
 }
 
-#upper, #lower {
+.row {
 	display: table-row;
-	width: 100%;
 }
 
-#upper { height: 90%; }
-#lower { height: 10%; }
-
-#upper-cell, footer {
+header, footer, #central {
 	display: table-cell;
 }
 
-#upper-cell-content {
-	padding: 10px;
+header, #central .part {
+	background-color: #81ADFF;
+	color: white;
 }
 
-/* Main panel */
-#main-panel {
-	width: 80%;
-	margin-left: 20%;
-}
-
-/*
- * Side panel parts
- */
-#side-panel h1 {
-	text-align: center;
-	/*background-color: #D2E6FF;*/
-	color: #2A86FF;
-	margin-bottom: 0;
-}
-
-#side-panel a.help {
+header a.help, #central .part a.help {
 	font-weight: normal;
 	cursor: help;
 	text-decoration: underline;
@@ -201,41 +99,84 @@ a:hover {
 	color: #eee;
 }
 
-#side-panel a.help:hover {
+header a.help:hover, #central .part a.help:hover {
 	color: #ccc;
 }
 
-#side-panel div h2 {
-	font-size: 110%;
+/* Header */
+header {
+	display: table;
+	width: 100%;
 }
 
-#header {
+#header-content {
+	display: table-row;
+}
+
+#header-content .cell {
+	display: table-cell;
+	vertical-align: middle;
 	text-align: center;
 }
 
-#settings, #export, #names {
-	border-bottom: 1px solid #2A75FF;
-	margin: 10px 0;
+#header-title {
+	width: 80%;
 }
 
-#settings {
+#header-levels {
+	width: 20%;
+}
+
+#header-levels p {
+	padding: 1em 0;
+	border-left: 1px solid #2A75FF;
+}
+
+a.button-level {
+	cursor: pointer;
+}
+
+a.button-level img {
+	vertical-align: middle;
+}
+
+/* Central part */
+#central {
+	height: 100%;
+	padding: 0;
+	color: white;
+	position: relative;
+}
+
+#central * {
+	margin: 0;
+	padding: 0;
+}
+
+#central .part {
+	margin: 0;
+	padding-bottom: 1em;
+	display: none;
+}
+
+#central h2 {
+	padding: 0.3em 0;
+	margin: 0 1em;
 	border-top: 1px solid #2A75FF;
 }
 
-#settings a.button {
-	border: 1px solid grey;
-	background-color: #ddd;
-	font-weight: normal;
-	padding: 5px 10px;
-	cursor: pointer;
-	color: #222;
+/* Footer */
+footer {
+	color: #333;
+	font-size: 80%;
+	background-color: #E9F1FE;
 }
 
-#settings a.button:hover {
-	background-color: #eee;
-	font-weight: bold;
-}
+/***************************
+ * Central part components *
+ ***************************/
 
+/* Settings */
 #settings ul {
 	list-style: none;
 	list-style-type: none;
@@ -243,15 +184,7 @@ a:hover {
 	text-align: left;
 }
 
-#export, #names {
-	padding-bottom: 10px;
-}
-
-#export *, #names * {
-	margin: 0;
-	padding: 0;
-}
-
+/* Export */
 #export a {
 	font-weight: normal;
 	text-decoration: underline;
@@ -263,8 +196,12 @@ a:hover {
 	color: #ccc;
 }
 
-#names, #export {
-	display: none;
+/* Room names */
+#rooms-container {
+	height: 100px;
+	overflow-y: scroll;
+	background-color: #E9F1FE;
+	margin: 10px;
 }
 
 .input-max {
@@ -280,19 +217,21 @@ a:hover {
 	width: 100%;
 }
 
-#rooms-container {
-	height: 100px;
-	overflow-y: scroll;
-	background-color: #E9F1FE;
-	margin: 10px 0;
-}
-
 #rooms {
 	color: #333;
 	display: table;
 	border-collapse: separate;
 	border-spacing: 10px;
 	width: 100%;
+}
+
+#rooms a {
+	color: #007BFE;
+	text-decoration: none;
+}
+
+#rooms a:hover {
+	color: #51A5FE;
 }
 
 .lvl-row {
@@ -320,18 +259,94 @@ a:hover {
 	margin: 0;
 }
 
-footer {
-	border-top: 1px solid gray;
-	color: #333;
-	text-align: center;
-	font-size: 80%;
-	background-color: #E9F1FE;
-	vertical-align: middle;
+/* Close central icon */
+#central-close {
+	position: absolute;
+	right: 0.5em;
+	top: 0;
+	font-weight: bold;
+	font-size: 1.5em;
+	color: #ccc;
+	cursor: pointer;
 }
 
-/*
- * Overlay panel rules
- */
+#central-close:hover {
+	color: white;
+}
+
+/**********************
+ * Main panel buttons *
+ **********************/
+#main-buttons {
+	position: absolute;
+	left: 20%;
+	top: 0.5em;
+	display: table;
+	z-index: 1000;
+	border-collapse: separate;
+	border-spacing: 0 0.2em;
+}
+
+#main-buttons.opened {
+	left: 20%;
+}
+
+/* Individual button */
+#main-buttons .button {
+	display: table-cell;
+	vertical-align: middle;
+	text-align: right;
+	padding: 0 0.3em;
+	background-color: rgba(64,64,64,0.8);
+	cursor: pointer;
+}
+
+#main-buttons .button:hover {
+	background-color: rgba(96,96,96,0.8);
+}
+
+#main-buttons .button p {
+	color: white;
+	text-decoration: none;
+	margin: 0.5em 0.3em;
+}
+
+#main-buttons .button img {
+	vertical-align: middle;
+	width: 24px;
+}
+
+/***************************
+ * Overlay optional panels *
+ ***************************/
+
+/* General definition */
+.overlay-panel {
+	height: 40%;
+	width: 30%;
+	position: absolute;
+	top: 30%;
+	left: 35%;
+	z-index: 10;
+	background-color: rgba(128,128,128,0.8);
+	color: white;
+	text-align: center;
+	display: none;
+}
+
+.overlay-panel * {
+	margin: 0;
+	padding: 0;
+}
+
+.overlay-panel h2 {
+	background-color: #ddd;
+	color: #444;
+	padding: 5px;
+	margin: 5px;
+}
+
+/* Loading panel */
 #op-loading div {
 	position: relative;
 	text-align: left;
@@ -357,7 +372,7 @@ footer {
 	left: 35px;
 	top: 10px;
 	color: #444;
-	margin: -30px 0 0 -30px; 
+	margin: -25px 0 0 -30px; 
 	-webkit-animation:spin 0.7s linear infinite;
 	-moz-animation:spin 0.7s linear infinite;
 	animation:spin 0.7s linear infinite;
@@ -367,12 +382,68 @@ footer {
 @-webkit-keyframes spin { 100% { -webkit-transform: rotate(-360deg); } }
 @keyframes spin { 100% { -webkit-transform: rotate(-360deg); transform:rotate(-360deg); } }
 
-/*
- * Map related rules
- */
-#map {
-	height: 100%;
+/* About panel */
+#op-about a {
+	color: #D2E2FF;
 }
+
+#op-about a:hover {
+	color: #B3CEFF;
+}
+
+#about-close {
+	position: absolute;
+	bottom: 10px;
+	right: 20px;
+}
+
+/****************
+ * Infobox area *
+ ****************/
+#infobox {
+	display: none;
+	position: absolute;
+	bottom: 20px;
+	right: 10px;
+	z-index: 10;
+	font-weight: bold;
+	font-size: 90%;
+	padding: 0 10px;
+	text-align: center;
+	padding: 0;
+	margin: 0;
+}
+
+#infobox-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+#infobox li {
+	padding: 5px;
+	margin-bottom: 5px;
+	/* border: 2px outset gray; */
+}
+
+#infobox li.info {
+	background-color: #D2E6FF;
+	color: #2A86FF;
+}
+
+#infobox li.alert {
+	background-color: #FEFFAA;
+	color: #FF862F;
+}
+
+#infobox li.error {
+	background-color: #FFD9D9;
+	color: #FF2A2A;
+}
+
+/*******************
+ * Leaflet pop-ups *
+ *******************/
 
 /* Popup titles */
 .popup {

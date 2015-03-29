@@ -162,7 +162,6 @@ function parseLevelsFloat(str) {
  */
 function centroidPolygon(geom) {
 	var centroid = [0, 0];
-	var first = true;
 	
 	for(var i in geom.coordinates[0]) {
 		if(i < geom.coordinates[0].length - 1) {
@@ -182,7 +181,6 @@ function centroidPolygon(geom) {
  */
 function centroidLineString(geom) {
 	var centroid = [0, 0];
-	var first = true;
 	
 	for(var i in geom.coordinates) {
 		if(i < geom.coordinates.length) {

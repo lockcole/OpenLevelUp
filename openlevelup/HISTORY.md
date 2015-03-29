@@ -1,5 +1,13 @@
 Changes history
 ===============
+29 march 2015
+-------------
+* User interface design changed, more lightweight
+
+28 march 2015
+-------------
+* Default leaflet fill opacity used for image export
+
 27 march 2015
 -------------
 * Level export as image added

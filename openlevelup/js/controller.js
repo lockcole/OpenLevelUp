@@ -40,10 +40,10 @@ Ctrl: function() {
 	var _mapdata = null;
 	
 	/** The current HTML view **/
-	var _view;
+	var _view = null;
 	
 	/** The previous level value (before a map update) **/
-	var _oldLevel;
+	var _oldLevel = null;
 	
 	/** Should we use level parameter from URL ? **/
 	var _useLevelURL = true;
@@ -60,21 +60,21 @@ Ctrl: function() {
 	 */
 	this.getView = function() {
 		return _view;
-	}
+	};
 	
 	/**
 	 * @return The current map data object
 	 */
 	this.getMapData = function() {
 		return _mapdata;
-	}
+	};
 	
 	/**
 	 * @return True if goTo() method just called
 	 */
 	this.isGoingTo = function() {
 		return _isGoingTo;
-	}
+	};
 
 //MODIFIERS
 	/**
@@ -82,7 +82,7 @@ Ctrl: function() {
 	 */
 	this.endGoTo = function() {
 		_isGoingTo = false;
-	}
+	};
 
 //OTHER METHODS
 	/**
@@ -98,21 +98,21 @@ Ctrl: function() {
 		_mapdata = new OLvlUp.model.MapData(_self);
 		
 		_self.onMapUpdate();
-	}
+	};
 	
 	/**
 	 * Increases the level value
 	 */
 	this.levelUp = function() {
 		_view.levelUp(_mapdata);
-	}
+	};
 	
 	/**
 	 * Decreases the level value
 	 */
 	this.levelDown = function() {
 		_view.levelDown(_mapdata);
-	}
+	};
 	
 	/**
 	 * Makes the map go to the given level
@@ -124,7 +124,7 @@ Ctrl: function() {
 			_view.setCurrentLevel(lvl);
 			_view.refreshMap(_mapdata);
 		}
-	}
+	};
 	
 	/**
 	 * This function is called when a minor change on map happens (transcendent change, base layer change, ...)
@@ -134,7 +134,7 @@ Ctrl: function() {
 			_view.setTileLayer(e.name);
 		}
 		_view.refreshMap(_mapdata);
-	}
+	};
 	
 	/**
 	 * This function is called when map should display legacy objects (or not)
@@ -148,7 +148,7 @@ Ctrl: function() {
 		else if(_view.getMap().getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
 			_self.onMapUpdate(true);
 		}
-	}
+	};
 	
 	/**
 	 * This function is called when a layer was added on map
@@ -158,7 +158,7 @@ Ctrl: function() {
 		if(e.layer._childClusters != undefined) {
 			_view.setLoading(false);
 		}
-	}
+	};
 	
 	/**
 	 * When search room input is changed
@@ -167,7 +167,7 @@ Ctrl: function() {
 		if(_view.getSearchRoom().length == 0 || _view.isSearchRoomLongEnough()) {
 			_self.resetRoomNames();
 		}
-	}
+	};
 	
 	/**
 	 * Resets the room names list
@@ -175,7 +175,7 @@ Ctrl: function() {
 	this.resetRoomNames = function() {
 		_view.resetSearchRoom();
 		_view.populateRoomNames(_mapdata.getRoomNames());
-	}
+	};
 	
 	/**
 	 * This function is called when map was moved or zoomed in/out.
@@ -240,7 +240,7 @@ Ctrl: function() {
 			_view.displayMessage("Zoom in to see more information", "info");
 			_view.refreshMap(_mapdata);
 		}
-	}
+	};
 	
 	/**
 	 * This function is called after data download finishes
@@ -266,10 +266,6 @@ Ctrl: function() {
 					_view.setCurrentLevel(_oldLevel);
 				}
 			}
-			//If no available level, display some message
-			else {
-				_view.displayMessage("There is no available data in this area", "alert");
-			}
 			
 			//Refresh leaflet map
 			$(document).on("donerefresh", controller.onDoneRefresh);
@@ -278,7 +274,7 @@ Ctrl: function() {
 		else {
 			_view.setLoading(false);
 		}
-	}
+	};
 	
 	/**
 	 * This function is called after cluster data download finishes
@@ -293,7 +289,7 @@ Ctrl: function() {
 		$(document).on("donerefresh", controller.onDoneRefresh);
 		_view.refreshMap(_mapdata);
 		//_view.setLoading(false);
-	}
+	};
 	
 	/**
 	 * This function is called when user wants to export the currently shown level
@@ -309,7 +305,7 @@ Ctrl: function() {
 		else {
 			_view.displayMessage("No level available for export", "alert");
 		}
-	}
+	};
 	
 	/**
 	 * This function is called when user wants to export the currently shown level as an image
@@ -326,7 +322,7 @@ Ctrl: function() {
 		else {
 			_view.displayMessage("No level available for export", "alert");
 		}
-	}
+	};
 	
 	/**
 	 * This function is called when map has done refreshing data
@@ -342,6 +338,27 @@ Ctrl: function() {
 		else {
 			_view.setLoading(false);
 		}
+	};
+	
+	/**
+	 * When settings button is clicked
+	 */
+	this.onShowSettings = function() {
+		_view.showCentralPanel("settings");
+	}
+	
+	/**
+	 * When rooms button is clicked
+	 */
+	this.onShowRooms = function() {
+		_view.showCentralPanel("room-names");
+	}
+	
+	/**
+	 * When export button is clicked
+	 */
+	this.onShowExport = function() {
+		_view.showCentralPanel("export");
 	}
 	
 	/**controller.endGoTo();
@@ -360,7 +377,7 @@ Ctrl: function() {
 		else {
 			_self.toLevel(lvl);
 		}
-	}
+	};
 	
 	/**
 	 * Downloads data from Overpass API
@@ -387,8 +404,8 @@ Ctrl: function() {
 		}
 
 		//Download data
-		var oapiResponse = $.get(OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest), handler, "text");
-	}
+		$.get(OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest), handler, "text");
+	};
 },
 
 /**
@@ -558,7 +575,7 @@ LevelExporter: function(data) {
 		
 		//Export
 		return draw.exportSvg();
-	}
+	};
 }
 
 };

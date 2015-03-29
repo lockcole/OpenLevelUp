@@ -90,7 +90,7 @@ Web: function(ctrl) {
 	var _nbMessages = 0;
 	
 	/** The leaflet map object **/
-	var _map;
+	var _map = null;
 	
 	/** The array which contains markers for polygon icons **/
 	var _markersPolygons = null;
@@ -136,35 +136,35 @@ Web: function(ctrl) {
 				return sParameterName[1];
 			}
 		}
-	}
+	};
 	
 	/**
 	 * @return The leaflet map object
 	 */
 	this.getMap = function() {
 		return _map;
-	}
+	};
 	
 	/**
 	 * @return The level parameter in URL
 	 */
 	this.getUrlLevel = function() {
 		return _urlLevel;
-	}
+	};
 	
 	/**
 	 * @return The current map latitude
 	 */
 	this.getLatitude = function() {
 		return normLat(_map.getCenter().lat);
-	}
+	};
 	
 	/**
 	 * @return The current map longitude
 	 */
 	this.getLongitude = function() {
 		return normLon(_map.getCenter().lng);
-	}
+	};
 	
 	/**
 	 * @return The currently shown level
@@ -172,63 +172,63 @@ Web: function(ctrl) {
 	this.getCurrentLevel = function() {
 		var level = parseFloat($("#level").val());
 		return (isNaN(level)) ? null : level;
-	}
+	};
 	
 	/**
 	 * @return The map bounds as string for Overpass API
 	 */
 	this.getMapBounds = function() {
 		return normLat(_map.getBounds().getSouth())+","+normLon(_map.getBounds().getWest())+","+normLat(_map.getBounds().getNorth())+","+normLon(_map.getBounds().getEast());
-	}
+	};
 	
 	/**
 	 * @return The current data layer
 	 */
 	this.getDataLayer = function() {
 		return _dataLayer;
-	}
+	};
 	
 	/**
 	 * @return Must we show transcendent objects ?
 	 */
 	this.showTranscendent = function() {
 		return $("#show-transcendent").prop("checked");
-	}
+	};
 	
 	/**
 	 * @return Must we show objects with legacy tagging (buildingpart) ?
 	 */
 	this.showLegacy = function() {
 		return $("#show-legacy").prop("checked");
-	}
+	};
 	
 	/**
 	 * @return Must we show unrendered objects ?
 	 */
 	this.showUnrendered = function() {
 		return $("#show-unrendered").prop("checked");
-	}
+	};
 	
 	/**
 	 * @return True if something is loading
 	 */
 	this.isLoading = function() {
 		return $("#op-loading").is(":visible");
-	}
+	};
 	
 	/**
 	 * @return True if the searched string for filtering rooms is long enough
 	 */
 	this.isSearchRoomLongEnough = function() {
 		return $("#search-room").val() != "Search" && $("#search-room").val().length >= 3;
-	}
+	};
 	
 	/**
 	 * @return The search room string
 	 */
 	this.getSearchRoom = function() {
 		return ($("#search-room").val() != "Search") ? $("#search-room").val() : "";
-	}
+	};
 
 //MODIFIERS
 	/**
@@ -237,7 +237,7 @@ Web: function(ctrl) {
 	this.clearMessages = function() {
 		$("#infobox-list li").remove();
 		_nbMessages = 0;
-	}
+	};
 
 	/**
 	* Displays a message when the map is loading, and hides it when its done.
@@ -246,7 +246,7 @@ Web: function(ctrl) {
 	this.setLoading = function(isLoading) {
 		$("#op-loading").toggle(isLoading);
 		$("#op-loading-info li").remove();
-	}
+	};
 	
 	/**
 	 * Displays the given level in map and view.
@@ -254,7 +254,7 @@ Web: function(ctrl) {
 	 */
 	this.setCurrentLevel = function(lvl) {
 		$("#level").val(lvl);
-	}
+	};
 	
 	/**
 	 * Changes the currently shown tile layer
@@ -267,7 +267,7 @@ Web: function(ctrl) {
 				break;
 			}
 		}
-	}
+	};
 	
 	/**
 	 * Resets search room field
@@ -279,7 +279,7 @@ Web: function(ctrl) {
 		else if(!$("#search-room").is(":focus")) {
 			$("#search-room").val("Search");
 		}
-	}
+	};
 
 //OTHER METHODS
 /*
@@ -290,7 +290,8 @@ Web: function(ctrl) {
 	 */
 	this.mapInit = function() {
 		//Init map center and zoom
-		_map = L.map('map', {minZoom: 1, maxZoom: 22}).setView([47, 2], 6);
+		_map = L.map('map', {minZoom: 1, maxZoom: 22, zoomControl: false}).setView([47, 2], 6);
+		L.control.zoom({ position: "topright" }).addTo(_map);
 		
 		//If coordinates are given in URL, then make map show the wanted area
 		var bbox = _self.getUrlParameter("bbox");
@@ -421,12 +422,21 @@ Web: function(ctrl) {
 		$("#search-room").focusout(controller.getView().onSearchRoomFocusChange);
 		$("#search-room").bind("input propertychange", controller.onSearchRoomChange);
 		$("#search-room-reset").click(controller.resetRoomNames);
+		$("#button-rooms").click(controller.onShowRooms);
+		$("#button-export").click(controller.onShowExport);
+		$("#button-settings").click(controller.onShowSettings);
+		$("#central-close").click(controller.getView().hideCentralPanel);
 		_map.on("baselayerchange", controller.onMapChange);
 		_map.on("layeradd", controller.onLayerAdd);
 		
+		//Central panel management
+		$("#button-rooms").hide();
+		$("#button-export").hide();
+		_self.hideCentralPanel();
+		
 		//Reset search room field
 		_self.resetSearchRoom();
-	}
+	};
 	
 	/**
 	 * Refreshes the shown data on map.
@@ -446,54 +456,63 @@ Web: function(ctrl) {
 			_objectLayered = null;
 		}
 		
+		$("#button-export").hide();
+		$("#button-rooms").hide();
+		
 		//Recreate data layer and add it to map
 		//The shown data depends of current zoom level
 		if(_map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
-			_objectLayered = new Object();
-			_markersPolygons = new Object();
-			_markersLinestrings = new Object();
-			_dataLayer = L.geoJson(
-				mapData.getData(),
-				{
-					filter: (_map.getZoom() <= OLvlUp.view.BUILDING_MAX_ZOOM) ? _filterBuildingElements : _filterElements,
-					style: _styleElements,
-					pointToLayer: _styleNodes,
-					onEachFeature: _processElements
+			if(mapData.getLevels() != null && mapData.getLevels().length > 0) {
+				_objectLayered = new Object();
+				_markersPolygons = new Object();
+				_markersLinestrings = new Object();
+				_dataLayer = L.geoJson(
+					mapData.getData(),
+					{
+						filter: (_map.getZoom() <= OLvlUp.view.BUILDING_MAX_ZOOM) ? _filterBuildingElements : _filterElements,
+						style: _styleElements,
+						pointToLayer: _styleNodes,
+						onEachFeature: _processElements
+					}
+				);
+				
+				_markersLayer = L.layerGroup();
+				
+				//Add eventual polygon icons
+				if(_markersPolygons != null && Object.keys(_markersPolygons).length > 0) {
+					for(var i in _markersPolygons) {
+						_markersLayer.addLayer(_markersPolygons[i]);
+					}
 				}
-			);
-			
-			_markersLayer = L.layerGroup();
-			
-			//Add eventual polygon icons
-			if(_markersPolygons != null && Object.keys(_markersPolygons).length > 0) {
-				for(var i in _markersPolygons) {
-					_markersLayer.addLayer(_markersPolygons[i]);
+				
+				//Add eventual linestring icons
+				if(_markersLinestrings != null && Object.keys(_markersLinestrings).length > 0) {
+					for(var i in _markersLinestrings) {
+						_markersLayer.addLayer(_markersLinestrings[i]);
+					}
 				}
+				
+				_markersLayer.addTo(_map);
+				
+				$("#button-export").show();
+				$("#button-rooms").show();
 			}
-			
-			//Add eventual linestring icons
-			if(_markersLinestrings != null && Object.keys(_markersLinestrings).length > 0) {
-				for(var i in _markersLinestrings) {
-					_markersLayer.addLayer(_markersLinestrings[i]);
-				}
+			else {
+				_self.displayMessage("There is no available data in this area", "alert");
 			}
-			
-			_markersLayer.addTo(_map);
-			
-			$("#export").show();
 		}
 		else if(_map.getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
-			_dataLayer = new L.MarkerClusterGroup({
-				singleMarkerMode: true,
-				spiderfyOnMaxZoom: false,
-				maxClusterRadius: 30
-			});
-			_dataLayer.addLayer(L.geoJson(mapData.getClusterData()));
-			
-			$("#export").hide();
-		}
-		else {
-			$("#export").hide();
+			if(mapData.getClusterData() != null) {
+				_dataLayer = new L.MarkerClusterGroup({
+					singleMarkerMode: true,
+					spiderfyOnMaxZoom: false,
+					maxClusterRadius: 30
+				});
+				_dataLayer.addLayer(L.geoJson(mapData.getClusterData()));
+			}
+			else {
+				_self.displayMessage("There is no available data in this area", "alert");
+			}
 		}
 		
 		//Add data layer to map
@@ -525,7 +544,7 @@ Web: function(ctrl) {
 		_self.updatePermalink(_map);
 		
 		$.event.trigger({ type: "donerefresh" });
-	}
+	};
 	
 	/**
 	 * Changes the tiles opacity, depending of shown level
@@ -868,7 +887,7 @@ Web: function(ctrl) {
 				_self.displayMessage("You are already at the last available level", "alert");
 			}
 		}
-	}
+	};
 	
 	/**
 	 * Makes the level decrease of one step
@@ -889,7 +908,7 @@ Web: function(ctrl) {
 				_self.displayMessage("You are already at the first available level", "alert");
 			}
 		}
-	}
+	};
 	
 	/**
 	 * This function updates the select field for levels
@@ -918,7 +937,7 @@ Web: function(ctrl) {
 			$("#show-transcendent").prop("disabled", true);
 			$("#show-unrendered").prop("disabled", true);
 		}
-	}
+	};
 
 /*
  * Other view methods
@@ -952,7 +971,7 @@ Web: function(ctrl) {
 				$("#infobox").hide();
 			}
 		}, 5000);
-	}
+	};
 	
 	/**
 	 * Displays a message in the loading info box, to know the current step.
@@ -965,7 +984,7 @@ Web: function(ctrl) {
 		
 		//Add text to the added child
 		$("#op-loading-info li:last-child").html(msg);
-	}
+	};
 	
 	/**
 	 * Updates the permalink on page.
@@ -993,7 +1012,7 @@ Web: function(ctrl) {
 		
 		//Update OSM link
 		$("#osm-link").attr('href', "http://openstreetmap.org/#map="+_map.getZoom()+"/"+_map.getCenter().lat+"/"+_map.getCenter().lng);
-	}
+	};
 	
 	/**
 	 * Updates the room names list
@@ -1003,8 +1022,10 @@ Web: function(ctrl) {
 		var filter = (_self.isSearchRoomLongEnough()) ? $("#search-room").val() : null;
 		
 		//Filter room names
+		var roomNamesFiltered = null;
+		
 		if(roomNames != null) {
-			var roomNamesFiltered = new Object();
+			roomNamesFiltered = new Object();
 			
 			for(var lvl in roomNames) {
 				roomNamesFiltered[lvl] = new Object();
@@ -1026,7 +1047,6 @@ Web: function(ctrl) {
 		}
 		
 		if(roomNames != null && roomNamesFiltered != null) {
-			$("#names").show();
 			$("#rooms").empty();
 			
 			var levelsKeys = Object.keys(roomNamesFiltered);
@@ -1070,10 +1090,7 @@ Web: function(ctrl) {
 				}
 			}
 		}
-		else {
-			$("#names").hide();
-		}
-	}
+	};
 	
 	/**
 	 * When search room input is changed
@@ -1085,13 +1102,37 @@ Web: function(ctrl) {
 		else if($("#search-room").val() == "" && !$("#search-room").is(":focus")) {
 			_ctrl.resetRoomNames();
 		}
-	}
+	};
+	
+	/**
+	 * Displays the given central panel
+	 * @param id The panel ID
+	 */
+	this.showCentralPanel = function(id) {
+		if(!$("#"+id).is(":visible")) {
+			$("#central .part").hide();
+			$("#"+id).show();
+			$("#main-buttons").addClass("opened");
+			$("#central-close").show();
+		}
+		else {
+			_self.hideCentralPanel();
+		}
+	};
+	
+	/**
+	 * Hides the central panel
+	 */
+	this.hideCentralPanel = function() {
+		$("#central .part").hide();
+		$("#central-close").hide();
+		$("#main-buttons").removeClass("opened");
+	};
 	
 	/**
 	 * Returns the centroid coordinates of given object as a string
 	 * @param geom The feature geometry
 	 * @return The coordinates, as a string with format "lat, lon"
-	 * @deprecated
 	 */
 	function _coordinates(geom) {
 		var result = "";

@@ -65,49 +65,49 @@ MapData: function(ctrl) {
 	 */
 	this.getData = function() {
 		return _geojson;
-	}
+	};
 	
 	/**
 	 * @return True if the cluster contains legacy data
 	 */
 	this.isClusterLegacy = function() {
 		return _legacyCluster;
-	}
+	};
 	
 	/**
 	 * @return The cluster data, as GeoJSON
 	 */
 	this.getClusterData = function() {
 		return _geojsonCluster;
-	}
+	};
 	
 	/**
 	 * @return The bounding box (see LatLngBounds in Leaflet API)
 	 */
 	this.getBBox = function() {
 		return _bbox;
-	}
+	};
 	
 	/**
 	 * @return The bounding box for cluster data (see LatLngBounds in Leaflet API)
 	 */
 	this.getClusterBBox = function() {
 		return _bboxCluster;
-	}
+	};
 	
 	/**
 	 * @return The levels, as an array
 	 */
 	this.getLevels = function() {
 		return _levels;
-	}
+	};
 	
 	/**
 	 * @return The room names, as an object[level][roomName] = featureGeometry
 	 */
 	this.getRoomNames = function() {
 		return _roomNames;
-	}
+	};
 	
 //MODIFIERS
 	/**
@@ -116,7 +116,7 @@ MapData: function(ctrl) {
 	 */
 	this.setBBox = function(bbox) {
 		_bbox = bbox;
-	}
+	};
 	
 	/**
 	 * Changes the cluster data bounding box.
@@ -124,7 +124,7 @@ MapData: function(ctrl) {
 	 */
 	this.setClusterBBox = function(bbox) {
 		_bboxCluster = bbox;
-	}
+	};
 	
 	/**
 	 * Sets if the current cluster data contains legacy objects
@@ -132,7 +132,7 @@ MapData: function(ctrl) {
 	 */
 	this.setClusterLegacy = function(l) {
 		_legacyCluster = l;
-	}
+	};
 	
 	/**
 	 * This functions deletes all information related to data (but not cluster data).
@@ -142,7 +142,7 @@ MapData: function(ctrl) {
 		_bbox = null;
 		_roomNames = null;
 		_levels = null;
-	}
+	};
 	
 	/**
 	 * This functions deletes all information related to cluster data.
@@ -150,7 +150,7 @@ MapData: function(ctrl) {
 	this.cleanClusterData = function() {
 		_geojsonCluster = null;
 		_bboxCluster = null;
-	}
+	};
 	
 //OTHER METHODS
 /*
@@ -269,7 +269,7 @@ MapData: function(ctrl) {
 		
 		//Call this method to notify controller that download is done
 		_ctrl.endMapUpdate();
-	}
+	};
 	
 	/**
 	 * Handles OAPI response for cluster data.
@@ -283,7 +283,7 @@ MapData: function(ctrl) {
 		
 		//Call this method to notify controller that download is done
 		_ctrl.endMapClusterUpdate();
-	}
+	};
 	
 	/**
 	 * Adds a feature in _roomNames
@@ -313,7 +313,7 @@ MapData: function(ctrl) {
 				_roomNames[feature.properties.levels[i]][name] = feature;
 			}
 		}
-	}
+	};
 
 /*
  * Data processing methods
@@ -427,7 +427,7 @@ FeatureStyle: function(feature, jsonStyle) {
 	 */
 	this.getStyle = function() {
 		return _style;
-	}
+	};
 
 	/**
 	 * Get the complete icon name, in particular when style contains a tag variable.
@@ -435,7 +435,7 @@ FeatureStyle: function(feature, jsonStyle) {
 	 */
 	this.getIconUrl = function() {
 		if(_icon == undefined) {
-			var _icon = _style.icon;
+			_icon = _style.icon;
 			
 			var regex = /\$\{(\w+)\}/;
 			if(regex.test(_icon)) {
@@ -451,7 +451,7 @@ FeatureStyle: function(feature, jsonStyle) {
 		}
 		
 		return _icon;
-	}
+	};
 
 //OTHER METHODS
 	/**
@@ -459,10 +459,9 @@ FeatureStyle: function(feature, jsonStyle) {
 	 * @param feature The feature to test
 	 * @param style The JSON style to test
 	 * @return True if the style is applyable
-	 * @deprecated
 	 */
 	function _isStyleApplyable(feature, style) {
-		var applyable;
+		var applyable = false;
 		
 		for(var j in style.onTags) {
 			var tagList = style.onTags[j];
