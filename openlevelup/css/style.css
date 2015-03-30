@@ -80,10 +80,15 @@ h1 {
 	display: table;
 	border-collapse: separate;
 	border-spacing: 0;
+	visibility: hidden;
 }
 
 .row {
 	display: table-row;
+}
+
+header, footer {
+	visibility: visible;
 }
 
 header, footer, #central {
@@ -149,11 +154,14 @@ a.button-level img {
 }
 
 /* Central part */
+#row-central {
+	visibility: hidden;
+}
+
 #central {
 	height: 100%;
 	padding: 0;
 	color: white;
-	position: relative;
 }
 
 #central * {
@@ -165,12 +173,18 @@ a.button-level img {
 	margin: 0;
 	padding-bottom: 1em;
 	display: none;
+	visibility: visible;
 }
 
 #central h2 {
 	padding: 0.3em 0;
 	margin: 0 1em;
 	border-top: 1px solid #2A75FF;
+}
+
+#central h2 img {
+	vertical-align: middle;
+	width: 40px;
 }
 
 /* Footer */
