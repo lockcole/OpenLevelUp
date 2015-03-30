@@ -254,16 +254,27 @@ Ctrl: function() {
 			
 			//Test how many levels are available
 			if(_mapdata.getLevels() != null && _mapdata.getLevels().length > 0) {
+				var levelToDisplay = null;
+				
 				//If we have to use the level parameter from the URL
 				var levelUrl = parseFloat(_view.getUrlLevel());
 				if(_useLevelURL && _mapdata.getLevels().indexOf(levelUrl) >= 0) {
-					_view.setCurrentLevel(levelUrl);
+					levelToDisplay = levelUrl;
 				}
 				_useLevelURL = false;
 				
 				//Restore old level if possible
 				if(!_useLevelURL && _mapdata.getLevels().indexOf(_oldLevel) >=0) {
-					_view.setCurrentLevel(_oldLevel);
+					levelToDisplay = _oldLevel;
+				}
+				
+				//Else, find a level to display (0 prefered)
+				if(levelToDisplay == null && _mapdata.getLevels().indexOf(0) >= 0) {
+					levelToDisplay = 0;
+				}
+				
+				if(levelToDisplay != null) {
+					_view.setCurrentLevel(levelToDisplay);
 				}
 			}
 			
@@ -404,7 +415,16 @@ Ctrl: function() {
 		}
 
 		//Download data
-		$.get(OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest), handler, "text");
+		$(document).ajaxError(function( event, jqxhr, settings, thrownError ) { console.log("Error: "+thrownError+"\nURL: "+settings.url); });
+		$.get(OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest), handler, "text").fail(controller.onDownloadFail);
+	};
+	
+	/**
+	 * This function is called when data download fails
+	 */
+	this.onDownloadFail = function() {
+		_view.setLoading(false);
+		_view.displayMessage("An error occured during data download", "error");
 	};
 },
 
