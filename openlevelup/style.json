@@ -181,42 +181,42 @@
 			"name": "Amenity",
 			"description": "Amenities icons",
 			"onTags": [ { "amenity": "*" } ],
-			"style": { "icon": "img/sjjb/amenity_${amenity}.png" }
+			"style": { "icon": "img/amenity_${amenity}.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Shop",
 			"description": "Shopping icons",
 			"onTags": [ { "shop": "*" } ],
-			"style": { "icon": "img/sjjb/shopping_${shop}.png" }
+			"style": { "icon": "img/shopping_${shop}.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Barrier",
 			"description": "Barrier icons",
 			"onTags": [ { "barrier": "*" } ],
-			"style": { "icon": "img/sjjb/barrier_${barrier}.png", "showMissingIcon": false }
+			"style": { "icon": "img/barrier_${barrier}.png", "showMissingIcon": false }
 		},
 		{
 			"type": "Style",
 			"name": "Tourism",
 			"description": "Tourism icons",
 			"onTags": [ { "tourism": "*" } ],
-			"style": { "icon": "img/sjjb/tourism_${tourism}.png" }
+			"style": { "icon": "img/tourism_${tourism}.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Information",
 			"description": "Information icons",
 			"onTags": [ { "information": "*" } ],
-			"style": { "icon": "img/sjjb/information_${information}.png" }
+			"style": { "icon": "img/information_${information}.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Airport",
 			"description": "Aeroway icons",
 			"onTags": [ { "aeroway": "*" } ],
-			"style": { "icon": "img/sjjb/aeroway_${aeroway}.png" }
+			"style": { "icon": "img/aeroway_${aeroway}.png" }
 		},
 		{
 			"type": "Style",
@@ -244,7 +244,7 @@
 			"name": "Bus stop",
 			"description": "Bus stop",
 			"onTags": [ { "highway": "bus_stop" } ],
-			"style": { "icon": "img/sjjb/highway_bus_stop.png" }
+			"style": { "icon": "img/highway_bus_stop.png" }
 		},
 		{
 			"type": "Style",
@@ -332,6 +332,13 @@
 		},
 		{
 			"type": "Style",
+			"name": "Statue",
+			"description": "Statue icons",
+			"onTags": [ { "artwork_type": "statue|sculpture|stone|bust" } ],
+			"style": { "icon": "img/statue.svg" }
+		},
+		{
+			"type": "Style",
 			"name": "Information",
 			"description": "Information for travelers",
 			"onTags": [ { "tourism": "information" } ],
@@ -384,7 +391,7 @@
 			"name": "Tomb",
 			"description": "Tomb",
 			"onTags": [ { "historic": "tomb" } ],
-			"style": { "icon": "img/sjjb/historic_tomb.png" }
+			"style": { "icon": "img/historic_tomb.png" }
 		}
 	]
 }

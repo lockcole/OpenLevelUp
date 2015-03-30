@@ -1,5 +1,11 @@
 Changes history
 ===============
+30 march 2015
+-------------
+* Icons for tourism=artwork and artwork_type=statue|sculpture|stone|bust
+* Loading and about dialogs height is now correctly scaled
+* Some meta markups added (SEO)
+
 29 march 2015
 -------------
 * User interface design changed, more lightweight
