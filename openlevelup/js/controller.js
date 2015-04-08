@@ -362,6 +362,7 @@ Ctrl: function() {
 	 * When rooms button is clicked
 	 */
 	this.onShowRooms = function() {
+		//_view.showRoomsPanel();
 		_view.showCentralPanel("room-names");
 	}
 	

@@ -26,8 +26,9 @@
 <head>
 	<!--
 		TODO (by priority)
-		* Ignore levels of objects out of bounding box
 		* Change room names panel
+		* Shortcuts for changing levels
+		* UI for small screens
 		* Improve browser compatibility
 		* Display building infos between cluster and data zooms
 		* Path finding in a building
@@ -129,7 +130,7 @@
 				
 				<!-- Room names -->
 				<div class="part" id="room-names">
-					<h2><img src="img/rooms.svg" /> List of rooms</h2>
+					<h2><img src="img/rooms.svg" /> Rooms</h2>
 					<p class="input-max"><span class="text"><input type="text" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
 					<div id="rooms-container">
 						<div id="rooms">
@@ -148,7 +149,7 @@
 		<div class="row">
 			<!-- Footer -->
 			<footer>
-				<p><a id="osm-link" href="http://openstreetmap.org">OSM.org</a> | <a id="shortlink" href="">Shortlink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
+				<p><a id="osm-link" title="See this area on OpenStreetMap" href="http://openstreetmap.org">OSM.org</a> | <a id="shortlink" href="">Shortlink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
 			</footer>
 		</div>
 	</div>
@@ -194,6 +195,19 @@
 			<p class="overlay-close"><a id="about-close" href="#">Close</a></p>
 		</div>
 	</div>
+	
+	<!-- Room names -->
+	<!--div class="overlay-panel" id="op-rooms">
+		<div class="overlay-content">
+			<h2><img src="img/door.svg" /> Rooms</h2>
+			<p class="input-max"><span class="text"><input type="text" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
+			<div id="rooms-container">
+				<div id="rooms">
+				</div>
+			</div>
+			<p class="overlay-close"><a id="about-close" href="#">Close</a></p>
+		</div>
+	</div-->
 	
 	<!-- Message/info box list -->
 	<div id="infobox">

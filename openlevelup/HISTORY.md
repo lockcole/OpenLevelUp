@@ -1,10 +1,20 @@
 Changes history
 ===============
+8 april 2015
+------------
+* Close button in central part of side panel is visible (style fix)
+* Better shop=mall rendering (similar as corridors)
+
+3 april 2015
+------------
+* Ignore objects out of map BBox for display, and out of data BBox for room names
+
 30 march 2015
 -------------
 * Icons for tourism=artwork, artwork_type=statue|sculpture|stone|bust, room=bedroom|toilet
 * Loading and about dialogs height is now correctly scaled
 * Some meta markups added (SEO)
+* Style improvement in order to make map clickable under invisible side panel elements
 
 29 march 2015
 -------------

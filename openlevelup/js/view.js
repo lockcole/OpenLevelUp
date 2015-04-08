@@ -688,11 +688,11 @@ Web: function(ctrl) {
 	* @return True if should be shown
 	*/
 	function _filterElements(feature, layer) {
-		var addObject = false;
+		var addObject = _map.getBounds().intersects(_getBounds(feature));
 		
 		//Consider level-related tags
 		if(feature.properties.levels != undefined) {
-			addObject = Object.keys(feature.properties.tags).length > 0
+			addObject &= Object.keys(feature.properties.tags).length > 0
 					&& (Object.keys(feature.properties.tags).length > 1 || feature.properties.tags.area == undefined)
 					&& feature.properties.levels.indexOf(_self.getCurrentLevel().toString()) >= 0
 					&& (_self.showTranscendent() || feature.properties.levels.length == 1)
@@ -702,7 +702,7 @@ Web: function(ctrl) {
 		//Consider objects without levels but connected to door elements
 		else {
 			//Building with min and max level
-			addObject = feature.properties.tags.building != undefined
+			addObject &= feature.properties.tags.building != undefined
 					&& feature.properties.tags.min_level != undefined
 					&& feature.properties.tags.max_level != undefined;
 			
@@ -864,6 +864,58 @@ Web: function(ctrl) {
 	function _getIconUrl(feature, iconStyle) {
 		_getStyle(feature);
 		return feature.properties.style.getIconUrl();
+	}
+	
+	/**
+	 * Returns the bounding box of a feature
+	 * @param feature The feature
+	 * @return The bounding box of the feature
+	 */
+	function _getBounds(feature) {
+		var minlat, maxlat, minlon, maxlon;
+		
+		switch(feature.geometry.type) {
+			case "Point":
+				minlat = feature.geometry.coordinates[1];
+				maxlat = feature.geometry.coordinates[1];
+				minlon = feature.geometry.coordinates[0];
+				maxlon = feature.geometry.coordinates[0];
+				break;
+
+			case "LineString":
+				minlat = feature.geometry.coordinates[0][1];
+				maxlat = feature.geometry.coordinates[0][1];
+				minlon = feature.geometry.coordinates[0][0];
+				maxlon = feature.geometry.coordinates[0][0];
+				
+				for(var i = 1; i < feature.geometry.coordinates.length; i++) {
+					var coords = feature.geometry.coordinates[i];
+					if(coords[0] < minlon) { minlon = coords[0]; }
+					else if(coords[0] > maxlon) { maxlon = coords[0]; }
+					if(coords[1] < minlat) { minlat = coords[1]; }
+					else if(coords[1] > maxlat) { maxlat = coords[1]; }
+				}
+				break;
+
+			case "Polygon":
+				minlat = feature.geometry.coordinates[0][0][1];
+				maxlat = feature.geometry.coordinates[0][0][1];
+				minlon = feature.geometry.coordinates[0][0][0];
+				maxlon = feature.geometry.coordinates[0][0][0];
+				
+				for(var i = 0; i < feature.geometry.coordinates.length; i++) {
+					for(var j=0; j < feature.geometry.coordinates[i].length; j++) {
+						var coords = feature.geometry.coordinates[i][j];
+						if(coords[0] < minlon) { minlon = coords[0]; }
+						else if(coords[0] > maxlon) { maxlon = coords[0]; }
+						if(coords[1] < minlat) { minlat = coords[1]; }
+						else if(coords[1] > maxlat) { maxlat = coords[1]; }
+					}
+				}
+			break;
+		}
+		
+		return L.latLngBounds(L.latLng(minlat, minlon), L.latLng(maxlat, maxlon));
 	}
 /*
  * Levels management
@@ -1033,7 +1085,8 @@ Web: function(ctrl) {
 				for(var room in roomNames[lvl]) {
 					if((filter == null || room.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
 						&& (_getStyle(roomNames[lvl][room]).popup == undefined
-						|| _getStyle(roomNames[lvl][room]).popup == "yes")) {
+						|| _getStyle(roomNames[lvl][room]).popup == "yes")
+						&& _ctrl.getMapData().getBBox().intersects(_getBounds(roomNames[lvl][room]))) {
 
 						roomNamesFiltered[lvl][room] = roomNames[lvl][room];
 					}
@@ -1128,6 +1181,13 @@ Web: function(ctrl) {
 		$("#central-close").hide();
 		$("#main-buttons").removeClass("opened");
 	};
+	
+	/**
+	 * Shows the rooms overlay panel
+	 */
+	this.showRoomsPanel = function() {
+		$("#op-rooms").show();
+	}
 	
 	/**
 	 * Returns the centroid coordinates of given object as a string

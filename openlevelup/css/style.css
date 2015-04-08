@@ -162,6 +162,7 @@ a.button-level img {
 	height: 100%;
 	padding: 0;
 	color: white;
+	position: relative;
 }
 
 #central * {
@@ -218,67 +219,11 @@ footer {
 	color: #ccc;
 }
 
-/* Room names */
-#rooms-container {
-	height: 100px;
-	overflow-y: scroll;
-	background-color: #E9F1FE;
-	margin: 10px;
-}
-
-.input-max {
-	display: table;
-}
-
-.input-max .text {
-	display: table-cell;
-	width: 100%;
-}
-
-.input-max .text input {
-	width: 100%;
-}
-
-#rooms {
-	color: #333;
-	display: table;
-	border-collapse: separate;
-	border-spacing: 10px;
-	width: 100%;
-}
-
-#rooms a {
-	color: #007BFE;
-	text-decoration: none;
-}
-
-#rooms a:hover {
-	color: #51A5FE;
-}
-
-.lvl-row {
-	display: table-row;
-}
-
-.lvl-name, .lvl-rooms {
-	display: table-cell;
-}
-
-.lvl-name {
-	vertical-align: top;
-	border-right: 1px solid #2A75FF;
-	font-weight: bold;
-}
-
-.lvl-rooms {
-	vertical-align: middle;
-	width: 100%;
-}
-
-.lvl-rooms ul {
-	list-style-type: none;
-	padding: 0;
-	margin: 0;
+/* Rooms list */
+#central #room-names.part {
+	height: 100%;
+	padding-bottom: 0;
+	position: relative;
 }
 
 /* Close central icon */
@@ -290,6 +235,7 @@ footer {
 	font-size: 1.5em;
 	color: #ccc;
 	cursor: pointer;
+	visibility: visible;
 }
 
 #central-close:hover {
@@ -345,6 +291,7 @@ footer {
 /* General definition */
 .overlay-panel {
 	height: 40%;
+	max-height: 40%;
 	width: 30%;
 	position: absolute;
 	top: 30%;
@@ -361,6 +308,7 @@ footer {
 }
 
 .overlay-content {
+	position: relative;
 	background-color: rgba(128,128,128,0.8);
 	padding: 0.1em;
 }
@@ -420,6 +368,94 @@ footer {
 .overlay-close {
 	text-align: right;
 	margin: 0.2em;
+}
+
+/* Room names */
+#op-rooms {
+	top: 15%;
+	height: 70%;
+}
+
+#op-rooms h2 {
+	text-align: left;
+}
+
+#op-rooms h2 img {
+	width: 32px;
+	vertical-align: middle;
+}
+
+/**************
+ * Rooms list *
+ **************/
+#rooms-container {
+	position: relative;
+	overflow-y: scroll;
+	background-color: #E9F1FE;
+	margin: 10px;
+	height: 300px;
+}
+
+/* Search field */
+.input-max {
+	display: table;
+}
+
+.input-max .text {
+	display: table-cell;
+	width: 100%;
+}
+
+.input-max .text input {
+	width: 100%;
+}
+
+/* Rooms list */
+#rooms {
+	color: #333;
+	display: table;
+	border-collapse: separate;
+	border-spacing: 10px;
+	width: 100%;
+}
+
+#rooms a {
+	color: #007BFE;
+	text-decoration: none;
+}
+
+#rooms a:hover {
+	color: #51A5FE;
+}
+
+/* Level row */
+.lvl-row {
+	display: table-row;
+}
+
+.lvl-name, .lvl-rooms {
+	display: table-cell;
+}
+
+.lvl-name {
+	vertical-align: top;
+	border-right: 1px solid #2A75FF;
+	font-weight: bold;
+}
+
+.lvl-rooms {
+	vertical-align: middle;
+	width: 100%;
+}
+
+.lvl-rooms ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+.lvl-rooms li {
+	text-align: left;
 }
 
 /****************

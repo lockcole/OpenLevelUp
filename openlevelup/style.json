@@ -13,14 +13,14 @@
 			"name": "Building",
 			"description": "Buildings",
 			"onTags": [ { "building": "*" }, { "building:part": "*" } ],
-			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 1, "fillColor": "#D4CACA", "fillOpacity": 1, "layer": -2 }
+			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 1, "fillColor": "#D4CACA", "fillOpacity": 1, "layer": -10 }
 		},
 		{
 			"type": "Style",
 			"name": "Room",
 			"description": "Indoor rooms",
 			"onTags": [ { "indoor": "room" }, { "room": "*" }, { "buildingpart": "room" } ],
-			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -1, "popup": "yes" }
+			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes" }
 		},
 		{
 			"type": "Style",
@@ -392,6 +392,13 @@
 			"description": "Tomb",
 			"onTags": [ { "historic": "tomb" } ],
 			"style": { "icon": "img/historic_tomb.png" }
+		},
+		{
+			"type": "Style",
+			"name": "Mall",
+			"description": "Mall surface",
+			"onTags": [ { "shop": "mall" } ],
+			"style" : { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -9 }
 		}
 	]
 }
