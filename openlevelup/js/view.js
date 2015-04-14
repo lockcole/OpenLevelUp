@@ -210,6 +210,13 @@ Web: function(ctrl) {
 	};
 	
 	/**
+	 * @return Must we show only building objects ?
+	 */
+	this.showBuildingsOnly = function() {
+		return $("#show-buildings-only").prop("checked");
+	};
+	
+	/**
 	 * @return True if something is loading
 	 */
 	this.isLoading = function() {
@@ -302,6 +309,7 @@ Web: function(ctrl) {
 		var legacy = parseInt(_self.getUrlParameter("legacy"));
 		var transcend = parseInt(_self.getUrlParameter("transcend"));
 		var unrendered = parseInt(_self.getUrlParameter("unrendered"));
+		var buildingsOnly = parseInt(_self.getUrlParameter("buildings"));
 		var lvl = _self.getUrlParameter("level");
 		var tiles = _self.getUrlParameter("tiles");
 		
@@ -319,10 +327,11 @@ Web: function(ctrl) {
 				zoom = letterToInt(shortRes[7]);
 				
 				var options = intToBitArray(base62toDec(shortRes[8]));
-				while(options.length < 3) { options = "0" + options; }
+				while(options.length < 4) { options = "0" + options; }
 				unrendered = options[options.length - 1];
 				legacy = options[options.length - 2];
 				transcend = options[options.length - 3];
+				buildingsOnly = options[options.length - 4];
 				
 				//Get level if available
 				if(shortRes[10] != undefined && shortRes[11] != undefined) {
@@ -377,6 +386,10 @@ Web: function(ctrl) {
 			$("#show-unrendered").prop("checked", unrendered == 1);
 		}
 		
+		if(buildingsOnly != null && (buildingsOnly == 0 || buildingsOnly == 1)) {
+			$("#show-buildings-only").prop("checked", buildingsOnly == 1);
+		}
+		
 		_urlLevel = lvl;
 		
 		//Create tile layers
@@ -415,6 +428,7 @@ Web: function(ctrl) {
 		$("#show-transcendent").change(controller.onMapChange);
 		$("#show-legacy").change(controller.onMapLegacyChange);
 		$("#show-unrendered").change(controller.onMapChange);
+		$("#show-buildings-only").change(controller.onMapChange);
 		$("#export-link").click(controller.onExportLevel);
 		$("#export-link-img").click(controller.onExportLevelImage);
 		$("#search-room").click(controller.getView().onSearchRoomFocusChange);
@@ -697,6 +711,7 @@ Web: function(ctrl) {
 					&& feature.properties.levels.indexOf(_self.getCurrentLevel().toString()) >= 0
 					&& (_self.showTranscendent() || feature.properties.levels.length == 1)
 					&& (_self.showLegacy() || feature.properties.tags.buildingpart == undefined)
+					&& (!_self.showBuildingsOnly() || feature.properties.tags.building != undefined)
 					&& (_self.showUnrendered() || Object.keys(_getStyle(feature)).length > 0);
 		}
 		//Consider objects without levels but connected to door elements
@@ -707,7 +722,7 @@ Web: function(ctrl) {
 					&& feature.properties.tags.max_level != undefined;
 			
 			//Elevator
-			if(_self.showTranscendent()) {
+			if(_self.showTranscendent() && !_self.showBuildingsOnly()) {
 				addObject = addObject || feature.properties.tags.highway == "elevator";
 			}
 			
@@ -982,12 +997,14 @@ Web: function(ctrl) {
 			$("#level").prop("disabled", false);
 			$("#show-transcendent").prop("disabled", false);
 			$("#show-unrendered").prop("disabled", false);
+			$("#show-buildings-only").prop("disabled", false);
 		}
 		//If not, we disable the select element
 		else {
 			$("#level").prop("disabled", true);
 			$("#show-transcendent").prop("disabled", true);
 			$("#show-unrendered").prop("disabled", true);
+			$("#show-buildings-only").prop("disabled", true);
 		}
 	};
 
@@ -1052,6 +1069,7 @@ Web: function(ctrl) {
 		params += "&transcend="+((_self.showTranscendent()) ? "1" : "0");
 		params += "&legacy="+((_self.showLegacy()) ? "1" : "0");
 		params += "&unrendered="+((_self.showUnrendered()) ? "1" : "0");
+		params += "&buildings="+((_self.showBuildingsOnly()) ? "1" : "0");
 		
 		var link = baseURL + params;
 		var linkShort = baseURL + "s=" + _shortlink();
@@ -1247,6 +1265,7 @@ Web: function(ctrl) {
 		}
 		
 		var shortOptions = bitArrayToBase62([
+					((_self.showBuildingsOnly()) ? "1" : "0"),
 					((_self.showTranscendent()) ? "1" : "0"),
 					((_self.showLegacy()) ? "1" : "0"),
 					((_self.showUnrendered()) ? "1" : "0")

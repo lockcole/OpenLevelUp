@@ -1,5 +1,9 @@
 Changes history
 ===============
+14 april 2015
+-------------
+* New option to display only buildings on map
+
 8 april 2015
 ------------
 * Close button in central part of side panel is visible (style fix)
