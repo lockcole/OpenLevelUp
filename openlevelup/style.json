@@ -31,6 +31,13 @@
 		},
 		{
 			"type": "Style",
+			"name": "Amenity",
+			"description": "Set layer for amenities which are kind of landuses",
+			"onTags": [ { "amenity": "school|college|university|hospital" } ],
+			"style": { "layer": -9 }
+		},
+		{
+			"type": "Style",
 			"name": "Path",
 			"description": "Highways (default)",
 			"onTags": [ { "highway": "*" } ],
@@ -54,7 +61,7 @@
 			"type": "Style",
 			"name": "Area",
 			"description": "Indoor areas ('OR' example for values)",
-			"onTags": [ { "indoor": "area|corridor" }, { "highway": "pedestrian|footway", "area": "yes" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|entrance|hall|entry|gallery" } ],
+			"onTags": [ { "indoor": "area|corridor" }, { "highway": "pedestrian|footway", "area": "yes" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|entrance|hall|entry|gallery|collection" } ],
 			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -1 }
 		},
 		{
@@ -174,7 +181,7 @@
 			"name": "Amenity",
 			"description": "Amenities, shops (default)",
 			"onTags": [ { "amenity": "*" }, { "shop": "*" } ],
-			"style": { "color": "red", "fillColor": "orange" }
+			"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2" }
 		},
 		{
 			"type": "Style",
@@ -343,6 +350,13 @@
 			"description": "Information for travelers",
 			"onTags": [ { "tourism": "information" } ],
 			"style": { "icon": "img/Infobox_info_icon.svg" }
+		},
+		{
+			"type": "Style",
+			"name": "Audioguide",
+			"description": "Audioguide",
+			"onTags": [ { "information": "audioguide" } ],
+			"style": { "icon": "img/information_audioguide.svg" }
 		},
 		{
 			"type": "Style",

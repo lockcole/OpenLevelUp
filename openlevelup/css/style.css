@@ -459,6 +459,10 @@ footer {
 	text-align: left;
 }
 
+.lvl-rooms li img {
+	vertical-align: middle;
+}
+
 /****************
  * Infobox area *
  ****************/

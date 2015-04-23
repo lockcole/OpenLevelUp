@@ -290,18 +290,9 @@ MapData: function(ctrl) {
 	 * @param feature The feature name
 	 */
 	function _addName(feature) {
-		//Look if the feature has a name or ref
-		var name = null;
-		
+		//Look if the feature has a name
 		if(feature.properties.tags.name != undefined) {
 			name = feature.properties.tags.name;
-		}
-		else if(feature.properties.tags.ref != undefined) {
-			name = feature.properties.tags.ref;
-		}
-		
-		//If a name was found, add feature
-		if(name != null) {
 			//Add object for each level
 			for(var i in feature.properties.levels) {
 				//Check if _roomNames as already an array for the given level

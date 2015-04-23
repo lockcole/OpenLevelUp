@@ -620,7 +620,7 @@ Web: function(ctrl) {
 			
 			//Add icon in title
 			if(styleRules.icon != undefined) {
-				var iconUrl = _getIconUrl(feature, styleRules.icon);
+				var iconUrl = feature.properties.style.getIconUrl();
 				if(iconUrl != null) {
 					text += '<img class="icon" src="'+iconUrl+'" /> ';
 				}
@@ -644,9 +644,6 @@ Web: function(ctrl) {
 			
 			//End title
 			text += '</h1>';
-			
-			//Link to osm.org object
-			text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+feature.properties.type+'/'+feature.properties.id+'">See this on OSM.org</a></p>';
 			
 			//List all tags
 			text += '<h2 class="popup">Tags</h2><p class="popup-txt">';
@@ -675,6 +672,9 @@ Web: function(ctrl) {
 				
 				text += '<p class="popup-img"><a href="'+url+'"><img src="'+url+'" alt="Image of this object" /></a></p>';
 			}
+			
+			//Link to osm.org object
+			text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+feature.properties.type+'/'+feature.properties.id+'">See this on OSM.org</a></p>';
 			
 			//And add popup to layer
 			layer.bindPopup(text);
@@ -840,7 +840,7 @@ Web: function(ctrl) {
 		var iconUrl = null;
 		
 		if(style.icon != undefined && style.icon != null && style.icon != '') {
-			var tmpUrl = _getIconUrl(feature, style.icon);
+			var tmpUrl = feature.properties.style.getIconUrl();
 			
 			if(tmpUrl != null) {
 				iconUrl = tmpUrl;
@@ -867,18 +867,6 @@ Web: function(ctrl) {
 		}
 		
 		return result;
-	}
-	
-	/**
-	 * Get the complete icon name, in particular when style contains a tag variable.
-	 * @param feature The GeoJSON feature
-	 * @param iconStyle The icon string from JSON style
-	 * @return The icon URL
-	 * @deprecated
-	 */
-	function _getIconUrl(feature, iconStyle) {
-		_getStyle(feature);
-		return feature.properties.style.getIconUrl();
 	}
 	
 	/**
@@ -1152,12 +1140,18 @@ Web: function(ctrl) {
 					$("#lvl"+lvl+"-rooms ul").append(newRoom);
 					$("#lvl"+lvl+"-rooms ul li:last").addClass("ref");
 					
+					var roomIcon = document.createElement("img");
 					var roomLink = document.createElement("a");
 					$("#lvl"+lvl+"-rooms ul li:last").append(roomLink);
+					$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
 					$("#lvl"+lvl+"-rooms ul li:last a")
-						.html(room)
+						.append(document.createTextNode(" "+room))
 						.attr("href", "#")
 						.attr("onclick", "controller.goTo('"+lvl+"', "+_coordinates(roomNamesFiltered[lvl][room].geometry)+")");
+					
+					$("#lvl"+lvl+"-rooms ul li:last a img")
+						.attr("src", roomNamesFiltered[lvl][room].properties.style.getIconUrl())
+						.attr("width", OLvlUp.view.ICON_SIZE+"px");
 				}
 			}
 		}

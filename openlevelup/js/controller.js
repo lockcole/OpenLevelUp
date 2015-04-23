@@ -380,7 +380,7 @@ Ctrl: function() {
 	 * @param lon The longitude
 	 */
 	this.goTo = function(lvl, lat, lon) {
-		_view.getMap().setView(L.latLng(lat, lon), _view.getMap().getMaxZoom());
+		_view.getMap().setView(L.latLng(lat, lon), _view.getMap().getMaxZoom()-1);
 		
 		if(_view.isLoading()) {
 			_isGoingTo = true;

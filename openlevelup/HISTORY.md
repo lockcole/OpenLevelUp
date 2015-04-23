@@ -1,5 +1,14 @@
 Changes history
 ===============
+23 april 2015
+-------------
+* New icon for information=audioguide, room=checkroom
+* Room=collection rendered like room=gallery
+* When a room name is clicked in side panel, map zooms to max zoom -1 (instead of max zoom)
+* Icons added before room names in dedicated panel
+* Layer added in JSON style for some amenities which are kind of landuses (university, school, college)
+* New rendering for shop/amenity (less funky)
+
 14 april 2015
 -------------
 * New option to display only buildings on map
