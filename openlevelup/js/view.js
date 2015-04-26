@@ -34,6 +34,9 @@ BUILDING_MAX_ZOOM: 0,
 /** The minimal zoom to display actual data on map **/
 DATA_MIN_ZOOM: 17,
 
+/** The maximal zoom of map **/
+MAX_ZOOM: 24,
+
 /** The minimal tiles opacity (between 0 and 1) **/
 TILES_MIN_OPACITY: 0.1,
 
@@ -297,7 +300,7 @@ Web: function(ctrl) {
 	 */
 	this.mapInit = function() {
 		//Init map center and zoom
-		_map = L.map('map', {minZoom: 1, maxZoom: 22, zoomControl: false}).setView([47, 2], 6);
+		_map = L.map('map', {minZoom: 1, maxZoom: OLvlUp.view.MAX_ZOOM, zoomControl: false}).setView([47, 2], 6);
 		L.control.zoom({ position: "topright" }).addTo(_map);
 		
 		//If coordinates are given in URL, then make map show the wanted area
@@ -616,67 +619,8 @@ Web: function(ctrl) {
 		
 		//Create popup if necessary
 		if(styleRules.popup == undefined || styleRules.popup == "yes") {
-			var text = '<h1 class="popup">';
-			
-			//Add icon in title
-			if(styleRules.icon != undefined) {
-				var iconUrl = feature.properties.style.getIconUrl();
-				if(iconUrl != null) {
-					text += '<img class="icon" src="'+iconUrl+'" /> ';
-				}
-			}
-			
-			//Object name (its name tag or its type)
-			text += (feature.properties.tags.name != undefined) ? feature.properties.tags.name : name;
-			
-			//Add up and down icons if levelup property == true
-			if(styleRules.levelup && feature.properties.levels != undefined) {
-				//Able to go up ?
-				var levelId = feature.properties.levels.indexOf(_self.getCurrentLevel().toString());
-				if(levelId < feature.properties.levels.length -1) {
-					text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId+1]+')" href="#"><img src="img/arrow_up.png" title="Go up" alt="Up!" /></a>';
-				}
-				//Able to go down ?
-				if(levelId > 0) {
-					text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId-1]+')" href="#"><img src="img/arrow_down.png" title="Go down" alt="Down!" /></a>';
-				}
-			}
-			
-			//End title
-			text += '</h1>';
-			
-			//List all tags
-			text += '<h2 class="popup">Tags</h2><p class="popup-txt">';
-			for(i in feature.properties.tags) {
-				//Render specific tags
-				//URLs
-				var urlTags = ["image", "website", "contact:website", "url"];
-				if(urlTags.indexOf(i) >= 0) {
-					text += i+' = <a href="'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
-				}
-				//Wikimedia commons
-				else if(i == "wikimedia_commons") {
-					text += i+' = <a href="https://commons.wikimedia.org/wiki/'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
-				}
-				else {
-					text += i+" = "+feature.properties.tags[i];
-				}
-				text += "<br />";
-			}
-			
-			text += "</p>";
-			
-			//Image rendering
-			if(feature.properties.tags.image != undefined) {
-				var url = feature.properties.tags.image;
-				
-				text += '<p class="popup-img"><a href="'+url+'"><img src="'+url+'" alt="Image of this object" /></a></p>';
-			}
-			
-			//Link to osm.org object
-			text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+feature.properties.type+'/'+feature.properties.id+'">See this on OSM.org</a></p>';
-			
 			//And add popup to layer
+			var text = _createPopup(feature, styleRules, name);
 			layer.bindPopup(text);
 			if(_markersPolygons[feature.properties.type+feature.properties.id] != undefined) {
 				_markersPolygons[feature.properties.type+feature.properties.id].bindPopup(text);
@@ -867,6 +811,179 @@ Web: function(ctrl) {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Creates the popup for a given feature
+	 * @param feature The feature the popup will be created for
+	 * @param styleRules The feature style rules
+	 * @param name The feature name
+	 * @return The text the popup will contain
+	 */
+	function _createPopup(feature, styleRules, name) {
+		/*
+		 * Title
+		 */
+		var text = '<h1 class="popup">';
+		
+		//Add icon in title
+		if(styleRules.icon != undefined) {
+			var iconUrl = feature.properties.style.getIconUrl();
+			if(iconUrl != null) {
+				text += '<img class="icon" src="'+iconUrl+'" /> ';
+			}
+		}
+		
+		//Object name (its name tag or its type)
+		text += (feature.properties.tags.name != undefined) ? feature.properties.tags.name : name;
+		
+		//Add up and down icons if levelup property == true
+		if(styleRules.levelup && feature.properties.levels != undefined) {
+			//Able to go up ?
+			var levelId = feature.properties.levels.indexOf(_self.getCurrentLevel().toString());
+			if(levelId < feature.properties.levels.length -1) {
+				text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId+1]+')" href="#"><img src="img/arrow_up.png" title="Go up" alt="Up!" /></a>';
+			}
+			//Able to go down ?
+			if(levelId > 0) {
+				text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId-1]+')" href="#"><img src="img/arrow_down.png" title="Go down" alt="Down!" /></a>';
+			}
+		}
+		
+		//End title
+		text += '</h1>';
+		
+		//Navigation bar
+		text += '<div class="popup-nav"><div class="row">';
+		text += '<div class="item selected" id="item-general"><a href="#" onclick="controller.changePopupTab(\'general\');">General</a></div>';
+		text += '<div class="item" id="item-technical"><a href="#" onclick="controller.changePopupTab(\'technical\');">Technical</a></div>';
+		text += '<div class="item" id="item-tags"><a href="#" onclick="controller.changePopupTab(\'tags\');">Tags</a></div>';
+		text += '</div></div>';
+		
+		/*
+		 * Tab 1 : general information
+		 */
+		text += '<div class="popup-tab" id="popup-tab-general">';
+		generalTxt = '';
+		generalTxt += _addFormatedTag(feature, "vending", "Selling", removeUscore);
+		generalTxt += _addFormatedTag(feature, "information", "Type", removeUscore);
+		generalTxt += _addFormatedTag(feature, "access", "Access");
+		generalTxt += _addFormatedTag(feature, "artist", "Creator");
+		generalTxt += _addFormatedTag(feature, "artist_name", "Creator");
+		generalTxt += _addFormatedTag(feature, "architect", "Architect");
+		generalTxt += _addFormatedTag(feature, "opening_hours", "Opening hours");
+		generalTxt += _addFormatedTag(feature, "start_date", "Created in");
+		generalTxt += _addFormatedTag(feature, "historic:era", "Era", removeUscore);
+		generalTxt += _addFormatedTag(feature, "historic:period", "Period", removeUscore);
+		generalTxt += _addFormatedTag(feature, "historic:civilization", "Civilization", removeUscore);
+		generalTxt += _addFormatedTag(feature, "website", "Website", asWebLink);
+		generalTxt += _addFormatedTag(feature, "contact:website", "Website", asWebLink);
+		generalTxt += _addFormatedTag(feature, "phone", "Phone");
+		generalTxt += _addFormatedTag(feature, "contact:phone", "Phone");
+		generalTxt += _addFormatedTag(feature, "email", "E-mail");
+		generalTxt += _addFormatedTag(feature, "contact:email", "E-mail");
+		generalTxt += _addFormatedTag(feature, "fee", "Fee");
+		generalTxt += _addFormatedTag(feature, "atm", "With ATM");
+		generalTxt += _addFormatedTag(feature, "payment:coins", "Pay with coins");
+		generalTxt += _addFormatedTag(feature, "payment:credit_cards", "Pay with credit cards");
+		generalTxt += _addFormatedTag(feature, "currency:EUR", "Pay in €");
+		generalTxt += _addFormatedTag(feature, "currency:USD", "Pay in US $");
+		generalTxt += _addFormatedTag(feature, "female", "For women");
+		generalTxt += _addFormatedTag(feature, "male", "For men");
+		generalTxt += _addFormatedTag(feature, "bicycle", "For bicycle");
+		generalTxt += _addFormatedTag(feature, "foot", "On foot");
+		generalTxt += _addFormatedTag(feature, "wheelchair", "For wheelchair");
+		generalTxt += _addFormatedTag(feature, "seats", "Seats");
+		generalTxt += _addFormatedTag(feature, "waste", "Waste",removeUscore);
+		generalTxt += _addFormatedTag(feature, "cuisine", "Cuisine", removeUscore);
+		
+		generalTxt += _addFormatedTag(feature, "description", "Details");
+		
+		//Image rendering
+		if(feature.properties.tags.image != undefined) {
+			var url = feature.properties.tags.image;
+			
+			generalTxt += '<p class="popup-img"><a href="'+url+'"><img src="'+url+'" alt="Image of this object" /></a></p>';
+		}
+		
+		if(generalTxt == '') { generalTxt = "No general information (look at tags)"; }
+		text += generalTxt;
+		
+		text += '</div>';
+		
+		/*
+		 * Tab 2 : technical information
+		 */
+		text += '<div class="popup-tab hidden" id="popup-tab-technical">';
+		
+		technicalTxt = '';
+		technicalTxt += _addFormatedTag(feature, "width", "Width", addDimensionUnit);
+		technicalTxt += _addFormatedTag(feature, "height", "Height", addDimensionUnit);
+		technicalTxt += _addFormatedTag(feature, "length", "Length", addDimensionUnit);
+		technicalTxt += _addFormatedTag(feature, "direction", "Direction", orientationValue);
+		technicalTxt += _addFormatedTag(feature, "camera:direction", "Direction (camera)", orientationValue);
+		technicalTxt += _addFormatedTag(feature, "operator", "Operator");
+		technicalTxt += _addFormatedTag(feature, "ref", "Reference");
+		technicalTxt += _addFormatedTag(feature, "material", "Made of");
+		
+		if(technicalTxt == '') { technicalTxt = "No technical information (look at tags)"; }
+		text += technicalTxt;
+		
+		text += '</div>';
+		
+		/*
+		 * Tab 3 : tags
+		 */
+		text += '<div class="popup-tab hidden" id="popup-tab-tags">';
+		
+		//List all tags
+		text += '<p class="popup-txt">';
+		for(i in feature.properties.tags) {
+			//Render specific tags
+			//URLs
+			var urlTags = ["image", "website", "contact:website", "url"];
+			if(urlTags.indexOf(i) >= 0) {
+				text += i+' = <a href="'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
+			}
+			//Wikimedia commons
+			else if(i == "wikimedia_commons") {
+				text += i+' = <a href="https://commons.wikimedia.org/wiki/'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
+			}
+			else {
+				text += i+" = "+feature.properties.tags[i];
+			}
+			text += "<br />";
+		}
+		text += "</p>";
+		
+		text += '</div>';
+		
+		/*
+		 * Footer
+		 */
+		//Link to osm.org object
+		text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+feature.properties.type+'/'+feature.properties.id+'">See this on OSM.org</a></p>';
+		
+		return text;
+	}
+	
+	/**
+	 * Creates a formated tag display
+	 * @param feature The concerned feature
+	 * @param key The OSM key to display
+	 * @param cleanName The clean name to display
+	 * @param tagCleaner The function that will clean the tag value (for example, add proper unit for dimensions), optional
+	 * @return The formated tag, or empty string if not found
+	 */
+	function _addFormatedTag(feature, key, cleanName, tagCleaner) {
+		var text = '';
+		if(tagCleaner == undefined) { tagCleaner = function(v) { return v; }; }
+		
+		if(feature.properties.tags[key] != undefined) {
+			text = '<b>'+cleanName+':</b> '+tagCleaner(feature.properties.tags[key])+'<br />';
+		}
+		
+		return text;
 	}
 	
 	/**
@@ -1143,15 +1260,20 @@ Web: function(ctrl) {
 					var roomIcon = document.createElement("img");
 					var roomLink = document.createElement("a");
 					$("#lvl"+lvl+"-rooms ul li:last").append(roomLink);
-					$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
+					var addImg = checkUrl(roomNamesFiltered[lvl][room].properties.style.getIconUrl());
+					if(addImg) {
+						$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
+					}
 					$("#lvl"+lvl+"-rooms ul li:last a")
 						.append(document.createTextNode(" "+room))
 						.attr("href", "#")
 						.attr("onclick", "controller.goTo('"+lvl+"', "+_coordinates(roomNamesFiltered[lvl][room].geometry)+")");
 					
+					if(addImg) {
 					$("#lvl"+lvl+"-rooms ul li:last a img")
 						.attr("src", roomNamesFiltered[lvl][room].properties.style.getIconUrl())
 						.attr("width", OLvlUp.view.ICON_SIZE+"px");
+					}
 				}
 			}
 		}
@@ -1199,6 +1321,17 @@ Web: function(ctrl) {
 	 */
 	this.showRoomsPanel = function() {
 		$("#op-rooms").show();
+	}
+	
+	/**
+	 * Changes the currently shown popup tab
+	 * @param id The ID of the tab to show (for exemple "general")
+	 */
+	this.changePopupTab = function(id) {
+		$(".popup-nav .item:visible").removeClass("selected");
+		$(".popup-tab:visible").hide();
+		$(".leaflet-popup:visible #popup-tab-"+id).show();
+		$("#item-"+id).addClass("selected");
 	}
 	
 	/**

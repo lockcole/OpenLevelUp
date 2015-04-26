@@ -392,6 +392,14 @@ Ctrl: function() {
 	};
 	
 	/**
+	 * Changes the currently shown popup tab in view
+	 * @param id The tab to show
+	 */
+	this.changePopupTab = function(id) {
+		_view.changePopupTab(id);
+	}
+	
+	/**
 	 * Downloads data from Overpass API
 	 * Then calls another function to process it.
 	 * @param type The kind of request ("data" or "cluster")

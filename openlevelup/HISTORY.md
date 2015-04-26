@@ -1,5 +1,11 @@
 Changes history
 ===============
+26 april 2015
+-------------
+* Maximal zoom changed to 24, set as a constant in view.js
+* Tabs added in pop-ups
+* Icon in room names panel added only if image is accessible (no 404 error)
+
 23 april 2015
 -------------
 * New icon for information=audioguide, room=checkroom
