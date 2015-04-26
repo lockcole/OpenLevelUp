@@ -250,7 +250,7 @@ function removeUscore(v) {
  * @return The string as a HTML link
  */
 function asWebLink(v) {
-	return '<a href="'+v+'">'+v+'</a>';
+	return '<a href="'+v+'">Link</a>';
 }
 
 /**
