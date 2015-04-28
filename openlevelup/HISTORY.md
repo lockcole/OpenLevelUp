@@ -1,5 +1,15 @@
 Changes history
 ===============
+28 april 2015
+-------------
+* Audioguide icon changed, now representing headphones
+* Room=security_check, room=locker, indoor=glass_cabinet now supported
+* Style for tourism=artwork as way/polygon
+* artwork_type=* added in general pop-up tab
+* Style fix for room=stairs|escalator layer
+* Open pop-up when moving to a selected object
+* For high zoom levels, download a larger area to make navigation smoother
+
 26 april 2015
 -------------
 * Maximal zoom changed to 24, set as a constant in view.js

@@ -51,6 +51,9 @@ Ctrl: function() {
 	/** Is the map going to somewhere (goTo() method called) ? **/
 	var _isGoingTo = false;
 	
+	/** The popup ID to open after refresh **/
+	var _popup = null;
+	
 	/** The current object **/
 	var _self = this;
 	
@@ -349,6 +352,13 @@ Ctrl: function() {
 		else {
 			_view.setLoading(false);
 		}
+		
+		if(_popup != null && _popup != undefined) {
+			_view.openPopup(_popup);
+			_popup = null;
+		}
+		
+		$(document).off("donerefresh");
 	};
 	
 	/**
@@ -379,7 +389,7 @@ Ctrl: function() {
 	 * @param lat The latitude
 	 * @param lon The longitude
 	 */
-	this.goTo = function(lvl, lat, lon) {
+	this.goTo = function(lvl, lat, lon, popup) {
 		_view.getMap().setView(L.latLng(lat, lon), 21);
 		
 		if(_view.isLoading()) {
@@ -388,8 +398,14 @@ Ctrl: function() {
 		}
 		else {
 			_self.toLevel(lvl);
+			_self.openPopup(popup);
 		}
+		_popup = popup;
 	};
+	
+	this.openPopup = function(id) {
+		_view.openPopup(id);
+	}
 	
 	/**
 	 * Changes the currently shown popup tab in view
@@ -406,7 +422,6 @@ Ctrl: function() {
 	 * @param handler The handler function, which will process the data
 	 */
 	this.downloadData = function(type, handler) {
-		var bounds = _view.getMapBounds();
 		var oapiRequest = null;
 		
 		_view.addLoadingInfo("Request Overpass API");
@@ -414,12 +429,21 @@ Ctrl: function() {
 		//Prepare request depending of type
 		if(type == "cluster") {
 			_mapdata.setClusterBBox(_view.getMap().getBounds());
+			var bounds = boundsString(_view.getMap().getBounds());
 			oapiRequest = '[out:json][timeout:25];(way["indoor"]["indoor"!="yes"]["level"]('+bounds+');';
 			if(_view.showLegacy()) { oapiRequest += 'way["buildingpart"]["level"]('+bounds+');'; }
 			oapiRequest += ');out body center;';
 		}
 		else {
-			_mapdata.setBBox(_view.getMap().getBounds());
+			var bbox = _view.getMap().getBounds();
+			
+			//Resize BBox for small areas (avoid multiple Overpass API calls)
+			if(_view.getMap().getZoom() >= 19) {
+				bbox = bbox.pad(2);
+			}
+			
+			_mapdata.setBBox(bbox);
+			var bounds = boundsString(bbox);
 			oapiRequest = '[out:json][timeout:25];(node["door"]('+bounds+');<;>;node["entrance"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+');relation["type"="multipolygon"]["level"]('+bounds+');node["repeat_on"]('+bounds+');way["repeat_on"]('+bounds+');way["min_level"]('+bounds+');way["max_level"]('+bounds+');relation["type"="level"]('+bounds+'));out body;>;out skel qt;';
 		}
 

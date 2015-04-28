@@ -116,6 +116,9 @@ Web: function(ctrl) {
 	/** Currently shown tile layer ID **/
 	var _tileLayer = null;
 	
+	/** The pop-ups content array **/
+	var _popups = null;
+	
 	/** The application controller **/
 	var _ctrl = ctrl;
 	
@@ -179,6 +182,7 @@ Web: function(ctrl) {
 	
 	/**
 	 * @return The map bounds as string for Overpass API
+	 * @deprecated Use boundsString(bounds) in utils.js instead
 	 */
 	this.getMapBounds = function() {
 		return normLat(_map.getBounds().getSouth())+","+normLon(_map.getBounds().getWest())+","+normLat(_map.getBounds().getNorth())+","+normLon(_map.getBounds().getEast());
@@ -483,6 +487,7 @@ Web: function(ctrl) {
 				_objectLayered = new Object();
 				_markersPolygons = new Object();
 				_markersLinestrings = new Object();
+				_popups = new Object();
 				_dataLayer = L.geoJson(
 					mapData.getData(),
 					{
@@ -564,6 +569,28 @@ Web: function(ctrl) {
 	};
 	
 	/**
+	 * Opens a pop-up at given coordinates
+	 * @param id The pop-up ID (for example, "node12345")
+	 */
+	this.openPopup = function(id) {
+		if(_popups[id] == undefined) {
+			//Search for feature
+			_dataLayer.eachLayer(function(l) {
+				if(l.feature != undefined && _getPopupId(l.feature) == id) {
+					_popups[id] = _createPopup(l.feature);
+				}
+			});
+		}
+		
+		if(_popups[id] != undefined) {
+			_map.openPopup(_popups[id]);
+		}
+		else {
+			console.log(id);
+		}
+	}
+	
+	/**
 	 * Changes the tiles opacity, depending of shown level
 	 */
 	function _changeTilesOpacity() {
@@ -620,10 +647,11 @@ Web: function(ctrl) {
 		//Create popup if necessary
 		if(styleRules.popup == undefined || styleRules.popup == "yes") {
 			//And add popup to layer
-			var text = _createPopup(feature, styleRules, name);
-			layer.bindPopup(text);
+			var popup = _createPopup(feature);
+			_popups[_getPopupId(feature)] = popup;
+			layer.bindPopup(popup);
 			if(_markersPolygons[feature.properties.type+feature.properties.id] != undefined) {
-				_markersPolygons[feature.properties.type+feature.properties.id].bindPopup(text);
+				_markersPolygons[feature.properties.type+feature.properties.id].bindPopup(popup);
 			}
 		}
 		
@@ -816,11 +844,12 @@ Web: function(ctrl) {
 	/**
 	 * Creates the popup for a given feature
 	 * @param feature The feature the popup will be created for
-	 * @param styleRules The feature style rules
-	 * @param name The feature name
 	 * @return The text the popup will contain
 	 */
-	function _createPopup(feature, styleRules, name) {
+	function _createPopup(feature) {
+		var name = feature.properties.name;
+		var styleRules = _getStyle(feature);
+		
 		/*
 		 * Title
 		 */
@@ -867,6 +896,7 @@ Web: function(ctrl) {
 		generalTxt = '';
 		generalTxt += _addFormatedTag(feature, "vending", "Selling", removeUscore);
 		generalTxt += _addFormatedTag(feature, "information", "Type", removeUscore);
+		generalTxt += _addFormatedTag(feature, "artwork_type", "Type", removeUscore);
 		generalTxt += _addFormatedTag(feature, "access", "Access");
 		generalTxt += _addFormatedTag(feature, "artist", "Creator");
 		generalTxt += _addFormatedTag(feature, "artist_name", "Creator");
@@ -964,7 +994,17 @@ Web: function(ctrl) {
 		//Link to osm.org object
 		text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+feature.properties.type+'/'+feature.properties.id+'">See this on OSM.org</a></p>';
 		
-		return text;
+		var coords = centroid(feature);
+		
+		return L.popup().setContent(text).setLatLng(L.latLng(coords[1], coords[0]));
+	}
+	
+	/**
+	 * @param feature The feature
+	 * @return The popup ID for a given feature
+	 */
+	function _getPopupId(feature) {
+		return feature.properties.type+feature.properties.id;
 	}
 	
 	/**
@@ -1267,7 +1307,7 @@ Web: function(ctrl) {
 					$("#lvl"+lvl+"-rooms ul li:last a")
 						.append(document.createTextNode(" "+room))
 						.attr("href", "#")
-						.attr("onclick", "controller.goTo('"+lvl+"', "+_coordinates(roomNamesFiltered[lvl][room].geometry)+")");
+						.attr("onclick", "controller.goTo('"+lvl+"', "+_coordinates(roomNamesFiltered[lvl][room].geometry)+",'"+_getPopupId(roomNamesFiltered[lvl][room])+"')");
 					
 					if(addImg) {
 					$("#lvl"+lvl+"-rooms ul li:last a img")
@@ -1338,6 +1378,7 @@ Web: function(ctrl) {
 	 * Returns the centroid coordinates of given object as a string
 	 * @param geom The feature geometry
 	 * @return The coordinates, as a string with format "lat, lon"
+	 * @deprecated Use centroid(feature) in utils.js instead
 	 */
 	function _coordinates(geom) {
 		var result = "";

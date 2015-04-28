@@ -158,6 +158,33 @@ function parseLevelsFloat(str) {
 }
 
 /**
+ * @return The map bounds as string for Overpass API
+ */
+function boundsString(bounds) {
+	return normLat(bounds.getSouth())+","+normLon(bounds.getWest())+","+normLat(bounds.getNorth())+","+normLon(bounds.getEast());
+}
+
+/**
+ * @param feature The feature
+ * @return The centroid (geometry type independent), as [longitude, latitude]
+ */
+function centroid(feature) {
+	var result = null;
+	
+	if(feature.geometry.type == "Point") {
+		result = feature.geometry.coordinates;
+	}
+	else if(feature.geometry.type == "LineString") {
+		result = centroidLineString(feature.geometry);
+	}
+	else if(feature.geometry.type == "Polygon") {
+		result = centroidPolygon(feature.geometry);
+	}
+	
+	return result;
+}
+
+/**
  * @return The centroid of given GeoJSON polygon
  */
 function centroidPolygon(geom) {
@@ -172,6 +199,25 @@ function centroidPolygon(geom) {
 	
 	centroid[0] = centroid[0] / (geom.coordinates[0].length -1);
 	centroid[1] = centroid[1] / (geom.coordinates[0].length -1);
+	
+	return centroid;
+}
+
+/**
+ * @return The centroid of given GeoJSON linestring
+ */
+function centroidLineString(geom) {
+	var centroid = [0, 0];
+	
+	for(var i in geom.coordinates) {
+		if(i < geom.coordinates.length) {
+			centroid[0] += geom.coordinates[i][0];
+			centroid[1] += geom.coordinates[i][1];
+		}
+	}
+	
+	centroid[0] = centroid[0] / (geom.coordinates.length);
+	centroid[1] = centroid[1] / (geom.coordinates.length);
 	
 	return centroid;
 }
@@ -251,25 +297,6 @@ function removeUscore(v) {
  */
 function asWebLink(v) {
 	return '<a href="'+v+'">Link</a>';
-}
-
-/**
- * @return The centroid of given GeoJSON linestring
- */
-function centroidLineString(geom) {
-	var centroid = [0, 0];
-	
-	for(var i in geom.coordinates) {
-		if(i < geom.coordinates.length) {
-			centroid[0] += geom.coordinates[i][0];
-			centroid[1] += geom.coordinates[i][1];
-		}
-	}
-	
-	centroid[0] = centroid[0] / (geom.coordinates.length);
-	centroid[1] = centroid[1] / (geom.coordinates.length);
-	
-	return centroid;
 }
 
 /**

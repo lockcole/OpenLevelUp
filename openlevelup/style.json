@@ -25,7 +25,7 @@
 		{
 			"type": "Style",
 			"name": "Wall",
-			"description": "Indoor rooms",
+			"description": "Indoor walls",
 			"onTags": [ { "indoor": "wall" }, { "buildingpart": "wall" }, { "barrier": "wall" } ],
 			"style": { "color": "#999999", "opacity": 1, "weight": 2, "fillColor": "red", "fillOpacity": 1, "popup": "yes" }
 		},
@@ -122,6 +122,13 @@
 		},
 		{
 			"type": "Style",
+			"name": "Checkroom",
+			"description": "Checkroom",
+			"onTags": [ { "room": "checkroom" } ],
+			"style": { "icon": "img/room_locker.svg" }
+		},
+		{
+			"type": "Style",
 			"name": "Grass",
 			"description": "Grass landuse",
 			"onTags": [ { "landuse": "grass" } ],
@@ -209,7 +216,7 @@
 			"name": "Tourism",
 			"description": "Tourism icons",
 			"onTags": [ { "tourism": "*" } ],
-			"style": { "icon": "img/tourism_${tourism}.png" }
+			"style": { "icon": "img/tourism_${tourism}.png", "color": "#ECC7A6", "fillColor": "#ECC7A6", "opacity": 1, "fillOpacity": 1, "weight": 3 }
 		},
 		{
 			"type": "Style",
@@ -256,9 +263,16 @@
 		{
 			"type": "Style",
 			"name": "Stairs",
+			"description": "Fix for room=stairs|escalator layer",
+			"onTags": [ { "room": "stairs" }, { "room": "escalator" } ],
+			"style": { "layer": -1 }
+		},
+		{
+			"type": "Style",
+			"name": "Stairs",
 			"description": "Stairs",
 			"onTags": [ { "highway": "steps" } ],
-			"style": { "color": "#F98072", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "2,1", "levelup": true }
+			"style": { "color": "#F98072", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "2,1", "levelup": true, "level": -1 }
 		},
 		{
 			"type": "Style",
@@ -272,7 +286,7 @@
 			"name": "Vertical passage",
 			"description": "Elevetor, stairs (as polygons)",
 			"onTags": [ { "highway": "elevator|lift" }, { "buildingpart": "verticalpassage" }, { "room": "stairs" } ],
-			"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true }
+			"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "level": -1 }
 		},
 		{
 			"type": "Style",
@@ -336,6 +350,13 @@
 			"description": "Pillar",
 			"onTags": [ { "man_made": "pillar" }, { "buildingpart": "pillar" }, { "building:part": "column" }, { "indoor": "column" } ],
 			"style": { "color": "#A8A8A8", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#A8A8A8", "fillOpacity": 1, "radius": 4, "layer": 0 }
+		},
+		{
+			"type": "Style",
+			"name": "Glass cabinet",
+			"description": "Glass cabinet",
+			"onTags": [ { "indoor": "glass_cabinet" } ],
+			"style": { "color": "#A2CCC8", "fillColor": "#E3F3F5", "opacity": 1, "fillOpacity": 1, "lineJoin": "miter", "weight": 3, "layer": -1 }
 		},
 		{
 			"type": "Style",
