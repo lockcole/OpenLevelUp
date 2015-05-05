@@ -1303,11 +1303,10 @@ Web: function(ctrl) {
 					var roomIcon = document.createElement("img");
 					var roomLink = document.createElement("a");
 					$("#lvl"+lvl+"-rooms ul li:last").append(roomLink);
+					
 					if(STYLE != undefined) {
 						var addImg = STYLE.images.indexOf(roomNamesFiltered[lvl][room].properties.style.getIconUrl()) >= 0;
-						if(addImg) {
-							$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
-						}
+						$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
 					}
 					
 					$("#lvl"+lvl+"-rooms ul li:last a")
@@ -1315,10 +1314,12 @@ Web: function(ctrl) {
 						.attr("href", "#")
 						.attr("onclick", "controller.goTo('"+lvl+"', "+_coordinates(roomNamesFiltered[lvl][room].geometry)+",'"+_getPopupId(roomNamesFiltered[lvl][room])+"')");
 					
-					if(addImg) {
-					$("#lvl"+lvl+"-rooms ul li:last a img")
-						.attr("src", OLvlUp.view.ICON_FOLDER+'/'+roomNamesFiltered[lvl][room].properties.style.getIconUrl())
-						.attr("width", OLvlUp.view.ICON_SIZE+"px");
+					if(STYLE != undefined) {
+						$("#lvl"+lvl+"-rooms ul li:last a img")
+							.attr("src", OLvlUp.view.ICON_FOLDER+'/'+
+								((addImg) ? roomNamesFiltered[lvl][room].properties.style.getIconUrl() : 'default.svg')
+							)
+							.attr("width", OLvlUp.view.ICON_SIZE+"px");
 					}
 				}
 			}

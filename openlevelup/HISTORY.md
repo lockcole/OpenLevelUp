@@ -1,5 +1,10 @@
 Changes history
 ===============
+5 march 2015
+------------
+* Icon management changed, instead of checking icon with an Ajax request, a list of available icons is present in JSON style
+* Default icon for room names added
+
 28 april 2015
 -------------
 * Audioguide icon changed, now representing headphones
