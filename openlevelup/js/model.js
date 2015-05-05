@@ -435,7 +435,7 @@ FeatureStyle: function(feature, jsonStyle) {
 				_icon = _icon.replace(regex, _tags[tagName]);
 				
 				//Check if icon file exists (to avoid exotic values)
-				if(!checkUrl(_icon)) {
+				if(jsonStyle.images.indexOf(_icon) < 0) {
 					_icon = null;
 				}
 			}
@@ -466,8 +466,8 @@ FeatureStyle: function(feature, jsonStyle) {
 					|| (val != "*" && val != featureVal && val.split("|").indexOf(featureVal) < 0)) {
 					
 					applyable = false;
-				break;
-					}
+					break;
+				}
 			}
 			//If style still applyable after looking for all tags in a taglist, then it's applyable
 			if(applyable) { break; }

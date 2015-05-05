@@ -46,6 +46,9 @@ TILES_MAX_OPACITY: 0.3,
 /** The icon size for objects **/
 ICON_SIZE: 24,
 
+/** The folder containing icons **/
+ICON_FOLDER: "img",
+
 /** The available tile layers (IDs must be integers and constant in time) **/
 TILE_LAYERS:
 	{
@@ -742,7 +745,7 @@ Web: function(ctrl) {
 				var coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
 				
 				var myIcon = L.icon({
-					iconUrl: result.icon,
+					iconUrl: OLvlUp.view.ICON_FOLDER+'/'+result.icon,
 					iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
 					iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
 					popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
@@ -815,10 +818,10 @@ Web: function(ctrl) {
 			var tmpUrl = feature.properties.style.getIconUrl();
 			
 			if(tmpUrl != null) {
-				iconUrl = tmpUrl;
+				iconUrl = OLvlUp.view.ICON_FOLDER+'/'+tmpUrl;
 			}
 			else if(style.showMissingIcon == undefined || style.showMissingIcon) {
-				iconUrl = 'img/default.svg';
+				iconUrl = OLvlUp.view.ICON_FOLDER+'/default.svg';
 			}
 		}
 		else if(style.showMissingIcon == undefined || style.showMissingIcon) {
@@ -859,7 +862,7 @@ Web: function(ctrl) {
 		if(styleRules.icon != undefined) {
 			var iconUrl = feature.properties.style.getIconUrl();
 			if(iconUrl != null) {
-				text += '<img class="icon" src="'+iconUrl+'" /> ';
+				text += '<img class="icon" src="'+OLvlUp.view.ICON_FOLDER+'/'+iconUrl+'" /> ';
 			}
 		}
 		
@@ -871,11 +874,11 @@ Web: function(ctrl) {
 			//Able to go up ?
 			var levelId = feature.properties.levels.indexOf(_self.getCurrentLevel().toString());
 			if(levelId < feature.properties.levels.length -1) {
-				text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId+1]+')" href="#"><img src="img/arrow_up.png" title="Go up" alt="Up!" /></a>';
+				text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId+1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_up.png" title="Go up" alt="Up!" /></a>';
 			}
 			//Able to go down ?
 			if(levelId > 0) {
-				text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId-1]+')" href="#"><img src="img/arrow_down.png" title="Go down" alt="Down!" /></a>';
+				text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId-1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_down.png" title="Go down" alt="Down!" /></a>';
 			}
 		}
 		
@@ -1300,10 +1303,13 @@ Web: function(ctrl) {
 					var roomIcon = document.createElement("img");
 					var roomLink = document.createElement("a");
 					$("#lvl"+lvl+"-rooms ul li:last").append(roomLink);
-					var addImg = checkUrl(roomNamesFiltered[lvl][room].properties.style.getIconUrl());
-					if(addImg) {
-						$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
+					if(STYLE != undefined) {
+						var addImg = STYLE.images.indexOf(roomNamesFiltered[lvl][room].properties.style.getIconUrl()) >= 0;
+						if(addImg) {
+							$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
+						}
 					}
+					
 					$("#lvl"+lvl+"-rooms ul li:last a")
 						.append(document.createTextNode(" "+room))
 						.attr("href", "#")
@@ -1311,7 +1317,7 @@ Web: function(ctrl) {
 					
 					if(addImg) {
 					$("#lvl"+lvl+"-rooms ul li:last a img")
-						.attr("src", roomNamesFiltered[lvl][room].properties.style.getIconUrl())
+						.attr("src", OLvlUp.view.ICON_FOLDER+'/'+roomNamesFiltered[lvl][room].properties.style.getIconUrl())
 						.attr("width", OLvlUp.view.ICON_SIZE+"px");
 					}
 				}

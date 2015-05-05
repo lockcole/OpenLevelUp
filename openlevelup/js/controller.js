@@ -27,7 +27,7 @@ OLvlUp.controller = {
 // ====== CONSTANTS ====== 
 /** Overpass API server URL **/
 API_URL: "http://www.overpass-api.de/api/interpreter?data=",
-//API_URL: ' http://api.openstreetmap.fr/oapi/interpreter?data=',
+//API_URL: "http://api.openstreetmap.fr/oapi/interpreter?data=",
 
 // ======= CLASSES =======
 /**
@@ -438,7 +438,7 @@ Ctrl: function() {
 			var bbox = _view.getMap().getBounds();
 			
 			//Resize BBox for small areas (avoid multiple Overpass API calls)
-			if(_view.getMap().getZoom() >= 19) {
+			if(_view.getMap().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM + 1) {
 				bbox = bbox.pad(2);
 			}
 			

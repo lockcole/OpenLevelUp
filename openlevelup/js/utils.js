@@ -48,38 +48,6 @@ function myFolderUrl() {
 }
 
 /**
- * Checks if a file exists on the server
- * @param url The URL of the file to check
- * @return True if it exists
- */
-function fileExists(url) {
-	if(url){
-		var req = new XMLHttpRequest();
-		req.open('GET', url, false);
-		req.send();
-		return req.status==200;
-	} else {
-		return false;
-	}
-}
-
-/** Checked URL **/
-var checkedUrl = new Object();
-
-/**
- * Checks if an URL exists (once)
- * @param url The URL to check
- * @return True if URL is correct
- */
-function checkUrl(url) {
-	if(Object.keys(checkedUrl).indexOf(url) < 0) {
-		checkedUrl[url] = fileExists(url);
-	}
-	
-	return checkedUrl[url];
-}
-
-/**
  * Parses levels list.
  * @param str The levels as a string (for example "1;5", "1,3", "1-3", "-1--6", "from 1 to 42" or "-2 to 6")
  * @return The parsed levels as a string array, or null if invalid
