@@ -438,8 +438,8 @@ Ctrl: function() {
 			var bbox = _view.getMap().getBounds();
 			
 			//Resize BBox for small areas (avoid multiple Overpass API calls)
-			if(_view.getMap().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM + 1) {
-				bbox = bbox.pad(2);
+			if(_view.getMap().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM + 2) {
+				bbox = bbox.pad(1.5);
 			}
 			
 			_mapdata.setBBox(bbox);
