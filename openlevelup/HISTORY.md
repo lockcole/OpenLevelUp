@@ -5,6 +5,7 @@ Changes history
 * Style added for doors as ways
 * Pop-ups also added on ways' icons (bug fix)
 * Bounding box calculated for MultiPolygons (bug fix)
+* Geom class created in model, to handle geometry related methods
 
 5 march 2015
 ------------

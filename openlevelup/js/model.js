@@ -374,6 +374,143 @@ MapData: function(ctrl) {
 },
 
 /**
+ * This class handles a feature geometry, and allows to do some processing on it.
+ */
+Geom: function(fGeometry) {
+//ATTRIBUTES
+	/** The feature geometry, in GeoJSON **/
+	var _geom = fGeometry;
+	
+	/** The current object **/
+	var _self = this;
+
+//ACCESSORS
+	/**
+	 * @return The centroid, as [longitude, latitude]
+	 */
+	this.getCentroid = function() {
+		var result = null;
+		
+		if(_geom.type == "Point") {
+			result = _geom.coordinates;
+		}
+		else if(_geom.type == "LineString") {
+			result = [0, 0];
+			
+			for(var i in _geom.coordinates) {
+				if(i < _geom.coordinates.length) {
+					result[0] += _geom.coordinates[i][0];
+					result[1] += _geom.coordinates[i][1];
+				}
+			}
+			
+			result[0] = result[0] / (_geom.coordinates.length);
+			result[1] = result[1] / (_geom.coordinates.length);
+		}
+		else if(_geom.type == "Polygon") {
+			result = [0, 0];
+			
+			for(var i in _geom.coordinates[0]) {
+				if(i < _geom.coordinates[0].length - 1) {
+					result[0] += _geom.coordinates[0][i][0];
+					result[1] += _geom.coordinates[0][i][1];
+				}
+			}
+			
+			result[0] = result[0] / (_geom.coordinates[0].length -1);
+			result[1] = result[1] / (_geom.coordinates[0].length -1);
+		}
+		else {
+			console.log("Unknown type: "+_geom.type);
+		}
+		
+		return result;
+	};
+	
+	/**
+	 * Get this object centroid as a string
+	 * @return "lat, lon"
+	 */
+	this.getCentroidAsString = function() {
+		var c = _self.getCentroid();
+		return c[1]+", "+c[0];
+	};
+	
+	/**
+	 * Returns the bounding box
+	 * @return The bounding box
+	 */
+	this.getBounds = function() {
+		var minlat, maxlat, minlon, maxlon;
+		
+		switch(_geom.type) {
+			case "Point":
+				minlat = _geom.coordinates[1];
+				maxlat = _geom.coordinates[1];
+				minlon = _geom.coordinates[0];
+				maxlon = _geom.coordinates[0];
+				break;
+				
+			case "LineString":
+				minlat = _geom.coordinates[0][1];
+				maxlat = _geom.coordinates[0][1];
+				minlon = _geom.coordinates[0][0];
+				maxlon = _geom.coordinates[0][0];
+				
+				for(var i = 1; i < _geom.coordinates.length; i++) {
+					var coords = _geom.coordinates[i];
+					if(coords[0] < minlon) { minlon = coords[0]; }
+					else if(coords[0] > maxlon) { maxlon = coords[0]; }
+					if(coords[1] < minlat) { minlat = coords[1]; }
+					else if(coords[1] > maxlat) { maxlat = coords[1]; }
+				}
+				break;
+				
+			case "Polygon":
+				minlat = _geom.coordinates[0][0][1];
+				maxlat = _geom.coordinates[0][0][1];
+				minlon = _geom.coordinates[0][0][0];
+				maxlon = _geom.coordinates[0][0][0];
+				
+				for(var i = 0; i < _geom.coordinates.length; i++) {
+					for(var j=0; j < _geom.coordinates[i].length; j++) {
+						var coords = _geom.coordinates[i][j];
+						if(coords[0] < minlon) { minlon = coords[0]; }
+						else if(coords[0] > maxlon) { maxlon = coords[0]; }
+						if(coords[1] < minlat) { minlat = coords[1]; }
+						else if(coords[1] > maxlat) { maxlat = coords[1]; }
+					}
+				}
+				break;
+				
+			case "MultiPolygon":
+				minlat = _geom.coordinates[0][0][1];
+				maxlat = _geom.coordinates[0][0][1];
+				minlon = _geom.coordinates[0][0][0];
+				maxlon = _geom.coordinates[0][0][0];
+				
+				for(var i = 0; i < _geom.coordinates.length; i++) {
+					for(var j=0; j < _geom.coordinates[i].length; j++) {
+						for(var k=0; k < _geom.coordinates[i][j]; k++) {
+							var coords = _geom.coordinates[i][j][k];
+							if(coords[0] < minlon) { minlon = coords[0]; }
+							else if(coords[0] > maxlon) { maxlon = coords[0]; }
+							if(coords[1] < minlat) { minlat = coords[1]; }
+							else if(coords[1] > maxlat) { maxlat = coords[1]; }
+						}
+					}
+				}
+				break;
+				
+			default:
+				console.log("Unknown type: "+_geom.type);
+		}
+		
+		return L.latLngBounds(L.latLng(minlat, minlon), L.latLng(maxlat, maxlon));
+	};
+},
+
+/**
  * This class represents a feature style, defined from JSON rules
  */
 FeatureStyle: function(feature, jsonStyle) {

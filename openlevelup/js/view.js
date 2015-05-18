@@ -681,7 +681,8 @@ Web: function(ctrl) {
 	* @return True if should be shown
 	*/
 	function _filterElements(feature, layer) {
-		var addObject = _map.getBounds().intersects(_getBounds(feature));
+		var ftGeom = new OLvlUp.model.Geom(feature.geometry);
+		var addObject = _map.getBounds().intersects(ftGeom.getBounds());
 		
 		//Consider level-related tags
 		if(feature.properties.levels != undefined) {
@@ -735,7 +736,8 @@ Web: function(ctrl) {
 		
 		//This add a marker if a polygon has its "icon" property defined
 		if(result.icon != undefined && feature.geometry.type == "Polygon") {
-			var centroid = centroidPolygon(feature.geometry);
+			var ftGeom = new OLvlUp.model.Geom(feature.geometry);
+			var centroid = ftGeom.getCentroid();
 			var marker = _createMarker(L.latLng(centroid[1], centroid[0]), feature, result);
 			_markersPolygons[feature.properties.type+feature.properties.id] = marker;
 		}
@@ -1001,7 +1003,8 @@ Web: function(ctrl) {
 		//Link to osm.org object
 		text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+feature.properties.type+'/'+feature.properties.id+'">See this on OSM.org</a></p>';
 		
-		var coords = centroid(feature);
+		var ftGeom = new OLvlUp.model.Geom(feature.geometry);
+		coords = ftGeom.getCentroid();
 		
 		return L.popup().setContent(text).setLatLng(L.latLng(coords[1], coords[0]));
 	}
@@ -1033,79 +1036,6 @@ Web: function(ctrl) {
 		return text;
 	}
 	
-	/**
-	 * Returns the bounding box of a feature
-	 * @param feature The feature
-	 * @return The bounding box of the feature
-	 */
-	function _getBounds(feature) {
-		var minlat, maxlat, minlon, maxlon;
-		
-		switch(feature.geometry.type) {
-			case "Point":
-				minlat = feature.geometry.coordinates[1];
-				maxlat = feature.geometry.coordinates[1];
-				minlon = feature.geometry.coordinates[0];
-				maxlon = feature.geometry.coordinates[0];
-				break;
-
-			case "LineString":
-				minlat = feature.geometry.coordinates[0][1];
-				maxlat = feature.geometry.coordinates[0][1];
-				minlon = feature.geometry.coordinates[0][0];
-				maxlon = feature.geometry.coordinates[0][0];
-				
-				for(var i = 1; i < feature.geometry.coordinates.length; i++) {
-					var coords = feature.geometry.coordinates[i];
-					if(coords[0] < minlon) { minlon = coords[0]; }
-					else if(coords[0] > maxlon) { maxlon = coords[0]; }
-					if(coords[1] < minlat) { minlat = coords[1]; }
-					else if(coords[1] > maxlat) { maxlat = coords[1]; }
-				}
-				break;
-
-			case "Polygon":
-				minlat = feature.geometry.coordinates[0][0][1];
-				maxlat = feature.geometry.coordinates[0][0][1];
-				minlon = feature.geometry.coordinates[0][0][0];
-				maxlon = feature.geometry.coordinates[0][0][0];
-				
-				for(var i = 0; i < feature.geometry.coordinates.length; i++) {
-					for(var j=0; j < feature.geometry.coordinates[i].length; j++) {
-						var coords = feature.geometry.coordinates[i][j];
-						if(coords[0] < minlon) { minlon = coords[0]; }
-						else if(coords[0] > maxlon) { maxlon = coords[0]; }
-						if(coords[1] < minlat) { minlat = coords[1]; }
-						else if(coords[1] > maxlat) { maxlat = coords[1]; }
-					}
-				}
-				break;
-			
-			case "MultiPolygon":
-				minlat = feature.geometry.coordinates[0][0][1];
-				maxlat = feature.geometry.coordinates[0][0][1];
-				minlon = feature.geometry.coordinates[0][0][0];
-				maxlon = feature.geometry.coordinates[0][0][0];
-				
-				for(var i = 0; i < feature.geometry.coordinates.length; i++) {
-					for(var j=0; j < feature.geometry.coordinates[i].length; j++) {
-						for(var k=0; k < feature.geometry.coordinates[i][j]; k++) {
-							var coords = feature.geometry.coordinates[i][j][k];
-							if(coords[0] < minlon) { minlon = coords[0]; }
-							else if(coords[0] > maxlon) { maxlon = coords[0]; }
-							if(coords[1] < minlat) { minlat = coords[1]; }
-							else if(coords[1] > maxlat) { maxlat = coords[1]; }
-						}
-					}
-				}
-				break;
-			
-			default:
-				console.log("Unknown type: "+feature.geometry.type);
-		}
-		
-		return L.latLngBounds(L.latLng(minlat, minlon), L.latLng(maxlat, maxlon));
-	}
 /*
  * Levels management
  */
@@ -1275,10 +1205,12 @@ Web: function(ctrl) {
 				roomNamesFiltered[lvl] = new Object();
 				
 				for(var room in roomNames[lvl]) {
+					var ftGeomRoom = new OLvlUp.model.Geom(roomNames[lvl][room].geometry);
+					
 					if((filter == null || room.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
 						&& (_getStyle(roomNames[lvl][room]).popup == undefined
 						|| _getStyle(roomNames[lvl][room]).popup == "yes")
-						&& _ctrl.getMapData().getBBox().intersects(_getBounds(roomNames[lvl][room]))) {
+						&& _ctrl.getMapData().getBBox().intersects(ftGeomRoom.getBounds())) {
 
 						roomNamesFiltered[lvl][room] = roomNames[lvl][room];
 					}
@@ -1335,10 +1267,12 @@ Web: function(ctrl) {
 						$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
 					}
 					
+					var ftGeom = new OLvlUp.model.Geom(roomNamesFiltered[lvl][room].geometry);
+					
 					$("#lvl"+lvl+"-rooms ul li:last a")
 						.append(document.createTextNode(" "+room))
 						.attr("href", "#")
-						.attr("onclick", "controller.goTo('"+lvl+"', "+_coordinates(roomNamesFiltered[lvl][room].geometry)+",'"+_getPopupId(roomNamesFiltered[lvl][room])+"')");
+						.attr("onclick", "controller.goTo('"+lvl+"', "+ftGeom.getCentroidAsString()+",'"+_getPopupId(roomNamesFiltered[lvl][room])+"')");
 					
 					if(STYLE != undefined) {
 						$("#lvl"+lvl+"-rooms ul li:last a img")
@@ -1405,33 +1339,6 @@ Web: function(ctrl) {
 		$(".popup-tab:visible").hide();
 		$(".leaflet-popup:visible #popup-tab-"+id).show();
 		$("#item-"+id).addClass("selected");
-	}
-	
-	/**
-	 * Returns the centroid coordinates of given object as a string
-	 * @param geom The feature geometry
-	 * @return The coordinates, as a string with format "lat, lon"
-	 * @deprecated Use centroid(feature) in utils.js instead
-	 */
-	function _coordinates(geom) {
-		var result = "";
-		
-		if(geom.type == "Point") {
-			result = geom.coordinates[1]+", "+geom.coordinates[0];
-		}
-		else if(geom.type == "LineString") {
-			var centroid = centroidLineString(geom);
-			result = centroid[1]+", "+centroid[0];
-		}
-		else if(geom.type == "Polygon") {
-			var centroid = centroidPolygon(geom);
-			result = centroid[1]+", "+centroid[0];
-		}
-		else {
-			console.log("Invalid geometry type");
-		}
-		
-		return result;
 	}
 	
 	/**
