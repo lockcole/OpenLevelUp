@@ -1,5 +1,10 @@
 Changes history
 ===============
+18 may 2015
+-----------
+* Style added for doors as ways
+* Pop-ups also added on ways' icons (bug fix)
+
 5 march 2015
 ------------
 * Icon management changed, instead of checking icon with an Ajax request, a list of available icons is present in JSON style

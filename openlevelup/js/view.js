@@ -656,6 +656,14 @@ Web: function(ctrl) {
 			if(_markersPolygons[feature.properties.type+feature.properties.id] != undefined) {
 				_markersPolygons[feature.properties.type+feature.properties.id].bindPopup(popup);
 			}
+			if(_markersLinestrings[feature.properties.type+feature.properties.id+"-0"] != undefined) {
+				var nbSegments = feature.geometry.coordinates.length - 1;
+				
+				//For each segment, add popup
+				for(var i=0; i < nbSegments; i++) {
+					_markersLinestrings[feature.properties.type+feature.properties.id+"-"+i].bindPopup(popup);
+				}
+			}
 		}
 		
 		//Send this object to back of other layers

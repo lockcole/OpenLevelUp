@@ -153,7 +153,7 @@
 			"name": "Door",
 			"description": "Door nodes ('OR' example for tags)",
 			"onTags": [ { "door": "*" }, { "entrance": "*" }, { "buildingpart": "door" } ],
-			"style": { "icon": "door.svg" }
+			"style": { "icon": "door.svg", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" }
 		},
 		{
 			"type": "Style",
