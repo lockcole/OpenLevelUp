@@ -4,6 +4,7 @@ Changes history
 -----------
 * Style added for doors as ways
 * Pop-ups also added on ways' icons (bug fix)
+* Bounding box calculated for MultiPolygons (bug fix)
 
 5 march 2015
 ------------

@@ -28,9 +28,6 @@ OLvlUp.view = {
 /** The minimal zoom to display cluster data on map, should be less than DATA_MIN_ZOOM **/
 CLUSTER_MIN_ZOOM: 5,
 
-/** The maximal zoom to display building general information (minimal zoom is DATA_MIN_ZOOM) **/
-BUILDING_MAX_ZOOM: 0,
-
 /** The minimal zoom to display actual data on map **/
 DATA_MIN_ZOOM: 17,
 
@@ -482,7 +479,7 @@ Web: function(ctrl) {
 		
 		$("#button-export").hide();
 		$("#button-rooms").hide();
-		
+
 		//Recreate data layer and add it to map
 		//The shown data depends of current zoom level
 		if(_map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
@@ -494,13 +491,13 @@ Web: function(ctrl) {
 				_dataLayer = L.geoJson(
 					mapData.getData(),
 					{
-						filter: (_map.getZoom() <= OLvlUp.view.BUILDING_MAX_ZOOM) ? _filterBuildingElements : _filterElements,
+						filter: _filterElements,
 						style: _styleElements,
 						pointToLayer: _styleNodes,
 						onEachFeature: _processElements
 					}
 				);
-				
+
 				_markersLayer = L.layerGroup();
 				
 				//Add eventual polygon icons
@@ -539,7 +536,7 @@ Web: function(ctrl) {
 				_self.displayMessage("There is no available data in this area", "alert");
 			}
 		}
-		
+
 		//Add data layer to map
 		if(_dataLayer != null) {
 			_dataLayer.addTo(_map);
@@ -567,7 +564,6 @@ Web: function(ctrl) {
 		
 		//Update permalink
 		_self.updatePermalink(_map);
-		
 		$.event.trigger({ type: "donerefresh" });
 	};
 	
@@ -703,7 +699,7 @@ Web: function(ctrl) {
 			addObject &= feature.properties.tags.building != undefined
 					&& feature.properties.tags.min_level != undefined
 					&& feature.properties.tags.max_level != undefined;
-			
+
 			//Elevator
 			if(_self.showTranscendent() && !_self.showBuildingsOnly()) {
 				addObject = addObject || feature.properties.tags.highway == "elevator";
@@ -1083,7 +1079,29 @@ Web: function(ctrl) {
 						else if(coords[1] > maxlat) { maxlat = coords[1]; }
 					}
 				}
-			break;
+				break;
+			
+			case "MultiPolygon":
+				minlat = feature.geometry.coordinates[0][0][1];
+				maxlat = feature.geometry.coordinates[0][0][1];
+				minlon = feature.geometry.coordinates[0][0][0];
+				maxlon = feature.geometry.coordinates[0][0][0];
+				
+				for(var i = 0; i < feature.geometry.coordinates.length; i++) {
+					for(var j=0; j < feature.geometry.coordinates[i].length; j++) {
+						for(var k=0; k < feature.geometry.coordinates[i][j]; k++) {
+							var coords = feature.geometry.coordinates[i][j][k];
+							if(coords[0] < minlon) { minlon = coords[0]; }
+							else if(coords[0] > maxlon) { maxlon = coords[0]; }
+							if(coords[1] < minlat) { minlat = coords[1]; }
+							else if(coords[1] > maxlat) { maxlat = coords[1]; }
+						}
+					}
+				}
+				break;
+			
+			default:
+				console.log("Unknown type: "+feature.geometry.type);
 		}
 		
 		return L.latLngBounds(L.latLng(minlat, minlon), L.latLng(maxlat, maxlon));
