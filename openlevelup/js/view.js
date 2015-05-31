@@ -307,6 +307,22 @@ Web: function(ctrl) {
 		_map = L.map('map', {minZoom: 1, maxZoom: OLvlUp.view.MAX_ZOOM, zoomControl: false}).setView([47, 2], 6);
 		L.control.zoom({ position: "topright" }).addTo(_map);
 		
+		//Add search bar
+		var search = L.Control.geocoder({ showResultIcons: true });
+		//Limit max zoom in order to avoid having no tiles in background for small objects
+		var minimalMaxZoom = OLvlUp.view.TILE_LAYERS[0].maxZoom;
+		for(var i in OLvlUp.view.TILE_LAYERS) {
+			if(OLvlUp.view.TILE_LAYERS[i].maxZoom < minimalMaxZoom) {
+				minimalMaxZoom = OLvlUp.view.TILE_LAYERS[i].maxZoom;
+			}
+		}
+		//Redefine markGeocode to avoid having an icon for the result
+		search.markGeocode = function (result) {
+			controller.getView().getMap().fitBounds(result.bbox, { maxZoom: minimalMaxZoom });
+			return this;
+		};
+		search.addTo(_map);
+		
 		//If coordinates are given in URL, then make map show the wanted area
 		var bbox = _self.getUrlParameter("bbox");
 		var lat = _self.getUrlParameter("lat");
