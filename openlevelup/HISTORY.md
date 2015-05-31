@@ -1,5 +1,9 @@
 Changes history
 ===============
+31 may 2015
+-----------
+* Icon added for prison cells
+
 18 may 2015
 -----------
 * Style added for doors as ways
