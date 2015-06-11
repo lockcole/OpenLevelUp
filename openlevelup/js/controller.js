@@ -91,11 +91,13 @@ Ctrl: function() {
 	/**
 	 * This function initializes the controller
 	 */
-	this.init = function() {
+	this.init = function(mobile) {
+		mobile = mobile || false;
+		
 		_view = new OLvlUp.view.Web(_self);
 		
 		//Init leaflet map
-		_view.mapInit();
+		_view.mapInit(mobile);
 		
 		//Create mapdata object
 		_mapdata = new OLvlUp.model.MapData(_self);

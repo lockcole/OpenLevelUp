@@ -138,7 +138,7 @@ function boundsString(bounds) {
  * @return The dimension with unit
  */
 function addDimensionUnit(v) {
-	if(!isNaN(Number.parseInt(v.substr(-1)))) {
+	if(!isNaN(parseInt(v.substr(-1)))) {
 		v+="m";
 	}
 	return v;
@@ -149,7 +149,7 @@ function addDimensionUnit(v) {
  */
 function orientationValue(v) {
 	//Is the orientation a number value or not ?
-	var vInt = Number.parseInt(v);
+	var vInt = parseInt(v);
 	if(isNaN(vInt)) {
 		var txtVals = {
 			N: "North", NNE: "North North-east", NE:"North-east", ENE: "East North-east",

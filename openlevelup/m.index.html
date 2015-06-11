@@ -1,0 +1,159 @@
+<!DOCTYPE html5>
+<html>
+<!--
+	This file is part of OpenLevelUp!.
+
+	OpenLevelUp! is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	any later version.
+
+	OpenLevelUp! is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with OpenLevelUp!.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!--
+	OpenLevelUp!
+	Web viewer for indoor mapping (based on OpenStreetMap data).
+	Author: Adrien PAVIE
+	
+	Main page for small screens
+-->
+<head>
+	<!-- Redirect for big screens -->
+	<script type="text/javascript">
+		if (window.screen.width >= 1000) {
+			window.location = 'index.html'+window.location.search;
+		}
+	</script>
+	
+	<!-- General definitions -->
+	<title>OpenLevelUp!</title>
+	<meta charset="utf-8" />
+	<meta name="description" content="See inside buildings with OpenLevelUp! Based on OpenStreetMap indoor data." />
+	<meta name="keywords" content="openlevelup, openstreetmap, osm, building, indoor, level, floor, map, viewer" />
+	<meta name="author" content="Adrien PAVIE (PanierAvide)" />
+	<meta name="copyright" content="&copy; Adrien PAVIE 2015, under GPL v3" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
+	<link rel="icon" type="image/jpg" href="img/favicon.jpg" />
+	
+	<!-- Leaflet includes -->
+	<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+	<script src="lib/leaflet/leaflet.js"></script>
+
+	<!-- OSMtoGeoJSON include -->
+	<script src="lib/osmtogeojson.js"></script>
+	
+	<!-- Azimuth include -->
+	<script src="lib/azimuth.js"></script>
+	
+	<!-- jQuery includes -->
+	<script src="lib/jquery-1.11.2.min.js"></script>
+	<script src="lib/jquery-migrate-1.2.1.min.js"></script>
+	
+	<!-- Leaflet plugin includes -->
+	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.css" />
+	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.Default.css" />
+	<script src="lib/markercluster/leaflet.markercluster-src.js"></script>
+	<script src="lib/polylinedecorator/L.RotatedMarker.js"></script>
+	<!--link rel="stylesheet" href="css/Control.Geocoder.css" />
+	<script src="lib/Control.Geocoder.js"></script-->
+	
+	<!-- OpenLevelUp includes -->
+	<script src="js/openlevelup.js" type="text/javascript"></script>
+	<script src="js/utils.js" type="text/javascript"></script>
+	<script src="js/model.js" type="text/javascript"></script>
+	<script src="js/view.js" type="text/javascript"></script>
+	<script src="js/controller.js" type="text/javascript"></script>
+	
+	<!-- CSS style -->
+	<link rel="stylesheet" href="css/m.style.css" />
+</head>
+<body>
+	<!--
+	Header
+	-->
+	<div class="body-row">
+	<header>
+		<div id="header-content">
+			<div id="header-title" class="cell">
+				<h1><a href="m.index.html" title="OpenLevelUp!"><img src="img/m.logo.jpg" alt="OpenLevelUp!" /></a></h1>
+			</div>
+			<div id="header-levels" class="cell">
+				<p>
+					<a class="button-level" id="levelUp"><img src="img/arrow2_up.png" alt="&uarr;" /></a>
+					<select id="level" disabled="true"></select>
+					<a class="button-level" id="levelDown"><img src="img/arrow2_down.png" alt="&darr;" /></a>
+				</p>
+			</div>
+			<div id="header-help" class="cell">
+				<a href="#" id="about-link"><img src="img/m.help.png" alt="Help ?" /></a>
+			</div>
+		</div>
+	</header>
+	</div>
+
+
+	<!--
+	Map area
+	-->
+	<div class="body-row">
+	<div id="map"></div>
+	</div>
+
+	
+	<!--
+	Overlay optional panels
+	-->
+	<!-- Message/info box list -->
+	<div class="body-row">
+	<div id="infobox">
+		<ul id="infobox-list">
+		</ul>
+	</div>
+	</div>
+
+	<!-- Loading panel -->
+	<div class="overlay-panel" id="op-loading">
+		<div class="overlay-content">
+			<p id="rotation">&#8634;</p>
+			<h2>Loading</h2>
+			<ul id="op-loading-info">
+			</ul>
+		</div>
+	</div>
+	
+	<!-- About panel -->
+	<div class="overlay-panel" id="op-about">
+		<div class="overlay-content">
+			<h2>About</h2>
+			<p>See <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project.
+			<br />Navigate through the building levels with the up and down buttons.
+			<br /><a href="mailto:panieravide@riseup.net">Contact</a> | Under <a href="https://www.gnu.org/licenses/gpl.html">GPL v3 license</a>.</p>
+			<p class="overlay-close"><a id="about-close" href="#">Close</a></p>
+		</div>
+	</div>
+
+
+	<!--
+	JS init code
+	-->
+	<script type="text/javascript">
+		/*
+		 * OpenLevelUp init
+		 */
+		//Create controller object
+		var controller = new OLvlUp.controller.Ctrl();
+		
+		//Init map
+		controller.init(true);
+		
+		//Trigger for map movements
+		controller.getView().getMap().on('moveend', function(e) { controller.onMapUpdate(); });
+	</script>
+</body>
+</html>

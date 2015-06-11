@@ -1,8 +1,14 @@
 Changes history
 ===============
+
+11 june 2015
+------------
+* Mobile version released
+
 31 may 2015
 -----------
 * Icon added for prison cells
+* Search bar added
 
 18 may 2015
 -----------

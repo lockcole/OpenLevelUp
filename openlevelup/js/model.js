@@ -170,7 +170,8 @@ MapData: function(ctrl) {
 		_roomNames = new Object();
 		
 		//Retrieve level informations
-		var levelsSet = new Set();
+		var levelsSet = new Array();// new Set();
+		
 		for(var i in _geojson.features) {
 			var feature = _geojson.features[i];
 			
@@ -221,7 +222,11 @@ MapData: function(ctrl) {
 			if(currentLevel != null) {
 				for(var i=0; i < currentLevel.length; i++) {
 					if(isFloat(currentLevel[i])) {
-						levelsSet.add(parseFloat(currentLevel[i]));
+						//levelsSet.add(parseFloat(currentLevel[i]));
+						var lvl = parseFloat(currentLevel[i]);
+						if(levelsSet.indexOf(lvl) < 0) {
+							levelsSet[levelsSet.length] = lvl;
+						}
 					}
 				}
 				feature.properties.levels = currentLevel;
@@ -253,13 +258,14 @@ MapData: function(ctrl) {
 		}
 		
 		//Transform level set into a sorted array
-		try {
+		/*try {
 			_levels = Array.from(levelsSet.values());
 		}
 		catch(error) {
 			//An error is possible if browser doesn't support Set.values()
 			_levels = _legacyProcessLevels();
-		}
+		}*/
+		_levels = levelsSet;
 		_levels.sort(function (a,b) { return a-b;});
 		
 		//Reset room names if no levels found

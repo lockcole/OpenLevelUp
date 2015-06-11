@@ -119,6 +119,9 @@ Web: function(ctrl) {
 	/** The pop-ups content array **/
 	var _popups = null;
 	
+	/** Is the view in mobile device ? **/
+	var _isMobile = false;
+	
 	/** The application controller **/
 	var _ctrl = ctrl;
 	
@@ -199,28 +202,28 @@ Web: function(ctrl) {
 	 * @return Must we show transcendent objects ?
 	 */
 	this.showTranscendent = function() {
-		return $("#show-transcendent").prop("checked");
+		return !_elementExists("#show-transcendent") || $("#show-transcendent").prop("checked");
 	};
 	
 	/**
 	 * @return Must we show objects with legacy tagging (buildingpart) ?
 	 */
 	this.showLegacy = function() {
-		return $("#show-legacy").prop("checked");
+		return !_elementExists("#show-legacy") || $("#show-legacy").prop("checked");
 	};
 	
 	/**
 	 * @return Must we show unrendered objects ?
 	 */
 	this.showUnrendered = function() {
-		return $("#show-unrendered").prop("checked");
+		return _elementExists("#show-unrendered") && $("#show-unrendered").prop("checked");
 	};
 	
 	/**
 	 * @return Must we show only building objects ?
 	 */
 	this.showBuildingsOnly = function() {
-		return $("#show-buildings-only").prop("checked");
+		return _elementExists("#show-buildings-only") && $("#show-buildings-only").prop("checked");
 	};
 	
 	/**
@@ -234,7 +237,7 @@ Web: function(ctrl) {
 	 * @return True if the searched string for filtering rooms is long enough
 	 */
 	this.isSearchRoomLongEnough = function() {
-		return $("#search-room").val() != "Search" && $("#search-room").val().length >= 3;
+		return _elementExists("#search-room") && $("#search-room").val() != "Search" && $("#search-room").val().length >= 3;
 	};
 	
 	/**
@@ -242,6 +245,13 @@ Web: function(ctrl) {
 	 */
 	this.getSearchRoom = function() {
 		return ($("#search-room").val() != "Search") ? $("#search-room").val() : "";
+	};
+	
+	/**
+	 * @return True if the given HTML element exists
+	 */
+	function _elementExists(html) {
+		return $(html).length > 0;
 	};
 
 //MODIFIERS
@@ -302,26 +312,37 @@ Web: function(ctrl) {
 	/**
 	 * This function initializes the Leaflet map
 	 */
-	this.mapInit = function() {
+	this.mapInit = function(mobile) {
+		_isMobile = mobile || false;
+		
 		//Init map center and zoom
 		_map = L.map('map', {minZoom: 1, maxZoom: OLvlUp.view.MAX_ZOOM, zoomControl: false}).setView([47, 2], 6);
-		L.control.zoom({ position: "topright" }).addTo(_map);
+		if(!_isMobile) {
+			L.control.zoom({ position: "topright" }).addTo(_map);
+		}
 		
 		//Add search bar
-		var search = L.Control.geocoder({ showResultIcons: true });
-		//Limit max zoom in order to avoid having no tiles in background for small objects
-		var minimalMaxZoom = OLvlUp.view.TILE_LAYERS[0].maxZoom;
-		for(var i in OLvlUp.view.TILE_LAYERS) {
-			if(OLvlUp.view.TILE_LAYERS[i].maxZoom < minimalMaxZoom) {
-				minimalMaxZoom = OLvlUp.view.TILE_LAYERS[i].maxZoom;
+		//TODO Remove mobile condition, only to get to time to solve search bar bug
+		if(!_isMobile) {
+			var search = L.Control.geocoder({ position: "topright" });
+			//Limit max zoom in order to avoid having no tiles in background for small objects
+			var minimalMaxZoom = OLvlUp.view.TILE_LAYERS[0].maxZoom;
+			for(var i in OLvlUp.view.TILE_LAYERS) {
+				if(OLvlUp.view.TILE_LAYERS[i].maxZoom < minimalMaxZoom) {
+					minimalMaxZoom = OLvlUp.view.TILE_LAYERS[i].maxZoom;
+				}
 			}
+			//Redefine markGeocode to avoid having an icon for the result
+			search.markGeocode = function (result) {
+				controller.getView().getMap().fitBounds(result.bbox, { maxZoom: minimalMaxZoom });
+				return this;
+			};
+			search.addTo(_map);
 		}
-		//Redefine markGeocode to avoid having an icon for the result
-		search.markGeocode = function (result) {
-			controller.getView().getMap().fitBounds(result.bbox, { maxZoom: minimalMaxZoom });
-			return this;
-		};
-		search.addTo(_map);
+		
+		if(_isMobile) {
+			L.control.zoom({ position: "topright" }).addTo(_map);
+		}
 		
 		//If coordinates are given in URL, then make map show the wanted area
 		var bbox = _self.getUrlParameter("bbox");
@@ -668,6 +689,7 @@ Web: function(ctrl) {
 			if(_markersPolygons[feature.properties.type+feature.properties.id] != undefined) {
 				_markersPolygons[feature.properties.type+feature.properties.id].bindPopup(popup);
 			}
+
 			if(_markersLinestrings[feature.properties.type+feature.properties.id+"-0"] != undefined) {
 				var nbSegments = feature.geometry.coordinates.length - 1;
 				
@@ -892,7 +914,7 @@ Web: function(ctrl) {
 		text += (feature.properties.tags.name != undefined) ? feature.properties.tags.name : name;
 		
 		//Add up and down icons if levelup property == true
-		if(styleRules.levelup && feature.properties.levels != undefined) {
+		if(styleRules.levelup && feature.properties.levels != undefined && !_isMobile) {
 			//Able to go up ?
 			var levelId = feature.properties.levels.indexOf(_self.getCurrentLevel().toString());
 			if(levelId < feature.properties.levels.length -1) {
@@ -908,11 +930,13 @@ Web: function(ctrl) {
 		text += '</h1>';
 		
 		//Navigation bar
-		text += '<div class="popup-nav"><div class="row">';
-		text += '<div class="item selected" id="item-general"><a href="#" onclick="controller.changePopupTab(\'general\');">General</a></div>';
-		text += '<div class="item" id="item-technical"><a href="#" onclick="controller.changePopupTab(\'technical\');">Technical</a></div>';
-		text += '<div class="item" id="item-tags"><a href="#" onclick="controller.changePopupTab(\'tags\');">Tags</a></div>';
-		text += '</div></div>';
+		if(!_isMobile) {
+			text += '<div class="popup-nav"><div class="row">';
+			text += '<div class="item selected" id="item-general"><a href="#" onclick="controller.changePopupTab(\'general\');">General</a></div>';
+			text += '<div class="item" id="item-technical"><a href="#" onclick="controller.changePopupTab(\'technical\');">Technical</a></div>';
+			text += '<div class="item" id="item-tags"><a href="#" onclick="controller.changePopupTab(\'tags\');">Tags</a></div>';
+			text += '</div></div>';
+		}
 		
 		/*
 		 * Tab 1 : general information
@@ -961,7 +985,7 @@ Web: function(ctrl) {
 			generalTxt += '<p class="popup-img"><a href="'+url+'"><img src="'+url+'" alt="Image of this object" /></a></p>';
 		}
 		
-		if(generalTxt == '') { generalTxt = "No general information (look at tags)"; }
+		if(generalTxt == '' && !_isMobile) { generalTxt = "No general information (look at tags)"; }
 		text += generalTxt;
 		
 		text += '</div>';
@@ -969,49 +993,53 @@ Web: function(ctrl) {
 		/*
 		 * Tab 2 : technical information
 		 */
-		text += '<div class="popup-tab hidden" id="popup-tab-technical">';
-		
-		technicalTxt = '';
-		technicalTxt += _addFormatedTag(feature, "width", "Width", addDimensionUnit);
-		technicalTxt += _addFormatedTag(feature, "height", "Height", addDimensionUnit);
-		technicalTxt += _addFormatedTag(feature, "length", "Length", addDimensionUnit);
-		technicalTxt += _addFormatedTag(feature, "direction", "Direction", orientationValue);
-		technicalTxt += _addFormatedTag(feature, "camera:direction", "Direction (camera)", orientationValue);
-		technicalTxt += _addFormatedTag(feature, "operator", "Operator");
-		technicalTxt += _addFormatedTag(feature, "ref", "Reference");
-		technicalTxt += _addFormatedTag(feature, "material", "Made of");
-		
-		if(technicalTxt == '') { technicalTxt = "No technical information (look at tags)"; }
-		text += technicalTxt;
-		
-		text += '</div>';
+		if(!_isMobile) {
+			text += '<div class="popup-tab hidden" id="popup-tab-technical">';
+			
+			technicalTxt = '';
+			technicalTxt += _addFormatedTag(feature, "width", "Width", addDimensionUnit);
+			technicalTxt += _addFormatedTag(feature, "height", "Height", addDimensionUnit);
+			technicalTxt += _addFormatedTag(feature, "length", "Length", addDimensionUnit);
+			technicalTxt += _addFormatedTag(feature, "direction", "Direction", orientationValue);
+			technicalTxt += _addFormatedTag(feature, "camera:direction", "Direction (camera)", orientationValue);
+			technicalTxt += _addFormatedTag(feature, "operator", "Operator");
+			technicalTxt += _addFormatedTag(feature, "ref", "Reference");
+			technicalTxt += _addFormatedTag(feature, "material", "Made of");
+			
+			if(technicalTxt == '') { technicalTxt = "No technical information (look at tags)"; }
+			text += technicalTxt;
+			
+			text += '</div>';
+		}
 		
 		/*
 		 * Tab 3 : tags
 		 */
-		text += '<div class="popup-tab hidden" id="popup-tab-tags">';
-		
-		//List all tags
-		text += '<p class="popup-txt">';
-		for(i in feature.properties.tags) {
-			//Render specific tags
-			//URLs
-			var urlTags = ["image", "website", "contact:website", "url"];
-			if(urlTags.indexOf(i) >= 0) {
-				text += i+' = <a href="'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
+		if(!_isMobile) {
+			text += '<div class="popup-tab hidden" id="popup-tab-tags">';
+			
+			//List all tags
+			text += '<p class="popup-txt">';
+			for(i in feature.properties.tags) {
+				//Render specific tags
+				//URLs
+				var urlTags = ["image", "website", "contact:website", "url"];
+				if(urlTags.indexOf(i) >= 0) {
+					text += i+' = <a href="'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
+				}
+				//Wikimedia commons
+				else if(i == "wikimedia_commons") {
+					text += i+' = <a href="https://commons.wikimedia.org/wiki/'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
+				}
+				else {
+					text += i+" = "+feature.properties.tags[i];
+				}
+				text += "<br />";
 			}
-			//Wikimedia commons
-			else if(i == "wikimedia_commons") {
-				text += i+' = <a href="https://commons.wikimedia.org/wiki/'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
-			}
-			else {
-				text += i+" = "+feature.properties.tags[i];
-			}
-			text += "<br />";
+			text += "</p>";
+			
+			text += '</div>';
 		}
-		text += "</p>";
-		
-		text += '</div>';
 		
 		/*
 		 * Footer
@@ -1022,7 +1050,9 @@ Web: function(ctrl) {
 		var ftGeom = new OLvlUp.model.Geom(feature.geometry);
 		coords = ftGeom.getCentroid();
 		
-		return L.popup().setContent(text).setLatLng(L.latLng(coords[1], coords[0]));
+		var options = (_isMobile) ? { autoPan: false } : {};
+		
+		return L.popup(options).setContent(text).setLatLng(L.latLng(coords[1], coords[0]));
 	}
 	
 	/**
