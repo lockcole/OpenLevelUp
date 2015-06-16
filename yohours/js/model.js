@@ -53,31 +53,42 @@ IRL_DAYS: [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
  * ========== CLASSES ==========
  */
 /**
- * Class Interval, defines an interval in a given day where the POI is open.
- * @param day The week day (use DAYS constants)
- * @param start The interval start (in minutes since midnight)
- * @param end The interval end (in minutes since midnight)
+ * Class Interval, defines an interval in a week where the POI is open.
+ * @param dayStart The start week day (use DAYS constants)
+ * @param dayEnd The end week day (use DAYS constants)
+ * @param minStart The interval start (in minutes since midnight)
+ * @param minEnd The interval end (in minutes since midnight)
  */
-Interval: function(day, start, end) {
+Interval: function(dayStart, dayEnd, minStart, minEnd) {
 //ATTRIBUTES
-	/** The day in the week, see DAYS **/
-	var _day = day;
+	/** The start day in the week, see DAYS **/
+	var _dayStart = dayStart;
+	
+	/** The end day in the week, see DAYS **/
+	var _dayEnd = dayEnd;
 	
 	/** The interval start, in minutes since midnight (local hour) **/
-	var _start = start;
+	var _start = minStart;
 	
 	/** The interval end, in minutes since midnight (local hour) **/
-	var _end = end;
+	var _end = minEnd;
 	
 	/** This object **/
 	var _self = this;
 
 //ACCESSORS
 	/**
-	 * @return The day in the week, see DAYS constants
+	 * @return The start day in the week, see DAYS constants
 	 */
-	this.getDay = function() {
-		return _day;
+	this.getStartDay = function() {
+		return _dayStart;
+	};
+	
+	/**
+	 * @return The end day in the week, see DAYS constants
+	 */
+	this.getEndDay = function() {
+		return _dayEnd;
 	};
 	
 	/**
@@ -93,6 +104,13 @@ Interval: function(day, start, end) {
 	this.getTo = function() {
 		return _end;
 	};
+
+//CONSTRUCTOR
+	//Handle special cases, like sunday midnight
+	if(_dayEnd == 0 && _end == 0) {
+		_dayEnd = 6;
+		_end = 24 * 60;
+	}
 },
 
 /**
@@ -128,8 +146,17 @@ Week: function() {
 		//Set to true values where an interval is defined
 		for(var id in _intervals) {
 			if(_intervals.hasOwnProperty(id) && _intervals[id] != undefined) {
-				for (var minute = _intervals[id].getFrom(); minute <= _intervals[id].getTo(); minute++) {
-					minuteArray[_intervals[id].getDay()][minute] = true;
+				for(var day = _intervals[id].getStartDay(); day <= _intervals[id].getEndDay(); day++) {
+					//Define start and end minute regarding the current day
+					var startMinute = (day == _intervals[id].getStartDay()) ? _intervals[id].getFrom() : 0;
+					var endMinute = (day == _intervals[id].getEndDay()) ? _intervals[id].getTo() : 24 * 60;
+					
+					//Set to true the minutes for this day
+					if(startMinute != endMinute) {
+						for(var minute = startMinute; minute <= endMinute; minute++) {
+							minuteArray[day][minute] = true;
+						}
+					}
 				}
 			}
 		}
@@ -155,6 +182,15 @@ Week: function() {
 		_nextInterval++;
 		
 		return _nextInterval-1;
+	};
+	
+	/**
+	 * Edits the given interval
+	 * @param id The interval ID
+	 * @param interval The new interval
+	 */
+	this.editInterval = function(id, interval) {
+		_intervals[id] = interval;
 	};
 	
 	/**
@@ -236,6 +272,13 @@ OpeningHoursParser: function() {
 				ret += add;
 			}
 		}
+		
+		//Special cases
+		// 24/7
+		if(ret == "Mo-Su 00:00-24:00") {
+			ret = "24/7";
+		}
+		
 		return ret;
 	};
 	

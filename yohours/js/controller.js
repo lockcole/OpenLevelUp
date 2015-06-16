@@ -24,10 +24,6 @@
  */
 YoHours.ctrl = {
 /*
- * ========= CONSTANTS =========
- */
-
-/*
  * ========== CLASSES ==========
  */
 MainController: function() {
@@ -58,6 +54,13 @@ MainController: function() {
 	this.getOpeningHours = function() {
 		return _parser.parse(_week);
 	};
+	
+	/**
+	 * @return The main view
+	 */
+	this.getView = function() {
+		return _view;
+	};
 
 //OTHER METHODS
 	/**
@@ -69,10 +72,22 @@ MainController: function() {
 
 	/**
 	 * Event handler, to add the current interval in week
+	 * @param interval The new interval
+	 * @return The interval ID
 	 */
-	this.newInterval = function() {
-		var intervalId = _week.addInterval(_view.getCurrentInterval());
-		_view.addInterval(intervalId, _week);
+	this.newInterval = function(interval) {
+		var intervalId = _week.addInterval(interval);
+		_view.refresh();
+		return intervalId;
+	};
+	
+	/**
+	 * Edits the given interval
+	 * @param id The interval ID
+	 * @param interval The new interval
+	 */
+	this.editInterval = function(id, interval) {
+		_week.editInterval(id, interval);
 		_view.refresh();
 	};
 	
@@ -83,7 +98,6 @@ MainController: function() {
 	this.removeInterval = function(intervalId) {
 		_week.removeInterval(intervalId);
 		_view.refresh();
-		console.log(_week.getIntervals());
 	};
 }
 

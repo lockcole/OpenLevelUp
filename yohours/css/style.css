@@ -20,27 +20,39 @@
  * Web interface to make opening hours data for OpenStreetMap the easy way
  * Author: Adrien PAVIE
  *
- * Utility JS methods
+ * CSS Style
  */
+body {
+	margin-top: 60px;
+	height: 100%;
+}
 
-/**
- * Converts minutes into HH:MM format
- * @param m The amount of minutes
- */
-function minToHourMin(m) {
-	var hours = Math.floor(m/60);
-	if(hours < 10) { hours = "0"+hours; }
-	var minutes = m % 60;
-	if(minutes < 10) { minutes = "0"+minutes; }
-	return hours+":"+minutes;
-};
+img.logo {
+	height: 80px;
+}
 
-/**
- * Converts the day code from a sunday-starting week into the day code of a monday-starting week
- * @param d The sunday-starting week day (as string)
- * @return The monday-starting week day
- */
-function swDayToMwDay(d) {
-	var day = parseInt(d);
-	return (day == 0) ? 6 : day - 1;
-};
+#opening_hours {
+	text-align: center;
+}
+
+#oh {
+	width: 50%;
+}
+
+.osm-tag {
+	font-size: 115%;
+	background: #DDE none repeat scroll 0% 0%;
+	white-space: nowrap;
+	font-family: monospace,Courier;
+}
+
+.osm-key {
+	font-weight: bold;
+}
+
+footer {
+	border-top: 1px solid #ddd;
+	margin-top: 20px;
+	padding: 10px;
+	text-align: center;
+}

@@ -26,6 +26,11 @@
 <head>
 	<!--
 		TODO (by priority)
+		* Merge off days when possible
+		* Add parameters, such as slot duration
+		* Add clear button
+		* Range display for 30 minutes intervals
+		* Add seasonal system for opening hours
 	-->
 	
 	<!-- General definitions -->
@@ -38,9 +43,19 @@
 	<!--link rel="icon" type="image/jpg" href="img/favicon.jpg" /-->
 	
 	<!-- jQuery includes -->
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
 	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	
+	<!-- Bootstrap includes -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+	<!-- FullCalendar includes -->
+	<script src="lib/moment.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/fullcalendar.min.js"></script>
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/fullcalendar.min.css">
 	
 	<!-- YoHours includes -->
 	<script type="text/javascript">
@@ -52,39 +67,47 @@
 	<script src="js/controller.js" type="text/javascript"></script>
 	
 	<!-- CSS Style -->
-	<!--link rel="stylesheet" href="css/style.css" /-->
+	<link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-	<h1>Yo Hours</h1>
-	
-	<div id="about">
-		<p>Define the <a href="https://wiki.openstreetmap.org/wiki/Key:opening_hours">opening hours</a> for OpenStreetMap simply !<br />
-		Just add time intervals, and we will do the job.</p>
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#">YoHours</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li class="active"><a href="#">Home</a></li>
+					<li><a id="help-link" href="#">Help</a></li>
+					<li><a href="mailto:panieravide@riseup.net">Contact</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container main">
+		<div class="jumbotron" id="about">
+			<h1><img class="logo" src="img/logo.svg" alt="YoHours" /></h1>
+			<p>OpenStreetMap <a href="https://wiki.openstreetmap.org/wiki/Key:opening_hours">opening hours</a> made easy !<br />
+			Just drag time intervals on the calendar, and we will do the job.</p>
+		</div>
+		
+		<div id="opening_hours">
+			<p><span class="osm-tag"><span class="osm-key">opening_hours</span>=<input type="text" id="oh" readonly /></span></p>
+		</div>
+		
+		<div id='calendar'></div>
 	</div>
 	
-	<div id="defined_intervals">
-		<h2>Defined hours</h2>
-		<p>OSM opening_hours = <input type="text" id="oh" readonly /></p>
-		<ul id="intervals_list">
-		</ul>
+	<div id="help" title="Help!">
+		<p>To add an interval, drag the cursor on the wanted interval on the calendar.
+		<br />You can move an interval with drag and drop.
+		<br />You can resize one by extending its borders.
+		<br />You can delete one by clicking on it.</p>
 	</div>
 	
-	<div id="interval">
-		<h2>New interval</h2>
-		<p>
-			<select id="day">
-				<option value="0">Monday</option>
-				<option value="1">Tuesday</option>
-				<option value="2">Wednesday</option>
-				<option value="3">Thursday</option>
-				<option value="4">Friday</option>
-				<option value="5">Saturday</option>
-				<option value="6">Sunday</option>
-			</select>
-			<span id="hours_start"></span> - <span id="hours_end"></span>
-		</p>
-		<div id="slider-range"></div>
-		<p><input type="button" id="new_interval" value="Add" /></p>
+	<footer class="container">
+		<p>&copy; <a href="http://adrien.pavie.info/">Adrien PAVIE</a> 2015, under <a href="https://www.gnu.org/licenses/gpl.html">GPL v3 license</a>.</p>
 	</div>
 
 	<!-- Main code -->
