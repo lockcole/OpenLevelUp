@@ -28,9 +28,9 @@
 		TODO (by priority)
 		* Handle all GeoJSON types
 		* Improve errors cases
+		* Handle bad website values (no http://)
 		* Code refactor (feature object in view ?)
 		* Shortcuts for changing levels
-		* UI for small screens
 		* Improve image export (merge half levels, underground level transparent, ...)
 		* Path finding in a building
 	-->
@@ -51,8 +51,8 @@
 	<link rel="icon" type="image/jpg" href="img/favicon.jpg" />
 	
 	<!-- Leaflet includes -->
-	<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
-	<script src="lib/leaflet/leaflet.js"></script>
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
 
 	<!-- OSMtoGeoJSON include -->
 	<script src="lib/osmtogeojson.js"></script>
@@ -64,8 +64,8 @@
 	<script src="lib/azimuth.js"></script>
 	
 	<!-- jQuery includes -->
-	<script src="lib/jquery-1.11.2.min.js"></script>
-	<script src="lib/jquery-migrate-1.2.1.min.js"></script>
+	<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 	
 	<!-- Leaflet plugin includes -->
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.css" />

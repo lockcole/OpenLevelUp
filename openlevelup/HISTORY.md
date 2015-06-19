@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+19 june 2015
+------------
+* CDN added for leaflet and jQuery
+
 11 june 2015
 ------------
 * Mobile version released
