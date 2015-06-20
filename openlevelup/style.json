@@ -59,6 +59,13 @@
 		},
 		{
 			"type": "Style",
+			"name": "Path (Guide strips)",
+			"description": "Path with guide strips",
+			"onTags": [ { "highway": "*", "guide_strips": "yes" } ],
+			"style": { "color": "#316EDD", "icon": "visually_impaired.svg" }
+		},
+		{
+			"type": "Style",
 			"name": "Area",
 			"description": "Indoor areas ('OR' example for values)",
 			"onTags": [ { "indoor": "area|corridor" }, { "highway": "pedestrian|footway", "area": "yes" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|entrance|hall|entry|gallery|collection" } ],

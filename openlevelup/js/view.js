@@ -1181,11 +1181,21 @@ Web: function(ctrl) {
 		else {
 			$("#tab-url").addClass("hide");
 		}
+		
+		//Mapillary image
+		//tags.mapillary = 'Rv1w8WC8fpgBjJO7L5S9NQ'; //For debug purposes only
+		if(hasMapillaryImage(tags)) {
+			$("#tab-mapillary a").show();
+			$("#tab-mapillary div").html(_imageMapillaryHtml(tags.mapillary));
+			$("#tab-mapillary").click(function() { controller.getView().changeImageTab("tab-mapillary"); });
+		}
+		else {
+			$("#tab-mapillary").addClass("hide");
+		}
 		$("#tab-flickr").addClass("hide");
-		$("#tab-mapillary").addClass("hide");
 		
 		//Set default tab
-		$("#op-images .tabs div:not(.hide):first").addClass("selected");
+		$("#op-images .tabs > div:not(.hide):first").addClass("selected");
 	};
 	
 	/**
@@ -1194,6 +1204,14 @@ Web: function(ctrl) {
 	 */
 	function _imageHtml(url) {
 		return '<a href="'+url+'" target="_blank"><img src="'+url+'" /></a>';
+	};
+	
+	/**
+	 * @param id The mapillary image ID
+	 * @return The image HTML markup
+	 */
+	function _imageMapillaryHtml(id) {
+		return '<a href="http://www.mapillary.com/map/im/'+id+'" target="_blank"><img src="https://d1cuyjsrcm0gby.cloudfront.net/'+id+'/thumb-2048.jpg" /></a>';
 	};
 	
 	/**

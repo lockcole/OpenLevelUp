@@ -578,18 +578,6 @@ p.popup-txt.centered {
 	text-align: center;
 }
 
-/* Popup image */
-/*.popup-img {
-	position: relative;
-	text-align: center;
-}
-
-.popup-img img {
-	height: 100px;
-	display: inline-block;
-	margin: 0 0.3em;
-}*/
-
 /************************
  * Images overlay panel *
  ************************/
@@ -636,7 +624,7 @@ p.popup-txt.centered {
 }
 
 .tabs > div.hide {
-	visibility: hidden;
+	display: none;
 }
 
 /* Tabs content */
@@ -645,7 +633,7 @@ p.popup-txt.centered {
 	top: 27px;
 	bottom: 0;
 	right: 0;
-	padding: 20px;
+	padding: 10px 5px 0 5px;
 	border-top: 2px solid #666;
 	margin: 0 5px 5px 5px;
 	z-index: 100;
@@ -663,4 +651,5 @@ p.popup-txt.centered {
 
 .tabs > div > div img {
 	height: 100%;
+	max-width: 100%;
 }

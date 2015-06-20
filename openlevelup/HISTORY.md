@@ -1,6 +1,12 @@
 Changes history
 ===============
 
+20 june 2015
+------------
+* New panel for images (as an overlay)
+* Support for mapillary=<id>
+* Style for guide_strips=yes
+
 19 june 2015
 ------------
 * CDN added for leaflet and jQuery

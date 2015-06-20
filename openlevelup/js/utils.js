@@ -66,12 +66,20 @@ function hasUrlImage(tags) {
 };
 
 /**
+ * @param tags The feature tags
+ * @return True if a mapillary image is defined
+ */
+function hasMapillaryImage(tags) {
+	return tags.mapillary != undefined;
+};
+
+/**
  * Does the given feature have an image ?
  * @param tags The feature tags
  * @return True if it has images
  */
 function hasImages(tags) {
-	return hasUrlImage(tags);
+	return hasUrlImage(tags) || hasMapillaryImage(tags);
 };
 
 /**
