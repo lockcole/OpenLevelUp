@@ -40,12 +40,39 @@ function myUrl() {
 }
 
 /**
+ * @return The URL hash
+ */
+function myUrlHash() {
+	return $(location).attr('href').split('#')[1];
+}
+
+/**
  * @return The current folder URL
  */
 function myFolderUrl() {
 	var pos = $(location).attr('href').lastIndexOf('/');
 	return $(location).attr('href').substring(0, pos);
 }
+
+/*
+ * Images management
+ */
+/**
+ * @param tags The feature tags
+ * @return True if a simple image is defined
+ */
+function hasUrlImage(tags) {
+	return tags.image != undefined;
+};
+
+/**
+ * Does the given feature have an image ?
+ * @param tags The feature tags
+ * @return True if it has images
+ */
+function hasImages(tags) {
+	return hasUrlImage(tags);
+};
 
 /**
  * Parses levels list.

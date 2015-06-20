@@ -579,7 +579,7 @@ p.popup-txt.centered {
 }
 
 /* Popup image */
-.popup-img {
+/*.popup-img {
 	position: relative;
 	text-align: center;
 }
@@ -588,4 +588,79 @@ p.popup-txt.centered {
 	height: 100px;
 	display: inline-block;
 	margin: 0 0.3em;
+}*/
+
+/************************
+ * Images overlay panel *
+ ************************/
+
+#op-images .overlay-close a {
+	color: #D2E2FF;
+}
+
+#op-images .overlay-close a:hover {
+	color: #B3CEFF;
+}
+
+/* Tabs block */
+.tabs {
+	height: 100%;
+	position: relative;
+	width: 100%;
+}
+
+/* Tabs links */
+.tabs > div {
+	display: inline;
+}
+
+.tabs > div > a {
+	position: relative;
+	text-decoration: none;
+	color: white;
+	display: block;
+	float: left;
+	padding: 5px 10px;
+	margin: 0 5px;
+}
+
+.tabs > div > a {
+	background: #444;
+	z-index: 100;
+
+}
+
+.tabs > div.selected > a {
+	background: #666;
+	z-index: 101;
+}
+
+.tabs > div.hide {
+	visibility: hidden;
+}
+
+/* Tabs content */
+.tabs > div > div {
+	left: 0;
+	top: 27px;
+	bottom: 0;
+	right: 0;
+	padding: 20px;
+	border-top: 2px solid #666;
+	margin: 0 5px 5px 5px;
+	z-index: 100;
+}
+
+.tabs > div > div {
+	position: absolute;
+	display: none;
+}
+
+.tabs > div.selected > div {
+	position: absolute;
+	display: block;
+}
+
+.tabs > div > div img {
+	height: 100%;
 }

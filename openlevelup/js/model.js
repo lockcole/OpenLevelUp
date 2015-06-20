@@ -109,6 +109,20 @@ MapData: function(ctrl) {
 		return _roomNames;
 	};
 	
+	/**
+	 * @param id The feature ID, for example way/123456
+	 * @return The tags for given feature, or null if not found
+	 */
+	this.getTags = function(id) {
+		for(var i in _geojson.features) {
+			var feature = _geojson.features[i];
+			if(feature.id == id) {
+				return feature.properties.tags;
+			}
+		}
+		return null;
+	};
+	
 //MODIFIERS
 	/**
 	 * Changes the data bounding box.

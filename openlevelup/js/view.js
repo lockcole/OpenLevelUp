@@ -469,6 +469,7 @@ Web: function(ctrl) {
 		$("#levelDown").click(controller.levelDown);
 		$("#about-link").click(function() { $("#op-about").toggle(); });
 		$("#about-close").click(function() { $("#op-about").hide(); });
+		$("#images-close").click(function() { $("#op-images").hide(); });
 		$("#show-transcendent").change(controller.onMapChange);
 		$("#show-legacy").change(controller.onMapLegacyChange);
 		$("#show-unrendered").change(controller.onMapChange);
@@ -979,10 +980,8 @@ Web: function(ctrl) {
 		generalTxt += _addFormatedTag(feature, "description", "Details");
 		
 		//Image rendering
-		if(feature.properties.tags.image != undefined) {
-			var url = feature.properties.tags.image;
-			
-			generalTxt += '<p class="popup-img"><a href="'+url+'"><img src="'+url+'" alt="Image of this object" /></a></p>';
+		if(hasImages(feature.properties.tags)) {
+			generalTxt += '<p class="popup-txt centered"><a href="#" id="images-open" onclick="controller.openImages(\''+feature.id+'\')">See related images</a></p>';
 		}
 		
 		if(generalTxt == '' && !_isMobile) { generalTxt = "No general information (look at tags)"; }
@@ -1159,6 +1158,54 @@ Web: function(ctrl) {
 	};
 
 /*
+ * Images
+ */
+	/**
+	 * Opens the images panel
+	 * @param tags The feature tags
+	 */
+	this.openImages = function(tags) {
+		//Open popup
+		$("#op-images").show();
+		$("#op-images .tabs div").removeClass();
+		
+		/*
+		 * Fill tabs
+		 */
+		//Simple URL
+		if(hasUrlImage(tags)) {
+			$("#tab-url a").show();
+			$("#tab-url div").html(_imageHtml(tags.image));
+			$("#tab-url").click(function() { controller.getView().changeImageTab("tab-url"); });
+		}
+		else {
+			$("#tab-url").addClass("hide");
+		}
+		$("#tab-flickr").addClass("hide");
+		$("#tab-mapillary").addClass("hide");
+		
+		//Set default tab
+		$("#op-images .tabs div:not(.hide):first").addClass("selected");
+	};
+	
+	/**
+	 * @param url The image URL
+	 * @return The image HTML markup
+	 */
+	function _imageHtml(url) {
+		return '<a href="'+url+'" target="_blank"><img src="'+url+'" /></a>';
+	};
+	
+	/**
+	 * Changes the currently opened tab in images popup
+	 * @param tab The tab name
+	 */
+	this.changeImageTab = function(tab) {
+		$("#op-images .tabs div").removeClass("selected");
+		$("#"+tab).addClass("selected");
+	};
+
+/*
  * Other view methods
  */
 	/**
@@ -1221,7 +1268,7 @@ Web: function(ctrl) {
 		params += "&unrendered="+((_self.showUnrendered()) ? "1" : "0");
 		params += "&buildings="+((_self.showBuildingsOnly()) ? "1" : "0");
 		
-		var link = baseURL + params;
+		var link = baseURL + params + '#' + myUrlHash();
 		var linkShort = baseURL + "s=" + _shortlink();
 		
 		$("#permalink").attr('href', link);

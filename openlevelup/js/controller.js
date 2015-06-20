@@ -418,6 +418,20 @@ Ctrl: function() {
 	}
 	
 	/**
+	 * Opens the images popup
+	 * @param id The feature ID, for example way/123456
+	 */
+	this.openImages = function(id) {
+		var tags = _mapdata.getTags(id);
+		if(tags != null) {
+			_view.openImages(tags);
+		}
+		else {
+			console.log("Object "+id+" not found");
+		}
+	};
+	
+	/**
 	 * Downloads data from Overpass API
 	 * Then calls another function to process it.
 	 * @param type The kind of request ("data" or "cluster")
