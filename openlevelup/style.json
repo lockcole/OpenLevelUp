@@ -69,7 +69,7 @@
 			"name": "Area",
 			"description": "Indoor areas ('OR' example for values)",
 			"onTags": [ { "indoor": "area|corridor" }, { "highway": "pedestrian|footway", "area": "yes" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|entrance|hall|entry|gallery|collection" } ],
-			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -1 }
+			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6 }
 		},
 		{
 			"type": "Style",

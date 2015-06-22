@@ -1035,6 +1035,8 @@ Web: function(ctrl) {
 				}
 				text += "<br />";
 			}
+
+			//text += feature.properties.style.getStyle().layer;
 			text += "</p>";
 			
 			text += '</div>';
