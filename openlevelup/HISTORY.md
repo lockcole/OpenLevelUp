@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+22 june 2015
+------------
+* More discrete style for door=no
+* Style fix for highway=footway as area
+
 20 june 2015
 ------------
 * New panel for images (as an overlay)

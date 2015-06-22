@@ -167,7 +167,7 @@
 			"name": "Passage",
 			"description": "Door=no nodes",
 			"onTags": [ { "door": "no" } ],
-			"style": { "icon": "door_no.svg" }
+			"style": { "color": "#0BB848", "fillColor": "#0BB848", "opacity": 1, "fillOpacity": 1, "radius": 3, "icon": null, "dashArray": "none" }
 		},
 		{
 			"type": "Style",
