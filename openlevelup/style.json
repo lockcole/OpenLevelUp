@@ -325,10 +325,17 @@
 		},
 		{
 			"type": "Style",
-			"name": "Subway",
-			"description": "Subway rails",
-			"onTags": [ { "railway": "subway" } ],
+			"name": "Rail",
+			"description": "Rail",
+			"onTags": [ { "railway": "rail|subway|light_rail|monorail|narrow_gauge|tram" } ],
 			"style": { "color": "#888888", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "5,5" }
+		},
+		{
+			"type": "Style",
+			"name": "Buffer stop",
+			"description": "Rail buffer stop",
+			"onTags": [ { "railway": "buffer_stop" } ],
+			"style": { "icon": "railway_buffer_stop.svg" }
 		},
 		{
 			"type": "Style",

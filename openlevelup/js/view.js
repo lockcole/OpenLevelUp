@@ -744,13 +744,13 @@ Web: function(ctrl) {
 			if(_self.showTranscendent() && !_self.showBuildingsOnly()) {
 				addObject = addObject || feature.properties.tags.highway == "elevator";
 			}
-			
-			//Display unrendered objects
-			/*if(!addObject) {
-				console.log("Unrendered object:");
-				console.log(feature);
-			}*/
 		}
+		
+		//Display unrendered objects
+		/*if(!addObject) {
+			console.log("Unrendered object:");
+			console.log(feature);
+		}*/
 
 		return addObject;
 	}

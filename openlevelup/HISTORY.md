@@ -5,6 +5,7 @@ Changes history
 ------------
 * More discrete style for door=no
 * Style fix for highway=footway as area
+* Style for railway=buffer_stop
 
 20 june 2015
 ------------
