@@ -363,7 +363,7 @@
 			"name": "Pillar",
 			"description": "Pillar",
 			"onTags": [ { "man_made": "pillar" }, { "buildingpart": "pillar" }, { "building:part": "column" }, { "indoor": "column" } ],
-			"style": { "color": "#A8A8A8", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#A8A8A8", "fillOpacity": 1, "radius": 4, "layer": 0 }
+			"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
 		},
 		{
 			"type": "Style",
