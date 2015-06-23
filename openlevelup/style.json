@@ -69,7 +69,7 @@
 			"name": "Area",
 			"description": "Indoor areas ('OR' example for values)",
 			"onTags": [ { "indoor": "area|corridor" }, { "highway": "pedestrian|footway", "area": "yes" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|entrance|hall|entry|gallery|collection" } ],
-			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6 }
+			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6, "label": "name", "labelStyle": "area" }
 		},
 		{
 			"type": "Style",
@@ -202,14 +202,14 @@
 			"name": "Amenity",
 			"description": "Amenities icons",
 			"onTags": [ { "amenity": "*" } ],
-			"style": { "icon": "amenity_${amenity}.png" }
+			"style": { "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
 		},
 		{
 			"type": "Style",
 			"name": "Shop",
-			"description": "Shopping icons",
+			"description": "Shopping specific style",
 			"onTags": [ { "shop": "*" } ],
-			"style": { "icon": "shopping_${shop}.png" }
+			"style": { "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
 		},
 		{
 			"type": "Style",
@@ -223,7 +223,7 @@
 			"name": "Tourism",
 			"description": "Tourism icons",
 			"onTags": [ { "tourism": "*" } ],
-			"style": { "icon": "tourism_${tourism}.png", "color": "#ECC7A6", "fillColor": "#ECC7A6", "opacity": 1, "fillOpacity": 1, "weight": 3 }
+			"style": { "icon": "tourism_${tourism}.png", "color": "#ECC7A6", "fillColor": "#ECC7A6", "opacity": 1, "fillOpacity": 1, "weight": 3, "label": "name", "labelStyle": "tourism" }
 		},
 		{
 			"type": "Style",
@@ -328,7 +328,7 @@
 			"name": "Rail",
 			"description": "Rail",
 			"onTags": [ { "railway": "rail|subway|light_rail|monorail|narrow_gauge|tram" } ],
-			"style": { "color": "#888888", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "5,5" }
+			"style": { "color": "#888888", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "5,5", "label": "name", "labelStyle": "railway" }
 		},
 		{
 			"type": "Style",

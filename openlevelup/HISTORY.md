@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+23 june 2015
+------------
+* Code refactoring for marker generation
+* Label system added (with customisable style)
+
 22 june 2015
 ------------
 * More discrete style for door=no

@@ -1,0 +1,65 @@
+/*
+ * This file is part of OpenLevelUp!.
+ * 
+ * OpenLevelUp! is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ * 
+ * OpenLevelUp! is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with OpenLevelUp!.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * OpenLevelUp!
+ * Web viewer for indoor mapping (based on OpenStreetMap data).
+ * Author: Adrien PAVIE
+ *
+ * Style for objects labels
+ */
+
+/** Common style **/
+.tlabel {
+	text-align: center;
+	margin-top: -1em;
+	font-size: 0.8em;
+}
+
+.tlabel div {
+	position: relative;
+	text-align: center;
+	left: -50%;
+	text-shadow: 0px 0px 3px rgba(255,255,255,1);
+}
+
+/** Walkable areas **/
+.tlabel.area {
+	color: #252525;
+	font-size: 0.9em;
+}
+
+/** Shops **/
+.tlabel.shop {
+	color: #AC39AC;
+}
+
+/** Amenity **/
+.tlabel.amenity {
+	color: #3E3E3E;
+	font-weight: bold;
+}
+
+/** Railway **/
+.tlabel.railway {
+	color: black;
+}
+
+/** Tourism **/
+.tlabel.tourism {
+	color: #0099E4;
+}

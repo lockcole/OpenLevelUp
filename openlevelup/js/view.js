@@ -29,7 +29,7 @@ OLvlUp.view = {
 CLUSTER_MIN_ZOOM: 5,
 
 /** The minimal zoom to display actual data on map **/
-DATA_MIN_ZOOM: 17,
+DATA_MIN_ZOOM: 18,
 
 /** The maximal zoom of map **/
 MAX_ZOOM: 24,
@@ -100,6 +100,9 @@ Web: function(ctrl) {
 	
 	/** The array which contains all polyline decorators **/
 	var _markersLinestrings = null;
+	
+	/** The array which contains all labels **/
+	var _markersLabels = null;
 	
 	/** The layer group that contains all overlay markers **/
 	var _markersLayer = null;
@@ -525,6 +528,7 @@ Web: function(ctrl) {
 				_objectLayered = new Object();
 				_markersPolygons = new Object();
 				_markersLinestrings = new Object();
+				_markersLabels = new Object();
 				_popups = new Object();
 				_dataLayer = L.geoJson(
 					mapData.getData(),
@@ -549,6 +553,13 @@ Web: function(ctrl) {
 				if(_markersLinestrings != null && Object.keys(_markersLinestrings).length > 0) {
 					for(var i in _markersLinestrings) {
 						_markersLayer.addLayer(_markersLinestrings[i]);
+					}
+				}
+				
+				//Add eventual linestring icons
+				if(_markersLabels != null && Object.keys(_markersLabels).length > 0) {
+					for(var i in _markersLabels) {
+						_markersLayer.addLayer(_markersLabels[i]);
 					}
 				}
 				
@@ -699,6 +710,18 @@ Web: function(ctrl) {
 					_markersLinestrings[feature.properties.type+feature.properties.id+"-"+i].bindPopup(popup);
 				}
 			}
+			
+			if(_markersLabels[feature.properties.type+feature.properties.id] != undefined) {
+				_markersLabels[feature.properties.type+feature.properties.id].bindPopup(popup);
+			}
+			else if(_markersLabels[feature.properties.type+feature.properties.id+"-0"] != undefined) {
+				var nbSegments = feature.geometry.coordinates.length - 1;
+				
+				//For each segment, add popup
+				for(var i=0; i < nbSegments; i++) {
+					_markersLabels[feature.properties.type+feature.properties.id+"-"+i].bindPopup(popup);
+				}
+			}
 		}
 		
 		//Send this object to back of other layers
@@ -772,41 +795,69 @@ Web: function(ctrl) {
 	*/
 	function _styleElements(feature) {
 		var result = _getStyle(feature);
+		var hasIcon = (result.icon != undefined);
+		var labelizable = _labelizable(feature);
 		
-		//This add a marker if a polygon has its "icon" property defined
-		if(result.icon != undefined && feature.geometry.type == "Polygon") {
-			var ftGeom = new OLvlUp.model.Geom(feature.geometry);
-			var centroid = ftGeom.getCentroid();
-			var marker = _createMarker(L.latLng(centroid[1], centroid[0]), feature, result);
-			_markersPolygons[feature.properties.type+feature.properties.id] = marker;
-		}
-		else if(result.icon != undefined && feature.geometry.type == "LineString") {
-			var nbSegments = feature.geometry.coordinates.length - 1;
-			
-			//For each segment, add an icon
-			for(var i=0; i < nbSegments; i++) {
-				var coord1 = feature.geometry.coordinates[i];
-				var coord2 = feature.geometry.coordinates[i+1];
-				var coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
+		if(hasIcon || labelizable) {
+			//This add a marker if a polygon has its "icon" property defined
+			if(feature.geometry.type == "Polygon") {
+				var ftGeom = new OLvlUp.model.Geom(feature.geometry);
+				var centroid = ftGeom.getCentroid();
+				var coord = L.latLng(centroid[1], centroid[0]);
 				
-				var myIcon = L.icon({
-					iconUrl: OLvlUp.view.ICON_FOLDER+'/'+result.icon,
-					iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
-					iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
-					popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
-				});
+				if(hasIcon) {
+					var marker = _createMarker(coord, feature, result);
+					_markersPolygons[feature.properties.type+feature.properties.id] = marker;
+				}
 				
-				var marker = null;
+				//Labels
+				if(labelizable) {
+					_markersLabels[feature.properties.type+feature.properties.id] = _createLabel(
+						feature,
+						coord,
+						hasIcon);
+				}
+			}
+			else if(feature.geometry.type == "LineString") {
+				var nbSegments = feature.geometry.coordinates.length - 1;
 				
-				if(result.rotateIcon) {
+				//For each segment, add an icon
+				for(var i=0; i < nbSegments; i++) {
+					var coord1 = feature.geometry.coordinates[i];
+					var coord2 = feature.geometry.coordinates[i+1];
+					var coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
 					var angle = azimuth({lat: coord1[1], lng: coord1[0], elv: 0}, {lat: coord2[1], lng: coord2[0], elv: 0}).azimuth;
-					marker = L.rotatedMarker(L.latLng(coordMid[1], coordMid[0]), {icon: myIcon, angle: angle});
-				}
-				else {
-					marker = _createMarker(L.latLng(coordMid[1], coordMid[0]), feature, result);
-				}
+					var coord = L.latLng(coordMid[1], coordMid[0]);
+					
+					if(hasIcon) {
+						var myIcon = L.icon({
+							iconUrl: OLvlUp.view.ICON_FOLDER+'/'+result.icon,
+							iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
+							iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
+							popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
+						});
+						
+						var marker = null;
+						
+						if(result.rotateIcon) {
+							marker = _createMarker(coord, feature, result, angle);
+						}
+						else {
+							marker = _createMarker(coord, feature, result);
+						}
 
-				_markersLinestrings[feature.properties.type+feature.properties.id+"-"+i] = marker;
+						_markersLinestrings[feature.properties.type+feature.properties.id+"-"+i] = marker;
+					}
+					
+					//Labels
+					if(labelizable) {
+						_markersLabels[feature.properties.type+feature.properties.id+"-"+i] = _createLabel(
+							feature,
+							coord,
+							hasIcon,
+							angle);
+					}
+				}
 			}
 		}
 		
@@ -845,6 +896,11 @@ Web: function(ctrl) {
 		
 		result = _createMarker(latlng, feature, style);
 		
+		//Labels
+		if(_labelizable(feature)) {
+			_markersLabels[feature.properties.type+feature.properties.id] = _createLabel(feature, latlng, true);
+		}
+		
 		return result;
 	}
 	
@@ -853,11 +909,13 @@ Web: function(ctrl) {
 	 * @param latlng The latitude and longitude of the marker
 	 * @param feature The feature which will be represented
 	 * @param style The feature style
+	 * @param angle The rotation angle (default: 0)
 	 * @return The leaflet marker, or null
 	 */
-	function _createMarker(latlng, feature, style) {
+	function _createMarker(latlng, feature, style, angle) {
 		var result = null;
 		var iconUrl = null;
+		angle = angle || null;
 		
 		if(style.icon != undefined && style.icon != null && style.icon != '') {
 			var tmpUrl = feature.properties.style.getIconUrl();
@@ -880,7 +938,13 @@ Web: function(ctrl) {
 				iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
 				popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
 			});
-			result = L.marker(latlng, {icon: myIcon});
+			
+			if(angle != null) {
+				result = L.rotatedMarker(latlng, {icon: myIcon, angle: angle});
+			}
+			else {
+				result = L.marker(latlng, {icon: myIcon});
+			}
 		}
 		else {
 			result = L.circleMarker(latlng, { opacity: 0, fillOpacity: 0 });
@@ -888,6 +952,51 @@ Web: function(ctrl) {
 		
 		return result;
 	}
+	
+	/**
+	 * Creates the label (as a marker) for the given feature
+	 * @param feature The feature
+	 * @param coordinates The coordinates of the point where the label will be rendered
+	 * @param hasMarker Does this feature will also be rendered as a marker (icon/circle) ?
+	 * @param angle The rotation angle for label (default: 0)
+	 * @return The label as a leaflet marker
+	 */
+	function _createLabel(feature, coordinates, hasMarker, angle) {
+		var styleRules = _getStyle(feature);
+		var angle = angle || false;
+		if(angle != false) {
+			angle = (angle >= 90) ? angle - 90 : angle + 270;
+			angle = angle % 180;
+		}
+		
+		var classes = (styleRules.labelStyle != undefined) ? ' '+styleRules.labelStyle : '';
+		var text = feature.properties.tags[styleRules.label];
+		var iconAnchor = (hasMarker) ? [ null, -OLvlUp.view.ICON_SIZE/2] : [ null, OLvlUp.view.ICON_SIZE/2 ];
+		var rotation = (angle) ? ' style="transform: rotate('+angle+'deg);"' : '';
+		
+		var label = L.marker(coordinates, {
+			icon: L.divIcon({
+				className: 'tlabel'+classes,   // Set class for CSS styling
+				html: '<div'+rotation+'>'+text+'</div>',
+				iconAnchor: iconAnchor,
+				iconSize: [ 70, null ]
+			}),
+			draggable: false,       // Allow label dragging...?
+			//zIndexOffset: 9000     // Make appear above other map features
+		});
+		
+		return label;
+	};
+	
+	/**
+	 * Should the feature receive a label ?
+	 * @param feature The feature
+	 * @return True if it should have a label
+	 */
+	function _labelizable(feature) {
+		var ftStyle = _getStyle(feature);
+		return ftStyle.label != undefined && ftStyle.label != null && feature.properties.tags[ftStyle.label] != undefined;
+	};
 	
 	/**
 	 * Creates the popup for a given feature
