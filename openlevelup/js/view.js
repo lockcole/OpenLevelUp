@@ -693,7 +693,7 @@ Web: function(ctrl) {
 		var ftId = ft.getId();
 		var ftGeomSegments = ft.getGeometry().get().coordinates.length;
 		var name = ft.getName();
-		var styleRules = ft.getStyle();
+		var styleRules = ft.getStyle().get();
 		
 		//Create popup if necessary
 		if(styleRules.popup == undefined || styleRules.popup == "yes") {
@@ -757,11 +757,11 @@ Web: function(ctrl) {
 		if(ftLevels.length > 0) {
 			addObject &= Object.keys(ft.getTags()).length > 0
 			&& (Object.keys(ftTags).length > 1 || ftTags.area == undefined)
-					&& ftLevels.indexOf(_self.getCurrentLevel().toString()) >= 0
+					&& ftLevels.indexOf(_self.getCurrentLevel()) >= 0
 					&& (_self.showTranscendent() || ftLevels.length == 1)
 					&& (_self.showLegacy() || ftTags.buildingpart == undefined)
 					&& (!_self.showBuildingsOnly() || ftTags.building != undefined)
-					&& (_self.showUnrendered() || Object.keys(feature.getStyle()).length > 0);
+					&& (_self.showUnrendered() || Object.keys(ft.getStyle().get()).length > 0);
 		}
 		//Consider objects without levels but connected to door elements
 		else {
@@ -802,8 +802,8 @@ Web: function(ctrl) {
 	*/
 	function _styleElements(feature) {
 		var ft = feature.properties;
-		var result = ft.getStyle();
-		var hasIcon = (result.icon != undefined);
+		var result = ft.getStyle().get();
+		var hasIcon = result.icon != undefined;
 		var labelizable = _labelizable(ft);
 		
 		if(hasIcon || labelizable) {
@@ -908,7 +908,7 @@ Web: function(ctrl) {
 		
 		//Labels
 		if(_labelizable(ft)) {
-			_markersLabels[ft.getId()] = _createLabel(ft, latlng, true);
+			_markersLabels[ft.getId()] = _createLabel(feature, latlng, true);
 		}
 		
 		return result;
@@ -973,7 +973,7 @@ Web: function(ctrl) {
 	 */
 	function _createLabel(feature, coordinates, hasMarker, angle) {
 		var ft = feature.properties;
-		var styleRules = ft.getStyle();
+		var styleRules = ft.getStyle().get();
 		var angle = angle || false;
 		if(angle != false) {
 			angle = (angle >= 90) ? angle - 90 : angle + 270;
@@ -1001,12 +1001,12 @@ Web: function(ctrl) {
 	
 	/**
 	 * Should the feature receive a label ?
-	 * @param feature The feature
+	 * @param ft The feature
 	 * @return True if it should have a label
 	 */
-	function _labelizable(feature) {
-		var ftStyle = feature.getStyle();
-		return ftStyle.label != undefined && ftStyle.label != null && feature.getTag(ftStyle.label) != undefined;
+	function _labelizable(ft) {
+		var ftStyle = ft.getStyle().get();
+		return ftStyle.label != undefined && ftStyle.label != null && ft.getTag(ftStyle.label) != undefined;
 	};
 	
 	/**
@@ -1016,7 +1016,7 @@ Web: function(ctrl) {
 	 */
 	function _createPopup(ft) {
 		var name = ft.getName();
-		var styleRules = ft.getStyle();
+		var styleRules = ft.getStyle().get();
 		
 		/*
 		 * Title
@@ -1025,7 +1025,7 @@ Web: function(ctrl) {
 		
 		//Add icon in title
 		if(styleRules.icon != undefined) {
-			var iconUrl = styleRules.getIconUrl();
+			var iconUrl = ft.getStyle().getIconUrl();
 			if(iconUrl != null) {
 				text += '<img class="icon" src="'+OLvlUp.view.ICON_FOLDER+'/'+iconUrl+'" /> ';
 			}
@@ -1038,7 +1038,7 @@ Web: function(ctrl) {
 		var ftLevels = ft.onLevels();
 		if(styleRules.levelup && ftLevels.length > 0 && !_isMobile) {
 			//Able to go up ?
-			var levelId = ftLevels.indexOf(_self.getCurrentLevel().toString());
+			var levelId = ftLevels.indexOf(_self.getCurrentLevel());
 			if(levelId < ftLevels.length -1) {
 				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_up.png" title="Go up" alt="Up!" /></a>';
 			}
@@ -1205,7 +1205,7 @@ Web: function(ctrl) {
 	 */
 	this.levelUp = function(mapData) {
 		if(_map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
-			var currentLevelId = mapData.getLevels().indexOf(parseFloat(_self.getCurrentLevel()));
+			var currentLevelId = mapData.getLevels().indexOf(_self.getCurrentLevel());
 			
 			if(currentLevelId == -1) {
 				_self.displayMessage("Invalid level", "error");
@@ -1226,7 +1226,7 @@ Web: function(ctrl) {
 	 */
 	this.levelDown = function(mapData) {
 		if(_map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
-			var currentLevelId = mapData.getLevels().indexOf(parseFloat(_self.getCurrentLevel()));
+			var currentLevelId = mapData.getLevels().indexOf(_self.getCurrentLevel());
 			
 			if(currentLevelId == -1) {
 				_self.displayMessage("Invalid level", "error");
