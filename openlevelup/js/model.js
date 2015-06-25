@@ -30,373 +30,748 @@ OLvlUp.model = {
  * Class MapData, model of the application (as defined in MVC pattern).
  * It allows to manage and process OSM and GeoJSON data.
  */
-MapData: function(ctrl) {
+// MapData: function(ctrl) {
+// //ATTRIBUTES
+// 	/** Levels array, ordered **/
+// 	var _levels = null;
+// 	
+// 	/** Data as GeoJSON **/
+// 	var _geojson = null;
+// 	
+// 	/** Cluster data as GeoJSON **/
+// 	var _geojsonCluster = null;
+// 	
+// 	/** Bounding box for current data **/
+// 	var _bbox = null;
+// 	
+// 	/** Bounding box for cluster data **/
+// 	var _bboxCluster = null;
+// 	
+// 	/** Does the cluster contain legacy data ? **/
+// 	var _legacyCluster = false;
+// 	
+// 	/** The names of all rooms in data **/
+// 	var _roomNames = null;
+// 	
+// 	/** The application controller **/
+// 	var _ctrl = ctrl;
+// 	
+// 	/** The current object **/
+// 	var _self = this;
+// 	
+// //ACCESSORS
+// 	/**
+// 	 * @return The data, as GeoJSON
+// 	 */
+// 	this.getData = function() {
+// 		return _geojson;
+// 	};
+// 	
+// 	/**
+// 	 * @return True if the cluster contains legacy data
+// 	 */
+// 	this.isClusterLegacy = function() {
+// 		return _legacyCluster;
+// 	};
+// 	
+// 	/**
+// 	 * @return The cluster data, as GeoJSON
+// 	 */
+// 	this.getClusterData = function() {
+// 		return _geojsonCluster;
+// 	};
+// 	
+// 	/**
+// 	 * @return The bounding box (see LatLngBounds in Leaflet API)
+// 	 */
+// 	this.getBBox = function() {
+// 		return _bbox;
+// 	};
+// 	
+// 	/**
+// 	 * @return The bounding box for cluster data (see LatLngBounds in Leaflet API)
+// 	 */
+// 	this.getClusterBBox = function() {
+// 		return _bboxCluster;
+// 	};
+// 	
+// 	/**
+// 	 * @return The levels, as an array
+// 	 */
+// 	this.getLevels = function() {
+// 		return _levels;
+// 	};
+// 	
+// 	/**
+// 	 * @return The room names, as an object[level][roomName] = featureGeometry
+// 	 */
+// 	this.getRoomNames = function() {
+// 		return _roomNames;
+// 	};
+// 	
+// 	/**
+// 	 * @param id The feature ID, for example way/123456
+// 	 * @return The tags for given feature, or null if not found
+// 	 */
+// 	this.getTags = function(id) {
+// 		for(var i in _geojson.features) {
+// 			var feature = _geojson.features[i];
+// 			if(feature.id == id) {
+// 				return feature.properties.tags;
+// 			}
+// 		}
+// 		return null;
+// 	};
+// 	
+// //MODIFIERS
+// 	/**
+// 	 * Changes the data bounding box.
+// 	 * @param bbox The new bounding box
+// 	 */
+// 	this.setBBox = function(bbox) {
+// 		_bbox = bbox;
+// 	};
+// 	
+// 	/**
+// 	 * Changes the cluster data bounding box.
+// 	 * @param bbox The new bounding box
+// 	 */
+// 	this.setClusterBBox = function(bbox) {
+// 		_bboxCluster = bbox;
+// 	};
+// 	
+// 	/**
+// 	 * Sets if the current cluster data contains legacy objects
+// 	 * @param l True if legacy
+// 	 */
+// 	this.setClusterLegacy = function(l) {
+// 		_legacyCluster = l;
+// 	};
+// 	
+// 	/**
+// 	 * This functions deletes all information related to data (but not cluster data).
+// 	 */
+// 	this.cleanData = function() {
+// 		_geojson = null;
+// 		_bbox = null;
+// 		_roomNames = null;
+// 		_levels = null;
+// 	};
+// 	
+// 	/**
+// 	 * This functions deletes all information related to cluster data.
+// 	 */
+// 	this.cleanClusterData = function() {
+// 		_geojsonCluster = null;
+// 		_bboxCluster = null;
+// 	};
+// 	
+// //OTHER METHODS
+// /*
+//  * Data update methods
+//  */
+// 	/**
+// 	 * Handles OAPI response.
+// 	 * @param data The OAPI data
+// 	 */
+// 	this.handleOapiResponse = function(data) {
+// 		_ctrl.getView().addLoadingInfo("Process received data");
+// 		
+// 		//Parse data
+// 		_geojson = _parseOsmData(data);
+// 		
+// 		//Create _roomNames object
+// 		_roomNames = new Object();
+// 		
+// 		//Retrieve level informations
+// 		var levelsSet = new Array();// new Set();
+// 		
+// 		for(var i in _geojson.features) {
+// 			var feature = _geojson.features[i];
+// 			
+// 			//try to find levels for this feature
+// 			var currentLevel = null;
+// 			
+// 			//Tag level
+// 			if(feature.properties.tags.level != undefined) {
+// 				currentLevel = parseLevelsStr(feature.properties.tags.level);
+// 			}
+// 			//Tag repeat_on
+// 			else if(feature.properties.tags.repeat_on != undefined) {
+// 				currentLevel = parseLevelsStr(feature.properties.tags.repeat_on);
+// 			}
+// 			//Tag min_level and max_level
+// 			else if(feature.properties.tags.min_level != undefined && feature.properties.tags.max_level != undefined) {
+// 				currentLevel = parseLevelsStr(feature.properties.tags.min_level+"-"+feature.properties.tags.max_level);
+// 			}
+// 			//Tag buildingpart:verticalpassage:floorrange
+// 			else if(feature.properties.tags["buildingpart:verticalpassage:floorrange"] != undefined) {
+// 				currentLevel = parseLevelsStr(feature.properties.tags["buildingpart:verticalpassage:floorrange"]);
+// 			}
+// 			//Relations type=level
+// 			else if(feature.properties.relations != undefined && feature.properties.relations.length > 0) {
+// 				currentLevel = new Array();
+// 				
+// 				//Try to find type=level relations, and add level value in level array
+// 				for(var i in feature.properties.relations) {
+// 					var rel = feature.properties.relations[i];
+// 					if(rel.reltags.type == "level" && rel.reltags.level != undefined) {
+// 						var relLevel = parseLevelsStr(rel.reltags.level);
+// 						
+// 						//Test if level value in relation is unique
+// 						if(relLevel.length == 1) {
+// 							currentLevel.push(relLevel[0]);
+// 						}
+// 						else {
+// 							console.log("Invalid level value for relation "+rel.rel);
+// 						}
+// 					}
+// 				}
+// 				
+// 				//Reset currentLevel if no level found
+// 				if(currentLevel.length == 0) { currentLevel = null; }
+// 			}
+// 			
+// 			//Add each level value in list, and create levels property in feature
+// 			if(currentLevel != null) {
+// 				for(var i=0; i < currentLevel.length; i++) {
+// 					if(isFloat(currentLevel[i])) {
+// 						//levelsSet.add(parseFloat(currentLevel[i]));
+// 						var lvl = parseFloat(currentLevel[i]);
+// 						if(levelsSet.indexOf(lvl) < 0) {
+// 							levelsSet[levelsSet.length] = lvl;
+// 						}
+// 					}
+// 				}
+// 				feature.properties.levels = currentLevel;
+// 				feature.properties.levels.sort(function(a,b) { return parseFloat(a) - parseFloat(b); });
+// 				_addName(feature);
+// 			} else {
+// 				//console.log("No valid level found for "+feature.properties.type+" "+feature.properties.id);
+// 			}
+// 			
+// 			//Edit indoor areas to set them as polygons instead of linestrings
+// 			if(((feature.properties.tags.indoor != undefined
+// 				&& feature.properties.tags.indoor != "yes"
+// 				&& feature.properties.tags.indoor != "wall")
+// 				|| (feature.properties.tags.buildingpart != undefined
+// 				&& feature.properties.tags.buildingpart != "wall")
+// 				|| feature.properties.tags.highway == "elevator"
+// 				|| feature.properties.tags.room != undefined)
+// 				&& feature.geometry.type == "LineString") {
+// 				
+// 				feature = _convertLineToPolygon(feature);
+// 			}
+// 			
+// 			//Edit some polygons that should be linestrings
+// 			if(feature.properties.tags.barrier != undefined
+// 				&& feature.geometry.type == "Polygon") {
+// 				
+// 				feature = _convertPolygonToLine(feature);
+// 			}
+// 		}
+// 		
+// 		//Transform level set into a sorted array
+// 		/*try {
+// 			_levels = Array.from(levelsSet.values());
+// 		}
+// 		catch(error) {
+// 			//An error is possible if browser doesn't support Set.values()
+// 			_levels = _legacyProcessLevels();
+// 		}*/
+// 		_levels = levelsSet;
+// 		_levels.sort(function (a,b) { return a-b;});
+// 		
+// 		//Reset room names if no levels found
+// 		if(Object.keys(_roomNames).length == 0) {
+// 			_roomNames = null;
+// 		}
+// 		
+// 		//Call this method to notify controller that download is done
+// 		_ctrl.endMapUpdate();
+// 	};
+// 	
+// 	/**
+// 	 * Handles OAPI response for cluster data.
+// 	 * @param data The OAPI data
+// 	 */
+// 	this.handleOapiClusterResponse = function(data) {
+// 		_ctrl.getView().addLoadingInfo("Process received data");
+// 		
+// 		//Parse data
+// 		_geojsonCluster = _parseOsmData(data);
+// 		
+// 		//Call this method to notify controller that download is done
+// 		_ctrl.endMapClusterUpdate();
+// 	};
+// 	
+// 	/**
+// 	 * Adds a feature in _roomNames
+// 	 * @param feature The feature name
+// 	 */
+// 	function _addName(feature) {
+// 		//Look if the feature has a name
+// 		if(feature.properties.tags.name != undefined) {
+// 			name = feature.properties.tags.name;
+// 			//Add object for each level
+// 			for(var i in feature.properties.levels) {
+// 				//Check if _roomNames as already an array for the given level
+// 				if(_roomNames[feature.properties.levels[i]] == undefined) {
+// 					_roomNames[feature.properties.levels[i]] = new Object();
+// 				}
+// 				
+// 				//Add this feature
+// 				_roomNames[feature.properties.levels[i]][name] = feature;
+// 			}
+// 		}
+// 	};
+// 
+// /*
+//  * Data processing methods
+//  */
+// 	/**
+// 	* Parses raw OSM XML data, and return result.
+// 	* @param data The OSM XML data.
+// 	* @return The OSM parsed data (GeoJSON)
+// 	*/
+// 	function _parseOsmData(data) {
+// 		//Convert XML to GeoJSON
+// 		data = data || "<osm></osm>";
+// 		try {
+// 			data = $.parseXML(data);
+// 		} catch(e) {
+// 			data = JSON.parse(data);
+// 		}
+// 		return osmtogeojson(data);
+// 	}
+// 	
+// 	/**
+// 	 * This function parses levels values from GeoJSON.
+// 	 * @deprecated Created only because of the lack of support of Set, to delete when it will be wide supported.
+// 	 * @return The parsed levels as an array (unsorted)
+// 	 */
+// 	function _legacyProcessLevels() {
+// 		levelsAsArray = new Array();
+// 		for(var i in _geojson.features) {
+// 			var feature = _geojson.features[i];
+// 			
+// 			//Add each value in list
+// 			if(feature.properties.levels != null) {
+// 				for(var i=0; i < feature.properties.levels.length; i++) {
+// 					if(isFloat(feature.properties.levels[i])) {
+// 						var lvl = parseFloat(feature.properties.levels[i]);
+// 						if(levelsAsArray.indexOf(lvl) < 0) {
+// 							levelsAsArray[levelsAsArray.length] = lvl;
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+// 		return levelsAsArray;
+// 	}
+// 	
+// 	/**
+// 	 * Converts a GeoJSON LineString into a GeoJSON polygon.
+// 	 * @param f The GeoJSON linestring
+// 	 * @return The corresponding polygon
+// 	 */
+// 	function _convertLineToPolygon(f) {
+// 		f.geometry.type = "Polygon";
+// 		f.geometry.coordinates = [ f.geometry.coordinates ];
+// 		return f;
+// 	}
+// 	
+// 	/**
+// 	 * Converts a GeoJSON Polygon into a GeoJSON LineString.
+// 	 * @param f The GeoJSON polygon
+// 	 * @return The corresponding linestring
+// 	 */
+// 	function _convertPolygonToLine(f) {
+// 		f.geometry.type = "LineString";
+// 		f.geometry.coordinates = f.geometry.coordinates[0];
+// 		return f;
+// 	}
+// },
+
+
+
+/**
+ * The OSM global data container.
+ * It contains the parsed object from Overpass call.
+ */
+OSMData: function(styleDef, bbox) {
 //ATTRIBUTES
-	/** Levels array, ordered **/
-	var _levels = null;
+	/** The feature objects **/
+	var _features = null;
 	
-	/** Data as GeoJSON **/
+	/** The features as GeoJSON **/
 	var _geojson = null;
 	
-	/** Cluster data as GeoJSON **/
-	var _geojsonCluster = null;
+	/** The available levels **/
+	var _levels = [];
 	
-	/** Bounding box for current data **/
-	var _bbox = null;
+	/** The bounding box of the data **/
+	var _bbox = bbox;
 	
-	/** Bounding box for cluster data **/
-	var _bboxCluster = null;
-	
-	/** Does the cluster contain legacy data ? **/
-	var _legacyCluster = false;
-	
-	/** The names of all rooms in data **/
-	var _roomNames = null;
-	
-	/** The application controller **/
-	var _ctrl = ctrl;
-	
-	/** The current object **/
-	var _self = this;
-	
+	/** The names of objects, by level **/
+	var _names = new Object();
+
+//CONSTRUCTOR
+	/**
+	 * Class constructor, initializes this object with received data.
+	 */
+	this.init = function(data) {
+		//Parse OSM data
+		_geojson = parseOsmData(data);
+		
+		//Create features
+		_features = new Object();
+		
+		for(var i in _geojson.features) {
+			var f = _geojson.features[i];
+			var id = f.id;
+			var currentFeature = new OLvlUp.model.Feature(f, styleDef);
+			_features[id] = currentFeature;
+			
+			//Add levels to list
+			var ftLevels = currentFeature.onLevels();
+			_levels = mergeArrays(_levels, ftLevels);
+			
+			//Add name to list
+			var name = currentFeature.getTag("name");
+			if(name != undefined) {
+				for(var lvlId in ftLevels) {
+					var lvl = ftLevels[lvlId];
+					
+					//Create given level in names if needed
+					if(_names[lvl] == undefined) {
+						_names[lvl] = new Array();
+					}
+					
+					_names[lvl][name] = currentFeature;
+				}
+			}
+			_geojson.features[i].properties = currentFeature;
+		}
+		
+		_levels.sort(function (a,b) { return a-b;});
+	};
+
 //ACCESSORS
 	/**
-	 * @return The data, as GeoJSON
-	 */
-	this.getData = function() {
-		return _geojson;
-	};
-	
-	/**
-	 * @return True if the cluster contains legacy data
-	 */
-	this.isClusterLegacy = function() {
-		return _legacyCluster;
-	};
-	
-	/**
-	 * @return The cluster data, as GeoJSON
-	 */
-	this.getClusterData = function() {
-		return _geojsonCluster;
-	};
-	
-	/**
-	 * @return The bounding box (see LatLngBounds in Leaflet API)
+	 * @return The data bounding box
 	 */
 	this.getBBox = function() {
 		return _bbox;
 	};
 	
 	/**
-	 * @return The bounding box for cluster data (see LatLngBounds in Leaflet API)
+	 * @return True if the object was initialized
 	 */
-	this.getClusterBBox = function() {
-		return _bboxCluster;
+	this.isInitialized = function() {
+		return _features != null;
 	};
 	
 	/**
-	 * @return The levels, as an array
+	 * @return The levels contained in data
 	 */
 	this.getLevels = function() {
 		return _levels;
 	};
 	
 	/**
-	 * @return The room names, as an object[level][roomName] = featureGeometry
+	 * @return The read names
 	 */
-	this.getRoomNames = function() {
-		return _roomNames;
+	this.getNames = function() {
+		return _names;
 	};
 	
 	/**
-	 * @param id The feature ID, for example way/123456
-	 * @return The tags for given feature, or null if not found
+	 * @param id The feature OSM ID
+	 * @return The feature object
 	 */
-	this.getTags = function(id) {
-		for(var i in _geojson.features) {
-			var feature = _geojson.features[i];
-			if(feature.id == id) {
-				return feature.properties.tags;
-			}
-		}
-		return null;
-	};
-	
-//MODIFIERS
-	/**
-	 * Changes the data bounding box.
-	 * @param bbox The new bounding box
-	 */
-	this.setBBox = function(bbox) {
-		_bbox = bbox;
+	this.getFeature = function(id) {
+		return _features[id];
 	};
 	
 	/**
-	 * Changes the cluster data bounding box.
-	 * @param bbox The new bounding box
+	 * @return The data as GeoJSON
 	 */
-	this.setClusterBBox = function(bbox) {
-		_bboxCluster = bbox;
+	this.getAsGeoJSON = function() {
+		return _geojson;
 	};
-	
-	/**
-	 * Sets if the current cluster data contains legacy objects
-	 * @param l True if legacy
-	 */
-	this.setClusterLegacy = function(l) {
-		_legacyCluster = l;
-	};
-	
-	/**
-	 * This functions deletes all information related to data (but not cluster data).
-	 */
-	this.cleanData = function() {
-		_geojson = null;
-		_bbox = null;
-		_roomNames = null;
-		_levels = null;
-	};
-	
-	/**
-	 * This functions deletes all information related to cluster data.
-	 */
-	this.cleanClusterData = function() {
-		_geojsonCluster = null;
-		_bboxCluster = null;
-	};
-	
-//OTHER METHODS
-/*
- * Data update methods
+},
+
+
+
+/**
+ * The OSM cluster data container.
+ * It contains the parsed object from Overpass call.
  */
+OSMClusterData: function(bbox) {
+	//ATTRIBUTES
+	/** The feature objects **/
+	var _data = null;
+
+	/** The bounding box of the data **/
+	var _bbox = bbox;
+	
+//CONSTRUCTOR
 	/**
-	 * Handles OAPI response.
-	 * @param data The OAPI data
+	 * Class constructor, initializes this object with received data.
 	 */
-	this.handleOapiResponse = function(data) {
-		_ctrl.getView().addLoadingInfo("Process received data");
-		
-		//Parse data
-		_geojson = _parseOsmData(data);
-		
-		//Create _roomNames object
-		_roomNames = new Object();
-		
-		//Retrieve level informations
-		var levelsSet = new Array();// new Set();
-		
-		for(var i in _geojson.features) {
-			var feature = _geojson.features[i];
-			
-			//try to find levels for this feature
-			var currentLevel = null;
-			
-			//Tag level
-			if(feature.properties.tags.level != undefined) {
-				currentLevel = parseLevelsStr(feature.properties.tags.level);
-			}
-			//Tag repeat_on
-			else if(feature.properties.tags.repeat_on != undefined) {
-				currentLevel = parseLevelsStr(feature.properties.tags.repeat_on);
-			}
-			//Tag min_level and max_level
-			else if(feature.properties.tags.min_level != undefined && feature.properties.tags.max_level != undefined) {
-				currentLevel = parseLevelsStr(feature.properties.tags.min_level+"-"+feature.properties.tags.max_level);
-			}
-			//Tag buildingpart:verticalpassage:floorrange
-			else if(feature.properties.tags["buildingpart:verticalpassage:floorrange"] != undefined) {
-				currentLevel = parseLevelsStr(feature.properties.tags["buildingpart:verticalpassage:floorrange"]);
-			}
-			//Relations type=level
-			else if(feature.properties.relations != undefined && feature.properties.relations.length > 0) {
-				currentLevel = new Array();
-				
-				//Try to find type=level relations, and add level value in level array
-				for(var i in feature.properties.relations) {
-					var rel = feature.properties.relations[i];
-					if(rel.reltags.type == "level" && rel.reltags.level != undefined) {
-						var relLevel = parseLevelsStr(rel.reltags.level);
-						
-						//Test if level value in relation is unique
-						if(relLevel.length == 1) {
-							currentLevel.push(relLevel[0]);
-						}
-						else {
-							console.log("Invalid level value for relation "+rel.rel);
-						}
-					}
-				}
-				
-				//Reset currentLevel if no level found
-				if(currentLevel.length == 0) { currentLevel = null; }
-			}
-			
-			//Add each level value in list, and create levels property in feature
-			if(currentLevel != null) {
-				for(var i=0; i < currentLevel.length; i++) {
-					if(isFloat(currentLevel[i])) {
-						//levelsSet.add(parseFloat(currentLevel[i]));
-						var lvl = parseFloat(currentLevel[i]);
-						if(levelsSet.indexOf(lvl) < 0) {
-							levelsSet[levelsSet.length] = lvl;
-						}
-					}
-				}
-				feature.properties.levels = currentLevel;
-				feature.properties.levels.sort(function(a,b) { return parseFloat(a) - parseFloat(b); });
-				_addName(feature);
-			} else {
-				//console.log("No valid level found for "+feature.properties.type+" "+feature.properties.id);
-			}
-			
-			//Edit indoor areas to set them as polygons instead of linestrings
-			if(((feature.properties.tags.indoor != undefined
-				&& feature.properties.tags.indoor != "yes"
-				&& feature.properties.tags.indoor != "wall")
-				|| (feature.properties.tags.buildingpart != undefined
-				&& feature.properties.tags.buildingpart != "wall")
-				|| feature.properties.tags.highway == "elevator"
-				|| feature.properties.tags.room != undefined)
-				&& feature.geometry.type == "LineString") {
-				
-				feature = _convertLineToPolygon(feature);
-			}
-			
-			//Edit some polygons that should be linestrings
-			if(feature.properties.tags.barrier != undefined
-				&& feature.geometry.type == "Polygon") {
-				
-				feature = _convertPolygonToLine(feature);
-			}
-		}
-		
-		//Transform level set into a sorted array
-		/*try {
-			_levels = Array.from(levelsSet.values());
-		}
-		catch(error) {
-			//An error is possible if browser doesn't support Set.values()
-			_levels = _legacyProcessLevels();
-		}*/
-		_levels = levelsSet;
-		_levels.sort(function (a,b) { return a-b;});
-		
-		//Reset room names if no levels found
-		if(Object.keys(_roomNames).length == 0) {
-			_roomNames = null;
-		}
-		
-		//Call this method to notify controller that download is done
-		_ctrl.endMapUpdate();
+	this.init = function(data) {
+		//Parse OSM data
+		_data = parseOsmData(data);
+	};
+
+//ACCESSORS
+	/**
+	 * @return The OSM cluster data
+	 */
+	this.getData = function() {
+		return _data;
 	};
 	
 	/**
-	 * Handles OAPI response for cluster data.
-	 * @param data The OAPI data
+	 * @return The data bounding box
 	 */
-	this.handleOapiClusterResponse = function(data) {
-		_ctrl.getView().addLoadingInfo("Process received data");
-		
-		//Parse data
-		_geojsonCluster = _parseOsmData(data);
-		
-		//Call this method to notify controller that download is done
-		_ctrl.endMapClusterUpdate();
+	this.getBBox = function() {
+		return _bbox;
 	};
 	
 	/**
-	 * Adds a feature in _roomNames
-	 * @param feature The feature name
+	 * @return True if the object was initialized
 	 */
-	function _addName(feature) {
-		//Look if the feature has a name
-		if(feature.properties.tags.name != undefined) {
-			name = feature.properties.tags.name;
-			//Add object for each level
-			for(var i in feature.properties.levels) {
-				//Check if _roomNames as already an array for the given level
-				if(_roomNames[feature.properties.levels[i]] == undefined) {
-					_roomNames[feature.properties.levels[i]] = new Object();
+	this.isInitialized = function() {
+		return _data != null;
+	};
+},
+
+
+
+/**
+ * A feature is a geolocated object with properties, style, geometry, ...
+ */
+Feature: function(f, styleDef) {
+//ATTRIBUTES
+	/** The human readable name of the object **/
+	var _name = null;
+
+	/** The OSM ID (for example "node/123456") **/
+	var _id = f.id;
+	
+	/** The levels in which this object is present **/
+	var _onLevels = null;
+	
+	/** The OSM object tags **/
+	var _tags = f.properties.tags;
+	
+	/** The feature geometry **/
+	var _geometry = null;
+	
+	/** The feature style **/
+	var _style = null;
+	
+	/** The feature images (if any) **/
+	var _images = undefined;
+	
+	/** This object **/
+	var _self = this;
+	
+//CONSTRUCTOR
+	/**
+	 * Class constructor
+	 * @param feature The OSM feature
+	 */
+	function _init(feature) {
+		/*
+		 * Init some vars
+		 */
+		_style = new OLvlUp.model.FeatureStyle(_self, styleDef);
+		_geometry = new OLvlUp.model.FeatureGeometry(feature.geometry);
+		
+		/*
+		 * Find a name for this object
+		 */
+		if(_tags.name != undefined) {
+			_name = _tags.name;
+		}
+		else if(_tags.ref != undefined) {
+			_name = _tags.ref;
+		}
+		else {
+			_name = _style.getName();
+		}
+		
+		/*
+		 * Parse levels
+		 */
+		//try to find levels for this feature
+		var currentLevel = null;
+		var relations = feature.properties.relations;
+		
+		//Tag level
+		if(_tags.level != undefined) {
+			currentLevel = parseLevelsFloat(_tags.level);
+		}
+		//Tag repeat_on
+		else if(_tags.repeat_on != undefined) {
+			currentLevel = parseLevelsFloat(_tags.repeat_on);
+		}
+		//Tag min_level and max_level
+		else if(_tags.min_level != undefined && _tags.max_level != undefined) {
+			currentLevel = parseLevelsFloat(_tags.min_level+"-"+_tags.max_level);
+		}
+		//Tag buildingpart:verticalpassage:floorrange
+		else if(_tags["buildingpart:verticalpassage:floorrange"] != undefined) {
+			currentLevel = parseLevelsFloat(_tags["buildingpart:verticalpassage:floorrange"]);
+		}
+		//Relations type=level
+		else if(relations != undefined && relations.length > 0) {
+			currentLevel = new Array();
+			
+			//Try to find type=level relations, and add level value in level array
+			for(var i in relations) {
+				var rel = relations[i];
+				if(rel.reltags.type == "level" && rel.reltags.level != undefined) {
+					var relLevel = parseLevelsFloat(rel.reltags.level);
+					
+					//Test if level value in relation is unique
+					if(relLevel.length == 1) {
+						currentLevel.push(relLevel[0]);
+					}
+					else {
+						console.log("Invalid level value for relation "+rel.rel);
+					}
 				}
-				
-				//Add this feature
-				_roomNames[feature.properties.levels[i]][name] = feature;
 			}
+			
+			//Reset currentLevel if no level found
+			if(currentLevel.length == 0) { currentLevel = null; }
+		}
+		
+		//Save found levels
+		if(currentLevel != null) {
+			currentLevel.sort(function(a,b) { return a - b; });
+			_onLevels = currentLevel;
+		} else {
+			//console.log("No valid level found for "+feature.properties.type+" "+feature.properties.id);
+			_onLevels = [];
+		}
+		
+		/*
+		 * Check if the feature could have images
+		 */
+		_images = (_self.hasImages()) ? new OLvlUp.model.FeatureImages(_self) : null;
+		
+		/*
+		 * Change geometry type if needed
+		 */
+		//Edit indoor areas to set them as polygons instead of linestrings
+		if(((_tags.indoor != undefined
+			&& _tags.indoor != "yes"
+			&& _tags.indoor != "wall")
+			|| (_tags.buildingpart != undefined
+			&& _tags.buildingpart != "wall")
+			|| _tags.highway == "elevator"
+			|| _tags.room != undefined)
+			&& _geometry.getType() == "LineString") {
+			
+			_geometry.convertToPolygon();
+		}
+			
+		//Edit some polygons that should be linestrings
+		if(_tags.barrier != undefined
+			&& _geometry.getType() == "Polygon") {
+		
+			_geometry.convertToLine();
 		}
 	};
 
-/*
- * Data processing methods
- */
+//ACCESSORS
 	/**
-	* Parses raw OSM XML data, and return result.
-	* @param data The OSM XML data.
-	* @return The OSM parsed data (GeoJSON)
-	*/
-	function _parseOsmData(data) {
-		//Convert XML to GeoJSON
-		data = data || "<osm></osm>";
-		try {
-			data = $.parseXML(data);
-		} catch(e) {
-			data = JSON.parse(data);
-		}
-		return osmtogeojson(data);
-	}
+	 * @return The human readable name
+	 */
+	this.getName = function() {
+		return _name;
+	};
 	
 	/**
-	 * This function parses levels values from GeoJSON.
-	 * @deprecated Created only because of the lack of support of Set, to delete when it will be wide supported.
-	 * @return The parsed levels as an array (unsorted)
+	 * @return The OSM Id
 	 */
-	function _legacyProcessLevels() {
-		levelsAsArray = new Array();
-		for(var i in _geojson.features) {
-			var feature = _geojson.features[i];
-			
-			//Add each value in list
-			if(feature.properties.levels != null) {
-				for(var i=0; i < feature.properties.levels.length; i++) {
-					if(isFloat(feature.properties.levels[i])) {
-						var lvl = parseFloat(feature.properties.levels[i]);
-						if(levelsAsArray.indexOf(lvl) < 0) {
-							levelsAsArray[levelsAsArray.length] = lvl;
-						}
-					}
-				}
-			}
-		}
-		return levelsAsArray;
-	}
+	this.getId = function() {
+		return _id;
+	};
 	
 	/**
-	 * Converts a GeoJSON LineString into a GeoJSON polygon.
-	 * @param f The GeoJSON linestring
-	 * @return The corresponding polygon
+	 * @return True if the feature has related images
 	 */
-	function _convertLineToPolygon(f) {
-		f.geometry.type = "Polygon";
-		f.geometry.coordinates = [ f.geometry.coordinates ];
-		return f;
-	}
+	this.hasImages = function() {
+		return (_images == undefined && (_tags.image != undefined || _tags.mapillary != undefined)) || (_images != undefined && _images != null);
+	};
 	
 	/**
-	 * Converts a GeoJSON Polygon into a GeoJSON LineString.
-	 * @param f The GeoJSON polygon
-	 * @return The corresponding linestring
+	 * @return The array of levels where the feature is available
 	 */
-	function _convertPolygonToLine(f) {
-		f.geometry.type = "LineString";
-		f.geometry.coordinates = f.geometry.coordinates[0];
-		return f;
-	}
+	this.onLevels = function() {
+		return _onLevels;
+	};
+	
+	/**
+	 * @param lvl The level to look for
+	 * @return True if the feature is present in the given level
+	 */
+	this.isOnLevel = function(lvl) {
+		return _onLevels.indexOf(lvl) != -1;
+	};
+	
+	/**
+	 * @return The OSM tags
+	 */
+	this.getTags = function() {
+		return _tags;
+	};
+	
+	/**
+	 * @param key The OSM key
+	 * @return The corresponding OSM value, or undefined if not found
+	 */
+	this.getTag = function(key) {
+		return _tags[key];
+	};
+	
+	/**
+	 * @return The feature images object or null if no available images
+	 */
+	this.getImages = function() {
+		return _images;
+	};
+	
+	/**
+	 * @return The feature style
+	 */
+	this.getStyle = function() {
+		return _style;
+	};
+	
+	/**
+	 * @return The feature geometry
+	 */
+	this.getGeometry = function() {
+		return _geometry;
+	};
+	
+//INIT
+	_init(f);
 },
+
+
 
 /**
  * This class handles a feature geometry, and allows to do some processing on it.
  */
-Geom: function(fGeometry) {
+FeatureGeometry: function(fGeometry) {
 //ATTRIBUTES
 	/** The feature geometry, in GeoJSON **/
 	var _geom = fGeometry;
@@ -405,6 +780,13 @@ Geom: function(fGeometry) {
 	var _self = this;
 
 //ACCESSORS
+	/**
+	 * @return The geometry in GeoJSON
+	 */
+	this.get = function() {
+		return _geom;
+	};
+	
 	/**
 	 * @return The centroid, as [longitude, latitude]
 	 */
@@ -457,12 +839,19 @@ Geom: function(fGeometry) {
 	};
 	
 	/**
+	 * @return The geometry type (GeoJSON values)
+	 */
+	this.getType = function() {
+		return _geom.type;
+	};
+	
+	/**
 	 * Returns the bounding box
 	 * @return The bounding box
 	 */
 	this.getBounds = function() {
 		var minlat, maxlat, minlon, maxlon;
-		
+
 		switch(_geom.type) {
 			case "Point":
 				minlat = _geom.coordinates[1];
@@ -528,7 +917,36 @@ Geom: function(fGeometry) {
 		
 		return L.latLngBounds(L.latLng(minlat, minlon), L.latLng(maxlat, maxlon));
 	};
+
+//MODIFIERS
+	/**
+	 * Converts this into a polygon.
+	 */
+	this.convertToPolygon = function() {
+		if(_geom.type == "LineString") {
+			_geom.type = "Polygon";
+			_geom.coordinates = [ _geom.coordinates ];
+		}
+		else {
+			console.log("Unhandled geometry change to polygon");
+		}
+	}
+	
+	/**
+	 * Converts this into a LineString.
+	 */
+	this.convertToLine = function() {
+		if(_geom.type == "Polygon") {
+			_geom.type = "LineString";
+			_geom.coordinates = _geom.coordinates[0];
+		}
+		else {
+			console.log("Unhandled geometry change to linestring");
+		}
+	}
 },
+
+
 
 /**
  * This class represents a feature style, defined from JSON rules
@@ -536,7 +954,7 @@ Geom: function(fGeometry) {
 FeatureStyle: function(feature, jsonStyle) {
 //ATTRIBUTES
 	/** The feature tags **/
-	var _tags = feature.properties.tags;
+	var _tags = feature.getTags();
 	
 	/** The style **/
 	var _style = new Object();
@@ -544,19 +962,21 @@ FeatureStyle: function(feature, jsonStyle) {
 	/** The feature icon **/
 	var _icon = undefined;
 	
+	/** The style name **/
+	var _name = "Object";
+	
 	/** The current object **/
 	var _self = this;
 
 //CONSTRUCTOR
-	var name = "Object";
-	
+
 	//Find potential styles depending on tags
 	for(var i in jsonStyle.styles) {
 		var style = jsonStyle.styles[i];
 		
 		//If applyable, we update the result style
 		if(_isStyleApplyable(feature, style)) {
-			name = style.name;
+			_name = style.name;
 			for(var param in style.style) {
 				_style[param] = style.style[param];
 			}
@@ -565,8 +985,6 @@ FeatureStyle: function(feature, jsonStyle) {
 	
 	//Change icon=no into undefined
 	if(_style.icon == "no") { _style.icon = undefined; }
-	
-	feature.properties.name = name;
 //--CONSTRUCTOR
 
 //ACCESSORS
@@ -600,6 +1018,13 @@ FeatureStyle: function(feature, jsonStyle) {
 		
 		return _icon;
 	};
+	
+	/**
+	 * @return The style name
+	 */
+	this.getName = function() {
+		return _name;
+	};
 
 //OTHER METHODS
 	/**
@@ -616,7 +1041,7 @@ FeatureStyle: function(feature, jsonStyle) {
 			applyable = true;
 			for(var key in tagList) {
 				var val = tagList[key];
-				var featureVal = feature.properties.tags[key];
+				var featureVal = feature.getTag(key);
 				
 				//If this rule is not applyable, stop
 				if(featureVal == undefined
@@ -632,5 +1057,29 @@ FeatureStyle: function(feature, jsonStyle) {
 		
 		return applyable;
 	}
+},
+
+
+
+/**
+ * FeatureImages represents the picture related to a given feature
+ * They can be from various sources (Web URL, Mapillary, Flickr, ...)
+ */
+//TODO Check if images are valid
+FeatureImages: function(feature) {
+//ATTRIBUTES
+	/** The image from image=* tag **/
+	var _img = feature.getTag("image");
+	
+	/** The image from mapillary=* tag **/
+	var _mapillary = feature.getTag("mapillary");
+	
+//ACCESSORS
+	/**
+	 * @return All the pictures (as an array)
+	 */
+	this.getImages = function() {
+		return [ _img, _mapillary ];
+	};
 }
 };

@@ -54,6 +54,39 @@ function myFolderUrl() {
 	return $(location).attr('href').substring(0, pos);
 }
 
+/**
+ * Parses raw OSM XML data, and return result.
+ * @param data The OSM XML data.
+ * @return The OSM parsed data (GeoJSON)
+ */
+function parseOsmData(data) {
+	//Convert XML to GeoJSON
+	data = data || "<osm></osm>";
+	try {
+		data = $.parseXML(data);
+	} catch(e) {
+		data = JSON.parse(data);
+	}
+	return osmtogeojson(data);
+};
+
+/**
+ * Merges two arrays and removes duplicates values
+ * @param a1 The first array
+ * @param a2 The second array
+ * @return The merged array
+ */
+function mergeArrays(a1, a2) {
+	var a = a1.concat(a2);
+	for(var i=0; i<a.length; ++i) {
+		for(var j=i+1; j<a.length; ++j) {
+			if(a[i] === a[j])
+				a.splice(j--, 1);
+		}
+	}
+	return a;
+};
+
 /*
  * Images management
  */

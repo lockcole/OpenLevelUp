@@ -582,6 +582,14 @@ p.popup-txt.centered {
  * Images overlay panel *
  ************************/
 
+#op-images {
+	height: 60%;
+	max-height: 60%;
+	width: 40%;
+	top: 20%;
+	left: 30%;
+}
+
 #op-images .overlay-close a {
 	color: #D2E2FF;
 }
@@ -652,4 +660,8 @@ p.popup-txt.centered {
 .tabs > div > div img {
 	height: 100%;
 	max-width: 100%;
+}
+
+.tabs > div > div#mapillary {
+	overflow-y: auto;
 }

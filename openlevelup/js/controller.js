@@ -36,8 +36,11 @@ API_URL: "http://www.overpass-api.de/api/interpreter?data=",
  */
 Ctrl: function() {
 //ATTRIBUTES
-	/** The current MapData object **/
-	var _mapdata = null;
+	/** The data container **/
+	var _data = null;
+	
+	/** The cluster data container **/
+	var _clusterData = null;
 	
 	/** The current HTML view **/
 	var _view = null;
@@ -69,7 +72,7 @@ Ctrl: function() {
 	 * @return The current map data object
 	 */
 	this.getMapData = function() {
-		return _mapdata;
+		return _data;
 	};
 	
 	/**
@@ -98,10 +101,6 @@ Ctrl: function() {
 		
 		//Init leaflet map
 		_view.mapInit(mobile);
-		
-		//Create mapdata object
-		_mapdata = new OLvlUp.model.MapData(_self);
-		
 		_self.onMapUpdate();
 	};
 	
@@ -109,14 +108,14 @@ Ctrl: function() {
 	 * Increases the level value
 	 */
 	this.levelUp = function() {
-		_view.levelUp(_mapdata);
+		_view.levelUp(_data);
 	};
 	
 	/**
 	 * Decreases the level value
 	 */
 	this.levelDown = function() {
-		_view.levelDown(_mapdata);
+		_view.levelDown(_data);
 	};
 	
 	/**
@@ -124,10 +123,10 @@ Ctrl: function() {
 	 * @param lvl The new level to display
 	 */
 	this.toLevel = function(lvl) {
-		if(_mapdata != null && _mapdata.getLevels() != null && _mapdata.getLevels().indexOf(parseFloat(lvl)) >= 0) {
+		if(_data != null && _data.getLevels() != null && _data.getLevels().indexOf(parseFloat(lvl)) >= 0) {
 			//Change level
 			_view.setCurrentLevel(lvl);
-			_view.refreshMap(_mapdata);
+			_view.refreshMap(_data);
 		}
 	};
 	
@@ -138,7 +137,7 @@ Ctrl: function() {
 		if(e.name != undefined) {
 			_view.setTileLayer(e.name);
 		}
-		_view.refreshMap(_mapdata);
+		_view.refreshMap(_data);
 	};
 	
 	/**
@@ -147,7 +146,7 @@ Ctrl: function() {
 	this.onMapLegacyChange = function() {
 		//If in data zooms, only change shown objects
 		if(_view.getMap().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
-			_view.refreshMap(_mapdata);
+			_view.refreshMap(_data);
 		}
 		//If in cluster zooms, re-download data
 		else if(_view.getMap().getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
@@ -179,7 +178,7 @@ Ctrl: function() {
 	 */
 	this.resetRoomNames = function() {
 		_view.resetSearchRoom();
-		_view.populateRoomNames(_mapdata.getRoomNames());
+		_view.populateRoomNames(_data.getNames());
 	};
 	
 	/**
@@ -193,8 +192,12 @@ Ctrl: function() {
 		_view.clearMessages();
 		
 		//Recreate mapdata if null
-		if(_mapdata == null) {
-			_mapdata = new OLvlUp.model.MapData(_self);
+		if(_data == null) {
+			_data = new OLvlUp.model.OSMData(STYLE, _view.getMap().getBounds());
+		}
+		
+		if(_clusterData == null) {
+			_clusterData = new OLvlUp.model.OSMClusterData(_view.getMap().getBounds());
 		}
 		
 		//Check if zoom is high enough to download data
@@ -207,10 +210,9 @@ Ctrl: function() {
 				_oldLevel = _view.getCurrentLevel();
 				
 				//Download data only if new BBox isn't contained in previous one
-				if(force || _mapdata.getBBox() == null || !_mapdata.getBBox().contains(_view.getMap().getBounds())) {
+				if(force || !_data.isInitialized() || !_data.getBBox().contains(_view.getMap().getBounds())) {
 					//Download data
-					_mapdata.cleanData();
-					_self.downloadData("data", _mapdata.handleOapiResponse);
+					_self.downloadData("data", _data.init);
 					//When download is done, endMapUpdate() will be called.
 				}
 				//Else, we just update view
@@ -222,14 +224,11 @@ Ctrl: function() {
 			else {
 				//Download data only if new BBox isn't contained in previous one
 				if(force
-					|| _mapdata.isClusterLegacy() != _view.showLegacy()
-					|| _mapdata.getClusterBBox() == null
-					|| !_mapdata.getClusterBBox().contains(_view.getMap().getBounds())) {
+					|| !_clusterData.isInitialized()
+					|| !_clusterData.getBBox().contains(_view.getMap().getBounds())) {
 
 					//Download data
-					_mapdata.cleanClusterData();
-					_mapdata.setClusterLegacy(_view.showLegacy());
-					_self.downloadData("cluster", _mapdata.handleOapiClusterResponse);
+					_self.downloadData("cluster", _clusterData.init);
 					//When download is done, endMapClusterUpdate() will be called.
 				}
 				//Else, we just update view
@@ -243,7 +242,7 @@ Ctrl: function() {
 			_view.populateSelectLevels({});
 			_view.populateRoomNames(null);
 			_view.displayMessage("Zoom in to see more information", "info");
-			_view.refreshMap(_mapdata);
+			_view.refreshMap(_data);
 		}
 	};
 	
@@ -253,28 +252,29 @@ Ctrl: function() {
 	this.endMapUpdate = function() {
 		_view.addLoadingInfo("Refresh map");
 		
-		if(_mapdata.getLevels() != null) {
-			_view.populateSelectLevels(_mapdata.getLevels());
-			_view.populateRoomNames(_mapdata.getRoomNames());
+		var levels = _data.getLevels();
+		if(levels != null) {
+			_view.populateSelectLevels(levels);
+			_view.populateRoomNames(_data.getNames());
 			
 			//Test how many levels are available
-			if(_mapdata.getLevels() != null && _mapdata.getLevels().length > 0) {
+			if(levels != null && levels.length > 0) {
 				var levelToDisplay = null;
 				
 				//If we have to use the level parameter from the URL
 				var levelUrl = parseFloat(_view.getUrlLevel());
-				if(_useLevelURL && _mapdata.getLevels().indexOf(levelUrl) >= 0) {
+				if(_useLevelURL && levels.indexOf(levelUrl) >= 0) {
 					levelToDisplay = levelUrl;
 				}
 				_useLevelURL = false;
 				
 				//Restore old level if possible
-				if(!_useLevelURL && _mapdata.getLevels().indexOf(_oldLevel) >=0) {
+				if(!_useLevelURL && levels.indexOf(_oldLevel) >=0) {
 					levelToDisplay = _oldLevel;
 				}
 				
 				//Else, find a level to display (0 prefered)
-				if(levelToDisplay == null && _mapdata.getLevels().indexOf(0) >= 0) {
+				if(levelToDisplay == null && levels.indexOf(0) >= 0) {
 					levelToDisplay = 0;
 				}
 				
@@ -285,7 +285,7 @@ Ctrl: function() {
 			
 			//Refresh leaflet map
 			$(document).on("donerefresh", controller.onDoneRefresh);
-			_view.refreshMap(_mapdata);
+			_view.refreshMap(_data);
 		}
 		else {
 			_view.setLoading(false);
@@ -303,7 +303,7 @@ Ctrl: function() {
 		
 		//Update view
 		$(document).on("donerefresh", controller.onDoneRefresh);
-		_view.refreshMap(_mapdata);
+		_view.refreshMap(_clusterData);
 		//_view.setLoading(false);
 	};
 	
@@ -422,7 +422,7 @@ Ctrl: function() {
 	 * @param id The feature ID, for example way/123456
 	 */
 	this.openImages = function(id) {
-		var tags = _mapdata.getTags(id);
+		var tags = _data.getFeature(id).getTags();
 		if(tags != null) {
 			_view.openImages(tags);
 		}
@@ -444,7 +444,6 @@ Ctrl: function() {
 		
 		//Prepare request depending of type
 		if(type == "cluster") {
-			_mapdata.setClusterBBox(_view.getMap().getBounds());
 			var bounds = boundsString(_view.getMap().getBounds());
 			oapiRequest = '[out:json][timeout:25];(way["indoor"]["indoor"!="yes"]["level"]('+bounds+');';
 			if(_view.showLegacy()) { oapiRequest += 'way["buildingpart"]["level"]('+bounds+');'; }
@@ -458,14 +457,26 @@ Ctrl: function() {
 				bbox = bbox.pad(1.5);
 			}
 			
-			_mapdata.setBBox(bbox);
 			var bounds = boundsString(bbox);
 			oapiRequest = '[out:json][timeout:25];(node["door"]('+bounds+');<;>;node["entrance"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+');relation["type"="multipolygon"]["level"]('+bounds+');node["repeat_on"]('+bounds+');way["repeat_on"]('+bounds+');way["min_level"]('+bounds+');way["max_level"]('+bounds+');relation["type"="level"]('+bounds+'));out body;>;out skel qt;';
 		}
 
 		//Download data
 		$(document).ajaxError(function( event, jqxhr, settings, thrownError ) { console.log("Error: "+thrownError+"\nURL: "+settings.url); });
-		$.get(OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest), handler, "text").fail(controller.onDownloadFail);
+		$.get(
+			OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest),
+			function(data) {
+				controller.getView().addLoadingInfo("Process received data");
+				handler(data);
+				if(type == "cluster") {
+					controller.endMapClusterUpdate();
+				}
+				else {
+					controller.endMapUpdate();
+				}
+			},
+			"text")
+		.fail(controller.onDownloadFail);
 	};
 	
 	/**
@@ -476,6 +487,8 @@ Ctrl: function() {
 		_view.displayMessage("An error occured during data download", "error");
 	};
 },
+
+
 
 /**
  * LevelExporter allows level data export.

@@ -531,7 +531,7 @@ Web: function(ctrl) {
 				_markersLabels = new Object();
 				_popups = new Object();
 				_dataLayer = L.geoJson(
-					mapData.getData(),
+					mapData.getAsGeoJSON(),
 					{
 						filter: _filterElements,
 						style: _styleElements,
@@ -573,13 +573,13 @@ Web: function(ctrl) {
 			}
 		}
 		else if(_map.getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
-			if(mapData.getClusterData() != null) {
+			if(mapData.getData() != null) {
 				_dataLayer = new L.MarkerClusterGroup({
 					singleMarkerMode: true,
 					spiderfyOnMaxZoom: false,
 					maxClusterRadius: 30
 				});
-				_dataLayer.addLayer(L.geoJson(mapData.getClusterData()));
+				_dataLayer.addLayer(L.geoJson(mapData.getData()));
 			}
 			else {
 				_self.displayMessage("There is no available data in this area", "alert");
@@ -624,8 +624,8 @@ Web: function(ctrl) {
 		if(_popups[id] == undefined) {
 			//Search for feature
 			_dataLayer.eachLayer(function(l) {
-				if(l.feature != undefined && _getPopupId(l.feature) == id) {
-					_popups[id] = _createPopup(l.feature);
+				if(l.feature != undefined && l.feature.properties.getId() == id) {
+					_popups[id] = _createPopup(l.feature.properties);
 				}
 			});
 		}
@@ -689,37 +689,40 @@ Web: function(ctrl) {
 	* @param layer The leaflet layer
 	*/
 	function _processElements(feature, layer) {
-		var name = feature.properties.name;
-		var styleRules = _getStyle(feature);
+		var ft = feature.properties;
+		var ftId = ft.getId();
+		var ftGeomSegments = ft.getGeometry().get().coordinates.length;
+		var name = ft.getName();
+		var styleRules = ft.getStyle();
 		
 		//Create popup if necessary
 		if(styleRules.popup == undefined || styleRules.popup == "yes") {
 			//And add popup to layer
-			var popup = _createPopup(feature);
-			_popups[_getPopupId(feature)] = popup;
+			var popup = _createPopup(ft);
+			_popups[ftId] = popup;
 			layer.bindPopup(popup);
-			if(_markersPolygons[feature.properties.type+feature.properties.id] != undefined) {
-				_markersPolygons[feature.properties.type+feature.properties.id].bindPopup(popup);
+			if(_markersPolygons[ftId] != undefined) {
+				_markersPolygons[ftId].bindPopup(popup);
 			}
 
-			if(_markersLinestrings[feature.properties.type+feature.properties.id+"-0"] != undefined) {
-				var nbSegments = feature.geometry.coordinates.length - 1;
+			if(_markersLinestrings[ftId+"-0"] != undefined) {
+				var nbSegments = ftGeomSegments - 1;
 				
 				//For each segment, add popup
 				for(var i=0; i < nbSegments; i++) {
-					_markersLinestrings[feature.properties.type+feature.properties.id+"-"+i].bindPopup(popup);
+					_markersLinestrings[ftId+"-"+i].bindPopup(popup);
 				}
 			}
 			
-			if(_markersLabels[feature.properties.type+feature.properties.id] != undefined) {
-				_markersLabels[feature.properties.type+feature.properties.id].bindPopup(popup);
+			if(_markersLabels[ftId] != undefined) {
+				_markersLabels[ftId].bindPopup(popup);
 			}
-			else if(_markersLabels[feature.properties.type+feature.properties.id+"-0"] != undefined) {
-				var nbSegments = feature.geometry.coordinates.length - 1;
+			else if(_markersLabels[ftId+"-0"] != undefined) {
+				var nbSegments = ftGeomSegments - 1;
 				
 				//For each segment, add popup
 				for(var i=0; i < nbSegments; i++) {
-					_markersLabels[feature.properties.type+feature.properties.id+"-"+i].bindPopup(popup);
+					_markersLabels[ftId+"-"+i].bindPopup(popup);
 				}
 			}
 		}
@@ -743,29 +746,33 @@ Web: function(ctrl) {
 	* @return True if should be shown
 	*/
 	function _filterElements(feature, layer) {
-		var ftGeom = new OLvlUp.model.Geom(feature.geometry);
+		var ft = feature.properties;
+		var ftGeom = ft.getGeometry();
+		var ftTags = ft.getTags();
+		var ftLevels = ft.onLevels();
+		
 		var addObject = _map.getBounds().intersects(ftGeom.getBounds());
 		
 		//Consider level-related tags
-		if(feature.properties.levels != undefined) {
-			addObject &= Object.keys(feature.properties.tags).length > 0
-					&& (Object.keys(feature.properties.tags).length > 1 || feature.properties.tags.area == undefined)
-					&& feature.properties.levels.indexOf(_self.getCurrentLevel().toString()) >= 0
-					&& (_self.showTranscendent() || feature.properties.levels.length == 1)
-					&& (_self.showLegacy() || feature.properties.tags.buildingpart == undefined)
-					&& (!_self.showBuildingsOnly() || feature.properties.tags.building != undefined)
-					&& (_self.showUnrendered() || Object.keys(_getStyle(feature)).length > 0);
+		if(ftLevels.length > 0) {
+			addObject &= Object.keys(ft.getTags()).length > 0
+			&& (Object.keys(ftTags).length > 1 || ftTags.area == undefined)
+					&& ftLevels.indexOf(_self.getCurrentLevel().toString()) >= 0
+					&& (_self.showTranscendent() || ftLevels.length == 1)
+					&& (_self.showLegacy() || ftTags.buildingpart == undefined)
+					&& (!_self.showBuildingsOnly() || ftTags.building != undefined)
+					&& (_self.showUnrendered() || Object.keys(feature.getStyle()).length > 0);
 		}
 		//Consider objects without levels but connected to door elements
 		else {
 			//Building with min and max level
-			addObject &= feature.properties.tags.building != undefined
-					&& feature.properties.tags.min_level != undefined
-					&& feature.properties.tags.max_level != undefined;
+			addObject &= ftTags.building != undefined
+					&& ftTags.min_level != undefined
+					&& ftTags.max_level != undefined;
 
 			//Elevator
 			if(_self.showTranscendent() && !_self.showBuildingsOnly()) {
-				addObject = addObject || feature.properties.tags.highway == "elevator";
+				addObject = addObject || ftTags.highway == "elevator";
 			}
 		}
 		
@@ -794,37 +801,39 @@ Web: function(ctrl) {
 	* @return The style
 	*/
 	function _styleElements(feature) {
-		var result = _getStyle(feature);
+		var ft = feature.properties;
+		var result = ft.getStyle();
 		var hasIcon = (result.icon != undefined);
-		var labelizable = _labelizable(feature);
+		var labelizable = _labelizable(ft);
 		
 		if(hasIcon || labelizable) {
+			var ftGeom = ft.getGeometry();
 			//This add a marker if a polygon has its "icon" property defined
-			if(feature.geometry.type == "Polygon") {
-				var ftGeom = new OLvlUp.model.Geom(feature.geometry);
+			if(ftGeom.getType() == "Polygon") {
 				var centroid = ftGeom.getCentroid();
 				var coord = L.latLng(centroid[1], centroid[0]);
 				
 				if(hasIcon) {
-					var marker = _createMarker(coord, feature, result);
-					_markersPolygons[feature.properties.type+feature.properties.id] = marker;
+					var marker = _createMarker(coord, ft, result);
+					_markersPolygons[ft.getId()] = marker;
 				}
 				
 				//Labels
 				if(labelizable) {
-					_markersLabels[feature.properties.type+feature.properties.id] = _createLabel(
+					_markersLabels[ft.getId()] = _createLabel(
 						feature,
 						coord,
 						hasIcon);
 				}
 			}
-			else if(feature.geometry.type == "LineString") {
-				var nbSegments = feature.geometry.coordinates.length - 1;
+			else if(ftGeom.getType() == "LineString") {
+				var ftGeomJSON = ftGeom.get();
+				var nbSegments = ftGeomJSON.coordinates.length - 1;
 				
 				//For each segment, add an icon
 				for(var i=0; i < nbSegments; i++) {
-					var coord1 = feature.geometry.coordinates[i];
-					var coord2 = feature.geometry.coordinates[i+1];
+					var coord1 = ftGeomJSON.coordinates[i];
+					var coord2 = ftGeomJSON.coordinates[i+1];
 					var coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
 					var angle = azimuth({lat: coord1[1], lng: coord1[0], elv: 0}, {lat: coord2[1], lng: coord2[0], elv: 0}).azimuth;
 					var coord = L.latLng(coordMid[1], coordMid[0]);
@@ -840,18 +849,18 @@ Web: function(ctrl) {
 						var marker = null;
 						
 						if(result.rotateIcon) {
-							marker = _createMarker(coord, feature, result, angle);
+							marker = _createMarker(coord, ft, result, angle);
 						}
 						else {
-							marker = _createMarker(coord, feature, result);
+							marker = _createMarker(coord, ft, result);
 						}
 
-						_markersLinestrings[feature.properties.type+feature.properties.id+"-"+i] = marker;
+						_markersLinestrings[ft.getId()+"-"+i] = marker;
 					}
 					
 					//Labels
 					if(labelizable) {
-						_markersLabels[feature.properties.type+feature.properties.id+"-"+i] = _createLabel(
+						_markersLabels[ft.getId()+"-"+i] = _createLabel(
 							feature,
 							coord,
 							hasIcon,
@@ -869,18 +878,18 @@ Web: function(ctrl) {
 	 * @param feature The GeoJSON feature
 	 * @return The appropriate style
 	 */
-	function _getStyle(feature) {
-		if(feature.properties.style == undefined) {
-			if(STYLE != undefined) {
-				feature.properties.style = new OLvlUp.model.FeatureStyle(feature, STYLE);
-			}
-			else {
-				controller.getView().displayMessage("Error while loading style file", "error");
-			}
-		}
-		
-		return feature.properties.style.getStyle();
-	}
+// 	function _getStyle(feature) {
+// 		if(feature.getStyle() == undefined) {
+// 			if(STYLE != undefined) {
+// 				feature.properties.style = new OLvlUp.model.FeatureStyle(feature, STYLE);
+// 			}
+// 			else {
+// 				controller.getView().displayMessage("Error while loading style file", "error");
+// 			}
+// 		}
+// 		
+// 		return feature.properties.style.getStyle();
+// 	}
 
 	/**
 	* Returns the appropriate style for a given OSM node element (depending of its tags)
@@ -890,15 +899,16 @@ Web: function(ctrl) {
 	*/
 	function _styleNodes(feature, latlng) {
 		var result;
+		var ft = feature.properties;
 		
 		//Find the appropriate icon, depending of tags
 		var style = _styleElements(feature);
 		
-		result = _createMarker(latlng, feature, style);
+		result = _createMarker(latlng, ft, style);
 		
 		//Labels
-		if(_labelizable(feature)) {
-			_markersLabels[feature.properties.type+feature.properties.id] = _createLabel(feature, latlng, true);
+		if(_labelizable(ft)) {
+			_markersLabels[ft.getId()] = _createLabel(ft, latlng, true);
 		}
 		
 		return result;
@@ -907,18 +917,18 @@ Web: function(ctrl) {
 	/**
 	 * Creates a marker
 	 * @param latlng The latitude and longitude of the marker
-	 * @param feature The feature which will be represented
+	 * @param ft The feature which will be represented
 	 * @param style The feature style
 	 * @param angle The rotation angle (default: 0)
 	 * @return The leaflet marker, or null
 	 */
-	function _createMarker(latlng, feature, style, angle) {
+	function _createMarker(latlng, ft, style, angle) {
 		var result = null;
 		var iconUrl = null;
 		angle = angle || null;
 		
 		if(style.icon != undefined && style.icon != null && style.icon != '') {
-			var tmpUrl = feature.properties.style.getIconUrl();
+			var tmpUrl = ft.getStyle().getIconUrl();
 			
 			if(tmpUrl != null) {
 				iconUrl = OLvlUp.view.ICON_FOLDER+'/'+tmpUrl;
@@ -962,7 +972,8 @@ Web: function(ctrl) {
 	 * @return The label as a leaflet marker
 	 */
 	function _createLabel(feature, coordinates, hasMarker, angle) {
-		var styleRules = _getStyle(feature);
+		var ft = feature.properties;
+		var styleRules = ft.getStyle();
 		var angle = angle || false;
 		if(angle != false) {
 			angle = (angle >= 90) ? angle - 90 : angle + 270;
@@ -970,7 +981,7 @@ Web: function(ctrl) {
 		}
 		
 		var classes = (styleRules.labelStyle != undefined) ? ' '+styleRules.labelStyle : '';
-		var text = feature.properties.tags[styleRules.label];
+		var text = ft.getTag(styleRules.label);
 		var iconAnchor = (hasMarker) ? [ null, -OLvlUp.view.ICON_SIZE/2] : [ null, OLvlUp.view.ICON_SIZE/2 ];
 		var rotation = (angle) ? ' style="transform: rotate('+angle+'deg);"' : '';
 		
@@ -994,8 +1005,8 @@ Web: function(ctrl) {
 	 * @return True if it should have a label
 	 */
 	function _labelizable(feature) {
-		var ftStyle = _getStyle(feature);
-		return ftStyle.label != undefined && ftStyle.label != null && feature.properties.tags[ftStyle.label] != undefined;
+		var ftStyle = feature.getStyle();
+		return ftStyle.label != undefined && ftStyle.label != null && feature.getTag(ftStyle.label) != undefined;
 	};
 	
 	/**
@@ -1003,9 +1014,9 @@ Web: function(ctrl) {
 	 * @param feature The feature the popup will be created for
 	 * @return The text the popup will contain
 	 */
-	function _createPopup(feature) {
-		var name = feature.properties.name;
-		var styleRules = _getStyle(feature);
+	function _createPopup(ft) {
+		var name = ft.getName();
+		var styleRules = ft.getStyle();
 		
 		/*
 		 * Title
@@ -1014,25 +1025,26 @@ Web: function(ctrl) {
 		
 		//Add icon in title
 		if(styleRules.icon != undefined) {
-			var iconUrl = feature.properties.style.getIconUrl();
+			var iconUrl = styleRules.getIconUrl();
 			if(iconUrl != null) {
 				text += '<img class="icon" src="'+OLvlUp.view.ICON_FOLDER+'/'+iconUrl+'" /> ';
 			}
 		}
 		
 		//Object name (its name tag or its type)
-		text += (feature.properties.tags.name != undefined) ? feature.properties.tags.name : name;
+		text += (ft.getTag("name") != undefined) ? ft.getTag("name") : name;
 		
 		//Add up and down icons if levelup property == true
-		if(styleRules.levelup && feature.properties.levels != undefined && !_isMobile) {
+		var ftLevels = ft.onLevels();
+		if(styleRules.levelup && ftLevels.length > 0 && !_isMobile) {
 			//Able to go up ?
-			var levelId = feature.properties.levels.indexOf(_self.getCurrentLevel().toString());
-			if(levelId < feature.properties.levels.length -1) {
-				text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId+1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_up.png" title="Go up" alt="Up!" /></a>';
+			var levelId = ftLevels.indexOf(_self.getCurrentLevel().toString());
+			if(levelId < ftLevels.length -1) {
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_up.png" title="Go up" alt="Up!" /></a>';
 			}
 			//Able to go down ?
 			if(levelId > 0) {
-				text += ' <a onclick="controller.toLevel('+feature.properties.levels[levelId-1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_down.png" title="Go down" alt="Down!" /></a>';
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_down.png" title="Go down" alt="Down!" /></a>';
 			}
 		}
 		
@@ -1053,44 +1065,44 @@ Web: function(ctrl) {
 		 */
 		text += '<div class="popup-tab" id="popup-tab-general">';
 		generalTxt = '';
-		generalTxt += _addFormatedTag(feature, "vending", "Selling", removeUscore);
-		generalTxt += _addFormatedTag(feature, "information", "Type", removeUscore);
-		generalTxt += _addFormatedTag(feature, "artwork_type", "Type", removeUscore);
-		generalTxt += _addFormatedTag(feature, "access", "Access");
-		generalTxt += _addFormatedTag(feature, "artist", "Creator");
-		generalTxt += _addFormatedTag(feature, "artist_name", "Creator");
-		generalTxt += _addFormatedTag(feature, "architect", "Architect");
-		generalTxt += _addFormatedTag(feature, "opening_hours", "Opening hours");
-		generalTxt += _addFormatedTag(feature, "start_date", "Created in");
-		generalTxt += _addFormatedTag(feature, "historic:era", "Era", removeUscore);
-		generalTxt += _addFormatedTag(feature, "historic:period", "Period", removeUscore);
-		generalTxt += _addFormatedTag(feature, "historic:civilization", "Civilization", removeUscore);
-		generalTxt += _addFormatedTag(feature, "website", "Website", asWebLink);
-		generalTxt += _addFormatedTag(feature, "contact:website", "Website", asWebLink);
-		generalTxt += _addFormatedTag(feature, "phone", "Phone");
-		generalTxt += _addFormatedTag(feature, "contact:phone", "Phone");
-		generalTxt += _addFormatedTag(feature, "email", "E-mail");
-		generalTxt += _addFormatedTag(feature, "contact:email", "E-mail");
-		generalTxt += _addFormatedTag(feature, "fee", "Fee");
-		generalTxt += _addFormatedTag(feature, "atm", "With ATM");
-		generalTxt += _addFormatedTag(feature, "payment:coins", "Pay with coins");
-		generalTxt += _addFormatedTag(feature, "payment:credit_cards", "Pay with credit cards");
-		generalTxt += _addFormatedTag(feature, "currency:EUR", "Pay in €");
-		generalTxt += _addFormatedTag(feature, "currency:USD", "Pay in US $");
-		generalTxt += _addFormatedTag(feature, "female", "For women");
-		generalTxt += _addFormatedTag(feature, "male", "For men");
-		generalTxt += _addFormatedTag(feature, "bicycle", "For bicycle");
-		generalTxt += _addFormatedTag(feature, "foot", "On foot");
-		generalTxt += _addFormatedTag(feature, "wheelchair", "For wheelchair");
-		generalTxt += _addFormatedTag(feature, "seats", "Seats");
-		generalTxt += _addFormatedTag(feature, "waste", "Waste",removeUscore);
-		generalTxt += _addFormatedTag(feature, "cuisine", "Cuisine", removeUscore);
+		generalTxt += _addFormatedTag(ft, "vending", "Selling", removeUscore);
+		generalTxt += _addFormatedTag(ft, "information", "Type", removeUscore);
+		generalTxt += _addFormatedTag(ft, "artwork_type", "Type", removeUscore);
+		generalTxt += _addFormatedTag(ft, "access", "Access");
+		generalTxt += _addFormatedTag(ft, "artist", "Creator");
+		generalTxt += _addFormatedTag(ft, "artist_name", "Creator");
+		generalTxt += _addFormatedTag(ft, "architect", "Architect");
+		generalTxt += _addFormatedTag(ft, "opening_hours", "Opening hours");
+		generalTxt += _addFormatedTag(ft, "start_date", "Created in");
+		generalTxt += _addFormatedTag(ft, "historic:era", "Era", removeUscore);
+		generalTxt += _addFormatedTag(ft, "historic:period", "Period", removeUscore);
+		generalTxt += _addFormatedTag(ft, "historic:civilization", "Civilization", removeUscore);
+		generalTxt += _addFormatedTag(ft, "website", "Website", asWebLink);
+		generalTxt += _addFormatedTag(ft, "contact:website", "Website", asWebLink);
+		generalTxt += _addFormatedTag(ft, "phone", "Phone");
+		generalTxt += _addFormatedTag(ft, "contact:phone", "Phone");
+		generalTxt += _addFormatedTag(ft, "email", "E-mail");
+		generalTxt += _addFormatedTag(ft, "contact:email", "E-mail");
+		generalTxt += _addFormatedTag(ft, "fee", "Fee");
+		generalTxt += _addFormatedTag(ft, "atm", "With ATM");
+		generalTxt += _addFormatedTag(ft, "payment:coins", "Pay with coins");
+		generalTxt += _addFormatedTag(ft, "payment:credit_cards", "Pay with credit cards");
+		generalTxt += _addFormatedTag(ft, "currency:EUR", "Pay in €");
+		generalTxt += _addFormatedTag(ft, "currency:USD", "Pay in US $");
+		generalTxt += _addFormatedTag(ft, "female", "For women");
+		generalTxt += _addFormatedTag(ft, "male", "For men");
+		generalTxt += _addFormatedTag(ft, "bicycle", "For bicycle");
+		generalTxt += _addFormatedTag(ft, "foot", "On foot");
+		generalTxt += _addFormatedTag(ft, "wheelchair", "For wheelchair");
+		generalTxt += _addFormatedTag(ft, "seats", "Seats");
+		generalTxt += _addFormatedTag(ft, "waste", "Waste",removeUscore);
+		generalTxt += _addFormatedTag(ft, "cuisine", "Cuisine", removeUscore);
 		
-		generalTxt += _addFormatedTag(feature, "description", "Details");
+		generalTxt += _addFormatedTag(ft, "description", "Details");
 		
 		//Image rendering
-		if(hasImages(feature.properties.tags)) {
-			generalTxt += '<p class="popup-txt centered"><a href="#" id="images-open" onclick="controller.openImages(\''+feature.id+'\')">See related images</a></p>';
+		if(ft.hasImages()) {
+			generalTxt += '<p class="popup-txt centered"><a href="#" id="images-open" onclick="controller.openImages(\''+ft.getId()+'\')">See related images</a></p>';
 		}
 		
 		if(generalTxt == '' && !_isMobile) { generalTxt = "No general information (look at tags)"; }
@@ -1105,14 +1117,14 @@ Web: function(ctrl) {
 			text += '<div class="popup-tab hidden" id="popup-tab-technical">';
 			
 			technicalTxt = '';
-			technicalTxt += _addFormatedTag(feature, "width", "Width", addDimensionUnit);
-			technicalTxt += _addFormatedTag(feature, "height", "Height", addDimensionUnit);
-			technicalTxt += _addFormatedTag(feature, "length", "Length", addDimensionUnit);
-			technicalTxt += _addFormatedTag(feature, "direction", "Direction", orientationValue);
-			technicalTxt += _addFormatedTag(feature, "camera:direction", "Direction (camera)", orientationValue);
-			technicalTxt += _addFormatedTag(feature, "operator", "Operator");
-			technicalTxt += _addFormatedTag(feature, "ref", "Reference");
-			technicalTxt += _addFormatedTag(feature, "material", "Made of");
+			technicalTxt += _addFormatedTag(ft, "width", "Width", addDimensionUnit);
+			technicalTxt += _addFormatedTag(ft, "height", "Height", addDimensionUnit);
+			technicalTxt += _addFormatedTag(ft, "length", "Length", addDimensionUnit);
+			technicalTxt += _addFormatedTag(ft, "direction", "Direction", orientationValue);
+			technicalTxt += _addFormatedTag(ft, "camera:direction", "Direction (camera)", orientationValue);
+			technicalTxt += _addFormatedTag(ft, "operator", "Operator");
+			technicalTxt += _addFormatedTag(ft, "ref", "Reference");
+			technicalTxt += _addFormatedTag(ft, "material", "Made of");
 			
 			if(technicalTxt == '') { technicalTxt = "No technical information (look at tags)"; }
 			text += technicalTxt;
@@ -1128,24 +1140,25 @@ Web: function(ctrl) {
 			
 			//List all tags
 			text += '<p class="popup-txt">';
-			for(i in feature.properties.tags) {
+			var ftTags = ft.getTags();
+			for(i in ftTags) {
 				//Render specific tags
 				//URLs
 				var urlTags = ["image", "website", "contact:website", "url"];
 				if(urlTags.indexOf(i) >= 0) {
-					text += i+' = <a href="'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
+					text += i+' = <a href="'+ftTags[i]+'">'+ftTags[i]+'</a>';
 				}
 				//Wikimedia commons
 				else if(i == "wikimedia_commons") {
-					text += i+' = <a href="https://commons.wikimedia.org/wiki/'+feature.properties.tags[i]+'">'+feature.properties.tags[i]+'</a>';
+					text += i+' = <a href="https://commons.wikimedia.org/wiki/'+ftTags[i]+'">'+ftTags[i]+'</a>';
 				}
 				else {
-					text += i+" = "+feature.properties.tags[i];
+					text += i+" = "+ftTags[i];
 				}
 				text += "<br />";
 			}
 
-			//text += feature.properties.style.getStyle().layer;
+			//text += ft.properties.style.getStyle().layer;
 			text += "</p>";
 			
 			text += '</div>';
@@ -1155,22 +1168,13 @@ Web: function(ctrl) {
 		 * Footer
 		 */
 		//Link to osm.org object
-		text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+feature.properties.type+'/'+feature.properties.id+'">See this on OSM.org</a></p>';
+		text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+ft.getId()+'">See this on OSM.org</a></p>';
 		
-		var ftGeom = new OLvlUp.model.Geom(feature.geometry);
-		coords = ftGeom.getCentroid();
+		coords = ft.getGeometry().getCentroid();
 		
 		var options = (_isMobile) ? { autoPan: false } : {};
 		
 		return L.popup(options).setContent(text).setLatLng(L.latLng(coords[1], coords[0]));
-	}
-	
-	/**
-	 * @param feature The feature
-	 * @return The popup ID for a given feature
-	 */
-	function _getPopupId(feature) {
-		return feature.properties.type+feature.properties.id;
 	}
 	
 	/**
@@ -1185,8 +1189,8 @@ Web: function(ctrl) {
 		var text = '';
 		if(tagCleaner == undefined) { tagCleaner = function(v) { return v; }; }
 		
-		if(feature.properties.tags[key] != undefined) {
-			text = '<b>'+cleanName+':</b> '+tagCleaner(feature.properties.tags[key])+'<br />';
+		if(feature.getTag(key) != undefined) {
+			text = '<b>'+cleanName+':</b> '+tagCleaner(feature.getTag(key))+'<br />';
 		}
 		
 		return text;
@@ -1298,6 +1302,7 @@ Web: function(ctrl) {
 		if(hasMapillaryImage(tags)) {
 			$("#tab-mapillary a").show();
 			$("#tab-mapillary div").html(_imageMapillaryHtml(tags.mapillary));
+			//Mapillary.init('mapillary', { image: tags.mapillary, width: $("#mapillary").width()-20, editor: false, showMap: false, showThumbs: false, showPlayControls: false });
 			$("#tab-mapillary").click(function() { controller.getView().changeImageTab("tab-mapillary"); });
 		}
 		else {
@@ -1427,11 +1432,11 @@ Web: function(ctrl) {
 				roomNamesFiltered[lvl] = new Object();
 				
 				for(var room in roomNames[lvl]) {
-					var ftGeomRoom = new OLvlUp.model.Geom(roomNames[lvl][room].geometry);
+					var ftGeomRoom = roomNames[lvl][room].getGeometry();
 					
 					if((filter == null || room.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
-						&& (_getStyle(roomNames[lvl][room]).popup == undefined
-						|| _getStyle(roomNames[lvl][room]).popup == "yes")
+						&& (roomNames[lvl][room].getStyle().popup == undefined
+						|| roomNames[lvl][room].getStyle().popup == "yes")
 						&& _ctrl.getMapData().getBBox().intersects(ftGeomRoom.getBounds())) {
 
 						roomNamesFiltered[lvl][room] = roomNames[lvl][room];
@@ -1485,21 +1490,21 @@ Web: function(ctrl) {
 					$("#lvl"+lvl+"-rooms ul li:last").append(roomLink);
 					
 					if(STYLE != undefined) {
-						var addImg = STYLE.images.indexOf(roomNamesFiltered[lvl][room].properties.style.getIconUrl()) >= 0;
+						var addImg = STYLE.images.indexOf(roomNamesFiltered[lvl][room].getStyle().getIconUrl()) >= 0;
 						$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
 					}
 					
-					var ftGeom = new OLvlUp.model.Geom(roomNamesFiltered[lvl][room].geometry);
+					var ftGeom = roomNamesFiltered[lvl][room].getGeometry();
 					
 					$("#lvl"+lvl+"-rooms ul li:last a")
 						.append(document.createTextNode(" "+room))
 						.attr("href", "#")
-						.attr("onclick", "controller.goTo('"+lvl+"', "+ftGeom.getCentroidAsString()+",'"+_getPopupId(roomNamesFiltered[lvl][room])+"')");
+						.attr("onclick", "controller.goTo('"+lvl+"', "+ftGeom.getCentroidAsString()+",'"+roomNamesFiltered[lvl][room].getId()+"')");
 					
 					if(STYLE != undefined) {
 						$("#lvl"+lvl+"-rooms ul li:last a img")
 							.attr("src", OLvlUp.view.ICON_FOLDER+'/'+
-								((addImg) ? roomNamesFiltered[lvl][room].properties.style.getIconUrl() : 'default.svg')
+								((addImg) ? roomNamesFiltered[lvl][room].getStyle().getIconUrl() : 'default.svg')
 							)
 							.attr("width", OLvlUp.view.ICON_SIZE+"px");
 					}
