@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+25 june 2015
+------------
+* Style for pole=landmark_sign
+
 23 june 2015
 ------------
 * Code refactoring for marker generation

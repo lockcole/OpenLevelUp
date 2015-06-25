@@ -430,6 +430,13 @@
 		},
 		{
 			"type": "Style",
+			"name": "Landmark sign",
+			"description": "Landmark sign",
+			"onTags": [ { "pole": "landmark_sign" } ],
+			"style": { "icon": "poi_place_hamlet.png", "label": "ref" }
+		},
+		{
+			"type": "Style",
 			"name": "CCTV",
 			"description": "Surveillance",
 			"onTags": [ { "man_made": "surveillance" } ],
@@ -556,6 +563,7 @@
 		"North_Pointer.svg",
 		"Octicons-circuit-board.svg",
 		"physics.svg",
+		"poi_place_hamlet.png",
 		"PublicInformationSymbol_EmergencyTelephone.svg",
 		"room_administration.svg",
 		"room_auditorium.svg",
