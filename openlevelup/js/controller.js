@@ -97,11 +97,11 @@ Ctrl: function() {
 	this.init = function(mobile) {
 		mobile = mobile || false;
 		
-		_view = new OLvlUp.view.Web(_self);
+		_view = new OLvlUp.view.MainView(_self, mobile);
 		
 		//Init leaflet map
-		_view.mapInit(mobile);
-		_self.onMapUpdate();
+// 		_view.mapInit(mobile);
+// 		_self.onMapUpdate();
 	};
 	
 	/**
