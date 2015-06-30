@@ -117,6 +117,15 @@ MainView: function(ctrl, mobile) {
 	/** The options component **/
 	var _cOptions = new OLvlUp.view.OptionsView();
 	
+	/** The export component **/
+	var _cExport = new OLvlUp.view.ExportView();
+	
+	/** The names component **/
+	var _cNames = new OLvlUp.view.NamesView();
+	
+	/** The levels component **/
+	var _cLevel = new OLvlUp.view.LevelView();
+	
 	/** The map component **/
 	var _cMap = null;
 
@@ -124,6 +133,10 @@ MainView: function(ctrl, mobile) {
 	function _init() {
 		_cUrl = new OLvlUp.view.URLView(_self);
 		_cMap = new OLvlUp.view.MapView(_self);
+		
+		_cExport.hideButton();
+		_cNames.hideButton();
+		_cLevel.disable();
 	};
 
 //ACCESSORS
@@ -161,7 +174,111 @@ MainView: function(ctrl, mobile) {
 	this.getOptionsView = function() {
 		return _cOptions;
 	};
+	
+	/**
+	 * @return The loading component
+	 */
+	this.getLoadingView = function() {
+		return _cLoading;
+	};
+	
+	/**
+	 * @return The level component
+	 */
+	this.getLevelView = function() {
+		return _cLevel;
+	};
+	
+	/**
+	 * @return The map data from the controller
+	 */
+	this.getData = function() {
+		return _ctrl.getData();
+	};
+	
+	/**
+	 * @return The cluster data from the controller
+	 */
+	this.getClusterData = function() {
+		return _ctrl.getClusterData();
+	};
 
+//OTHER METHODS
+	/**
+	 * Updates the view when map moves or zoom changes
+	 */
+	this.updateMapMoved = function() {
+		var zoom = _cMap.get().getZoom();
+		var oldZoom = _cMap.getOldZoom();
+		
+		//Check new zoom value
+		if(zoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+			//Add names and export buttons if needed
+			if(oldZoom < OLvlUp.view.DATA_MIN_ZOOM) {
+				_cExport.showButton();
+				_cNames.showButton();
+				_cLevel.enable();
+			}
+		}
+		else {
+			//Remove names and export buttons if needed
+			if(oldZoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+				_cExport.hideButton();
+				_cNames.hideButton();
+				_cLevel.disable();
+			}
+			
+			//Clear view if lower zoom than cluster
+			if(zoom < OLvlUp.view.CLUSTER_MIN_ZOOM) {
+				_cMessages.displayMessage("Zoom in to see more information", "info");
+			}
+		}
+		
+		_cMap.update();
+		_cUrl.mapUpdated();
+	};
+	
+	/**
+	 * Updates the view when level changes
+	 */
+	this.updateLevelChanged = function() {
+		_cMap.update();
+	};
+	
+	/**
+	 * Updates the view when an option changes
+	 */
+	this.updateOptionChanged = function() {
+		_cMap.update();
+	};
+	
+	/**
+	 * Displays the given central panel
+	 * @param id The panel ID
+	 */
+	this.showCentralPanel = function(id) {
+		if(!$("#"+id).is(":visible")) {
+			$("#central .part").hide();
+			$("#"+id).show();
+			$("#main-buttons").addClass("opened");
+			$("#central-close").show();
+			$("#central-close").click(controller.getView().hideCentralPanel);
+		}
+		else {
+			_self.hideCentralPanel();
+		}
+	};
+	
+	/**
+	 * Hides the central panel
+	 */
+	this.hideCentralPanel = function() {
+		$("#central .part").hide();
+		$("#central-close").hide();
+		$("#central-close").off("click");
+		$("#main-buttons").removeClass("opened");
+	};
+	
 //INIT
 	_init();
 },
@@ -182,8 +299,11 @@ MapView: function(main) {
 	/** The current tile layer **/
 	var _tileLayer = null;
 	
-	/** The current level (or null if in cluster mode) **/
-	var _level = null;
+	/** The current data layer **/
+	var _dataLayer = null;
+	
+	/** The previous zoom value **/
+	var _oldZoom = null;
 	
 	/** The current object **/
 	var _self = this;
@@ -192,8 +312,35 @@ MapView: function(main) {
 	function _init() {
 		var isMobile = _mainView.isMobile();
 		
+		//Get URL values to restore
+		var url = _mainView.getUrlView();
+		var lat = (url.getLatitude() != undefined) ? url.getLatitude() : 2;
+		var lon = (url.getLongitude() != undefined) ? url.getLongitude() : 47;
+		var zoom = (url.getZoom() != undefined) ? url.getZoom() : 6;
+		var bbox = url.getBBox();
+		var tiles = url.getTiles();
+		
 		//Init map center and zoom
-		_map = L.map('map', {minZoom: 1, maxZoom: OLvlUp.view.MAX_ZOOM, zoomControl: false}).setView([47, 2], 6);
+		_map = L.map('map', {minZoom: 1, maxZoom: OLvlUp.view.MAX_ZOOM, zoomControl: false});
+		if(bbox != undefined) {
+			//Get latitude and longitude information from BBox string
+			var coordinates = bbox.split(',');
+			
+			if(coordinates.length == 4) {
+				var sw = L.latLng(coordinates[1], coordinates[0]);
+				var ne = L.latLng(coordinates[3], coordinates[2]);
+				var bounds = L.latLngBounds(sw, ne);
+				_map.fitBounds(bounds);
+			}
+			else {
+				_mainView.getMessagesView().displayMessage("Invalid bounding box", "alert");
+				_map.setView([lat, lon], zoom);
+			}
+		}
+		else {
+			_map.setView([lat, lon], zoom);
+		}
+		
 		if(!isMobile) {
 			L.control.zoom({ position: "topright" }).addTo(_map);
 		}
@@ -222,7 +369,6 @@ MapView: function(main) {
 		}
 		
 		//Create tile layers
-		var tiles = _mainView.getUrlView().getTiles();
 		var tileLayers = new Array();
 		var firstLayer = true;
 		
@@ -249,8 +395,10 @@ MapView: function(main) {
 		}
 		L.control.layers(tileLayers).addTo(_map);
 		
+		_oldZoom = _map.getZoom();
+		
 		//Trigger for map movement event
-		_map.on('moveend', function(e) { _self.update(); });
+		_map.on('moveend', function(e) { controller.onMapUpdate(); });
 	};
 
 //ACCESSORS
@@ -267,16 +415,159 @@ MapView: function(main) {
 	this.getTileLayer = function() {
 		return _tileLayer;
 	};
+	
+	/**
+	 * @return The previous zoom value
+	 */
+	this.getOldZoom = function() {
+		return _oldZoom;
+	};
 
 //OTHER METHODS
 	/**
-	 * Event handler for map movement
+	 * Event handler for map movement or level change
+	 * Refreshes data on map
 	 */
 	this.update = function() {
+		//Delete previous data
+		if(_dataLayer != null) {
+			_map.removeLayer(_dataLayer);
+			_dataLayer = null;
+		}
+		
+		//Create data (specific to level)
+		var zoom = _map.getZoom();
+		
+		if(zoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+			_dataLayer = _createFullData();
+		}
+		else if(zoom >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
+			_dataLayer = _createClusterData();
+		}
+		
+		//Add data to map
+		if(_dataLayer != null) {
+			_dataLayer.addTo(_map);
+		}
+		else {
+			_mainView.getMessagesView().displayMessage("There is no available data in this area", "alert");
+		}
+		
+		//Change old zoom value
+		_oldZoom = _map.getZoom();
+	};
+	
+	/**
+	 * Changes the currently shown tile layer
+	 * @param name The tile layer name
+	 */
+	this.setTileLayer = function(name) {
+		for(var i in OLvlUp.view.TILE_LAYERS) {
+			if(OLvlUp.view.TILE_LAYERS[i].name == name) {
+				_tileLayer = i;
+				break;
+			}
+		}
 	};
 
+	/**
+	 * Create data for detailled levels
+	 * @return The data layer for leaflet
+	 */
+	function _createFullData() {
+	};
+	
+	/**
+	 * Create data for cluster levels
+	 * @return The data layer for leaflet
+	 */
+	function _createClusterData() {
+		var data = _mainView.getClusterData().get();
+		var result = null;
+		
+		if(data != null) {
+			result = new L.MarkerClusterGroup({
+				singleMarkerMode: true,
+				spiderfyOnMaxZoom: false,
+				maxClusterRadius: 30
+			});
+			result.addLayer(L.geoJson(data));
+		}
+		
+		return result;
+	};
 //INIT
 	_init();
+},
+
+
+
+/**
+ * The levels component
+ */
+LevelView: function(main) {
+//ATTRIBUTES
+	/** The currently shown level **/
+	var _level = null;
+
+	/** The main view **/
+	var _mainView = main;
+
+//ACCESSORS
+	/**
+	 * @return The current level value
+	 */
+	this.get = function() {
+		return _level;
+	};
+
+//MODIFIERS
+	/**
+	 * Changes the current level
+	 * @param lvl The new level
+	 */
+	this.set = function(lvl) {
+		var data = _mainView.getData();
+		lvl = parseFloat(lvl);
+		
+		if(data != null && data.getLevels() != null && data.getLevels().indexOf(lvl) >= 0) {
+			//Change level
+			_level = lvl;
+		}
+		else {
+			throw new Error("Invalid level");
+		}
+	};
+	
+	/**
+	 * Goes to the upper level
+	 */
+	this.up = function() {
+	};
+	
+	/**
+	 * Goes to the lower level
+	 */
+	this.down = function() {
+	};
+	
+	/**
+	 * Disable level buttons
+	 */
+	this.disable = function() {
+		$("#level").prop("disabled", true);
+		$("#levelUp").off("click");
+		$("#levelDown").off("click");
+	};
+	
+	/**
+	 * Enable level button
+	 */
+	this.enable = function() {
+		$("#level").prop("disabled", false);
+		$("#levelUp").click(controller.levelUp);
+		$("#levelDown").click(controller.levelDown);
+	};
 },
 
 
@@ -286,9 +577,6 @@ MapView: function(main) {
  */
 OptionsView: function() {
 //ATTRIBUTES
-	/** Show legacy tag elements **/
-	var _legacy = true;
-	
 	/** Show transcendent elements **/
 	var _transcend = true;
 	
@@ -305,15 +593,14 @@ OptionsView: function() {
 	function _init() {
 		//Init checkboxes
 		$("#show-transcendent").prop("checked", _transcend);
-		$("#show-legacy").prop("checked", _legacy);
 		$("#show-unrendered").prop("checked", _unrendered);
 		$("#show-buildings-only").prop("checked", _buildings);
 		
 		//Add triggers
 		$("#show-transcendent").change(_self.changeTranscendent);
-		$("#show-legacy").change(_self.changeLegacy);
 		$("#show-unrendered").change(_self.changeUnrendered);
 		$("#show-buildings-only").change(_self.changeBuildingsOnly);
+		$("#button-settings").click(controller.onShowSettings);
 	};
 
 //ACCESSORS
@@ -322,13 +609,6 @@ OptionsView: function() {
 	 */
 	this.showTranscendent = function() {
 		return _transcend;
-	};
-	
-	/**
-	 * @return Must we show objects with legacy tagging (buildingpart) ?
-	 */
-	this.showLegacy = function() {
-		return _legacy;
 	};
 	
 	/**
@@ -354,13 +634,6 @@ OptionsView: function() {
 	};
 	
 	/**
-	 * Must we set objects with legacy tagging (buildingpart) ?
-	 */
-	this.changeLegacy = function() {
-		_legacy = !_legacy;
-	};
-	
-	/**
 	 * Must we set unrendered objects ?
 	 */
 	this.changeUnrendered = function() {
@@ -380,14 +653,6 @@ OptionsView: function() {
 	this.setTranscendent = function(p) {
 		_transcend = p;
 		$("#show-transcendent").prop("checked", _transcend);
-	};
-	
-	/**
-	 * Must we set objects with legacy tagging (buildingpart) ?
-	 */
-	this.setLegacy = function(p) {
-		_legacy = p;
-		$("#show-legacy").prop("checked", _legacy);
 	};
 	
 	/**
@@ -416,6 +681,28 @@ OptionsView: function() {
  * The export component
  */
 ExportView: function() {
+//CONSTRUCTOR
+	function _init() {
+		$("#button-export").click(controller.onShowExport);
+	};
+	
+//OTHER METHODS
+	/**
+	 * Shows the export button
+	 */
+	this.showButton = function() {
+		$("#button-export").show();
+	};
+	
+	/**
+	 * Hides the export button
+	 */
+	this.hideButton = function() {
+		$("#button-export").hide();
+	};
+
+//INIT
+	_init();
 },
 
 
@@ -447,6 +734,41 @@ URLView: function(main) {
 	 */
 	this.getTiles = function() {
 		return _tiles;
+	};
+	
+	/**
+	 * @return The bounding box
+	 */
+	this.getBBox = function() {
+		return _bbox;
+	};
+	
+	/**
+	 * @return The latitude
+	 */
+	this.getLatitude = function() {
+		return _lat;
+	};
+	
+	/**
+	 * @return The longitude
+	 */
+	this.getLongitude = function() {
+		return _lon;
+	};
+	
+	/**
+	 * @return The zoom
+	 */
+	this.getZoom = function() {
+		return _zoom;
+	};
+	
+	/**
+	 * @return The level
+	 */
+	this.getLevel = function() {
+		return _level;
 	};
 
 //CONSTRUCTOR
@@ -513,7 +835,7 @@ URLView: function(main) {
 				var options = intToBitArray(base62toDec(shortRes[8]));
 				while(options.length < 4) { options = "0" + options; }
 				optionsView.setUnrendered(options[options.length - 1]);
-				optionsView.setLegacy(options[options.length - 2]);
+				//optionsView.setLegacy(options[options.length - 2]); //Deprecated option
 				optionsView.setTranscendent(options[options.length - 3]);
 				optionsView.setBuildingsOnly(options[options.length - 4]);
 				
@@ -538,7 +860,6 @@ URLView: function(main) {
 			_lat = parameters.lat;
 			_lon = parameters.lon;
 			_zoom = parameters.zoom;
-			optionsView.setLegacy(parameters.legacy);
 			optionsView.setTranscendent(parameters.transcend);
 			optionsView.setUnrendered(parameters.unrendered);
 			optionsView.setBuildingsOnly(parameters.buildings);
@@ -556,7 +877,6 @@ URLView: function(main) {
 		}
 		
 		params += "&transcend="+((optionsView.showTranscendent()) ? "1" : "0");
-		params += "&legacy="+((optionsView.showLegacy()) ? "1" : "0");
 		params += "&unrendered="+((optionsView.showUnrendered()) ? "1" : "0");
 		params += "&buildings="+((optionsView.showBuildingsOnly()) ? "1" : "0");
 		
@@ -601,7 +921,7 @@ URLView: function(main) {
 		var shortOptions = bitArrayToBase62([
 					((optionsView.showBuildingsOnly()) ? "1" : "0"),
 					((optionsView.showTranscendent()) ? "1" : "0"),
-					((optionsView.showLegacy()) ? "1" : "0"),
+					"1", //((optionsView.showLegacy()) ? "1" : "0"),
 					((optionsView.showUnrendered()) ? "1" : "0")
 				]);
 		
@@ -636,6 +956,28 @@ URLView: function(main) {
  * The room names component
  */
 NamesView: function() {
+//CONSTRUCTOR
+	function _init() {
+		$("#button-rooms").click(controller.onShowRooms);
+	};
+
+//OTHER METHODS
+	/**
+	 * Shows the export button
+	 */
+	this.showButton = function() {
+		$("#button-rooms").show();
+	};
+	
+	/**
+	 * Hides the export button
+	 */
+	this.hideButton = function() {
+		$("#button-rooms").hide();
+	};
+
+//INIT
+	_init();
 },
 
 
@@ -677,7 +1019,7 @@ LoadingView: function() {
 		$("#op-loading-info").append(newLi);
 		
 		//Add text to the added child
-		$("#op-loading-info li:last-child").html(msg);
+		$("#op-loading-info li:last-child").html(info);
 	};
 },
 
@@ -749,6 +1091,15 @@ MessagesView: function() {
 				$("#infobox").hide();
 			}
 		}, 5000);
+	};
+	
+	
+	/**
+	 * Clears all messages.
+	 */
+	this.clear = function() {
+		$("#infobox-list li").remove();
+		_nbMessages = 0;
 	};
 }
 

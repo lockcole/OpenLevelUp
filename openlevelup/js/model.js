@@ -149,7 +149,7 @@ OSMClusterData: function(bbox) {
 	/**
 	 * @return The OSM cluster data
 	 */
-	this.getData = function() {
+	this.get = function() {
 		return _data;
 	};
 	

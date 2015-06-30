@@ -71,8 +71,15 @@ Ctrl: function() {
 	/**
 	 * @return The current map data object
 	 */
-	this.getMapData = function() {
+	this.getData = function() {
 		return _data;
+	};
+	
+	/**
+	 * @return The cluster data
+	 */
+	this.getClusterData = function() {
+		return _clusterData;
 	};
 	
 	/**
@@ -101,21 +108,23 @@ Ctrl: function() {
 		
 		//Init leaflet map
 // 		_view.mapInit(mobile);
-// 		_self.onMapUpdate();
+ 		_self.onMapUpdate();
 	};
 	
 	/**
 	 * Increases the level value
 	 */
 	this.levelUp = function() {
-		_view.levelUp(_data);
+		_view.getLevelView().up();
+		_view.updateLevelChanged();
 	};
 	
 	/**
 	 * Decreases the level value
 	 */
 	this.levelDown = function() {
-		_view.levelDown(_data);
+		_view.getLevelView().down();
+		_view.updateLevelChanged();
 	};
 	
 	/**
@@ -123,10 +132,12 @@ Ctrl: function() {
 	 * @param lvl The new level to display
 	 */
 	this.toLevel = function(lvl) {
-		if(_data != null && _data.getLevels() != null && _data.getLevels().indexOf(parseFloat(lvl)) >= 0) {
-			//Change level
-			_view.setCurrentLevel(lvl);
-			_view.refreshMap(_data);
+		try {
+		_view.getLevelView().set(lvl);
+		_view.updateLevelChanged();
+		}
+		catch(e) {
+			_view.getMessagesView().displayMessage(e.message, "error");
 		}
 	};
 	
@@ -135,23 +146,9 @@ Ctrl: function() {
 	 */
 	this.onMapChange = function(e) {
 		if(e.name != undefined) {
-			_view.setTileLayer(e.name);
+			_view.getMapView().setTileLayer(e.name);
 		}
-		_view.refreshMap(_data);
-	};
-	
-	/**
-	 * This function is called when map should display legacy objects (or not)
-	 */
-	this.onMapLegacyChange = function() {
-		//If in data zooms, only change shown objects
-		if(_view.getMap().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
-			_view.refreshMap(_data);
-		}
-		//If in cluster zooms, re-download data
-		else if(_view.getMap().getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
-			_self.onMapUpdate(true);
-		}
+		_view.updateOptionChanged();
 	};
 	
 	/**
@@ -160,26 +157,26 @@ Ctrl: function() {
 	this.onLayerAdd = function(e) {
 		//Stop loading when cluster is added
 		if(e.layer._childClusters != undefined) {
-			_view.setLoading(false);
+			_view.getLoadingView.setLoading(false);
 		}
 	};
 	
 	/**
 	 * When search room input is changed
 	 */
-	this.onSearchRoomChange = function() {
-		if(_view.getSearchRoom().length == 0 || _view.isSearchRoomLongEnough()) {
-			_self.resetRoomNames();
-		}
-	};
+// 	this.onSearchRoomChange = function() {
+// 		if(_view.getSearchRoom().length == 0 || _view.isSearchRoomLongEnough()) {
+// 			_self.resetRoomNames();
+// 		}
+// 	};
 	
 	/**
 	 * Resets the room names list
 	 */
-	this.resetRoomNames = function() {
-		_view.resetSearchRoom();
-		_view.populateRoomNames(_data.getNames());
-	};
+// 	this.resetRoomNames = function() {
+// 		_view.resetSearchRoom();
+// 		_view.populateRoomNames(_data.getNames());
+// 	};
 	
 	/**
 	 * This function is called when map was moved or zoomed in/out.
@@ -189,25 +186,25 @@ Ctrl: function() {
 		force = force || false;
 
 		//Clear messages
-		_view.clearMessages();
+		_view.getMessagesView().clear();
 		
 		//Recreate mapdata if null
 		if(_data == null) {
-			_data = new OLvlUp.model.OSMData(STYLE, _view.getMap().getBounds());
+			_data = new OLvlUp.model.OSMData(STYLE, _view.getMapView().get().getBounds());
 		}
 		
 		if(_clusterData == null) {
-			_clusterData = new OLvlUp.model.OSMClusterData(_view.getMap().getBounds());
+			_clusterData = new OLvlUp.model.OSMClusterData(_view.getMapView().get().getBounds());
 		}
 		
 		//Check if zoom is high enough to download data
-		if(_view.getMap().getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
-			_view.setLoading(true);
-			_view.addLoadingInfo("Clear map");
+		if(_view.getMapView().get().getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
+			_view.getLoadingView().setLoading(true);
+			_view.getLoadingView().addLoadingInfo("Clear map");
 			
 			//High zoom data download
-			if(_view.getMap().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
-				_oldLevel = _view.getCurrentLevel();
+			if(_view.getMapView().get().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
+				_oldLevel = _view.getLevelView().get();
 				
 				//Download data only if new BBox isn't contained in previous one
 				if(force || !_data.isInitialized() || !_data.getBBox().contains(_view.getMap().getBounds())) {
@@ -225,7 +222,7 @@ Ctrl: function() {
 				//Download data only if new BBox isn't contained in previous one
 				if(force
 					|| !_clusterData.isInitialized()
-					|| !_clusterData.getBBox().contains(_view.getMap().getBounds())) {
+					|| !_clusterData.getBBox().contains(_view.getMapView().get().getBounds())) {
 
 					//Download data
 					_self.downloadData("cluster", _clusterData.init);
@@ -239,10 +236,7 @@ Ctrl: function() {
 		}
 		//Else, clean map
 		else {
-			_view.populateSelectLevels({});
-			_view.populateRoomNames(null);
-			_view.displayMessage("Zoom in to see more information", "info");
-			_view.refreshMap(_data);
+			_view.updateMapMoved();
 		}
 	};
 	
@@ -250,7 +244,7 @@ Ctrl: function() {
 	 * This function is called after data download finishes
 	 */
 	this.endMapUpdate = function() {
-		_view.addLoadingInfo("Refresh map");
+		_view.getLoadingView().addLoadingInfo("Refresh map");
 		
 		var levels = _data.getLevels();
 		if(levels != null) {
@@ -296,15 +290,9 @@ Ctrl: function() {
 	 * This function is called after cluster data download finishes
 	 */
 	this.endMapClusterUpdate = function() {
-		_view.addLoadingInfo("Refresh map");
-		
-		_view.populateSelectLevels({});
-		_view.populateRoomNames(null);
-		
-		//Update view
-		$(document).on("donerefresh", controller.onDoneRefresh);
-		_view.refreshMap(_clusterData);
-		//_view.setLoading(false);
+		_view.getLoadingView().addLoadingInfo("Refresh map");
+		_view.updateMapMoved();
+		_view.getLoadingView().setLoading(false);
 	};
 	
 	/**
@@ -374,7 +362,6 @@ Ctrl: function() {
 	 * When rooms button is clicked
 	 */
 	this.onShowRooms = function() {
-		//_view.showRoomsPanel();
 		_view.showCentralPanel("room-names");
 	}
 	
@@ -439,21 +426,20 @@ Ctrl: function() {
 	 */
 	this.downloadData = function(type, handler) {
 		var oapiRequest = null;
+		var map = _view.getMapView().get();
 		
-		_view.addLoadingInfo("Request Overpass API");
+		_view.getLoadingView().addLoadingInfo("Request Overpass API");
 		
 		//Prepare request depending of type
 		if(type == "cluster") {
-			var bounds = boundsString(_view.getMap().getBounds());
-			oapiRequest = '[out:json][timeout:25];(way["indoor"]["indoor"!="yes"]["level"]('+bounds+');';
-			if(_view.showLegacy()) { oapiRequest += 'way["buildingpart"]["level"]('+bounds+');'; }
-			oapiRequest += ');out body center;';
+			var bounds = boundsString(map.getBounds());
+			oapiRequest = '[out:json][timeout:25];(way["indoor"]["indoor"!="yes"]["level"]('+bounds+');way["buildingpart"]["level"]('+bounds+'););out body center;';
 		}
 		else {
-			var bbox = _view.getMap().getBounds();
+			var bbox = map.getBounds();
 			
 			//Resize BBox for small areas (avoid multiple Overpass API calls)
-			if(_view.getMap().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM + 2) {
+			if(map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM + 2) {
 				bbox = bbox.pad(1.5);
 			}
 			
@@ -466,7 +452,7 @@ Ctrl: function() {
 		$.get(
 			OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest),
 			function(data) {
-				controller.getView().addLoadingInfo("Process received data");
+				controller.getView().getLoadingView().addLoadingInfo("Process received data");
 				handler(data);
 				if(type == "cluster") {
 					controller.endMapClusterUpdate();
