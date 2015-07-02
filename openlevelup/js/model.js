@@ -120,6 +120,13 @@ OSMData: function(styleDef, bbox) {
 	this.getFeature = function(id) {
 		return _features[id];
 	};
+	
+	/**
+	 * @return The features as an array
+	 */
+	this.getFeatures = function() {
+		return _features;
+	};
 },
 
 

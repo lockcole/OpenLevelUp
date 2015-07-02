@@ -475,6 +475,31 @@ MapView: function(main) {
 	 * @return The data layer for leaflet
 	 */
 	function _createFullData() {
+		var features = _mainView.getData().getFeatures();
+		var result = null;
+		
+		if(features != null) {
+			result = L.layerGroup();
+			var addedLayers = 0;
+			
+			//Analyze each feature
+			for(var featureId in features) {
+				var feature = features[featureId];
+				var layerFeature = _createFeatureLayer(feature);
+				
+				//If feature should be viewed, add to layer group
+				if(layerFeature != null) {
+					result.addLayer(layerFeature);
+					addedLayers++;
+				}
+			}
+			
+			if(addedLayers == 0) {
+				result = null;
+			}
+		}
+		
+		return result;
 	};
 	
 	/**
@@ -496,6 +521,184 @@ MapView: function(main) {
 		
 		return result;
 	};
+
+/*
+ * Feature management related methods
+ */
+	/**
+	 * Creates the layer for the given feature
+	 * @param feature The feature object
+	 * @return The leaflet layer, or null if should not be shown
+	 */
+	function _createFeatureLayer(feature) {
+		var layer = null;
+		
+		if(_isDisplayable(feature)) {
+			// 		var ft = feature.properties;
+			// 		var ftId = ft.getId();
+			// 		var ftGeomSegments = ft.getGeometry().get().coordinates.length;
+			// 		var name = ft.getName();
+			// 		var styleRules = ft.getStyle().get();
+			// 		
+			// 		//Create popup if necessary
+			// 		if(styleRules.popup == undefined || styleRules.popup == "yes") {
+			// 			//And add popup to layer
+			// 			var popup = _createPopup(ft);
+			// 			_popups[ftId] = popup;
+			// 			layer.bindPopup(popup);
+			// 			if(_markersPolygons[ftId] != undefined) {
+			// 				_markersPolygons[ftId].bindPopup(popup);
+			// 			}
+			// 
+			// 			if(_markersLinestrings[ftId+"-0"] != undefined) {
+			// 				var nbSegments = ftGeomSegments - 1;
+			// 				
+			// 				//For each segment, add popup
+			// 				for(var i=0; i < nbSegments; i++) {
+			// 					_markersLinestrings[ftId+"-"+i].bindPopup(popup);
+			// 				}
+			// 			}
+			// 			
+			// 			if(_markersLabels[ftId] != undefined) {
+			// 				_markersLabels[ftId].bindPopup(popup);
+			// 			}
+			// 			else if(_markersLabels[ftId+"-0"] != undefined) {
+			// 				var nbSegments = ftGeomSegments - 1;
+			// 				
+			// 				//For each segment, add popup
+			// 				for(var i=0; i < nbSegments; i++) {
+			// 					_markersLabels[ftId+"-"+i].bindPopup(popup);
+			// 				}
+			// 			}
+			// 		}
+			// 		
+			// 		//Send this object to back of other layers
+			// 		if(styleRules.layer != undefined) {
+			// 			styleRules.layer = parseFloat(styleRules.layer);
+			// 			if(!isNaN(styleRules.layer)) {
+			// 				if(_objectLayered[styleRules.layer] == undefined) {
+			// 					_objectLayered[styleRules.layer] = new Array();
+			// 				}
+			// 				_objectLayered[styleRules.layer].push(layer);
+			// 			}
+			// 		}
+			
+			//STYLE
+			// 		var ft = feature.properties;
+			// 		var result = ft.getStyle().get();
+			// 		var hasIcon = result.icon != undefined;
+			// 		var labelizable = _labelizable(ft);
+			// 		
+			// 		if(hasIcon || labelizable) {
+			// 			var ftGeom = ft.getGeometry();
+			// 			//This add a marker if a polygon has its "icon" property defined
+			// 			if(ftGeom.getType() == "Polygon") {
+			// 				var centroid = ftGeom.getCentroid();
+			// 				var coord = L.latLng(centroid[1], centroid[0]);
+			// 				
+			// 				if(hasIcon) {
+			// 					var marker = _createMarker(coord, ft, result);
+			// 					_markersPolygons[ft.getId()] = marker;
+			// 				}
+			// 				
+			// 				//Labels
+			// 				if(labelizable) {
+			// 					_markersLabels[ft.getId()] = _createLabel(
+			// 						feature,
+			// 						coord,
+			// 						hasIcon);
+			// 				}
+			// 			}
+			// 			else if(ftGeom.getType() == "LineString") {
+			// 				var ftGeomJSON = ftGeom.get();
+			// 				var nbSegments = ftGeomJSON.coordinates.length - 1;
+			// 				
+			// 				//For each segment, add an icon
+			// 				for(var i=0; i < nbSegments; i++) {
+			// 					var coord1 = ftGeomJSON.coordinates[i];
+			// 					var coord2 = ftGeomJSON.coordinates[i+1];
+			// 					var coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
+			// 					var angle = azimuth({lat: coord1[1], lng: coord1[0], elv: 0}, {lat: coord2[1], lng: coord2[0], elv: 0}).azimuth;
+			// 					var coord = L.latLng(coordMid[1], coordMid[0]);
+			// 					
+			// 					if(hasIcon) {
+			// 						var myIcon = L.icon({
+			// 							iconUrl: OLvlUp.view.ICON_FOLDER+'/'+result.icon,
+			// 							iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
+			// 							iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
+			// 							popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
+			// 						});
+			// 						
+			// 						var marker = null;
+			// 						
+			// 						if(result.rotateIcon) {
+			// 							marker = _createMarker(coord, ft, result, angle);
+			// 						}
+			// 						else {
+			// 							marker = _createMarker(coord, ft, result);
+			// 						}
+			// 
+			// 						_markersLinestrings[ft.getId()+"-"+i] = marker;
+			// 					}
+			// 					
+			// 					//Labels
+			// 					if(labelizable) {
+			// 						_markersLabels[ft.getId()+"-"+i] = _createLabel(
+			// 							feature,
+			// 							coord,
+			// 							hasIcon,
+			// 							angle);
+			// 					}
+			// 				}
+			// 			}
+			// 		}
+			// 		
+			// 		return result;
+		}
+		
+		return layer;
+	};
+	
+	/**
+	 * Should the given feature be shown, regarding to view context ?
+	 * @return True if yes
+	 */
+	function _isDisplayable(feature) {
+		var ftGeom = feature.getGeometry();
+		var ftTags = feature.getTags();
+		var ftLevels = feature.onLevels();
+		var options = _mainView.getOptionsView();
+		
+		var addObject = false;
+		
+		//Only process feature in bounds
+		if(_mainView.getMapView().get().getBounds().intersects(ftGeom.getBounds())) {
+			//Consider level-related tags
+			if(ftLevels.length > 0) {
+				addObject = Object.keys(feature.getTags()).length > 0
+						&& (Object.keys(ftTags).length > 1 || ftTags.area == undefined)
+						&& ftLevels.indexOf(_self.getCurrentLevel()) >= 0
+						&& (options.showTranscendent() || ftLevels.length == 1)
+						&& (!options.showBuildingsOnly() || ftTags.building != undefined)
+						&& (options.showUnrendered() || Object.keys(feature.getStyle().get()).length > 0);
+			}
+			//Consider objects without levels but connected to door elements
+			else {
+				//Building with min and max level
+				addObject = ftTags.building != undefined
+						&& ftTags.min_level != undefined
+						&& ftTags.max_level != undefined;
+
+				//Elevator
+				if(options.showTranscendent() && !options.showBuildingsOnly()) {
+					addObject = addObject || ftTags.highway == "elevator";
+				}
+			}
+		}
+
+		return addObject;
+	};
+	
 //INIT
 	_init();
 },

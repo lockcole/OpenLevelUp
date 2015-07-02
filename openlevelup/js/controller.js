@@ -207,7 +207,7 @@ Ctrl: function() {
 				_oldLevel = _view.getLevelView().get();
 				
 				//Download data only if new BBox isn't contained in previous one
-				if(force || !_data.isInitialized() || !_data.getBBox().contains(_view.getMap().getBounds())) {
+				if(force || !_data.isInitialized() || !_data.getBBox().contains(_view.getMapView().get().getBounds())) {
 					//Download data
 					_self.downloadData("data", _data.init);
 					//When download is done, endMapUpdate() will be called.
@@ -245,45 +245,48 @@ Ctrl: function() {
 	 */
 	this.endMapUpdate = function() {
 		_view.getLoadingView().addLoadingInfo("Refresh map");
-		
-		var levels = _data.getLevels();
-		if(levels != null) {
-			_view.populateSelectLevels(levels);
-			_view.populateRoomNames(_data.getNames());
-			
-			//Test how many levels are available
-			if(levels != null && levels.length > 0) {
-				var levelToDisplay = null;
-				
-				//If we have to use the level parameter from the URL
-				var levelUrl = parseFloat(_view.getUrlLevel());
-				if(_useLevelURL && levels.indexOf(levelUrl) >= 0) {
-					levelToDisplay = levelUrl;
-				}
-				_useLevelURL = false;
-				
-				//Restore old level if possible
-				if(!_useLevelURL && levels.indexOf(_oldLevel) >=0) {
-					levelToDisplay = _oldLevel;
-				}
-				
-				//Else, find a level to display (0 prefered)
-				if(levelToDisplay == null && levels.indexOf(0) >= 0) {
-					levelToDisplay = 0;
-				}
-				
-				if(levelToDisplay != null) {
-					_view.setCurrentLevel(levelToDisplay);
-				}
-			}
-			
-			//Refresh leaflet map
-			$(document).on("donerefresh", controller.onDoneRefresh);
-			_view.refreshMap(_data);
-		}
-		else {
-			_view.setLoading(false);
-		}
+		_view.updateMapMoved();
+		_view.getLoadingView().setLoading(false);
+// 		_view.getLoadingView().addLoadingInfo("Refresh map");
+// 		
+// 		var levels = _data.getLevels();
+// 		if(levels != null) {
+// 			_view.populateSelectLevels(levels);
+// 			_view.populateRoomNames(_data.getNames());
+// 			
+// 			//Test how many levels are available
+// 			if(levels != null && levels.length > 0) {
+// 				var levelToDisplay = null;
+// 				
+// 				//If we have to use the level parameter from the URL
+// 				var levelUrl = parseFloat(_view.getUrlLevel());
+// 				if(_useLevelURL && levels.indexOf(levelUrl) >= 0) {
+// 					levelToDisplay = levelUrl;
+// 				}
+// 				_useLevelURL = false;
+// 				
+// 				//Restore old level if possible
+// 				if(!_useLevelURL && levels.indexOf(_oldLevel) >=0) {
+// 					levelToDisplay = _oldLevel;
+// 				}
+// 				
+// 				//Else, find a level to display (0 prefered)
+// 				if(levelToDisplay == null && levels.indexOf(0) >= 0) {
+// 					levelToDisplay = 0;
+// 				}
+// 				
+// 				if(levelToDisplay != null) {
+// 					_view.setCurrentLevel(levelToDisplay);
+// 				}
+// 			}
+// 			
+// 			//Refresh leaflet map
+// 			$(document).on("donerefresh", controller.onDoneRefresh);
+// 			_view.refreshMap(_data);
+// 		}
+// 		else {
+// 			_view.setLoading(false);
+// 		}
 	};
 	
 	/**
