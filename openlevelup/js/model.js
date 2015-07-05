@@ -54,7 +54,7 @@ OSMData: function(styleDef, bbox) {
 		
 		//Create features
 		_features = new Object();
-		
+
 		for(var i in geojson.features) {
 			var f = geojson.features[i];
 			var id = f.id;
@@ -283,7 +283,7 @@ Feature: function(f, styleDef) {
 			currentLevel.sort(function(a,b) { return a - b; });
 			_onLevels = currentLevel;
 		} else {
-			//console.log("No valid level found for "+feature.properties.type+" "+feature.properties.id);
+			//console.log("No valid level found for "+_id);
 			_onLevels = [];
 		}
 		
@@ -470,6 +470,57 @@ FeatureGeometry: function(fGeometry) {
 	 */
 	this.getType = function() {
 		return _geom.type;
+	};
+	
+	/**
+	 * @return The geometry as leaflet format (LatLng)
+	 */
+	this.getLatLng = function() {
+		var result = null;
+		
+		switch(_geom.type) {
+			case "Point":
+				result = L.latLng(_geom.coordinates[1], _geom.coordinates[0]);
+				break;
+				
+			case "LineString":
+				result = [];
+				for(var i = 0; i < _geom.coordinates.length; i++) {
+					var coords = _geom.coordinates[i];
+					result[i] = L.latLng(coords[1], coords[0]);
+				}
+				break;
+				
+			case "Polygon":
+				result = [];
+				for(var i = 0; i < _geom.coordinates.length; i++) {
+					result[i] = [];
+					for(var j=0; j < _geom.coordinates[i].length; j++) {
+						var coords = _geom.coordinates[i][j];
+						result[i][j] = L.latLng(coords[1], coords[0]);
+					}
+				}
+				break;
+				
+			case "MultiPolygon":
+				result = [];
+				for(var i = 0; i < _geom.coordinates.length; i++) {
+					result[i] = [];
+					for(var j=0; j < _geom.coordinates[i].length; j++) {
+						result[i][j] = [];
+						for(var k=0; k < _geom.coordinates[i][j]; k++) {
+							var coords = _geom.coordinates[i][j][k];
+							result[i][j][k] = L.latLng(coords[1], coords[0]);
+						}
+					}
+				}
+				break;
+				
+			default:
+				console.log("Unknown type: "+_geom.type);
+		}
+		
+		return result;
 	};
 	
 	/**

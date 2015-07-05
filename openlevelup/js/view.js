@@ -124,7 +124,7 @@ MainView: function(ctrl, mobile) {
 	var _cNames = new OLvlUp.view.NamesView();
 	
 	/** The levels component **/
-	var _cLevel = new OLvlUp.view.LevelView();
+	var _cLevel = null;
 	
 	/** The map component **/
 	var _cMap = null;
@@ -133,6 +133,7 @@ MainView: function(ctrl, mobile) {
 	function _init() {
 		_cUrl = new OLvlUp.view.URLView(_self);
 		_cMap = new OLvlUp.view.MapView(_self);
+		_cLevel = new OLvlUp.view.LevelView(_self);
 		
 		_cExport.hideButton();
 		_cNames.hideButton();
@@ -214,18 +215,23 @@ MainView: function(ctrl, mobile) {
 		//Check new zoom value
 		if(zoom >= OLvlUp.view.DATA_MIN_ZOOM) {
 			//Add names and export buttons if needed
-			if(oldZoom < OLvlUp.view.DATA_MIN_ZOOM) {
+			if(oldZoom == null || oldZoom < OLvlUp.view.DATA_MIN_ZOOM) {
 				_cExport.showButton();
 				_cNames.showButton();
 				_cLevel.enable();
+				_cOptions.enable();
 			}
+			
+			//Update levels
+			_cLevel.update();
 		}
 		else {
 			//Remove names and export buttons if needed
-			if(oldZoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+			if(oldZoom == null || oldZoom >= OLvlUp.view.DATA_MIN_ZOOM) {
 				_cExport.hideButton();
 				_cNames.hideButton();
 				_cLevel.disable();
+				_cOptions.disable();
 			}
 			
 			//Clear view if lower zoom than cluster
@@ -243,6 +249,7 @@ MainView: function(ctrl, mobile) {
 	 */
 	this.updateLevelChanged = function() {
 		_cMap.update();
+		_cUrl.mapUpdated();
 	};
 	
 	/**
@@ -250,6 +257,7 @@ MainView: function(ctrl, mobile) {
 	 */
 	this.updateOptionChanged = function() {
 		_cMap.update();
+		_cUrl.optionsChanged();
 	};
 	
 	/**
@@ -314,8 +322,8 @@ MapView: function(main) {
 		
 		//Get URL values to restore
 		var url = _mainView.getUrlView();
-		var lat = (url.getLatitude() != undefined) ? url.getLatitude() : 2;
-		var lon = (url.getLongitude() != undefined) ? url.getLongitude() : 47;
+		var lat = (url.getLatitude() != undefined) ? url.getLatitude() : 47;
+		var lon = (url.getLongitude() != undefined) ? url.getLongitude() : 2;
 		var zoom = (url.getZoom() != undefined) ? url.getZoom() : 6;
 		var bbox = url.getBBox();
 		var tiles = url.getTiles();
@@ -394,8 +402,6 @@ MapView: function(main) {
 			}
 		}
 		L.control.layers(tileLayers).addTo(_map);
-		
-		_oldZoom = _map.getZoom();
 		
 		//Trigger for map movement event
 		_map.on('moveend', function(e) { controller.onMapUpdate(); });
@@ -485,7 +491,8 @@ MapView: function(main) {
 			//Analyze each feature
 			for(var featureId in features) {
 				var feature = features[featureId];
-				var layerFeature = _createFeatureLayer(feature);
+				var featureView = new OLvlUp.view.FeatureView(_mainView, feature);
+				var layerFeature = featureView.createLayer();
 				
 				//If feature should be viewed, add to layer group
 				if(layerFeature != null) {
@@ -521,19 +528,78 @@ MapView: function(main) {
 		
 		return result;
 	};
+	
+//INIT
+	_init();
+},
 
-/*
- * Feature management related methods
+
+
+/**
+ * The component for a single feature
  */
+FeatureView: function(main, feature) {
+//ATTRIBUTES
+	/** The relative layer **/
+	var _layer = 0;
+	
+	/** The main view **/
+	var _mainView = main;
+
+//ACCESSORS
+	/**
+	 * @return The relative layer to overlay object on map
+	 */
+	this.getRelativeLayer = function() {
+		return _layer;
+	};
+	
+//OTHER METHODS
 	/**
 	 * Creates the layer for the given feature
 	 * @param feature The feature object
 	 * @return The leaflet layer, or null if should not be shown
 	 */
-	function _createFeatureLayer(feature) {
+	this.createLayer = function() {
 		var layer = null;
 		
 		if(_isDisplayable(feature)) {
+			var style = feature.getStyle().get();
+			layer = L.featureGroup();
+			
+			//Init layer object, depending of geometry type
+			switch(feature.getGeometry().getType()) {
+				case "Point":
+					//Layer type depends of style (circle or marker)
+					layer.addLayer(_createMarker(feature.getGeometry().getLatLng()));
+					break;
+
+				case "LineString":
+					layer.addLayer(L.polyline(feature.getGeometry().getLatLng(), style));
+					break;
+
+				case "Polygon":
+					layer.addLayer(L.polygon(feature.getGeometry().getLatLng(), style));
+					break;
+
+				default:
+					console.log("Unknown geometry type: "+feature.getGeometry().getType());
+			}
+			
+			//Add popup if needed
+			if(style.popup == undefined || style.popup == "yes") {
+				layer.bindPopup(_createPopup());
+			}
+			
+			//Determine relative layer
+			var layer = style.layer;
+			if(layer != undefined) {
+				layer = parseFloat(layer);
+				if(!isNaN(layer)) {
+					_layer = layer;
+				}
+			}
+			
 			// 		var ft = feature.properties;
 			// 		var ftId = ft.getId();
 			// 		var ftGeomSegments = ft.getGeometry().get().coordinates.length;
@@ -663,7 +729,7 @@ MapView: function(main) {
 	 * Should the given feature be shown, regarding to view context ?
 	 * @return True if yes
 	 */
-	function _isDisplayable(feature) {
+	function _isDisplayable() {
 		var ftGeom = feature.getGeometry();
 		var ftTags = feature.getTags();
 		var ftLevels = feature.onLevels();
@@ -675,9 +741,10 @@ MapView: function(main) {
 		if(_mainView.getMapView().get().getBounds().intersects(ftGeom.getBounds())) {
 			//Consider level-related tags
 			if(ftLevels.length > 0) {
-				addObject = Object.keys(feature.getTags()).length > 0
-						&& (Object.keys(ftTags).length > 1 || ftTags.area == undefined)
-						&& ftLevels.indexOf(_self.getCurrentLevel()) >= 0
+				var nbTags = Object.keys(ftTags).length;
+				addObject = nbTags > 0
+						&& (nbTags > 1 || ftTags.area == undefined)
+						&& feature.isOnLevel(_mainView.getLevelView().get())
 						&& (options.showTranscendent() || ftLevels.length == 1)
 						&& (!options.showBuildingsOnly() || ftTags.building != undefined)
 						&& (options.showUnrendered() || Object.keys(feature.getStyle().get()).length > 0);
@@ -688,19 +755,252 @@ MapView: function(main) {
 				addObject = ftTags.building != undefined
 						&& ftTags.min_level != undefined
 						&& ftTags.max_level != undefined;
-
+				
 				//Elevator
 				if(options.showTranscendent() && !options.showBuildingsOnly()) {
 					addObject = addObject || ftTags.highway == "elevator";
 				}
 			}
 		}
-
+		
 		return addObject;
 	};
 	
-//INIT
-	_init();
+	/**
+	 * Creates a marker
+	 * @param latlng The latitude and longitude of the marker
+	 * @param angle The rotation angle (default: 0)
+	 * @return The leaflet marker, or null
+	 */
+	function _createMarker(latlng, angle) {
+		var result = null;
+		var iconUrl = null;
+		var style = feature.getStyle().get();
+		angle = angle || null;
+		
+		if(style.icon != undefined && style.icon != null && style.icon != '') {
+			var tmpUrl = feature.getStyle().getIconUrl();
+			
+			if(tmpUrl != null) {
+				iconUrl = OLvlUp.view.ICON_FOLDER+'/'+tmpUrl;
+			}
+			else if(style.showMissingIcon == undefined || style.showMissingIcon) {
+				iconUrl = OLvlUp.view.ICON_FOLDER+'/default.svg';
+			}
+		}
+		else if(style.showMissingIcon == undefined || style.showMissingIcon) {
+			result = L.circleMarker(latlng, style);
+		}
+		
+		if(iconUrl != null) {
+			var myIcon = L.icon({
+				iconUrl: iconUrl,
+				iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
+				iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
+				popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
+			});
+			
+			if(angle != null) {
+				result = L.rotatedMarker(latlng, {icon: myIcon, angle: angle});
+			}
+			else {
+				result = L.marker(latlng, {icon: myIcon});
+			}
+		}
+		else {
+			result = L.circleMarker(latlng, { opacity: 0, fillOpacity: 0 });
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Creates the popup for a given feature
+	 * @param feature The feature the popup will be created for
+	 * @return The text the popup will contain
+	 */
+	function _createPopup() {
+		var name = feature.getName();
+		var style = feature.getStyle().get();
+		var isMobile = _mainView.isMobile();
+		
+		/*
+		 * Title
+		 */
+		var text = '<h1 class="popup">';
+		
+		//Add icon in title
+		if(style.icon != undefined) {
+			var iconUrl = feature.getStyle().getIconUrl();
+			if(iconUrl != null) {
+				text += '<img class="icon" src="'+OLvlUp.view.ICON_FOLDER+'/'+iconUrl+'" /> ';
+			}
+		}
+		
+		//Object name (its name tag or its type)
+		text += (feature.getTag("name") != undefined) ? feature.getTag("name") : name;
+		
+		//Add up and down icons if levelup property == true
+		var ftLevels = feature.onLevels();
+		if(style.levelup && ftLevels.length > 0 && !isMobile) {
+			//Able to go up ?
+			var levelId = ftLevels.indexOf(_mainView.getLevelView().get());
+			if(levelId < ftLevels.length -1) {
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_up.png" title="Go up" alt="Up!" /></a>';
+			}
+			//Able to go down ?
+			if(levelId > 0) {
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_down.png" title="Go down" alt="Down!" /></a>';
+			}
+		}
+		
+		//End title
+		text += '</h1>';
+		
+		//Navigation bar
+		if(!isMobile) {
+			text += '<div class="popup-nav"><div class="row">';
+			text += '<div class="item selected" id="item-general"><a href="#" onclick="controller.changePopupTab(\'general\');">General</a></div>';
+			text += '<div class="item" id="item-technical"><a href="#" onclick="controller.changePopupTab(\'technical\');">Technical</a></div>';
+			text += '<div class="item" id="item-tags"><a href="#" onclick="controller.changePopupTab(\'tags\');">Tags</a></div>';
+			text += '</div></div>';
+		}
+		
+		/*
+		 * Tab 1 : general information
+		 */
+		text += '<div class="popup-tab" id="popup-tab-general">';
+		generalTxt = '';
+		generalTxt += _addFormatedTag(feature, "vending", "Selling", removeUscore);
+		generalTxt += _addFormatedTag(feature, "information", "Type", removeUscore);
+		generalTxt += _addFormatedTag(feature, "artwork_type", "Type", removeUscore);
+		generalTxt += _addFormatedTag(feature, "access", "Access");
+		generalTxt += _addFormatedTag(feature, "artist", "Creator");
+		generalTxt += _addFormatedTag(feature, "artist_name", "Creator");
+		generalTxt += _addFormatedTag(feature, "architect", "Architect");
+		generalTxt += _addFormatedTag(feature, "opening_hours", "Opening hours");
+		generalTxt += _addFormatedTag(feature, "start_date", "Created in");
+		generalTxt += _addFormatedTag(feature, "historic:era", "Era", removeUscore);
+		generalTxt += _addFormatedTag(feature, "historic:period", "Period", removeUscore);
+		generalTxt += _addFormatedTag(feature, "historic:civilization", "Civilization", removeUscore);
+		generalTxt += _addFormatedTag(feature, "website", "Website", asWebLink);
+		generalTxt += _addFormatedTag(feature, "contact:website", "Website", asWebLink);
+		generalTxt += _addFormatedTag(feature, "phone", "Phone");
+		generalTxt += _addFormatedTag(feature, "contact:phone", "Phone");
+		generalTxt += _addFormatedTag(feature, "email", "E-mail");
+		generalTxt += _addFormatedTag(feature, "contact:email", "E-mail");
+		generalTxt += _addFormatedTag(feature, "fee", "Fee");
+		generalTxt += _addFormatedTag(feature, "atm", "With ATM");
+		generalTxt += _addFormatedTag(feature, "payment:coins", "Pay with coins");
+		generalTxt += _addFormatedTag(feature, "payment:credit_cards", "Pay with credit cards");
+		generalTxt += _addFormatedTag(feature, "currency:EUR", "Pay in €");
+		generalTxt += _addFormatedTag(feature, "currency:USD", "Pay in US $");
+		generalTxt += _addFormatedTag(feature, "female", "For women");
+		generalTxt += _addFormatedTag(feature, "male", "For men");
+		generalTxt += _addFormatedTag(feature, "bicycle", "For bicycle");
+		generalTxt += _addFormatedTag(feature, "foot", "On foot");
+		generalTxt += _addFormatedTag(feature, "wheelchair", "For wheelchair");
+		generalTxt += _addFormatedTag(feature, "seats", "Seats");
+		generalTxt += _addFormatedTag(feature, "waste", "Waste",removeUscore);
+		generalTxt += _addFormatedTag(feature, "cuisine", "Cuisine", removeUscore);
+		
+		generalTxt += _addFormatedTag(feature, "description", "Details");
+		
+		//Image rendering
+		if(feature.hasImages()) {
+			generalTxt += '<p class="popup-txt centered"><a href="#" id="images-open" onclick="controller.openImages(\''+feature.getId()+'\')">See related images</a></p>';
+		}
+		
+		if(generalTxt == '' && !isMobile) { generalTxt = "No general information (look at tags)"; }
+		text += generalTxt;
+		
+		text += '</div>';
+		
+		/*
+		 * Tab 2 : technical information
+		 */
+		if(!isMobile) {
+			text += '<div class="popup-tab hidden" id="popup-tab-technical">';
+			
+			technicalTxt = '';
+			technicalTxt += _addFormatedTag(feature, "width", "Width", addDimensionUnit);
+			technicalTxt += _addFormatedTag(feature, "height", "Height", addDimensionUnit);
+			technicalTxt += _addFormatedTag(feature, "length", "Length", addDimensionUnit);
+			technicalTxt += _addFormatedTag(feature, "direction", "Direction", orientationValue);
+			technicalTxt += _addFormatedTag(feature, "camera:direction", "Direction (camera)", orientationValue);
+			technicalTxt += _addFormatedTag(feature, "operator", "Operator");
+			technicalTxt += _addFormatedTag(feature, "ref", "Reference");
+			technicalTxt += _addFormatedTag(feature, "material", "Made of");
+			
+			if(technicalTxt == '') { technicalTxt = "No technical information (look at tags)"; }
+			text += technicalTxt;
+			
+			text += '</div>';
+		}
+		
+		/*
+		 * Tab 3 : tags
+		 */
+		if(!isMobile) {
+			text += '<div class="popup-tab hidden" id="popup-tab-tags">';
+			
+			//List all tags
+			text += '<p class="popup-txt">';
+			var ftTags = feature.getTags();
+			for(i in ftTags) {
+				//Render specific tags
+				//URLs
+				var urlTags = ["image", "website", "contact:website", "url"];
+				if(urlTags.indexOf(i) >= 0) {
+					text += i+' = <a href="'+ftTags[i]+'">'+ftTags[i]+'</a>';
+				}
+				//Wikimedia commons
+				else if(i == "wikimedia_commons") {
+					text += i+' = <a href="https://commons.wikimedia.org/wiki/'+ftTags[i]+'">'+ftTags[i]+'</a>';
+				}
+				else {
+					text += i+" = "+ftTags[i];
+				}
+				text += "<br />";
+			}
+
+			//text += feature.properties.style.getStyle().layer;
+			text += "</p>";
+			
+			text += '</div>';
+		}
+		
+		/*
+		 * Footer
+		 */
+		//Link to osm.org object
+		text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+feature.getId()+'">See this on OSM.org</a></p>';
+		
+		coords = feature.getGeometry().getCentroid();
+		
+		var options = (isMobile) ? { autoPan: false } : {};
+		
+		return L.popup(options).setContent(text).setLatLng(L.latLng(coords[1], coords[0]));
+	}
+	
+	/**
+	 * Creates a formated tag display
+	 * @param feature The concerned feature
+	 * @param key The OSM key to display
+	 * @param cleanName The clean name to display
+	 * @param tagCleaner The function that will clean the tag value (for example, add proper unit for dimensions), optional
+	 * @return The formated tag, or empty string if not found
+	 */
+	function _addFormatedTag(feature, key, cleanName, tagCleaner) {
+		var text = '';
+		if(tagCleaner == undefined) { tagCleaner = function(v) { return v; }; }
+		
+		if(feature.getTag(key) != undefined) {
+			text = '<b>'+cleanName+':</b> '+tagCleaner(feature.getTag(key))+'<br />';
+		}
+		
+		return text;
+	}
 },
 
 
@@ -713,8 +1013,14 @@ LevelView: function(main) {
 	/** The currently shown level **/
 	var _level = null;
 
+	/** The available levels **/
+	var _levels = null;
+	
 	/** The main view **/
 	var _mainView = main;
+	
+	/** This object **/
+	var _self = this;
 
 //ACCESSORS
 	/**
@@ -727,15 +1033,18 @@ LevelView: function(main) {
 //MODIFIERS
 	/**
 	 * Changes the current level
-	 * @param lvl The new level
+	 * @param lvl The new level (if undefined, uses the current select value)
 	 */
 	this.set = function(lvl) {
 		var data = _mainView.getData();
-		lvl = parseFloat(lvl);
+		var lvlOk = (lvl != null) ? parseFloat(lvl) : parseFloat($("#level").val());
 		
-		if(data != null && data.getLevels() != null && data.getLevels().indexOf(lvl) >= 0) {
-			//Change level
-			_level = lvl;
+		if(data != null && data.getLevels() != null) {
+			if(data.getLevels().indexOf(lvlOk) >= 0) {
+				//Change level
+				_level = lvlOk;
+				if(lvl != null) { $("#level").val(lvlOk); }
+			}
 		}
 		else {
 			throw new Error("Invalid level");
@@ -743,15 +1052,79 @@ LevelView: function(main) {
 	};
 	
 	/**
+	 * Changes the level values depending of data
+	 */
+	this.update = function() {
+		_levels = _mainView.getData().getLevels();
+		
+		//Change current level if not available anymore
+		if(_level == null || _levels.indexOf(_level) < 0) {
+			//Set to 0 if available
+			_level = (_levels.indexOf(0) >= 0) ? 0 : _levels[0];
+		}
+		
+		/*
+		 * Fill level selector
+		 */
+		var option = '';
+
+		//Compute level and store them as select options
+		for(var i=0; i < _levels.length; i++) {
+			var lvl = _levels[i];
+			
+			option += '<option value="'+ lvl + '"';
+			if(lvl == _level) { option += ' selected="selected"'; }
+			option += '>' + lvl + '</option>';
+		}
+		
+		//If levels array isn't empty, we add options
+		if(option != '') {
+			$('#level').html(option);
+			$("#level").prop("disabled", false);
+		}
+		//If not, we disable the select element
+		else {
+			$('#level').empty();
+			$("#level").prop("disabled", true);
+		}
+	};
+	
+	/**
 	 * Goes to the upper level
 	 */
 	this.up = function() {
+		if(_mainView.getMapView().get().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
+			var currentLevelId = _levels.indexOf(_level);
+			
+			if(currentLevelId == -1) {
+				_mainView.getMessagesView().displayMessage("Invalid level", "error");
+			}
+			else if(currentLevelId + 1 < _levels.length) {
+				_self.set(_levels[currentLevelId+1]);
+			}
+			else {
+				_mainView.getMessagesView().displayMessage("You are already at the last available level", "alert");
+			}
+		}
 	};
 	
 	/**
 	 * Goes to the lower level
 	 */
 	this.down = function() {
+		if(_mainView.getMapView().get().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
+			var currentLevelId = _levels.indexOf(_level);
+			
+			if(currentLevelId == -1) {
+				_mainView.getMessagesView().displayMessage("Invalid level", "error");
+			}
+			else if(currentLevelId > 0) {
+				_self.set(_levels[currentLevelId-1]);
+			}
+			else {
+				_mainView.getMessagesView().displayMessage("You are already at the first available level", "alert");
+			}
+		}
 	};
 	
 	/**
@@ -761,6 +1134,7 @@ LevelView: function(main) {
 		$("#level").prop("disabled", true);
 		$("#levelUp").off("click");
 		$("#levelDown").off("click");
+		$("#level").off("change");
 	};
 	
 	/**
@@ -768,8 +1142,9 @@ LevelView: function(main) {
 	 */
 	this.enable = function() {
 		$("#level").prop("disabled", false);
-		$("#levelUp").click(controller.levelUp);
-		$("#levelDown").click(controller.levelDown);
+		$("#levelUp").click(controller.onLevelUp);
+		$("#levelDown").click(controller.onLevelDown);
+		$("#level").change(controller.onLevelChange);
 	};
 },
 
@@ -800,10 +1175,20 @@ OptionsView: function() {
 		$("#show-buildings-only").prop("checked", _buildings);
 		
 		//Add triggers
-		$("#show-transcendent").change(_self.changeTranscendent);
-		$("#show-unrendered").change(_self.changeUnrendered);
-		$("#show-buildings-only").change(_self.changeBuildingsOnly);
 		$("#button-settings").click(controller.onShowSettings);
+		$("#show-transcendent").change(function() {
+			_self.changeTranscendent();
+			controller.getView().updateOptionChanged();
+		});
+		$("#show-unrendered").change(function() {
+			_self.changeUnrendered();
+			controller.getView().updateOptionChanged();
+		});
+		$("#show-buildings-only").change(function() {
+			_self.changeBuildingsOnly();
+			controller.getView().updateOptionChanged();
+		});
+		_self.enable();
 	};
 
 //ACCESSORS
@@ -872,6 +1257,24 @@ OptionsView: function() {
 	this.setBuildingsOnly = function(p) {
 		_buildings = p;
 		$("#show-buildings-only").prop("checked", _buildings);
+	};
+	
+	/**
+	 * Disable options buttons
+	 */
+	this.disable = function() {
+		$("#show-buildings-only").prop("disabled", true);
+		$("#show-unrendered").prop("disabled", true);
+		$("#show-transcendent").prop("disabled", true);
+	};
+	
+	/**
+	 * Enable level button
+	 */
+	this.enable = function() {
+		$("#show-buildings-only").prop("disabled", false);
+		$("#show-unrendered").prop("disabled", false);
+		$("#show-transcendent").prop("disabled", false);
 	};
 
 //INIT
@@ -1000,6 +1403,12 @@ URLView: function(main) {
 		_setShortlink();
 	};
 	
+	this.optionsChanged = function() {
+		//Update DOM
+		_updateUrl();
+		_setShortlink();
+	};
+	
 	/**
 	 * @return The page base URL
 	 */
@@ -1063,9 +1472,9 @@ URLView: function(main) {
 			_lat = parameters.lat;
 			_lon = parameters.lon;
 			_zoom = parameters.zoom;
-			optionsView.setTranscendent(parameters.transcend);
-			optionsView.setUnrendered(parameters.unrendered);
-			optionsView.setBuildingsOnly(parameters.buildings);
+			if(parameters.transcend != undefined) { optionsView.setTranscendent(parameters.transcend == "1"); }
+			if(parameters.unrendered != undefined) { optionsView.setUnrendered(parameters.unrendered == "1"); }
+			if(parameters.buildings != undefined) { optionsView.setBuildingsOnly(parameters.buildings == "1"); }
 			_level = parameters.level;
 			_tiles = parameters.tiles;
 		}
