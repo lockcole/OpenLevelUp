@@ -603,6 +603,25 @@ MapView: function(main) {
 		});
 	}
 	
+	/**
+	 * This functions makes map go to given coordinates, at given level
+	 * @param lvl The level
+	 * 
+	 */
+	this.goTo = function(lvl, lat, lon, popup) {
+		_view.getMapView().get().setView(L.latLng(lat, lon), 21);
+		
+		if(_view.isLoading()) {
+			_isGoingTo = true;
+			$(document).on("donerefresh", function() { controller.onDoneRefresh(lvl); });
+		}
+		else {
+			_self.toLevel(lvl);
+			_self.openPopup(popup);
+		}
+		_popup = popup;
+	};
+	
 //INIT
 	_init();
 },
