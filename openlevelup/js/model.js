@@ -296,22 +296,19 @@ Feature: function(f, styleDef) {
 		 * Change geometry type if needed
 		 */
 		//Edit indoor areas to set them as polygons instead of linestrings
-		if(((_tags.indoor != undefined
-			&& _tags.indoor != "yes"
-			&& _tags.indoor != "wall")
-			|| (_tags.buildingpart != undefined
-			&& _tags.buildingpart != "wall")
+		if(_geometry.getType() == "LineString" && (
+			(_tags.indoor != undefined && _tags.indoor != "yes" && _tags.indoor != "wall")
+			|| (_tags.buildingpart != undefined && _tags.buildingpart != "wall")
 			|| _tags.highway == "elevator"
-			|| _tags.room != undefined)
-			&& _geometry.getType() == "LineString") {
-			
+			|| _tags.room != undefined
+		)) {
 			_geometry.convertToPolygon();
 		}
 			
 		//Edit some polygons that should be linestrings
-		if(_tags.barrier != undefined
-			&& _geometry.getType() == "Polygon") {
-		
+		if(_geometry.getType() == "Polygon" && (
+			_tags.barrier != undefined
+		)) {
 			_geometry.convertToLine();
 		}
 	};
