@@ -1,6 +1,12 @@
 Changes history
 ===============
 
+06 july 2015
+------------
+* Refactored version published
+* Gallery system for images
+* Improved data management
+
 25 june 2015
 ------------
 * Style for pole=landmark_sign
