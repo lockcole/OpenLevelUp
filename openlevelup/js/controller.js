@@ -205,6 +205,7 @@ Ctrl: function() {
 		//Check if zoom is high enough to download data
 		if(zoom >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
 			_view.getLoadingView().setLoading(true);
+			_view.getLoadingView().addLoadingInfo("Prepare update");
 			
 			//High zoom data download
 			if(zoom >= OLvlUp.view.DATA_MIN_ZOOM) {
