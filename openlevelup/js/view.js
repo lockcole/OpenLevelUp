@@ -123,6 +123,9 @@ MainView: function(ctrl, mobile) {
 	/** The names component **/
 	var _cNames = null;
 	
+	/** The images component **/
+	var _cImages = null;
+	
 	/** The levels component **/
 	var _cLevel = null;
 	
@@ -134,6 +137,7 @@ MainView: function(ctrl, mobile) {
 		_cUrl = new OLvlUp.view.URLView(_self);
 		_cMap = new OLvlUp.view.MapView(_self);
 		_cNames = new OLvlUp.view.NamesView(_self);
+		_cImages = new OLvlUp.view.ImagesView(_self);
 		_cLevel = new OLvlUp.view.LevelView(_self);
 		
 		_cExport.hideButton();
@@ -182,6 +186,13 @@ MainView: function(ctrl, mobile) {
 	 */
 	this.getLoadingView = function() {
 		return _cLoading;
+	};
+	
+	/**
+	 * @return The images component
+	 */
+	this.getImagesView = function() {
+		return _cImages;
 	};
 	
 	/**
@@ -993,7 +1004,7 @@ FeatureView: function(main, feature) {
 		
 		//Image rendering
 		if(feature.hasImages()) {
-			generalTxt += '<p class="popup-txt centered"><a href="#" id="images-open" onclick="controller.openImages(\''+feature.getId()+'\')">See related images</a></p>';
+			generalTxt += '<p class="popup-txt centered"><a href="#" id="images-open" onclick="controller.getView().getImagesView().open(\''+feature.getId()+'\')">See related images</a></p>';
 		}
 		
 		if(generalTxt == '' && !isMobile) { generalTxt = "No general information (look at tags)"; }
@@ -1900,7 +1911,54 @@ NamesView: function(main) {
 /**
  * The images overlay panel component
  */
-ImagesView: function() {
+ImagesView: function(main) {
+//ATTRIBUTES
+	/** The main view **/
+	var _mainView = main;
+
+//CONSTRUCTOR
+	function _init() {
+		$("#images-close").click(function() { $("#op-images").hide(); });
+		$("#tab-imgs").click(function() { controller.getView().getImagesView().changeTab("tab-imgs"); });
+		$("#tab-status").click(function() { controller.getView().getImagesView().changeTab("tab-status"); });
+	};
+
+//OTHER METHODS
+	/**
+	 * Opens and set images for the given feature
+	 * @param ftId The feature ID
+	 */
+	this.open = function(ftId) {
+		//Retrieve feature
+		var imagesUrl = _mainView.getData().getFeature(ftId).getImages().get();
+		
+		//Create HTML
+		var markup = '';
+		for(var i in imagesUrl) {
+			var url = imagesUrl[i];
+			markup += '<a href="'+url+'" target="_blank"><img src="'+url+'" /></a><br />';
+		}
+		
+		//Set tabs
+		$("#tab-imgs div").html(markup);
+		
+		
+		//Open panel
+		$("#tab-imgs").addClass("selected");
+		$("#op-images").show();
+	};
+	
+ 	/**
+ 	 * Changes the currently opened tab in images popup
+ 	 * @param tab The tab name
+ 	 */
+ 	this.changeTab = function(tab) {
+ 		$("#op-images .tabs div").removeClass("selected");
+ 		$("#"+tab).addClass("selected");
+ 	};
+
+//INIT
+	_init();
 },
 
 

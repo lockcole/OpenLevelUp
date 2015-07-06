@@ -755,21 +755,61 @@ FeatureStyle: function(feature, jsonStyle) {
  * FeatureImages represents the picture related to a given feature
  * They can be from various sources (Web URL, Mapillary, Flickr, ...)
  */
-//TODO Check if images are valid
 FeatureImages: function(feature) {
 //ATTRIBUTES
 	/** The image from image=* tag **/
-	var _img = feature.getTag("image");
+	var _img = null;
 	
 	/** The image from mapillary=* tag **/
 	var _mapillary = feature.getTag("mapillary");
-	
+
+//CONSTRUCTOR
+	function _init() {
+		_img = _parseImageTag(feature.getTag("image"));
+	};
+
 //ACCESSORS
 	/**
-	 * @return All the pictures (as an array)
+	 * @return All the pictures URL (as an array)
 	 */
-	this.getImages = function() {
-		return [ _img, _mapillary ];
+	this.get = function() {
+		var result = [];
+		
+		if(_img != null) { result.push(_img); }
+		if(_mapillary != undefined) { result.push('https://d1cuyjsrcm0gby.cloudfront.net/'+_mapillary+'/thumb-2048.jpg'); }
+
+		return result;
 	};
+
+//OTHER METHODS
+	function _parseImageTag(image) {
+		var result = null;
+		
+		var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
+		var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
+		var regexWiki = /^(File):(\S+)$/;
+		
+		if(image.match(regexUrl)) {
+			result = image;
+		}
+		else if(image.match(regexUrlNoProtocol)) {
+			result = 'http://'+image;
+		}
+		else if(image.match(regexWiki)) {
+			var imageUtf8 = unescape(encodeURIComponent(image)).replace(' ', '_');
+			var digest = hex_md5(imageUtf8);
+			var folder = digest[0] + '/' + digest[0] + digest[1] + '/' + encodeURIComponent(imageUtf8);
+			result = 'http://upload.wikimedia.org/wikipedia/commons/' + folder;
+		}
+		else {
+			console.log("Invalid image key: "+image);
+		}
+		
+		return result;
+	};
+
+//INIT
+	_init();
 }
+
 };

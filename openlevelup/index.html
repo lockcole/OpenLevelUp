@@ -58,7 +58,7 @@
 	<script src="lib/osmtogeojson.js"></script>
 	
 	<!-- FileSaver include -->
-	<script src="lib/FileSaver.js"></script>
+	<!--script src="lib/FileSaver.js"></script-->
 	
 	<!-- Azimuth include -->
 	<script src="lib/azimuth.js"></script>
@@ -80,8 +80,8 @@
 	<script src="lib/Control.Geocoder.js"></script>
 	
 	<!-- SVG.js includes -->
-	<script src="lib/svg.min.js"></script>
-	<script src="lib/svg.export.min.js"></script>
+	<!--script src="lib/svg.min.js"></script>
+	<script src="lib/svg.export.min.js"></script-->
 	
 	<!-- OpenLevelUp includes -->
 	<script src="js/openlevelup.js" type="text/javascript"></script>
@@ -212,17 +212,13 @@
 		<div class="overlay-content">
 			<h2>Pictures</h2>
 			<div class="tabs">
-				<div id="tab-url">
-					<a href="#tab-url">Picture</a>
+				<div id="tab-imgs">
+					<a href="#tab-imgs">Images</a>
 					<div>Picture</div>
 				</div>
-				<div id="tab-mapillary">
-					<a href="#tab-mapillary">Mapillary</a>
+				<div id="tab-status">
+					<a href="#tab-status">Status</a>
 					<div>Mapillary</div>
-				</div>
-				<div id="tab-flickr">
-					<a href="#tab-flickr">Flickr</a>
-					<div>Flickr</div>
 				</div>
 			</div>
 			<p class="overlay-close"><a id="images-close" href="#">Close</a></p>
@@ -239,8 +235,8 @@
 	<!--
 	SVG area (hidden)
 	-->
-	<div id="svg-area">
-	</div>
+	<!--div id="svg-area">
+	</div-->
 
 	<!--
 	JS init code
@@ -254,9 +250,6 @@
 		
 		//Init map
 		controller.init();
-		
-		//Trigger for map movements
-		//controller.getView().getMap().on('moveend', function(e) { controller.onMapUpdate(); });
 	</script>
 </body>
 </html>
