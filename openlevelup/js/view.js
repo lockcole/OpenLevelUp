@@ -312,6 +312,9 @@ MapView: function(main) {
 	/** The current data layer **/
 	var _dataLayer = null;
 	
+	/** The feature popups **/
+	var _dataPopups = {};
+	
 	/** The previous zoom value **/
 	var _oldZoom = null;
 	
@@ -443,6 +446,7 @@ MapView: function(main) {
 		if(_dataLayer != null) {
 			_map.removeLayer(_dataLayer);
 			_dataLayer = null;
+			_dataPopups = {};
 		}
 		
 		//Create data (specific to level)
@@ -527,6 +531,9 @@ MapView: function(main) {
 					
 					//Add to feature layers
 					featureLayers[relLayer].addLayer(featureView.getLayer());
+					if(featureView.hasPopup()) {
+						_dataPopups[featureId] = featureView.getLayer();
+					}
 					
 					dispayableFeatures++;
 				}
@@ -605,23 +612,48 @@ MapView: function(main) {
 	
 	/**
 	 * This functions makes map go to given coordinates, at given level
+	 * @param ftId The feature ID
 	 * @param lvl The level
-	 * 
 	 */
-	this.goTo = function(lvl, lat, lon, popup) {
-		_view.getMapView().get().setView(L.latLng(lat, lon), 21);
+	this.goTo = function(ftId, lvl) {
+		//Change level
+		_mainView.getLevelView().set(lvl);
+		_mainView.updateLevelChanged();
 		
-		if(_view.isLoading()) {
-			_isGoingTo = true;
-			$(document).on("donerefresh", function() { controller.onDoneRefresh(lvl); });
-		}
-		else {
-			_self.toLevel(lvl);
-			_self.openPopup(popup);
-		}
-		_popup = popup;
+		//Retrieve feature
+		var feature = _mainView.getData().getFeature(ftId);
+		
+		//Zoom on feature
+		var centroid = feature.getGeometry().getCentroid();
+		var centroidLatLng = L.latLng(centroid[1], centroid[0]);
+		_map.setView(centroidLatLng, 21);
+		
+		//Open popup
+		setTimeout(function() {
+			if(_mainView.getLoadingView().isLoading()) {
+				$(document).bind("loading_done", function() {
+					_dataPopups[ftId].openPopup(centroidLatLng);
+					$(document).unbind("loading_done");
+				});
+			}
+			else {
+				_dataPopups[ftId].openPopup(centroidLatLng);
+			}
+		},
+		300);
 	};
-	
+
+	/**
+ 	 * Changes the currently shown popup tab
+	 * @param id The ID of the tab to show (for exemple "general")
+	 */
+	this.changePopupTab = function(id) {
+		$(".popup-nav .item:visible").removeClass("selected");
+		$(".popup-tab:visible").hide();
+		$(".leaflet-popup:visible #popup-tab-"+id).show();
+		$("#item-"+id).addClass("selected");
+	};
+
 //INIT
 	_init();
 },
@@ -635,6 +667,9 @@ FeatureView: function(main, feature) {
 //ATTRIBUTES
 	/** The feature layer **/
 	var _layer = null;
+	
+	/** Does this object has a popup ? **/
+	var _hasPopup = false;
 	
 	/** The main view **/
 	var _mainView = main;
@@ -731,6 +766,7 @@ FeatureView: function(main, feature) {
 			//Add popup if needed
 			if(style.popup == undefined || style.popup == "yes") {
 				_layer.bindPopup(_createPopup());
+				_hasPopup = true;
 			}
 		}
 	};
@@ -759,6 +795,13 @@ FeatureView: function(main, feature) {
 	 */
 	this.getLayer = function() {
 		return _layer;
+	};
+	
+	/**
+	 * @return True if this view has an associated popup
+	 */
+	this.hasPopup = function() {
+		return _hasPopup;
 	};
 	
 //OTHER METHODS
@@ -799,11 +842,11 @@ FeatureView: function(main, feature) {
 				}
 			}
 		}
-		
-// 		if(!addObject) {
-// 			console.log("Unrendered object: "+feature.getId());
-// 			console.log(ftTags);
-// 		}
+
+//		if(!addObject) {
+//			console.log("Unrendered object: "+feature.getId());
+//			console.log(ftTags);
+//		}
 		
 		return addObject;
 	};
@@ -849,10 +892,10 @@ FeatureView: function(main, feature) {
 				result = L.marker(latlng, {icon: myIcon});
 			}
 		}
-		else {
-			result = L.circleMarker(latlng, { opacity: 0, fillOpacity: 0 });
-		}
-		
+//		else {
+//			result = L.circleMarker(latlng, { opacity: 0, fillOpacity: 0 });
+//		}
+			
 		return result;
 	}
 	
@@ -902,9 +945,9 @@ FeatureView: function(main, feature) {
 		//Navigation bar
 		if(!isMobile) {
 			text += '<div class="popup-nav"><div class="row">';
-			text += '<div class="item selected" id="item-general"><a href="#" onclick="controller.changePopupTab(\'general\');">General</a></div>';
-			text += '<div class="item" id="item-technical"><a href="#" onclick="controller.changePopupTab(\'technical\');">Technical</a></div>';
-			text += '<div class="item" id="item-tags"><a href="#" onclick="controller.changePopupTab(\'tags\');">Tags</a></div>';
+			text += '<div class="item selected" id="item-general"><a href="#" onclick="controller.getView().getMapView().changePopupTab(\'general\');">General</a></div>';
+			text += '<div class="item" id="item-technical"><a href="#" onclick="controller.getView().getMapView().changePopupTab(\'technical\');">Technical</a></div>';
+			text += '<div class="item" id="item-tags"><a href="#" onclick="controller.getView().getMapView().changePopupTab(\'tags\');">Tags</a></div>';
 			text += '</div></div>';
 		}
 		
@@ -1805,7 +1848,7 @@ NamesView: function(main) {
 					$("#lvl"+lvl+"-rooms ul li:last a")
 						.append(document.createTextNode(" "+room))
 						.attr("href", "#")
-						.attr("onclick", "controller.getView().getMapView().goTo('"+lvl+"', "+ftGeom.getCentroidAsString()+",'"+roomNamesFiltered[lvl][room].getId()+"')");
+						.attr("onclick", "controller.getView().getMapView().goTo('"+roomNamesFiltered[lvl][room].getId()+"','"+lvl+"')");
 					
 					if(STYLE != undefined) {
 						$("#lvl"+lvl+"-rooms ul li:last a img")
@@ -1867,15 +1910,27 @@ ImagesView: function() {
  */
 LoadingView: function() {
 //ATTRIBUTES
+	/** Is loading ? **/
+	var _loading = false;
+	
 	/** The last timestamp **/
 	var _lastTime = 0;
 
+//ACCESSORS
+	/**
+	 * @return True if loading
+	 */
+	this.isLoading = function() {
+		return _loading;
+	};
+	
 //OTHER METHODS
 	/**
 	 * Shows or hides the loading component
 	 * @param loading True if the application is loading something
 	 */
 	this.setLoading = function(loading) {
+		_loading = loading;
 		if(loading) {
 			$("#op-loading-info li").remove();
 			$("#op-loading").show();
@@ -1883,6 +1938,7 @@ LoadingView: function() {
 		}
 		else {
 			$("#op-loading").hide();
+			$(document).trigger("loading_done");
 		}
 	};
 	
@@ -1988,41 +2044,12 @@ MessagesView: function() {
 
 };
 
-// 	
-// 	/**
-// 	 * @return True if the searched string for filtering rooms is long enough
-// 	 */
-// 	this.isSearchRoomLongEnough = function() {
-// 		return _elementExists("#search-room") && $("#search-room").val() != "Search" && $("#search-room").val().length >= 3;
-// 	};
-// 	
-// 	/**
-// 	 * @return The search room string
-// 	 */
-// 	this.getSearchRoom = function() {
-// 		return ($("#search-room").val() != "Search") ? $("#search-room").val() : "";
-// 	};
-// 	
 // 	/**
 // 	 * @return True if the given HTML element exists
 // 	 */
 // 	function _elementExists(html) {
 // 		return $(html).length > 0;
 // 	};
-
-// 	
-// 	/**
-// 	 * Resets search room field
-// 	 */
-// 	this.resetSearchRoom = function() {
-// 		if($("#search-room").val() == "Search" && $("#search-room").is(":focus")) {
-// 			$("#search-room").val("");
-// 		}
-// 		else if(!$("#search-room").is(":focus")) {
-// 			$("#search-room").val("Search");
-// 		}
-// 	};
-// 
 // //OTHER METHODS
 // /*
 //  * Map related methods
@@ -2032,64 +2059,8 @@ MessagesView: function() {
 // 	 */
 // 	this.mapInit = function(mobile) {
 // 		$("#images-close").click(function() { $("#op-images").hide(); });
-// 		$("#export-link").click(controller.onExportLevel);
-// 		$("#export-link-img").click(controller.onExportLevelImage);
-// 		$("#search-room").click(controller.getView().onSearchRoomFocusChange);
-// 		$("#search-room").focus(controller.getView().onSearchRoomFocusChange);
-// 		$("#search-room").focusout(controller.getView().onSearchRoomFocusChange);
-// 		$("#search-room").bind("input propertychange", controller.onSearchRoomChange);
-// 		$("#search-room-reset").click(controller.resetRoomNames);
-// 		
-// 		//Reset search room field
-// 		_self.resetSearchRoom();
 // 	};
-// 	
-// 	/**
-// 	 * Opens a pop-up at given coordinates
-// 	 * @param id The pop-up ID (for example, "node12345")
-// 	 */
-// 	this.openPopup = function(id) {
-// 		if(_popups[id] == undefined) {
-// 			//Search for feature
-// 			_dataLayer.eachLayer(function(l) {
-// 				if(l.feature != undefined && l.feature.properties.getId() == id) {
-// 					_popups[id] = _createPopup(l.feature.properties);
-// 				}
-// 			});
-// 		}
-// 		
-// 		if(_popups[id] != undefined) {
-// 			_map.openPopup(_popups[id]);
-// 		}
-// 		else {
-// 			console.log(id);
-// 		}
-// 	}
 
-
-// 
-// 	/**
-// 	* Returns the appropriate style for a given OSM node element (depending of its tags)
-// 	* @param feature The GeoJSON element to decorate
-// 	* @param latlng Its coordinates
-// 	* @return The style
-// 	*/
-// 	function _styleNodes(feature, latlng) {
-// 		var result;
-// 		var ft = feature.properties;
-// 		
-// 		//Find the appropriate icon, depending of tags
-// 		var style = _styleElements(feature);
-// 		
-// 		result = _createMarker(latlng, ft, style);
-// 		
-// 		//Labels
-// 		if(_labelizable(ft)) {
-// 			_markersLabels[ft.getId()] = _createLabel(feature, latlng, true);
-// 		}
-// 		
-// 		return result;
-// 	}
 // /*
 //  * Images
 //  */
@@ -2157,124 +2128,3 @@ MessagesView: function() {
 // 		$("#"+tab).addClass("selected");
 // 	};
 
-// 	/**
-// 	 * Updates the room names list
-// 	 * @param roomNames The room names (from model), or null to hide
-// 	 */
-// 	this.populateRoomNames = function(roomNames) {
-// 		var filter = (_self.isSearchRoomLongEnough()) ? $("#search-room").val() : null;
-// 		
-// 		//Filter room names
-// 		var roomNamesFiltered = null;
-// 		
-// 		if(roomNames != null) {
-// 			roomNamesFiltered = new Object();
-// 			
-// 			for(var lvl in roomNames) {
-// 				roomNamesFiltered[lvl] = new Object();
-// 				
-// 				for(var room in roomNames[lvl]) {
-// 					var ftGeomRoom = roomNames[lvl][room].getGeometry();
-// 					
-// 					if((filter == null || room.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
-// 						&& (roomNames[lvl][room].getStyle().popup == undefined
-// 						|| roomNames[lvl][room].getStyle().popup == "yes")
-// 						&& _ctrl.getMapData().getBBox().intersects(ftGeomRoom.getBounds())) {
-// 
-// 						roomNamesFiltered[lvl][room] = roomNames[lvl][room];
-// 					}
-// 				}
-// 				
-// 				//Remove level if empty
-// 				if(Object.keys(roomNamesFiltered[lvl]).length == 0) {
-// 					delete roomNamesFiltered[lvl];
-// 				}
-// 			}
-// 		}
-// 		
-// 		if(roomNames != null && roomNamesFiltered != null) {
-// 			$("#rooms").empty();
-// 			
-// 			var levelsKeys = Object.keys(roomNamesFiltered);
-// 			levelsKeys.sort(function (a,b) { return parseFloat(a)-parseFloat(b);});
-// 			
-// 			for(var i in levelsKeys) {
-// 				var lvl = levelsKeys[i];
-// 				//Create new level row
-// 				var newRow = document.createElement("div");
-// 				
-// 				//Add class
-// 				$("#rooms").append(newRow);
-// 				$("#rooms div:last").addClass("lvl-row").attr("id", "lvl"+lvl);
-// 				
-// 				//Create cell for level name
-// 				var newLvlName = document.createElement("div");
-// 				$("#lvl"+lvl).append(newLvlName);
-// 				$("#lvl"+lvl+" div").addClass("lvl-name").html(lvl);
-// 				
-// 				//Create cell for level rooms
-// 				var newLvlRooms = document.createElement("div");
-// 				$("#lvl"+lvl).append(newLvlRooms);
-// 				$("#lvl"+lvl+" div:last").addClass("lvl-rooms").attr("id", "lvl"+lvl+"-rooms");
-// 				
-// 				//Init room list
-// 				var newRoomList = document.createElement("ul");
-// 				$("#lvl"+lvl+"-rooms").append(newRoomList);
-// 				
-// 				//Add each room
-// 				for(var room in roomNamesFiltered[lvl]) {
-// 					var newRoom = document.createElement("li");
-// 					$("#lvl"+lvl+"-rooms ul").append(newRoom);
-// 					$("#lvl"+lvl+"-rooms ul li:last").addClass("ref");
-// 					
-// 					var roomIcon = document.createElement("img");
-// 					var roomLink = document.createElement("a");
-// 					$("#lvl"+lvl+"-rooms ul li:last").append(roomLink);
-// 					
-// 					if(STYLE != undefined) {
-// 						var addImg = STYLE.images.indexOf(roomNamesFiltered[lvl][room].getStyle().getIconUrl()) >= 0;
-// 						$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
-// 					}
-// 					
-// 					var ftGeom = roomNamesFiltered[lvl][room].getGeometry();
-// 					
-// 					$("#lvl"+lvl+"-rooms ul li:last a")
-// 						.append(document.createTextNode(" "+room))
-// 						.attr("href", "#")
-// 						.attr("onclick", "controller.goTo('"+lvl+"', "+ftGeom.getCentroidAsString()+",'"+roomNamesFiltered[lvl][room].getId()+"')");
-// 					
-// 					if(STYLE != undefined) {
-// 						$("#lvl"+lvl+"-rooms ul li:last a img")
-// 							.attr("src", OLvlUp.view.ICON_FOLDER+'/'+
-// 								((addImg) ? roomNamesFiltered[lvl][room].getStyle().getIconUrl() : 'default.svg')
-// 							)
-// 							.attr("width", OLvlUp.view.ICON_SIZE+"px");
-// 					}
-// 				}
-// 			}
-// 		}
-// 	};
-// 	
-// 	/**
-// 	 * When search room input is changed
-// 	 */
-// 	this.onSearchRoomFocusChange = function() {
-// 		if($("#search-room").val() == "Search" && $("#search-room").is(":focus")) {
-// 			$("#search-room").val("");
-// 		}
-// 		else if($("#search-room").val() == "" && !$("#search-room").is(":focus")) {
-// 			_ctrl.resetRoomNames();
-// 		}
-// 	};
-// 	
-// 	
-// 	/**
-// 	 * Changes the currently shown popup tab
-// 	 * @param id The ID of the tab to show (for exemple "general")
-// 	 */
-// 	this.changePopupTab = function(id) {
-// 		$(".popup-nav .item:visible").removeClass("selected");
-// 		$(".popup-tab:visible").hide();
-// 		$(".leaflet-popup:visible #popup-tab-"+id).show();
-// 		$("#item-"+id).addClass("selected");
-// 	}

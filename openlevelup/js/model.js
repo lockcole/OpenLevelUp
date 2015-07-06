@@ -59,7 +59,14 @@ OSMData: function(styleDef, bbox) {
 			var f = geojson.features[i];
 			var id = f.id;
 			var currentFeature = new OLvlUp.model.Feature(f, styleDef);
-			_features[id] = currentFeature;
+			
+			if(_features[id] == undefined) {
+				_features[id] = currentFeature;
+			}
+//			else {
+//				console.log("Duplicate: "+id);
+//				console.log(currentFeature.getTags());
+//			}
 			
 			//Add levels to list
 			var ftLevels = currentFeature.onLevels();
@@ -192,7 +199,7 @@ Feature: function(f, styleDef) {
 	var _onLevels = null;
 	
 	/** The OSM object tags **/
-	var _tags = f.properties.tags;
+	var _tags = null;
 	
 	/** The feature geometry **/
 	var _geometry = null;
@@ -215,6 +222,7 @@ Feature: function(f, styleDef) {
 		/*
 		 * Init some vars
 		 */
+		_tags = feature.properties.tags;
 		_style = new OLvlUp.model.FeatureStyle(_self, styleDef);
 		_geometry = new OLvlUp.model.FeatureGeometry(feature.geometry);
 		
