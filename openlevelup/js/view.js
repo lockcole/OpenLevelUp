@@ -118,7 +118,7 @@ MainView: function(ctrl, mobile) {
 	var _cOptions = new OLvlUp.view.OptionsView();
 	
 	/** The export component **/
-	var _cExport = new OLvlUp.view.ExportView();
+	var _cExport = null;
 	
 	/** The names component **/
 	var _cNames = null;
@@ -139,6 +139,7 @@ MainView: function(ctrl, mobile) {
 		_cNames = new OLvlUp.view.NamesView(_self);
 		_cImages = new OLvlUp.view.ImagesView(_self);
 		_cLevel = new OLvlUp.view.LevelView(_self);
+		_cExport = new OLvlUp.view.ExportView(_self);
 		
 		_cExport.hideButton();
 		_cNames.hideButton();
@@ -226,18 +227,19 @@ MainView: function(ctrl, mobile) {
 		
 		//Check new zoom value
 		if(zoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+			//Update levels
+			_cLevel.update();
+			
 			//Add names and export buttons if needed
 			if(oldZoom == null || oldZoom < OLvlUp.view.DATA_MIN_ZOOM) {
 				_cExport.showButton();
 				_cNames.showButton();
 				_cLevel.enable();
 				_cOptions.enable();
+				_cMap.update();
 			}
-			
-			//Update levels
-			_cLevel.update();
 		}
-		else {
+		else if(zoom >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
 			//Remove names and export buttons if needed
 			if(oldZoom == null || oldZoom >= OLvlUp.view.DATA_MIN_ZOOM) {
 				_cExport.hideButton();
@@ -246,13 +248,27 @@ MainView: function(ctrl, mobile) {
 				_cOptions.disable();
 			}
 			
-			//Clear view if lower zoom than cluster
-			if(zoom < OLvlUp.view.CLUSTER_MIN_ZOOM) {
-				_cMessages.displayMessage("Zoom in to see more information", "info");
+			if(oldZoom == null || oldZoom >= OLvlUp.view.DATA_MIN_ZOOM || oldZoom < OLvlUp.view.CLUSTER_MIN_ZOOM) {
+				_cMap.update();
+			}
+		}
+		else {
+			_cMessages.displayMessage("Zoom in to see more information", "info");
+			
+			//Remove names and export buttons if needed
+			if(oldZoom == null || oldZoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+				_cExport.hideButton();
+				_cNames.hideButton();
+				_cLevel.disable();
+				_cOptions.disable();
+			}
+			
+			//Reset map
+			if(oldZoom == null || oldZoom >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
+				_cMap.update();
 			}
 		}
 		
-		_cMap.update();
 		_cUrl.mapUpdated();
 		_cNames.update();
 	};
@@ -447,6 +463,14 @@ MapView: function(main) {
 		return _oldZoom;
 	};
 
+//MODIFIERS
+	/**
+	 * Resets some variables
+	 */
+	this.resetVars = function() {
+		_oldZoom = null;
+	};
+
 //OTHER METHODS
 	/**
 	 * Event handler for map movement or level change
@@ -529,24 +553,29 @@ MapView: function(main) {
 			
 			//Analyze each feature
 			for(var featureId in features) {
-				var feature = features[featureId];
-				var featureView = new OLvlUp.view.FeatureView(_mainView, feature);
-				
-				if(featureView.getLayer() != null) {
-					var relLayer = featureView.getRelativeLayer().toString();
+				try {
+					var feature = features[featureId];
+					var featureView = new OLvlUp.view.FeatureView(_mainView, feature);
 					
-					//Create feature layer if needed
-					if(featureLayers[relLayer] == undefined) {
-						featureLayers[relLayer] = L.featureGroup();
+					if(featureView.getLayer() != null) {
+						var relLayer = featureView.getRelativeLayer().toString();
+						
+						//Create feature layer if needed
+						if(featureLayers[relLayer] == undefined) {
+							featureLayers[relLayer] = L.featureGroup();
+						}
+						
+						//Add to feature layers
+						featureLayers[relLayer].addLayer(featureView.getLayer());
+						if(featureView.hasPopup()) {
+							_dataPopups[featureId] = featureView.getLayer();
+						}
+						
+						dispayableFeatures++;
 					}
-					
-					//Add to feature layers
-					featureLayers[relLayer].addLayer(featureView.getLayer());
-					if(featureView.hasPopup()) {
-						_dataPopups[featureId] = featureView.getLayer();
-					}
-					
-					dispayableFeatures++;
+				}
+				catch(e) {
+					console.log("Error: "+e);
 				}
 			}
 			
@@ -583,9 +612,10 @@ MapView: function(main) {
 	 */
 	this.changeTilesOpacity = function() {
 		var newOpacity = 1;
-		var levelsArray = _mainView.getData().getLevels();
 		
-		if(_map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM && levelsArray != null) {
+		if(_map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM && _mainView.getData() != null) {
+			var levelsArray = _mainView.getData().getLevels();
+			
 			//Find level 0 index in levels array
 			var levelZero = levelsArray.indexOf(0);
 			var midLevel = (levelZero >= 0) ? levelZero : Math.floor(levelsArray.length / 2);
@@ -713,6 +743,10 @@ FeatureView: function(main, feature) {
 					_layer.addLayer(L.polygon(geom.getLatLng(), style));
 					break;
 					
+				case "MultiPolygon":
+					_layer.addLayer(L.multiPolygon(geom.getLatLng(), style));
+					break;
+					
 				default:
 					console.log("Unknown geometry type: "+geomType);
 			}
@@ -765,7 +799,7 @@ FeatureView: function(main, feature) {
 						break;
 						
 					case "Polygon":
-						var centroid = feature.getGeometry().getCentroid();
+						var centroid = geom.getCentroid();
 						var coord = L.latLng(centroid[1], centroid[0]);
 						
 						if(hasIcon) {
@@ -778,6 +812,39 @@ FeatureView: function(main, feature) {
 						//Labels
 						if(labelizable) {
 							_layer.addLayer(_createLabel(coord, hasIcon));
+						}
+						break;
+					
+					case "MultiPolygon":
+						var ftGeomJSON = geom.get();
+						var nbPolygons = ftGeomJSON.coordinates.length;
+						
+						//For each polygon, add an icon
+						for(var i=0; i < nbPolygons; i++) {
+							var coordMid = [0, 0];
+							var coordsPolygon = ftGeomJSON.coordinates[i];
+							for(var i in coordsPolygon[0]) {
+								if(i < coordsPolygon[0].length - 1) {
+									coordMid[0] += coordsPolygon[0][i][0];
+									coordMid[1] += coordsPolygon[0][i][1];
+								}
+							}
+							
+							coordMid[0] = coordMid[0] / (coordsPolygon[0].length -1);
+							coordMid[1] = coordMid[1] / (coordsPolygon[0].length -1);
+							var coord = L.latLng(coordMid[1], coordMid[0]);
+							
+							if(hasIcon) {
+								var marker = _createMarker(coord);
+								if(marker != null) {
+									_layer.addLayer(marker);
+								}
+							}
+							
+							//Labels
+							if(labelizable) {
+								_layer.addLayer(_createLabel(coord, hasIcon, angle));
+							}
 						}
 						break;
 						
@@ -840,29 +907,27 @@ FeatureView: function(main, feature) {
 		
 		var addObject = false;
 		
-		//Only process feature in bounds
-		if(_mainView.getMapView().get().getBounds().intersects(ftGeom.getBounds())) {
-			//Object with levels defined
-			if(ftLevels.length > 0) {
-				var nbTags = Object.keys(ftTags).length;
-				addObject = nbTags > 0
-						&& (nbTags > 1 || ftTags.area == undefined)
-						&& feature.isOnLevel(_mainView.getLevelView().get())
-						&& (options.showTranscendent() || ftLevels.length == 1)
-						&& (!options.showBuildingsOnly() || ftTags.building != undefined)
-						&& (options.showUnrendered() || Object.keys(feature.getStyle().get()).length > 0);
-			}
-			//Objects without levels
-			else {
-				//Building with min and max level
-				addObject = ftTags.building != undefined
-						&& ftTags.min_level != undefined
-						&& ftTags.max_level != undefined;
-				
-				//Elevator
-				if(options.showTranscendent() && !options.showBuildingsOnly()) {
-					addObject = addObject || ftTags.highway == "elevator";
-				}
+		//Object with levels defined
+		if(ftLevels.length > 0) {
+			var nbTags = Object.keys(ftTags).length;
+
+			addObject = nbTags > 0
+					&& (nbTags > 1 || ftTags.area == undefined)
+					&& feature.isOnLevel(_mainView.getLevelView().get())
+					&& (options.showTranscendent() || ftLevels.length == 1)
+					&& (!options.showBuildingsOnly() || ftTags.building != undefined)
+					&& (options.showUnrendered() || Object.keys(feature.getStyle().get()).length > 0);
+		}
+		//Objects without levels
+		else {
+			//Building with min and max level
+			addObject = ftTags.building != undefined
+					&& ftTags.min_level != undefined
+					&& ftTags.max_level != undefined;
+			
+			//Elevator
+			if(options.showTranscendent() && !options.showBuildingsOnly()) {
+				addObject = addObject || ftTags.highway == "elevator";
 			}
 		}
 
@@ -893,7 +958,7 @@ FeatureView: function(main, feature) {
 				iconUrl = OLvlUp.view.ICON_FOLDER+'/'+tmpUrl;
 			}
 			else if(style.showMissingIcon == undefined || style.showMissingIcon) {
-				iconUrl = OLvlUp.view.ICON_FOLDER+'/default.svg';
+				iconUrl = OLvlUp.view.ICON_FOLDER+'/default.png';
 			}
 		}
 		else if(style.showMissingIcon == undefined || style.showMissingIcon) {
@@ -1172,6 +1237,9 @@ LevelView: function(main) {
 	/** The available levels **/
 	var _levels = null;
 	
+	/** Is the component enabled ? **/
+	var _enabled = false;
+	
 	/** This object **/
 	var _self = this;
 
@@ -1189,6 +1257,7 @@ LevelView: function(main) {
 	 * @param lvl The new level (if undefined, uses the current select value)
 	 */
 	this.set = function(lvl) {
+		console.log("level set");
 		var data = _mainView.getData();
 		var lvlOk = (lvl != null) ? parseFloat(lvl) : parseFloat($("#level").val());
 		
@@ -1248,6 +1317,7 @@ LevelView: function(main) {
 	 * Goes to the upper level
 	 */
 	this.up = function() {
+		console.log("up");
 		if(_mainView.getMapView().get().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
 			var currentLevelId = _levels.indexOf(_level);
 			
@@ -1267,6 +1337,7 @@ LevelView: function(main) {
 	 * Goes to the lower level
 	 */
 	this.down = function() {
+		console.log("down");
 		if(_mainView.getMapView().get().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
 			var currentLevelId = _levels.indexOf(_level);
 			
@@ -1286,20 +1357,26 @@ LevelView: function(main) {
 	 * Disable level buttons
 	 */
 	this.disable = function() {
-		$("#level").prop("disabled", true);
-		$("#levelUp").off("click");
-		$("#levelDown").off("click");
-		$("#level").off("change");
+		if(_enabled) {
+			_enabled = false;
+			$("#level").prop("disabled", true);
+			$("#levelUp").off("click");
+			$("#levelDown").off("click");
+			$("#level").off("change");
+		}
 	};
 	
 	/**
 	 * Enable level button
 	 */
 	this.enable = function() {
-		$("#level").prop("disabled", false);
-		$("#levelUp").click(controller.onLevelUp);
-		$("#levelDown").click(controller.onLevelDown);
-		$("#level").change(controller.onLevelChange);
+		if(!_enabled) {
+			_enabled = true;
+			$("#level").prop("disabled", false);
+			$("#levelUp").click(controller.onLevelUp);
+			$("#levelDown").click(controller.onLevelDown);
+			$("#level").change(controller.onLevelChange);
+		}
 	};
 },
 
@@ -1443,7 +1520,11 @@ OptionsView: function() {
 /**
  * The export component
  */
-ExportView: function() {
+ExportView: function(main) {
+//ATTRIBUTES
+	/** The main view **/
+	var _mainView = main;
+
 //CONSTRUCTOR
 	function _init() {
 		$("#button-export").click(function() {
@@ -1466,6 +1547,7 @@ ExportView: function() {
 	 */
 	this.hideButton = function() {
 		$("#button-export").hide();
+		_mainView.hideCentralPanel();
 	};
 
 //INIT
@@ -1791,100 +1873,103 @@ NamesView: function(main) {
 	 */
 	this.hideButton = function() {
 		$("#button-rooms").hide();
+		_mainView.hideCentralPanel();
 	};
 	
 	/**
 	 * Updates the names list
 	 */
 	this.update = function() {
-		var filter = (_self.searchOK()) ? $("#search-room").val() : null;
-		var roomNames = _mainView.getData().getNames();
-		
-		//Filter room names
-		var roomNamesFiltered = null;
-		
-		if(roomNames != null) {
-			roomNamesFiltered = new Object();
+		if(_mainView.getData() != null) {
+			var filter = (_self.searchOK()) ? $("#search-room").val() : null;
+			var roomNames = _mainView.getData().getNames();
 			
-			for(var lvl in roomNames) {
-				roomNamesFiltered[lvl] = new Object();
+			//Filter room names
+			var roomNamesFiltered = null;
+			
+			if(roomNames != null) {
+				roomNamesFiltered = new Object();
 				
-				for(var room in roomNames[lvl]) {
-					var ftGeomRoom = roomNames[lvl][room].getGeometry();
+				for(var lvl in roomNames) {
+					roomNamesFiltered[lvl] = new Object();
 					
-					if((filter == null || room.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
-						&& (roomNames[lvl][room].getStyle().get().popup == undefined
-						|| roomNames[lvl][room].getStyle().get().popup == "yes")
-						&& _mainView.getData().getBBox().intersects(ftGeomRoom.getBounds())) {
+					for(var room in roomNames[lvl]) {
+						var ftGeomRoom = roomNames[lvl][room].getGeometry();
+						
+						if((filter == null || room.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
+							&& (roomNames[lvl][room].getStyle().get().popup == undefined
+							|| roomNames[lvl][room].getStyle().get().popup == "yes")
+							&& _mainView.getData().getBBox().intersects(ftGeomRoom.getBounds())) {
 
-						roomNamesFiltered[lvl][room] = roomNames[lvl][room];
+							roomNamesFiltered[lvl][room] = roomNames[lvl][room];
+						}
 					}
-				}
-				
-				//Remove level if empty
-				if(Object.keys(roomNamesFiltered[lvl]).length == 0) {
-					delete roomNamesFiltered[lvl];
+					
+					//Remove level if empty
+					if(Object.keys(roomNamesFiltered[lvl]).length == 0) {
+						delete roomNamesFiltered[lvl];
+					}
 				}
 			}
-		}
-		
-		if(roomNames != null && roomNamesFiltered != null) {
-			$("#rooms").empty();
 			
-			var levelsKeys = Object.keys(roomNamesFiltered);
-			levelsKeys.sort(function (a,b) { return parseFloat(a)-parseFloat(b);});
-			
-			for(var i in levelsKeys) {
-				var lvl = levelsKeys[i];
-				//Create new level row
-				var newRow = document.createElement("div");
+			if(roomNames != null && roomNamesFiltered != null) {
+				$("#rooms").empty();
 				
-				//Add class
-				$("#rooms").append(newRow);
-				$("#rooms div:last").addClass("lvl-row").attr("id", "lvl"+lvl);
+				var levelsKeys = Object.keys(roomNamesFiltered);
+				levelsKeys.sort(function (a,b) { return parseFloat(a)-parseFloat(b);});
 				
-				//Create cell for level name
-				var newLvlName = document.createElement("div");
-				$("#lvl"+lvl).append(newLvlName);
-				$("#lvl"+lvl+" div").addClass("lvl-name").html(lvl);
-				
-				//Create cell for level rooms
-				var newLvlRooms = document.createElement("div");
-				$("#lvl"+lvl).append(newLvlRooms);
-				$("#lvl"+lvl+" div:last").addClass("lvl-rooms").attr("id", "lvl"+lvl+"-rooms");
-				
-				//Init room list
-				var newRoomList = document.createElement("ul");
-				$("#lvl"+lvl+"-rooms").append(newRoomList);
-				
-				//Add each room
-				for(var room in roomNamesFiltered[lvl]) {
-					var newRoom = document.createElement("li");
-					$("#lvl"+lvl+"-rooms ul").append(newRoom);
-					$("#lvl"+lvl+"-rooms ul li:last").addClass("ref");
+				for(var i in levelsKeys) {
+					var lvl = levelsKeys[i];
+					//Create new level row
+					var newRow = document.createElement("div");
 					
-					var roomIcon = document.createElement("img");
-					var roomLink = document.createElement("a");
-					$("#lvl"+lvl+"-rooms ul li:last").append(roomLink);
+					//Add class
+					$("#rooms").append(newRow);
+					$("#rooms div:last").addClass("lvl-row").attr("id", "lvl"+lvl);
 					
-					if(STYLE != undefined) {
-						var addImg = STYLE.images.indexOf(roomNamesFiltered[lvl][room].getStyle().getIconUrl()) >= 0;
-						$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
-					}
+					//Create cell for level name
+					var newLvlName = document.createElement("div");
+					$("#lvl"+lvl).append(newLvlName);
+					$("#lvl"+lvl+" div").addClass("lvl-name").html(lvl);
 					
-					var ftGeom = roomNamesFiltered[lvl][room].getGeometry();
+					//Create cell for level rooms
+					var newLvlRooms = document.createElement("div");
+					$("#lvl"+lvl).append(newLvlRooms);
+					$("#lvl"+lvl+" div:last").addClass("lvl-rooms").attr("id", "lvl"+lvl+"-rooms");
 					
-					$("#lvl"+lvl+"-rooms ul li:last a")
-						.append(document.createTextNode(" "+room))
-						.attr("href", "#")
-						.attr("onclick", "controller.getView().getMapView().goTo('"+roomNamesFiltered[lvl][room].getId()+"','"+lvl+"')");
+					//Init room list
+					var newRoomList = document.createElement("ul");
+					$("#lvl"+lvl+"-rooms").append(newRoomList);
 					
-					if(STYLE != undefined) {
-						$("#lvl"+lvl+"-rooms ul li:last a img")
-							.attr("src", OLvlUp.view.ICON_FOLDER+'/'+
-								((addImg) ? roomNamesFiltered[lvl][room].getStyle().getIconUrl() : 'default.svg')
-							)
-							.attr("width", OLvlUp.view.ICON_SIZE+"px");
+					//Add each room
+					for(var room in roomNamesFiltered[lvl]) {
+						var newRoom = document.createElement("li");
+						$("#lvl"+lvl+"-rooms ul").append(newRoom);
+						$("#lvl"+lvl+"-rooms ul li:last").addClass("ref");
+						
+						var roomIcon = document.createElement("img");
+						var roomLink = document.createElement("a");
+						$("#lvl"+lvl+"-rooms ul li:last").append(roomLink);
+						
+						if(STYLE != undefined) {
+							var addImg = STYLE.images.indexOf(roomNamesFiltered[lvl][room].getStyle().getIconUrl()) >= 0;
+							$("#lvl"+lvl+"-rooms ul li:last a").append(roomIcon);
+						}
+						
+						var ftGeom = roomNamesFiltered[lvl][room].getGeometry();
+						
+						$("#lvl"+lvl+"-rooms ul li:last a")
+							.append(document.createTextNode(" "+room))
+							.attr("href", "#")
+							.attr("onclick", "controller.getView().getMapView().goTo('"+roomNamesFiltered[lvl][room].getId()+"','"+lvl+"')");
+						
+						if(STYLE != undefined) {
+							$("#lvl"+lvl+"-rooms ul li:last a img")
+								.attr("src", OLvlUp.view.ICON_FOLDER+'/'+
+									((addImg) ? roomNamesFiltered[lvl][room].getStyle().getIconUrl() : 'default.png')
+								)
+								.attr("width", OLvlUp.view.ICON_SIZE+"px");
+						}
 					}
 				}
 			}

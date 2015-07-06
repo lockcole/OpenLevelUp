@@ -197,35 +197,31 @@ Ctrl: function() {
 
 		var map = _view.getMapView().get();
 		var bbox = map.getBounds();
+		var zoom = map.getZoom();
 		
 		//Clear messages
 		_view.getMessagesView().clear();
 		
-		//Recreate mapdata if null
-		if(_data == null) {
-			if(_view.getMapView().get().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
-				//Resize BBox for small areas (avoid multiple Overpass API calls)
-				var diffZoom = map.getZoom() - OLvlUp.view.DATA_MIN_ZOOM;
-				bbox = bbox.pad(1.1 + 0.5 * diffZoom);
-			}
-			_data = new OLvlUp.model.OSMData(bbox, STYLE);
-		}
-		
-		if(_clusterData == null) {
-			_clusterData = new OLvlUp.model.OSMClusterData(bbox);
-		}
-		
 		//Check if zoom is high enough to download data
-		if(_view.getMapView().get().getZoom() >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
+		if(zoom >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
 			_view.getLoadingView().setLoading(true);
 			
 			//High zoom data download
-			if(_view.getMapView().get().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
+			if(zoom >= OLvlUp.view.DATA_MIN_ZOOM) {
 				_oldLevel = _view.getLevelView().get();
 				
 				//Download data only if new BBox isn't contained in previous one
-				if(force || !_data.isInitialized() || !_data.getBBox().contains(_view.getMapView().get().getBounds())) {
+				if(force
+					|| _data == null
+					|| !_data.isInitialized()
+					|| !_data.getBBox().contains(bbox)
+				) {
+					//Resize BBox for small areas (avoid multiple Overpass API calls)
+					var diffZoom = zoom - OLvlUp.view.DATA_MIN_ZOOM;
+					bbox = bbox.pad(1.1 + 0.5 * diffZoom);
+					
 					//Download data
+					_data = new OLvlUp.model.OSMData(bbox, STYLE);
 					_self.downloadData("data", _data.init, bbox);
 					//When download is done, endMapUpdate() will be called.
 				}
@@ -238,10 +234,18 @@ Ctrl: function() {
 			else {
 				//Download data only if new BBox isn't contained in previous one
 				if(force
+					|| _clusterData == null
 					|| !_clusterData.isInitialized()
-					|| !_clusterData.getBBox().contains(_view.getMapView().get().getBounds())) {
-
+					|| !_clusterData.getBBox().contains(bbox)
+				) {
+					if(zoom > OLvlUp.view.CLUSTER_MIN_ZOOM) {
+						//Resize BBox for small areas (avoid multiple Overpass API calls)
+						var diffZoom = zoom - OLvlUp.view.CLUSTER_MIN_ZOOM;
+						bbox = bbox.pad(1.1 + 0.5 * diffZoom);
+					}
+					
 					//Download data
+					_clusterData = new OLvlUp.model.OSMClusterData(bbox);
 					_self.downloadData("cluster", _clusterData.init, bbox);
 					//When download is done, endMapClusterUpdate() will be called.
 				}
@@ -306,7 +310,9 @@ Ctrl: function() {
 			OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest),
 			function(data) {
 				controller.getView().getLoadingView().addLoadingInfo("Process received data");
+				
 				handler(data);
+				controller.getView().getMapView().resetVars();
 				if(type == "cluster") {
 					controller.endMapClusterUpdate();
 				}

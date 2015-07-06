@@ -48,21 +48,21 @@
 			"name": "Oneway path",
 			"description": "Oneway path",
 			"onTags": [ { "oneway": "yes" }, { "conveying": "forward" } ],
-			"style": { "icon": "arrow1_up.svg", "rotateIcon": true }
+			"style": { "icon": "arrow1_up.png", "rotateIcon": true }
 		},
 		{
 			"type": "Style",
 			"name": "Oneway path",
 			"description": "Oneway path",
 			"onTags": [ { "oneway": "-1" }, { "conveying": "backward" } ],
-			"style": { "icon": "arrow1_down.svg", "rotateIcon": true }
+			"style": { "icon": "arrow1_down.png", "rotateIcon": true }
 		},
 		{
 			"type": "Style",
 			"name": "Path (Guide strips)",
 			"description": "Path with guide strips",
 			"onTags": [ { "highway": "*", "guide_strips": "yes" } ],
-			"style": { "color": "#316EDD", "icon": "visually_impaired.svg" }
+			"style": { "color": "#316EDD", "icon": "visually_impaired.png" }
 		},
 		{
 			"type": "Style",
@@ -76,63 +76,63 @@
 			"name": "Room",
 			"description": "Room icons",
 			"onTags": [ { "room": "*" } ],
-			"style": { "icon": "room_${room}.svg", "showMissingIcon": false }
+			"style": { "icon": "room_${room}.png", "showMissingIcon": false }
 		},
 		{
 			"type": "Style",
 			"name": "Computer lab",
 			"description": "Computer laboratory icon",
 			"onTags": [ { "room": "laboratory", "laboratory": "computer" } ],
-			"style": { "icon": "room_computer.svg" }
+			"style": { "icon": "room_computer.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Biology laboratory",
 			"description": "Biology laboratory",
 			"onTags": [ { "room": "laboratory", "laboratory": "biology|biological" } ],
-			"style": { "icon": "Biohazard_symbol.svg" }
+			"style": { "icon": "Biohazard_symbol.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Physics laboratory",
 			"description": "Physics laboratory",
 			"onTags": [ { "room": "laboratory", "laboratory": "physical" } ],
-			"style": { "icon": "physics.svg" }
+			"style": { "icon": "physics.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Electronics laboratory",
 			"description": "Electronics laboratory",
 			"onTags": [ { "room": "laboratory", "laboratory": "electronics|electronic" } ],
-			"style": { "icon": "Octicons-circuit-board.svg" }
+			"style": { "icon": "Octicons-circuit-board.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Amphitheatre",
 			"description": "Amphitheatre",
 			"onTags": [ { "room": "amphitheatre" } ],
-			"style": { "icon": "room_auditorium.svg" }
+			"style": { "icon": "room_auditorium.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Reception",
 			"description": "Reception",
 			"onTags": [ { "room": "reception" } ],
-			"style": { "icon": "room_administration.svg" }
+			"style": { "icon": "room_administration.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Refectory",
 			"description": "Refectory",
 			"onTags": [ { "room": "refectory" } ],
-			"style": { "icon": "room_restaurant.svg" }
+			"style": { "icon": "room_restaurant.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Checkroom",
 			"description": "Checkroom",
 			"onTags": [ { "room": "checkroom" } ],
-			"style": { "icon": "room_locker.svg" }
+			"style": { "icon": "room_locker.png" }
 		},
 		{
 			"type": "Style",
@@ -160,7 +160,7 @@
 			"name": "Door",
 			"description": "Door nodes ('OR' example for tags)",
 			"onTags": [ { "door": "*" }, { "entrance": "*" }, { "buildingpart": "door" } ],
-			"style": { "icon": "door.svg", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" }
+			"style": { "icon": "door.png", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" }
 		},
 		{
 			"type": "Style",
@@ -174,21 +174,21 @@
 			"name": "Subway entrance",
 			"description": "Subway entrance",
 			"onTags": [ { "railway": "subway_entrance" } ],
-			"style": { "icon": "subway.svg" }
+			"style": { "icon": "subway.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Sliding door",
 			"description": "Door=sliding nodes",
 			"onTags": [ { "door": "sliding" } ],
-			"style": { "icon": "door_sliding.svg" }
+			"style": { "icon": "door_sliding.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Emergency exit",
 			"description": "Emergency exit",
 			"onTags": [ { "entrance": "emergency" } ],
-			"style": { "icon": "emergency_door.svg" }
+			"style": { "icon": "emergency_door.png" }
 		},
 		{
 			"type": "Style",
@@ -244,14 +244,14 @@
 			"name": "Ticket validator",
 			"description": "Ticket validator",
 			"onTags": [ { "amenity": "ticket_validator" } ],
-			"style": { "icon": "tickets_valid.svg" }
+			"style": { "icon": "tickets_valid.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Ticket vending",
 			"description": "Ticket vending machine ('AND' example for tags)",
 			"onTags": [ { "amenity": "vending_machine", "vending": "public_transport_tickets" } ],
-			"style": { "icon": "tickets_vending.svg" }
+			"style": { "icon": "tickets_vending.png" }
 		},
 		{
 			"type": "Style",
@@ -307,21 +307,21 @@
 			"name": "Stairs",
 			"description": "Stairs (verticalpassage)",
 			"onTags": [ { "buildingpart:verticalpassage": "stairway" }, { "room": "stairs" } ],
-			"style": { "icon": "NingboRT_Stairs_Logo.svg" }
+			"style": { "icon": "NingboRT_Stairs_Logo.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Emergency stairs",
 			"description": "Stairs for emergency only (as polygons)",
 			"onTags": [ { "buildingpart": "verticalpassage", "access": "emergency" } ],
-			"style": { "color": "#009262", "fillColor": "#C0FFCB", "icon": "Emergency_stairs.svg" }
+			"style": { "color": "#009262", "fillColor": "#C0FFCB", "icon": "Emergency_stairs.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Escalator",
 			"description": "Escalator (verticalpassage)",
 			"onTags": [ { "buildingpart:verticalpassage": "escalator" }, { "room": "escalator" } ],
-			"style": { "icon": "Aiga_escalator_mirror.svg" }
+			"style": { "icon": "Aiga_escalator_mirror.png" }
 		},
 		{
 			"type": "Style",
@@ -335,7 +335,7 @@
 			"name": "Buffer stop",
 			"description": "Rail buffer stop",
 			"onTags": [ { "railway": "buffer_stop" } ],
-			"style": { "icon": "railway_buffer_stop.svg" }
+			"style": { "icon": "railway_buffer_stop.png" }
 		},
 		{
 			"type": "Style",
@@ -356,7 +356,7 @@
 			"name": "Turnstile",
 			"description": "Turnstile",
 			"onTags": [ { "barrier": "turnstile" } ],
-			"style": { "icon": "barrier_turnstile.svg" }
+			"style": { "icon": "barrier_turnstile.png" }
 		},
 		{
 			"type": "Style",
@@ -377,56 +377,56 @@
 			"name": "Statue",
 			"description": "Statue icons",
 			"onTags": [ { "artwork_type": "statue|sculpture|stone|bust" } ],
-			"style": { "icon": "statue.svg" }
+			"style": { "icon": "statue.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Information",
 			"description": "Information for travelers",
 			"onTags": [ { "tourism": "information" } ],
-			"style": { "icon": "Infobox_info_icon.svg" }
+			"style": { "icon": "Infobox_info_icon.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Audioguide",
 			"description": "Audioguide",
 			"onTags": [ { "information": "audioguide" } ],
-			"style": { "icon": "information_audioguide.svg" }
+			"style": { "icon": "information_audioguide.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Map",
 			"description": "Map",
 			"onTags": [ { "information": "map" } ],
-			"style": { "icon": "map_default.svg" }
+			"style": { "icon": "map_default.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Street map",
 			"description": "Map",
 			"onTags": [ { "information": "map", "map_type": "street" } ],
-			"style": { "icon": "map_street.svg" }
+			"style": { "icon": "map_street.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Scheme map",
 			"description": "Map",
 			"onTags": [ { "information": "map", "map_type": "scheme" } ],
-			"style": { "icon": "map_scheme.svg" }
+			"style": { "icon": "map_scheme.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Advert",
 			"description": "Advertising",
 			"onTags": [ { "advertising": "*" } ],
-			"style": { "icon": "advertising.svg" }
+			"style": { "icon": "advertising.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Emergency phone",
 			"description": "Emergency phone",
 			"onTags": [ { "emergency": "phone" } ],
-			"style": { "icon": "PublicInformationSymbol_EmergencyTelephone.svg" }
+			"style": { "icon": "PublicInformationSymbol_EmergencyTelephone.png" }
 		},
 		{
 			"type": "Style",
@@ -440,7 +440,7 @@
 			"name": "CCTV",
 			"description": "Surveillance",
 			"onTags": [ { "man_made": "surveillance" } ],
-			"style": { "icon": "Video_surveillance_logo.svg" }
+			"style": { "icon": "Video_surveillance_logo.png" }
 		},
 		{
 			"type": "Style",
@@ -458,13 +458,13 @@
 		}
 	],
 	"images": [
-		"advertising.svg",
+		"advertising.png",
 		"aeroway_aerodrome.png",
 		"aeroway_airport.png",
 		"aeroway_gate.png",
 		"aeroway_helipad.png",
 		"aeroway_terminal.png",
-		"Aiga_escalator_mirror.svg",
+		"Aiga_escalator_mirror.png",
 		"amenity_atm.png",
 		"amenity_bank.png",
 		"amenity_bar.png",
@@ -518,8 +518,8 @@
 		"amenity_vending_machine.png",
 		"amenity_veterinary.png",
 		"amenity_waste_basket.png",
-		"arrow1_down.svg",
-		"arrow1_up.svg",
+		"arrow1_down.png",
+		"arrow1_up.png",
 		"arrow2_down.png",
 		"arrow2_up.png",
 		"arrow_down.png",
@@ -537,59 +537,59 @@
 		"barrier_steps.png",
 		"barrier_stile.png",
 		"barrier_toll_booth.png",
-		"barrier_turnstile.svg",
-		"bench.svg",
-		"Biohazard_symbol.svg",
-		"default.svg",
-		"door_no.svg",
-		"door_sliding.svg",
-		"door.svg",
+		"barrier_turnstile.png",
+		"bench.png",
+		"Biohazard_symbol.png",
+		"default.png",
+		"door_no.png",
+		"door_sliding.png",
+		"door.png",
 		"Elevator_icon.png",
-		"emergency_door.svg",
-		"Emergency_stairs.svg",
-		"export.svg",
+		"emergency_door.png",
+		"Emergency_stairs.png",
+		"export.png",
 		"Farm-Fresh_newspaper.png",
 		"highway_bus_stop.png",
 		"historic_tomb.png",
-		"Infobox_info_icon.svg",
-		"information_audioguide.svg",
+		"Infobox_info_icon.png",
+		"information_audioguide.png",
 		"information_guidepost.png",
 		"information_map.png",
 		"man_made_survey_point.png",
-		"map_default.svg",
-		"map_scheme.svg",
-		"map_street.svg",
-		"NingboRT_Stairs_Logo.svg",
-		"North_Pointer.svg",
-		"Octicons-circuit-board.svg",
-		"physics.svg",
+		"map_default.png",
+		"map_scheme.png",
+		"map_street.png",
+		"NingboRT_Stairs_Logo.png",
+		"North_Pointer.png",
+		"Octicons-circuit-board.png",
+		"physics.png",
 		"poi_place_hamlet.png",
-		"PublicInformationSymbol_EmergencyTelephone.svg",
-		"room_administration.svg",
-		"room_auditorium.svg",
-		"room_bedroom.svg",
-		"room_chapel.svg",
-		"room_class.svg",
-		"room_computer.svg",
-		"room_conference.svg",
-		"room_crypt.svg",
-		"room_kitchen.svg",
-		"room_laboratory.svg",
-		"room_library.svg",
-		"room_locker.svg",
-		"room_nursery.svg",
-		"room_office.svg",
-		"room_prison_cell.svg",
-		"room_restaurant.svg",
-		"room_security_check.svg",
-		"room_sport.svg",
-		"rooms.svg",
-		"room_storage.svg",
-		"room_technical.svg",
-		"room_toilets.svg",
-		"room_toilet.svg",
-		"room_waiting.svg",
-		"settings.svg",
+		"PublicInformationSymbol_EmergencyTelephone.png",
+		"room_administration.png",
+		"room_auditorium.png",
+		"room_bedroom.png",
+		"room_chapel.png",
+		"room_class.png",
+		"room_computer.png",
+		"room_conference.png",
+		"room_crypt.png",
+		"room_kitchen.png",
+		"room_laboratory.png",
+		"room_library.png",
+		"room_locker.png",
+		"room_nursery.png",
+		"room_office.png",
+		"room_prison_cell.png",
+		"room_restaurant.png",
+		"room_security_check.png",
+		"room_sport.png",
+		"rooms.png",
+		"room_storage.png",
+		"room_technical.png",
+		"room_toilets.png",
+		"room_toilet.png",
+		"room_waiting.png",
+		"settings.png",
 		"shopping_alcohol.png",
 		"shopping_bakery.png",
 		"shopping_bicycle.png",
@@ -628,10 +628,10 @@
 		"shopping_tobacco.png",
 		"shopping_toys.png",
 		"shopping_video_rental.png",
-		"statue.svg",
-		"subway.svg",
-		"tickets_valid.svg",
-		"tickets_vending.svg",
+		"statue.png",
+		"subway.png",
+		"tickets_valid.png",
+		"tickets_vending.png",
 		"tourism_artwork.png",
 		"tourism_attraction.png",
 		"tourism_bed_and_breakfast.png",
@@ -647,7 +647,7 @@
 		"tourism_picnic_site.png",
 		"tourism_viewpoint.png",
 		"tourism_zoo.png",
-		"Trash_can.svg",
-		"Video_surveillance_logo.svg"
+		"Trash_can.png",
+		"Video_surveillance_logo.png"
 	]
 }

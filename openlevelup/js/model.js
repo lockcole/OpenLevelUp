@@ -454,6 +454,19 @@ FeatureGeometry: function(fGeometry) {
 			result[0] = result[0] / (_geom.coordinates[0].length -1);
 			result[1] = result[1] / (_geom.coordinates[0].length -1);
 		}
+		else if(_geom.type == "MultiPolygon") {
+			result = [0, 0];
+			
+			for(var i in _geom.coordinates[0][0]) {
+				if(i < _geom.coordinates[0][0].length - 1) {
+					result[0] += _geom.coordinates[0][0][i][0];
+					result[1] += _geom.coordinates[0][0][i][1];
+				}
+			}
+			
+			result[0] = result[0] / (_geom.coordinates[0][0].length -1);
+			result[1] = result[1] / (_geom.coordinates[0][0].length -1);
+		}
 		else {
 			console.log("Unknown type: "+_geom.type);
 		}

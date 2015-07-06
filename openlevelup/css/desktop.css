@@ -23,9 +23,14 @@
  * Style for main page
  */
 
-/************
- * SVG Area *
- ************/
+/*******
+ * Map *
+ *******/
+#map {
+	position: fixed;
+	z-index: -1;
+}
+
 #svg-area {
 	width: 100%;
 	height: 100%;
@@ -41,10 +46,8 @@
  * Main panels *
  ***************/
 #main-panel {
-	position: absolute;
+	float: left;
 	z-index: 1000;
-	left: 0;
-	top: 0;
 	bottom: 0;
 	width: 20%;
 	max-width: 20%;
@@ -206,17 +209,13 @@ footer {
  * Main panel buttons *
  **********************/
 #main-buttons {
-	position: absolute;
-	left: 20%;
+	position: relative;
+	float: left;
 	top: 0.2em;
 	display: table;
 	z-index: 1000;
 	border-collapse: separate;
 	border-spacing: 0 0.2em;
-}
-
-#main-buttons.opened {
-	left: 20%;
 }
 
 /* Individual button */
