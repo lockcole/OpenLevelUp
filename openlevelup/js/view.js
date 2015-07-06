@@ -699,7 +699,10 @@ FeatureView: function(main, feature) {
 			//Init layer object, depending of geometry type
 			switch(geomType) {
 				case "Point":
-					_layer.addLayer(_createMarker(geom.getLatLng()));
+					var marker = _createMarker(geom.getLatLng());
+					if(marker != null) {
+						_layer.addLayer(marker);
+					}
 					break;
 					
 				case "LineString":
@@ -741,10 +744,16 @@ FeatureView: function(main, feature) {
 							
 							if(hasIcon) {
 								if(style.rotateIcon) {
-									_layer.addLayer(_createMarker(coord, angle));
+									var marker = _createMarker(coord, angle);
+									if(marker != null) {
+										_layer.addLayer(marker);
+									}
 								}
 								else {
-									_layer.addLayer(_createMarker(coord));
+									var marker = _createMarker(coord);
+									if(marker != null) {
+										_layer.addLayer(marker);
+									}
 								}
 							}
 							
@@ -760,7 +769,10 @@ FeatureView: function(main, feature) {
 						var coord = L.latLng(centroid[1], centroid[0]);
 						
 						if(hasIcon) {
-							_layer.addLayer(_createMarker(coord));
+							var marker = _createMarker(coord);
+							if(marker != null) {
+								_layer.addLayer(marker);
+							}
 						}
 						
 						//Labels
@@ -2101,88 +2113,3 @@ MessagesView: function() {
 }
 
 };
-
-// 	/**
-// 	 * @return True if the given HTML element exists
-// 	 */
-// 	function _elementExists(html) {
-// 		return $(html).length > 0;
-// 	};
-// //OTHER METHODS
-// /*
-//  * Map related methods
-//  */
-// 	/**
-// 	 * This function initializes the Leaflet map
-// 	 */
-// 	this.mapInit = function(mobile) {
-// 		$("#images-close").click(function() { $("#op-images").hide(); });
-// 	};
-
-// /*
-//  * Images
-//  */
-// 	/**
-// 	 * Opens the images panel
-// 	 * @param tags The feature tags
-// 	 */
-// 	this.openImages = function(tags) {
-// 		//Open popup
-// 		$("#op-images").show();
-// 		$("#op-images .tabs div").removeClass();
-// 		
-// 		/*
-// 		 * Fill tabs
-// 		 */
-// 		//Simple URL
-// 		if(hasUrlImage(tags)) {
-// 			$("#tab-url a").show();
-// 			$("#tab-url div").html(_imageHtml(tags.image));
-// 			$("#tab-url").click(function() { controller.getView().changeImageTab("tab-url"); });
-// 		}
-// 		else {
-// 			$("#tab-url").addClass("hide");
-// 		}
-// 		
-// 		//Mapillary image
-// 		//tags.mapillary = 'Rv1w8WC8fpgBjJO7L5S9NQ'; //For debug purposes only
-// 		if(hasMapillaryImage(tags)) {
-// 			$("#tab-mapillary a").show();
-// 			$("#tab-mapillary div").html(_imageMapillaryHtml(tags.mapillary));
-// 			//Mapillary.init('mapillary', { image: tags.mapillary, width: $("#mapillary").width()-20, editor: false, showMap: false, showThumbs: false, showPlayControls: false });
-// 			$("#tab-mapillary").click(function() { controller.getView().changeImageTab("tab-mapillary"); });
-// 		}
-// 		else {
-// 			$("#tab-mapillary").addClass("hide");
-// 		}
-// 		$("#tab-flickr").addClass("hide");
-// 		
-// 		//Set default tab
-// 		$("#op-images .tabs > div:not(.hide):first").addClass("selected");
-// 	};
-// 	
-// 	/**
-// 	 * @param url The image URL
-// 	 * @return The image HTML markup
-// 	 */
-// 	function _imageHtml(url) {
-// 		return '<a href="'+url+'" target="_blank"><img src="'+url+'" /></a>';
-// 	};
-// 	
-// 	/**
-// 	 * @param id The mapillary image ID
-// 	 * @return The image HTML markup
-// 	 */
-// 	function _imageMapillaryHtml(id) {
-// 		return '<a href="http://www.mapillary.com/map/im/'+id+'" target="_blank"><img src="https://d1cuyjsrcm0gby.cloudfront.net/'+id+'/thumb-2048.jpg" /></a>';
-// 	};
-// 	
-// 	/**
-// 	 * Changes the currently opened tab in images popup
-// 	 * @param tab The tab name
-// 	 */
-// 	this.changeImageTab = function(tab) {
-// 		$("#op-images .tabs div").removeClass("selected");
-// 		$("#"+tab).addClass("selected");
-// 	};
-

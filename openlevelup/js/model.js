@@ -765,7 +765,10 @@ FeatureImages: function(feature) {
 
 //CONSTRUCTOR
 	function _init() {
-		_img = _parseImageTag(feature.getTag("image"));
+		var imageTag = feature.getTag("image");
+		if(imageTag != undefined) {
+			_img = _parseImageTag(imageTag);
+		}
 	};
 
 //ACCESSORS
@@ -787,17 +790,18 @@ FeatureImages: function(feature) {
 		
 		var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
 		var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
-		var regexWiki = /^(File):(\S+)$/;
+		var regexWiki = /^(File):.+$/;
 		
 		if(image.match(regexUrl)) {
 			result = image;
 		}
-		else if(image.match(regexUrlNoProtocol)) {
+		else if(image.match(regexUrlNoProtocol) && !image.match(regexWiki)) {
 			result = 'http://'+image;
 		}
 		else if(image.match(regexWiki)) {
-			var imageUtf8 = unescape(encodeURIComponent(image)).replace(' ', '_');
-			var digest = hex_md5(imageUtf8);
+			var file = image.substring(5);
+			var imageUtf8 = file.replace(/ /g, '_');
+			var digest = md5(imageUtf8);
 			var folder = digest[0] + '/' + digest[0] + digest[1] + '/' + encodeURIComponent(imageUtf8);
 			result = 'http://upload.wikimedia.org/wikipedia/commons/' + folder;
 		}

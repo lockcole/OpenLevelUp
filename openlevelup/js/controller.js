@@ -28,6 +28,7 @@ OLvlUp.controller = {
 /** Overpass API server URL **/
 API_URL: "http://www.overpass-api.de/api/interpreter?data=",
 //API_URL: "http://api.openstreetmap.fr/oapi/interpreter?data=",
+//API_URL: "http://overpass.osm.rambler.ru/cgi/interpreter?data=",
 
 // ======= CLASSES =======
 /**
