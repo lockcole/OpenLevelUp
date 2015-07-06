@@ -421,8 +421,8 @@ MapView: function(main) {
 		
 		//Trigger for map events
 		_map.on('moveend', function(e) { controller.onMapUpdate(); });
-		_map.on("baselayerchange", controller.onMapChange);
-		_map.on("layeradd", controller.onLayerAdd);
+		_map.on("baselayerchange", controller.onMapLayerChange);
+		_map.on("layeradd", controller.onMapLayerAdd);
 	};
 
 //ACCESSORS
@@ -1330,7 +1330,9 @@ OptionsView: function() {
 		$("#show-buildings-only").prop("checked", _buildings);
 		
 		//Add triggers
-		$("#button-settings").click(controller.onShowSettings);
+		$("#button-settings").click(function() {
+			controller.getView().showCentralPanel("settings");
+		});
 		$("#show-transcendent").change(function() {
 			_self.changeTranscendent();
 			controller.getView().updateOptionChanged();
@@ -1444,7 +1446,9 @@ OptionsView: function() {
 ExportView: function() {
 //CONSTRUCTOR
 	function _init() {
-		$("#button-export").click(controller.onShowExport);
+		$("#button-export").click(function() {
+			controller.getView().showCentralPanel("export");
+		});
 		//$("#export-link").click(controller.onExportLevel);
 		//$("#export-link-img").click(controller.onExportLevelImage);
 	};
@@ -1763,7 +1767,9 @@ NamesView: function(main) {
 
 //CONSTRUCTOR
 	function _init() {
-		$("#button-rooms").click(controller.onShowRooms);
+		$("#button-rooms").click(function() {
+			_mainView.showCentralPanel("room-names");
+		});
 		$("#search-room").click(_self.searchFocus);
 		$("#search-room").focus(_self.searchFocus);
 		$("#search-room").focusout(_self.searchFocus);

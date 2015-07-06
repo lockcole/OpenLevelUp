@@ -24,37 +24,6 @@
  */
 
 /**
- * Is the given value a float value ?
- * @param val The value to test
- * @return True if it's a float
- */
-function isFloat(val) {
-	return !isNaN(val);
-}
-
-/**
- * @return The current page URL
- */
-function myUrl() {
-	return $(location).attr('href').split('?')[0];
-}
-
-/**
- * @return The URL hash
- */
-function myUrlHash() {
-	return $(location).attr('href').split('#')[1];
-}
-
-/**
- * @return The current folder URL
- */
-function myFolderUrl() {
-	var pos = $(location).attr('href').lastIndexOf('/');
-	return $(location).attr('href').substring(0, pos);
-}
-
-/**
  * Parses raw OSM XML data, and return result.
  * @param data The OSM XML data.
  * @return The OSM parsed data (GeoJSON)
@@ -85,34 +54,6 @@ function mergeArrays(a1, a2) {
 		}
 	}
 	return a;
-};
-
-/*
- * Images management
- */
-/**
- * @param tags The feature tags
- * @return True if a simple image is defined
- */
-function hasUrlImage(tags) {
-	return tags.image != undefined;
-};
-
-/**
- * @param tags The feature tags
- * @return True if a mapillary image is defined
- */
-function hasMapillaryImage(tags) {
-	return tags.mapillary != undefined;
-};
-
-/**
- * Does the given feature have an image ?
- * @param tags The feature tags
- * @return True if it has images
- */
-function hasImages(tags) {
-	return hasUrlImage(tags) || hasMapillaryImage(tags);
 };
 
 /**

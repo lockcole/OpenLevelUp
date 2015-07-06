@@ -30,7 +30,7 @@ OLvlUp.model = {
  * The OSM global data container.
  * It contains the parsed object from Overpass call.
  */
-OSMData: function(styleDef, bbox) {
+OSMData: function(bbox, styleDef) {
 //ATTRIBUTES
 	/** The feature objects **/
 	var _features = null;

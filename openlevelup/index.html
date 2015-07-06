@@ -96,7 +96,8 @@
 	<script src="js/controller.js" type="text/javascript"></script>
 	
 	<!-- CSS style -->
-	<link rel="stylesheet" href="css/style.css" />
+	<link rel="stylesheet" href="css/common.css" />
+	<link rel="stylesheet" href="css/desktop.css" />
 	<link rel="stylesheet" href="css/labels.css" />
 </head>
 <body>
@@ -113,17 +114,19 @@
 		<div class="row">
 			<!-- Header -->
 			<header>
-				<div id="header-content">
-					<div id="header-title" class="cell">
-						<h1><a href="index.html" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a></h1>
-						<p>See inside buildings<br />with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
-					</div>
-					<div id="header-levels" class="cell">
-						<p>
-							<a class="button-level" id="levelUp"><img src="img/arrow2_up.png" alt="&uarr;" /></a><br />
-							<select id="level" disabled="true"></select><br />
-							<a class="button-level" id="levelDown"><img src="img/arrow2_down.png" alt="&darr;" /></a>
-						</p>
+				<div id="header-table">
+					<div id="header-content">
+						<div id="header-title" class="cell">
+							<h1><a href="index.html" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a></h1>
+							<p>See inside buildings<br />with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
+						</div>
+						<div id="header-levels" class="cell">
+							<p>
+								<a class="button-level" id="levelUp"><img src="img/arrow2_up.png" alt="&uarr;" /></a><br />
+								<select id="level" disabled="true"></select><br />
+								<a class="button-level" id="levelDown"><img src="img/arrow2_down.png" alt="&darr;" /></a>
+							</p>
+						</div>
 					</div>
 				</div>
 			</header>
@@ -215,7 +218,6 @@
 	<!-- Images panel -->
 	<div class="overlay-panel" id="op-images">
 		<div class="overlay-content">
-			<h2>Pictures</h2>
 			<div class="tabs">
 				<div id="tab-imgs">
 					<a href="#tab-imgs">Images</a>
