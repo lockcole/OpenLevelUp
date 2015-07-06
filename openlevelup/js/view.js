@@ -1932,7 +1932,7 @@ ImagesView: function(main) {
 	function _init() {
 		$("#images-close").click(function() { $("#op-images").hide(); });
 		$("#tab-imgs").click(function() { controller.getView().getImagesView().changeTab("tab-imgs"); });
-		$("#tab-status").click(function() { controller.getView().getImagesView().changeTab("tab-status"); });
+		$("#tab-spheric").click(function() { controller.getView().getImagesView().changeTab("tab-spheric"); });
 	};
 
 //OTHER METHODS
@@ -1942,18 +1942,37 @@ ImagesView: function(main) {
 	 */
 	this.open = function(ftId) {
 		//Retrieve feature
-		var imagesUrl = _mainView.getData().getFeature(ftId).getImages().get();
+		var images = _mainView.getData().getFeature(ftId).getImages().get();
 		
-		//Create HTML
-		var markup = '';
-		for(var i in imagesUrl) {
-			var url = imagesUrl[i];
-			markup += '<a href="'+url+'" target="_blank"><img src="'+url+'" /></a><br />';
+		//Create images list
+		var imagesData = [];
+		for(var i in images) {
+			var img = images[i];
+			imagesData.push({
+				image: img.url,
+				link: img.url,
+				title: img.source,
+				description: img.tag
+			});
 		}
 		
-		//Set tabs
-		$("#tab-imgs div").html(markup);
-		
+		//Set images tab
+		if(imagesData.length > 0) {
+			//Load base images
+			Galleria.run('.galleria', { dataSource: imagesData });
+			
+			//Look for flickr images
+			var osmId = ftId.split("/");
+			var flickr = new Galleria.Flickr();
+			flickr.setOptions({
+				thumbSize: 'medium'
+			}).tags('osm:'+osmId[0]+'='+osmId[1], function(data) {
+				Galleria.get(0).push(data);
+			});
+		}
+		else {
+			$("#tab-imgs div").html("No valid images");
+		}
 		
 		//Open panel
 		$("#tab-imgs").addClass("selected");

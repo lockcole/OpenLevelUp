@@ -773,13 +773,26 @@ FeatureImages: function(feature) {
 
 //ACCESSORS
 	/**
-	 * @return All the pictures URL (as an array)
+	 * @return All the simple pictures (as an array)
 	 */
 	this.get = function() {
 		var result = [];
 		
-		if(_img != null) { result.push(_img); }
-		if(_mapillary != undefined) { result.push('https://d1cuyjsrcm0gby.cloudfront.net/'+_mapillary+'/thumb-2048.jpg'); }
+		if(_img != null) {
+			result.push({
+				url: _img,
+				source: "Web",
+				tag: "image = "+feature.getTag("image")
+			});
+		}
+		
+		if(_mapillary != undefined) {
+			result.push({
+				url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+_mapillary+'/thumb-2048.jpg',
+				source: "Mapillary",
+				tag: "mapillary = "+_mapillary
+			});
+		}
 
 		return result;
 	};

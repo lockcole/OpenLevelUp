@@ -66,6 +66,12 @@
 	<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 	
+	<!-- Galleria includes -->
+	<script src="lib/galleria/galleria-1.4.2.min.js"></script>
+	<link rel="stylesheet" href="lib/galleria/themes/classic/galleria.classic.css">
+	<script src="lib/galleria/themes/classic/galleria.classic.min.js"></script>
+	<script src="lib/galleria/plugins/flickr/galleria.flickr.min.js"></script>
+	
 	<!-- Leaflet plugin includes -->
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.css" />
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.Default.css" />
@@ -213,12 +219,13 @@
 			<div class="tabs">
 				<div id="tab-imgs">
 					<a href="#tab-imgs">Images</a>
-					<div>Picture</div>
+					<div class="galleria">
+					</div>
 				</div>
-				<div id="tab-status">
-					<a href="#tab-status">Status</a>
-					<div>Mapillary</div>
-				</div>
+				<!--div id="tab-spheric">
+					<a href="#tab-spheric">Sphere</a>
+					<div>Spherical images</div>
+				</div-->
 			</div>
 			<p class="overlay-close"><a id="images-close" href="#">Close</a></p>
 		</div>

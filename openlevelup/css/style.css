@@ -658,11 +658,16 @@ p.popup-txt.centered {
 	display: block;
 }
 
-.tabs > div > div img {
+/*.tabs > div > div img {
 	height: 100%;
 	max-width: 100%;
 }
 
 .tabs > div > div#mapillary {
 	overflow-y: auto;
+}*/
+
+/* Galleria */
+.galleria {
+	max-width: 100%;
 }
