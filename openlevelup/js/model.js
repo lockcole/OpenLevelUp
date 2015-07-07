@@ -848,9 +848,9 @@ FeatureImages: function(feature) {
 	function _parseImageTag(image) {
 		var result = null;
 		
-		var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
-		var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
-		var regexWiki = /^(File):.+$/;
+		var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|gif|jpg|jpeg|bmp)$/;
+		var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|gif|jpg|jpeg|bmp)$/;
+		var regexWiki = /^(File):.+\.(png|gif|jpg|jpeg|bmp)$/i;
 		
 		if(image.match(regexUrl)) {
 			result = image;
