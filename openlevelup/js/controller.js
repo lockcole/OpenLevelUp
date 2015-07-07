@@ -398,14 +398,15 @@ Ctrl: function() {
 								var feature = _data.getFeature(ftId);
 								if(feature != undefined) {
 									feature.getImages().addFlickrImage(photo.title, photo.url_c);
-									if(_view.getMapView().updatePopup(ftId)) {
-										associatedPhotos++;
-									}
+									associatedPhotos++;
 								}
 							}
 						}
 					}
 					
+					if(associatedPhotos > 0) {
+						_view.updatePhotosAdded();
+					}
 					console.log("[Flickr] Done processing images ("+associatedPhotos+" associated)");
 				}
 				else {

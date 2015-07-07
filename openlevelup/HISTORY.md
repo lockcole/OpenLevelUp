@@ -4,6 +4,7 @@ Changes history
 7 july 2015
 -----------
 * Added Flickr photos retrieval
+* Objects with associated photos can be shown on map (option)
 
 6 july 2015
 -----------

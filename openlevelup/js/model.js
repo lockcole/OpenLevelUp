@@ -340,7 +340,7 @@ Feature: function(f, styleDef) {
 	 * @return True if the feature has related images
 	 */
 	this.hasImages = function() {
-		return (_images == undefined && (_tags.image != undefined || _tags.mapillary != undefined)) || (_images != undefined && _images != null);
+		return (_images == undefined && (_tags.image != undefined || _tags.mapillary != undefined)) || (_images != undefined && _images != null && _images.hasValidImages());
 	};
 	
 	/**
@@ -781,6 +781,9 @@ FeatureImages: function(feature) {
 	
 	/** The Flickr images **/
 	var _flickr = [];
+	
+	/** This object **/
+	var _self = this;
 
 //CONSTRUCTOR
 	function _init() {
@@ -818,6 +821,13 @@ FeatureImages: function(feature) {
 		}
 
 		return result;
+	};
+	
+	/**
+	 * @return True if it has at least one valid image
+	 */
+	this.hasValidImages = function() {
+		return _self.get().length > 0;
 	};
 
 //MODIFIERS

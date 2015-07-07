@@ -290,6 +290,13 @@ MainView: function(ctrl, mobile) {
 	};
 	
 	/**
+	 * Updates the view when photos are added
+	 */
+	this.updatePhotosAdded = function() {
+		_cMap.update();
+	};
+	
+	/**
 	 * Displays the given central panel
 	 * @param id The panel ID
 	 */
@@ -773,13 +780,18 @@ FeatureView: function(main, feature) {
 			//Look for an icon or a label
 			var hasIcon = style.icon != undefined;
 			var labelizable = _labelizable();
+			var hasPhoto = _mainView.getOptionsView().showPhotos() && feature.hasImages();
 			
-			if(hasIcon || labelizable) {
+			if(hasIcon || labelizable || hasPhoto) {
 				switch(geomType) {
 					case "Point":
 						//Labels
 						if(labelizable) {
 							_layer.addLayer(_createLabel(geom.getLatLng(), hasIcon));
+						}
+						
+						if(hasPhoto) {
+							_layer.addLayer(_createPhotoIcon(geom.getLatLng()));
 						}
 						break;
 						
@@ -814,6 +826,10 @@ FeatureView: function(main, feature) {
 							if(labelizable) {
 								_layer.addLayer(_createLabel(coord, hasIcon, angle));
 							}
+							
+							if(hasPhoto) {
+								_layer.addLayer(_createPhotoIcon(coord));
+							}
 						}
 						break;
 						
@@ -831,6 +847,10 @@ FeatureView: function(main, feature) {
 						//Labels
 						if(labelizable) {
 							_layer.addLayer(_createLabel(coord, hasIcon));
+						}
+						
+						if(hasPhoto) {
+							_layer.addLayer(_createPhotoIcon(coord));
 						}
 						break;
 					
@@ -863,6 +883,10 @@ FeatureView: function(main, feature) {
 							//Labels
 							if(labelizable) {
 								_layer.addLayer(_createLabel(coord, hasIcon, angle));
+							}
+							
+							if(hasPhoto) {
+								_layer.addLayer(_createPhotoIcon(coord));
 							}
 						}
 						break;
@@ -1005,6 +1029,20 @@ FeatureView: function(main, feature) {
 			
 		return result;
 	}
+	
+	/**
+	 * Creates a photo marker with the given coordinates
+	 * @param latlng The coordinates as leaflet LatLng
+	 * @return The marker as leaflet layer
+	 */
+	function _createPhotoIcon(latlng) {
+		return L.circleMarker(latlng,{
+			color: "green",
+			fill: false,
+			opacity: 0.7,
+			radius: OLvlUp.view.ICON_SIZE/2 + 1
+		})
+	};
 	
 	/**
 	 * Creates the popup for a given feature
@@ -1411,6 +1449,9 @@ OptionsView: function() {
 	/** Show only buildings **/
 	var _buildings = false;
 	
+	/** Show photos markers **/
+	var _photos = false;
+	
 	/** This object **/
 	var _self = this;
 
@@ -1420,6 +1461,7 @@ OptionsView: function() {
 		$("#show-transcendent").prop("checked", _transcend);
 		$("#show-unrendered").prop("checked", _unrendered);
 		$("#show-buildings-only").prop("checked", _buildings);
+		$("#show-photos").prop("checked", _photos);
 		
 		//Add triggers
 		$("#button-settings").click(function() {
@@ -1435,6 +1477,10 @@ OptionsView: function() {
 		});
 		$("#show-buildings-only").change(function() {
 			_self.changeBuildingsOnly();
+			controller.getView().updateOptionChanged();
+		});
+		$("#show-photos").change(function() {
+			_self.changePhotos();
 			controller.getView().updateOptionChanged();
 		});
 		_self.enable();
@@ -1461,6 +1507,13 @@ OptionsView: function() {
 	this.showBuildingsOnly = function() {
 		return _buildings;
 	};
+	
+	/**
+	 * @return Must we show photo markers ?
+	 */
+	this.showPhotos = function() {
+		return _photos;
+	};
 
 //MODIFIERS
 	/**
@@ -1482,6 +1535,13 @@ OptionsView: function() {
 	 */
 	this.changeBuildingsOnly = function() {
 		_buildings = !_buildings;
+	};
+	
+	/**
+	 * Must we show photo markers ?
+	 */
+	this.changePhotos = function() {
+		_photos = !_photos;
 	};
 	
 	/**
@@ -1509,12 +1569,21 @@ OptionsView: function() {
 	};
 	
 	/**
+	 * Must we show photo markers ?
+	 */
+	this.setPhotos = function(p) {
+		_photos = p;
+		$("#show-photos").prop("checked", _photos);
+	};
+	
+	/**
 	 * Disable options buttons
 	 */
 	this.disable = function() {
 		$("#show-buildings-only").prop("disabled", true);
 		$("#show-unrendered").prop("disabled", true);
 		$("#show-transcendent").prop("disabled", true);
+		$("#show-photos").prop("disabled", true);
 	};
 	
 	/**
@@ -1524,6 +1593,7 @@ OptionsView: function() {
 		$("#show-buildings-only").prop("disabled", false);
 		$("#show-unrendered").prop("disabled", false);
 		$("#show-transcendent").prop("disabled", false);
+		$("#show-photos").prop("disabled", false);
 	};
 
 //INIT
@@ -1729,11 +1799,12 @@ URLView: function(main) {
 				_zoom = letterToInt(shortRes[7]);
 				
 				var options = intToBitArray(base62toDec(shortRes[8]));
-				while(options.length < 4) { options = "0" + options; }
+				while(options.length < 5) { options = "0" + options; }
 				optionsView.setUnrendered(options[options.length - 1] == 1);
 				//optionsView.setLegacy(options[options.length - 2] == 1); //Deprecated option
 				optionsView.setTranscendent(options[options.length - 3] == 1);
 				optionsView.setBuildingsOnly(options[options.length - 4] == 1);
+				optionsView.setPhotos(options[options.length - 5] == 1);
 				
 				//Get level if available
 				if(shortRes[10] != undefined && shortRes[11] != undefined) {
@@ -1759,6 +1830,7 @@ URLView: function(main) {
 			if(parameters.transcend != undefined) { optionsView.setTranscendent(parameters.transcend == "1"); }
 			if(parameters.unrendered != undefined) { optionsView.setUnrendered(parameters.unrendered == "1"); }
 			if(parameters.buildings != undefined) { optionsView.setBuildingsOnly(parameters.buildings == "1"); }
+			if(parameters.photos != undefined) { optionsView.setPhotos(parameters.photos == "1"); }
 			_level = parameters.level;
 			_tiles = parameters.tiles;
 		}
@@ -1776,6 +1848,7 @@ URLView: function(main) {
 			params += "&transcend="+((optionsView.showTranscendent()) ? "1" : "0");
 			params += "&unrendered="+((optionsView.showUnrendered()) ? "1" : "0");
 			params += "&buildings="+((optionsView.showBuildingsOnly()) ? "1" : "0");
+			params += "&photos="+((optionsView.showPhotos()) ? "1" : "0");
 		}
 		
 		var hash = _getUrlHash();
@@ -1818,6 +1891,7 @@ URLView: function(main) {
 		}
 		
 		var shortOptions = bitArrayToBase62([
+					((optionsView.showPhotos()) ? "1" : "0"),
 					((optionsView.showBuildingsOnly()) ? "1" : "0"),
 					((optionsView.showTranscendent()) ? "1" : "0"),
 					"1", //((optionsView.showLegacy()) ? "1" : "0"),
