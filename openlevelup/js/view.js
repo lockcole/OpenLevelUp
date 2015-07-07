@@ -2140,15 +2140,6 @@ ImagesView: function(main) {
 		if(imagesData.length > 0) {
 			//Load base images
 			Galleria.run('.galleria', { dataSource: imagesData });
-			
-			//Look for flickr images
-			var osmId = ftId.split("/");
-			var flickr = new Galleria.Flickr();
-			flickr.setOptions({
-				thumbSize: 'medium'
-			}).tags('osm:'+osmId[0]+'='+osmId[1], function(data) {
-				Galleria.get(0).push(data);
-			});
 		}
 		else {
 			$("#tab-imgs div").html("No valid images");
