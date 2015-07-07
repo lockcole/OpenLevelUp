@@ -31,12 +31,21 @@
 function parseOsmData(data) {
 	//Convert XML to GeoJSON
 	data = data || "<osm></osm>";
+	return osmtogeojson(parseApiData(data));
+};
+
+/**
+ * Parses whatever API data
+ * @param data The data as JSON or XML
+ * @return The parsed data
+ */
+function parseApiData(data) {
 	try {
 		data = $.parseXML(data);
 	} catch(e) {
 		data = JSON.parse(data);
 	}
-	return osmtogeojson(data);
+	return data;
 };
 
 /**

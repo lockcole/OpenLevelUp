@@ -377,6 +377,9 @@ Feature: function(f, styleDef) {
 	 * @return The feature images object or null if no available images
 	 */
 	this.getImages = function() {
+		if(_images == null || _images == undefined) {
+			_images = new OLvlUp.model.FeatureImages(_self);
+		}
 		return _images;
 	};
 	
@@ -775,6 +778,9 @@ FeatureImages: function(feature) {
 	
 	/** The image from mapillary=* tag **/
 	var _mapillary = feature.getTag("mapillary");
+	
+	/** The Flickr images **/
+	var _flickr = [];
 
 //CONSTRUCTOR
 	function _init() {
@@ -806,8 +812,26 @@ FeatureImages: function(feature) {
 				tag: "mapillary = "+_mapillary
 			});
 		}
+		
+		if(_flickr.length > 0) {
+			result = mergeArrays(result, _flickr);
+		}
 
 		return result;
+	};
+
+//MODIFIERS
+	/**
+	 * Adds a Flickr image to this object
+	 * @param title The image title
+	 * @param url The image URL
+	 */
+	this.addFlickrImage = function(title, url) {
+		_flickr.push({
+			url: url,
+			source: "Flickr",
+			tag: title
+		});
 	};
 
 //OTHER METHODS

@@ -470,6 +470,22 @@ MapView: function(main) {
 	this.resetVars = function() {
 		_oldZoom = null;
 	};
+	
+	/**
+	 * Updates the popup for the given feature
+	 * @param ftId The feature ID
+	 * @return True if popup found and updated
+	 */
+	this.updatePopup = function(ftId) {
+		var result = false;
+		if(_dataPopups[ftId] != undefined) {
+			var ftViewTmp = new OLvlUp.view.FeatureView(_mainView, _mainView.getData().getFeature(ftId));
+			var popup = ftViewTmp.createPopup();
+			var featureViewLayer = _dataPopups[ftId].bindPopup(popup);
+			result = true;
+		}
+		return result;
+	};
 
 //OTHER METHODS
 	/**
@@ -714,6 +730,9 @@ FeatureView: function(main, feature) {
 	
 	/** The main view **/
 	var _mainView = main;
+	
+	/** This object **/
+	var _self = this;
 
 //CONSTRUCTOR
 	/**
@@ -855,7 +874,7 @@ FeatureView: function(main, feature) {
 			
 			//Add popup if needed
 			if(style.popup == undefined || style.popup == "yes") {
-				_layer.bindPopup(_createPopup());
+				_layer.bindPopup(_self.createPopup());
 				_hasPopup = true;
 			}
 		}
@@ -989,10 +1008,9 @@ FeatureView: function(main, feature) {
 	
 	/**
 	 * Creates the popup for a given feature
-	 * @param feature The feature the popup will be created for
-	 * @return The text the popup will contain
+	 * @return The popup object
 	 */
-	function _createPopup() {
+	this.createPopup = function() {
 		var name = feature.getName();
 		var style = feature.getStyle().get();
 		var isMobile = _mainView.isMobile();
@@ -1257,7 +1275,6 @@ LevelView: function(main) {
 	 * @param lvl The new level (if undefined, uses the current select value)
 	 */
 	this.set = function(lvl) {
-		console.log("level set");
 		var data = _mainView.getData();
 		var lvlOk = (lvl != null) ? parseFloat(lvl) : parseFloat($("#level").val());
 		
@@ -1317,7 +1334,6 @@ LevelView: function(main) {
 	 * Goes to the upper level
 	 */
 	this.up = function() {
-		console.log("up");
 		if(_mainView.getMapView().get().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
 			var currentLevelId = _levels.indexOf(_level);
 			
@@ -1337,7 +1353,6 @@ LevelView: function(main) {
 	 * Goes to the lower level
 	 */
 	this.down = function() {
-		console.log("down");
 		if(_mainView.getMapView().get().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
 			var currentLevelId = _levels.indexOf(_level);
 			

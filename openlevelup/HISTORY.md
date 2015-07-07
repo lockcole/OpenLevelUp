@@ -1,8 +1,12 @@
 Changes history
 ===============
 
-06 july 2015
-------------
+7 july 2015
+-----------
+* Added Flickr photos retrieval
+
+6 july 2015
+-----------
 * Refactored version published
 * Gallery system for images
 * Improved data management

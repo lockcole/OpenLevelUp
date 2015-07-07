@@ -26,9 +26,15 @@
 OLvlUp.controller = {
 // ====== CONSTANTS ====== 
 /** Overpass API server URL **/
-API_URL: "http://www.overpass-api.de/api/interpreter?data=",
+//API_URL: "http://www.overpass-api.de/api/interpreter?data=",
 //API_URL: "http://api.openstreetmap.fr/oapi/interpreter?data=",
-//API_URL: "http://overpass.osm.rambler.ru/cgi/interpreter?data=",
+API_URL: "http://overpass.osm.rambler.ru/cgi/interpreter?data=",
+
+/** Flickr API URL **/
+FLICKR_API_URL: "https://api.flickr.com/services/rest/?",
+
+/** Flickr API Key **/
+FLICKR_API_KEY: "d06fb1ebb3ede5813b89c79320e11ab8",
 
 // ======= CLASSES =======
 /**
@@ -319,6 +325,9 @@ Ctrl: function() {
 				}
 				else {
 					controller.endMapUpdate();
+					
+					//Download Flickr data
+					controller.downloadFlickr(bbox);
 				}
 			},
 			"text")
@@ -332,6 +341,92 @@ Ctrl: function() {
 		controller.getView().getLoadingView().setLoading(false);
 		controller.getView().getMessagesView().displayMessage("An error occured during data download", "error");
 	};
-}
 
+/*********************
+ * Flickr management *
+ *********************/
+	/**
+	 * Retrieves picture data from Flickr
+	 * @param bbox The bounding box
+	 */
+	this.downloadFlickr = function(bbox) {
+		var params = 'method=flickr.photos.search&api_key='+OLvlUp.controller.FLICKR_API_KEY+'&bbox='+bbox.toBBoxString()+'&machine_tags=osm:&has_geo=1&extras=machine_tags,url_c&format=json&nojsoncallback=1';
+		var url = OLvlUp.controller.FLICKR_API_URL+params;
+		
+		//Download
+		$.get(
+			url,
+			controller.setFlickrData,
+			"text"
+		).fail(controller.onFlickrDownloadFail);
+	};
+	
+	/**
+	 * Processes the received Flickr data, and updates the model objects
+	 * @param data The Flickr data, as JSON
+	 */
+	this.setFlickrData = function(data) {
+		console.log("[Flickr] Updating data");
+		try {
+			//Parse JSON
+			parsedData = parseApiData(data);
+			
+			if(_data.isInitialized()) {
+				if(parsedData.stat == "ok") {
+					var associatedPhotos = 0;
+					var osmKeyRegex = /^(osm:)(node|way|relation)$/;
+					
+					//Read photos
+					var photoList = parsedData.photos.photo;
+					for(var i in photoList) {
+						var photo = photoList[i];
+						
+						//Update objects according to machine tags
+						var machineTags = photo.machine_tags.split(',');
+						for(var j in machineTags) {
+							var machineTag = machineTags[j].split('=');
+							var key = machineTag[0];
+							var value = machineTag[1];
+							
+							//Check if valid key and value
+							if(key.match(osmKeyRegex) && !isNaN(value)) {
+								//Kind of object
+								var type = key.split(':')[1];
+								var ftId = type+'/'+value;
+								
+								//Update given object
+								var feature = _data.getFeature(ftId);
+								if(feature != undefined) {
+									feature.getImages().addFlickrImage(photo.title, photo.url_c);
+									if(_view.getMapView().updatePopup(ftId)) {
+										associatedPhotos++;
+									}
+								}
+							}
+						}
+					}
+					
+					console.log("[Flickr] Done processing images ("+associatedPhotos+" associated)");
+				}
+				else {
+					console.log("[Flickr] Error: received corrupted data");
+					console.log(data);
+				}
+			}
+			else {
+				console.log("[Flickr] Error: map data is not initialized");
+			}
+		}
+		catch(e) {
+			console.log("[Flickr] Error during data process: "+e);
+		}
+	};
+	
+	/**
+	 * This function is called when data download fails
+	 */
+	this.onFlickrDownloadFail = function() {
+		console.log("[Flickr] An error occured")
+	};
+}
 };
