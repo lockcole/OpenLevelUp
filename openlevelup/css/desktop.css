@@ -78,6 +78,7 @@ header, footer {
 
 header, footer, #central {
 	display: table-cell;
+	visibility: hidden;
 }
 
 header p, footer p {
