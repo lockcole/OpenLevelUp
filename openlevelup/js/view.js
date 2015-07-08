@@ -2108,6 +2108,9 @@ ImagesView: function(main) {
 	/** The main view **/
 	var _mainView = main;
 
+	/** This object **/
+	var _self = this;
+	
 //CONSTRUCTOR
 	function _init() {
 		$("#images-close").click(function() { $("#op-images").hide(); });
@@ -2122,7 +2125,8 @@ ImagesView: function(main) {
 	 */
 	this.open = function(ftId) {
 		//Retrieve feature
-		var images = _mainView.getData().getFeature(ftId).getImages().get();
+		var ftImgs = _mainView.getData().getFeature(ftId).getImages();
+		var images = ftImgs.get();
 		
 		//Create images list
 		var imagesData = [];
@@ -2145,6 +2149,12 @@ ImagesView: function(main) {
 			$("#tab-imgs div").html("No valid images");
 		}
 		
+		//Update images status
+		var status = ftImgs.getStatus();
+		_self.updateStatus("web", status.web);
+		_self.updateStatus("mapillary", status.mapillary);
+		_self.updateStatus("flickr", status.flickr);
+		
 		//Open panel
 		$("#tab-imgs").addClass("selected");
 		$("#op-images").show();
@@ -2158,6 +2168,19 @@ ImagesView: function(main) {
  		$("#op-images .tabs div").removeClass("selected");
  		$("#"+tab).addClass("selected");
  	};
+	
+	/**
+	 * Changes the status for a given source
+	 * @param source The image source (mapillary, flickr, web)
+	 * @param status The image status (ok, missing, bad, unknown)
+	 */
+	this.updateStatus = function(source, status) {
+		var element = $("#status-"+source);
+		element.removeClass("ok missing bad");
+		if(status != "unknown") {
+			element.addClass(status);
+		}
+	};
 
 //INIT
 	_init();

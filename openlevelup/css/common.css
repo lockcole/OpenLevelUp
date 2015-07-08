@@ -309,3 +309,49 @@ p.popup-txt.centered {
 	height: 100%;
 	max-width: 100%;
 }
+
+/* Images status */
+#op-images-footer > p {
+	display: inline-block;
+}
+
+#op-images-status {
+	float: left;
+	margin-left: 10px;
+	margin-bottom: 5px;
+}
+
+#op-images-footer .overlay-close {
+	float: right;
+}
+
+#op-images-footer .clear {
+	clear: both;
+}
+
+#op-images-status a {
+	color: white;
+	cursor: help;
+}
+
+#op-images-status img {
+	height: 24px;
+}
+
+.status {
+	font-size: 2.7em;
+	margin-right: 20px;
+	color: orange;
+}
+
+.status.ok {
+	color: green;
+}
+
+.status.missing {
+	color: white;
+}
+
+.status.bad {
+	color: red;
+}

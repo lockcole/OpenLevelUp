@@ -774,7 +774,7 @@ FeatureStyle: function(feature, jsonStyle) {
 FeatureImages: function(feature) {
 //ATTRIBUTES
 	/** The image from image=* tag **/
-	var _img = null;
+	var _img = undefined;
 	
 	/** The image from mapillary=* tag **/
 	var _mapillary = feature.getTag("mapillary");
@@ -800,7 +800,7 @@ FeatureImages: function(feature) {
 	this.get = function() {
 		var result = [];
 		
-		if(_img != null) {
+		if(_img != null && _img != undefined) {
 			result.push({
 				url: _img,
 				source: "Web",
@@ -821,6 +821,32 @@ FeatureImages: function(feature) {
 		}
 
 		return result;
+	};
+	
+	/**
+	 * @return The images status as an object { source => status }
+	 */
+	this.getStatus = function() {
+		var status = {};
+		
+		//Web image
+		if(_img === null) {
+			status.web = "bad";
+		}
+		else if(_img === undefined) {
+			status.web = "missing";
+		}
+		else {
+			status.web = "ok";
+		}
+		
+		//Mapillary
+		status.mapillary = (_mapillary != undefined) ? "ok" : "missing";
+		
+		//Flickr
+		status.flickr = (_flickr.length > 0) ? "ok" : "missing";
+		
+		return status;
 	};
 	
 	/**
@@ -846,7 +872,7 @@ FeatureImages: function(feature) {
 
 //OTHER METHODS
 	function _parseImageTag(image) {
-		var result = null;
+		var result = undefined;
 		
 		var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|gif|jpg|jpeg|bmp)$/;
 		var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|gif|jpg|jpeg|bmp)$/;
@@ -867,6 +893,7 @@ FeatureImages: function(feature) {
 		}
 		else {
 			console.log("Invalid image key: "+image);
+			result = null;
 		}
 		
 		return result;
