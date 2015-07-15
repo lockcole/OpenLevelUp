@@ -299,26 +299,6 @@ Feature: function(f, styleDef) {
 		 * Check if the feature could have images
 		 */
 		_images = (_self.hasImages()) ? new OLvlUp.model.FeatureImages(_self) : null;
-		
-		/*
-		 * Change geometry type if needed
-		 */
-		//Edit indoor areas to set them as polygons instead of linestrings
-		if(_geometry.getType() == "LineString" && (
-			(_tags.indoor != undefined && _tags.indoor != "yes" && _tags.indoor != "wall")
-			|| (_tags.buildingpart != undefined && _tags.buildingpart != "wall")
-			|| _tags.highway == "elevator"
-			|| _tags.room != undefined
-		)) {
-			_geometry.convertToPolygon();
-		}
-			
-		//Edit some polygons that should be linestrings
-		if(_geometry.getType() == "Polygon" && (
-			_tags.barrier != undefined
-		)) {
-			_geometry.convertToLine();
-		}
 	};
 
 //ACCESSORS
@@ -874,8 +854,8 @@ FeatureImages: function(feature) {
 	function _parseImageTag(image) {
 		var result = undefined;
 		
-		var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|gif|jpg|jpeg|bmp)$/;
-		var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|gif|jpg|jpeg|bmp)$/;
+		var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|PNG|gif|GIF|jpg|JPG|jpeg|JPEG|bmp|BMP)$/;
+		var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|PNG|gif|GIF|jpg|JPG|jpeg|JPEG|bmp|BMP)$/;
 		var regexWiki = /^(File):.+\.(png|gif|jpg|jpeg|bmp)$/i;
 		
 		if(image.match(regexUrl)) {
@@ -892,7 +872,7 @@ FeatureImages: function(feature) {
 			result = 'http://upload.wikimedia.org/wikipedia/commons/' + folder;
 		}
 		else {
-			console.log("Invalid image key: "+image);
+			console.warn("[Images] Invalid key: "+image);
 			result = null;
 		}
 		
