@@ -56,7 +56,7 @@ Ctrl: function() {
 	var _clusterData = null;
 	
 	/** The mapillary data **/
-	var _mapillaryData = {};
+	var _mapillaryData = new OLvlUp.model.MapillaryData();
 	
 	/** The current HTML view **/
 	var _view = null;
@@ -84,6 +84,13 @@ Ctrl: function() {
 	 */
 	this.getClusterData = function() {
 		return _clusterData;
+	};
+	
+	/**
+	 * @return The mapillary data
+	 */
+	this.getMapillaryData = function() {
+		return _mapillaryData;
 	};
 
 //OTHER METHODS
@@ -337,6 +344,18 @@ Ctrl: function() {
 					
 					//Download Flickr data
 					controller.downloadFlickr(bbox);
+					
+					//Request mapillary data
+					var mapillaryKeys = _data.getMapillaryKeys();
+					for(var i=0; i < mapillaryKeys.length; i++) {
+						var key = mapillaryKeys[i];
+						if(!_mapillaryData.has(key)) {
+							_self.requestMapillaryData(key);
+						}
+					}
+					//TODO REMOVE
+					console.warn("remove dat");
+					_self.requestMapillaryData("uz6B88s_bqak0Ilo7vlJDw");
 				}
 			},
 			"text")
@@ -445,41 +464,35 @@ Ctrl: function() {
 	/**
 	 * Request the information for a given mapillary photo
 	 * @param id The mapillary ID
-	 * @param images The feature images object to edit when information is retrieved
 	 */
-	this.requestMapillaryData = function(id, images) {
-		//If already downloaded image, update
-		if(_mapillaryData[id] != undefined) {
-			images.setMapillaryCaptureAngle(_mapillaryData[id].ca);
-		}
-		//Else, download information
-		else {
-			var params = 'im/'+id+'?client_id='+OLvlUp.controller.MAPILLARY_API_KEY;
-			var url = OLvlUp.controller.MAPILLARY_API_URL+params;
-			
-			//Download
-			$.get(
-				url,
-				function(data) { controller.setMapillaryData(data, images); },
-				"text"
-			).fail(controller.onMapillaryDownloadFail);
-		}
+	this.requestMapillaryData = function(id) {
+		var params = 'g/'+id+'?client_id='+OLvlUp.controller.MAPILLARY_API_KEY;
+		var url = OLvlUp.controller.MAPILLARY_API_URL+params;
+		
+		//Download
+		$.get(
+			url,
+			controller.setMapillaryData,
+			"text"
+		).fail(controller.onMapillaryDownloadFail);
 	};
 	
 	/**
 	 * Processes the received Mapillary data, and updates the images data in model
 	 * @param data The Flickr data, as JSON
 	 */
-	this.setMapillaryData = function(data, images) {
+	this.setMapillaryData = function(data) {
 		try {
 			//Parse JSON
 			parsedData = parseApiData(data);
 			
-			if(_data.isInitialized() || images == undefined || images == null) {
-				var key = parsedData.key;
-				if(key != undefined) {
-					images.setMapillaryCaptureAngle(parsedData.ca);
-					_mapillaryData[key] = parsedData;
+			if(_data.isInitialized()) {
+				//var key = parsedData.key;
+				//if(key != undefined) {
+				if(parsedData.nodes.length > 0) {
+					var key = parsedData.nodes[0].key;
+					_mapillaryData.add(key, parsedData.nodes[0]);
+					//_mapillaryData.add(key, parsedData);
 					console.log("[Mapillary] Done processing image "+key);
 				}
 				else {

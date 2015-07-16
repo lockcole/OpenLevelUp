@@ -134,6 +134,21 @@ OSMData: function(bbox, styleDef) {
 	this.getFeatures = function() {
 		return _features;
 	};
+	
+	/**
+	 * @return The mapillary keys in data
+	 */
+	this.getMapillaryKeys = function() {
+		var keys = [];
+		for(var ftId in _features) {
+			var feature = _features[ftId];
+			var mapillary = feature.getTag("mapillary");
+			if(mapillary != undefined) {
+				keys.push(mapillary);
+			}
+		}
+		return keys;
+	};
 },
 
 
@@ -179,6 +194,54 @@ OSMClusterData: function(bbox) {
 	 */
 	this.isInitialized = function() {
 		return _data != null;
+	};
+},
+
+
+
+/**
+ * A container for Mapillary images information
+ */
+MapillaryData: function() {
+//ATTRIBUTES
+	/** The mapillary data, as key => data **/
+	var _data = {};
+
+//ACCESSORS
+	/**
+	 * Does it have the given image data ?
+	 * @param key The image key
+	 * @return True if got data
+	 */
+	this.has = function(key) {
+		return _data[key] != undefined;
+	};
+	
+	/**
+	 * @param key The image key
+	 * @return The image data
+	 */
+	this.get = function(key) {
+		return _data[key];
+	};
+	
+	/**
+	 * Is the image spherical ?
+	 * @param key The image key
+	 * @return True if spherical
+	 */
+	this.isSpherical = function(key) {
+		return _data[key].special_type == "pano";
+	};
+	
+//MODIFIERS
+	/**
+	 * Adds a new information set
+	 * @param key The image key
+	 * @param data The image data
+	 */
+	this.add = function(key, data) {
+		_data[key] = data;
 	};
 },
 
@@ -299,26 +362,6 @@ Feature: function(f, styleDef) {
 		 * Check if the feature could have images
 		 */
 		_images = (_self.hasImages()) ? new OLvlUp.model.FeatureImages(_self) : null;
-		
-		/*
-		 * Change geometry type if needed
-		 */
-		//Edit indoor areas to set them as polygons instead of linestrings
-		if(_geometry.getType() == "LineString" && (
-			(_tags.indoor != undefined && _tags.indoor != "yes" && _tags.indoor != "wall")
-			|| (_tags.buildingpart != undefined && _tags.buildingpart != "wall")
-			|| _tags.highway == "elevator"
-			|| _tags.room != undefined
-		)) {
-			_geometry.convertToPolygon();
-		}
-			
-		//Edit some polygons that should be linestrings
-		if(_geometry.getType() == "Polygon" && (
-			_tags.barrier != undefined
-		)) {
-			_geometry.convertToLine();
-		}
 	};
 
 //ACCESSORS
@@ -774,13 +817,10 @@ FeatureStyle: function(feature, jsonStyle) {
 FeatureImages: function(feature) {
 //ATTRIBUTES
 	/** The image from image=* tag **/
-	var _img = null;
+	var _img = undefined;
 	
 	/** The image from mapillary=* tag **/
-	var _mapillary = feature.getTag("mapillary");
-	
-	/** Is the mapillary image spherical ? **/
-	var _isMapillarySpherical = false;
+	var _mapillary = "uz6B88s_bqak0Ilo7vlJDw"; //feature.getTag("mapillary");
 	
 	/** The Flickr images **/
 	var _flickr = [];
@@ -803,7 +843,7 @@ FeatureImages: function(feature) {
 	this.get = function() {
 		var result = [];
 		
-		if(_img != null) {
+		if(_img != null && _img != undefined) {
 			result.push({
 				url: _img,
 				source: "Web",
@@ -811,7 +851,12 @@ FeatureImages: function(feature) {
 			});
 		}
 		
-		if(_mapillary != undefined && !_isMapillarySpherical) {
+		var mapillaryData = controller.getMapillaryData();
+		if(
+			_mapillary != undefined
+			&& mapillaryData.has(_mapillary)
+			&& !mapillaryData.isSpherical(_mapillary)
+		) {
 			result.push({
 				url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+_mapillary+'/thumb-2048.jpg',
 				source: "Mapillary",
@@ -832,7 +877,12 @@ FeatureImages: function(feature) {
 	this.getSpherical = function() {
 		var result = null;
 		
-		if(_mapillary != undefined && _isMapillarySpherical) {
+		var mapillaryData = controller.getMapillaryData();
+		if(
+			_mapillary != undefined
+			&& mapillaryData.has(_mapillary)
+			&& mapillaryData.isSpherical(_mapillary)
+		) {
 			result = {
 				url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+_mapillary+'/thumb-2048.jpg',
 				source: "Mapillary",
@@ -844,10 +894,45 @@ FeatureImages: function(feature) {
 	};
 	
 	/**
+	 * @return The images status as an object { source => status }
+	 */
+	this.getStatus = function() {
+		var status = {};
+		
+		//Web image
+		if(_img === null) {
+			status.web = "bad";
+		}
+		else if(_img === undefined) {
+			status.web = "missing";
+		}
+		else {
+			status.web = "ok";
+		}
+		
+		//Mapillary
+		var mapillaryData = controller.getMapillaryData();
+		if(_mapillary == undefined) {
+			status.mapillary = "missing";
+		}
+		else if(mapillaryData.has(_mapillary)) {
+			status.mapillary = "ok";
+		}
+		else {
+			status.mapillary = "bad";
+		}
+		
+		//Flickr
+		status.flickr = (_flickr.length > 0) ? "ok" : "missing";
+		
+		return status;
+	};
+	
+	/**
 	 * @return True if it has at least one valid image
 	 */
 	this.hasValidImages = function() {
-		return _self.get().length > 0;
+		return _self.get().length > 0 || _self.getSpherical() != null;
 	};
 
 //MODIFIERS
@@ -863,23 +948,13 @@ FeatureImages: function(feature) {
 			tag: title
 		});
 	};
-	
-	/**
-	 * Sets the mapillary image capture angle
-	 * @param angle The capture angle (in degrees)
-	 */
-	this.setMapillaryCaptureAngle = function(angle) {
-		if(angle > 359) {
-			_isMapillarySpherical = true;
-		}
-	};
 
 //OTHER METHODS
 	function _parseImageTag(image) {
-		var result = null;
+		var result = undefined;
 		
-		var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|gif|jpg|jpeg|bmp)$/;
-		var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|gif|jpg|jpeg|bmp)$/;
+		var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|PNG|gif|GIF|jpg|JPG|jpeg|JPEG|bmp|BMP)$/;
+		var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|PNG|gif|GIF|jpg|JPG|jpeg|JPEG|bmp|BMP)$/;
 		var regexWiki = /^(File):.+\.(png|gif|jpg|jpeg|bmp)$/i;
 		
 		if(image.match(regexUrl)) {
@@ -896,7 +971,8 @@ FeatureImages: function(feature) {
 			result = 'http://upload.wikimedia.org/wikipedia/commons/' + folder;
 		}
 		else {
-			console.log("Invalid image key: "+image);
+			console.warn("[Images] Invalid key: "+image);
+			result = null;
 		}
 		
 		return result;

@@ -31,7 +31,7 @@
 function parseOsmData(data) {
 	//Convert XML to GeoJSON
 	data = data || "<osm></osm>";
-	return osmtogeojson(parseApiData(data));
+	return osmtogeojson(parseApiData(data), { polygonFeatures: POLYGON_FEATURES });
 };
 
 /**

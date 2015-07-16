@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+8 july 2015
+-----------
+* CSS fix for Chrome
+* Status icons for images added
+
 7 july 2015
 -----------
 * Added Flickr photos retrieval

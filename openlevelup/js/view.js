@@ -598,7 +598,7 @@ MapView: function(main) {
 					}
 				}
 				catch(e) {
-					console.log("Error: "+e);
+					console.error("[View] "+e);
 				}
 			}
 			
@@ -2108,6 +2108,19 @@ ImagesView: function(main) {
 	/** The main view **/
 	var _mainView = main;
 
+	/** This object **/
+	var _self = this;
+	
+	/*
+	 * Sphere related attributes
+	 */
+	var _camera, _scene, _renderer;
+	var _isUserInteracting = false,
+		_onMouseDownMouseX = 0, _onMouseDownMouseY = 0,
+		_lon = 0, _onMouseDownLon = 0,
+		_lat = 0, _onMouseDownLat = 0,
+		_phi = 0, _theta = 0;
+	
 //CONSTRUCTOR
 	function _init() {
 		$("#images-close").click(function() { $("#op-images").hide(); });
@@ -2122,7 +2135,9 @@ ImagesView: function(main) {
 	 */
 	this.open = function(ftId) {
 		//Retrieve feature
-		var images = _mainView.getData().getFeature(ftId).getImages().get();
+		var ftImgs = _mainView.getData().getFeature(ftId).getImages();
+		var images = ftImgs.get();
+		var sphericalImages = ftImgs.getSpherical();
 		
 		//Create images list
 		var imagesData = [];
@@ -2136,7 +2151,10 @@ ImagesView: function(main) {
 			});
 		}
 		
-		//Set images tab
+		/*
+		 * Set images tab
+		 */
+		//Common images
 		if(imagesData.length > 0) {
 			//Load base images
 			Galleria.run('.galleria', { dataSource: imagesData });
@@ -2144,6 +2162,22 @@ ImagesView: function(main) {
 		else {
 			$("#tab-imgs div").html("No valid images");
 		}
+		
+		//Spherical images
+		if(sphericalImages != null) {
+			$("#tab-spheric").show();
+			_loadSphere(sphericalImages.url);
+			_animateSphere();
+		}
+		else {
+			$("#tab-spheric").hide();
+		}
+		
+		//Update images status
+		var status = ftImgs.getStatus();
+		_self.updateStatus("web", status.web);
+		_self.updateStatus("mapillary", status.mapillary);
+		_self.updateStatus("flickr", status.flickr);
 		
 		//Open panel
 		$("#tab-imgs").addClass("selected");
@@ -2158,6 +2192,142 @@ ImagesView: function(main) {
  		$("#op-images .tabs div").removeClass("selected");
  		$("#"+tab).addClass("selected");
  	};
+	
+	/**
+	 * Changes the status for a given source
+	 * @param source The image source (mapillary, flickr, web)
+	 * @param status The image status (ok, missing, bad, unknown)
+	 */
+	this.updateStatus = function(source, status) {
+		var element = $("#status-"+source);
+		element.removeClass("ok missing bad");
+		if(status != "unknown") {
+			element.addClass(status);
+		}
+	};
+	
+	/*
+	 * Sphere related methods
+	 */
+	 
+	/**
+	 * Loads the ThreeJS sphere
+	 * @param url The image URL
+	 */
+	function _loadSphere(url) {
+		var container, mesh;
+		container = $("#three-container");
+		
+		//Camera
+		_camera = new THREE.PerspectiveCamera( 75, container.innerWidth / container.innerHeight, 1, 1100 );
+		_camera.target = new THREE.Vector3( 0, 0, 0 );
+		
+		//Scene
+		_scene = new THREE.Scene();
+		
+		//Sphere
+		var geometry = new THREE.SphereGeometry( 500, 60, 40 );
+		geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
+		THREE.ImageUtils.crossOrigin = "anonymous";
+		var material = new THREE.MeshBasicMaterial( {
+			map: THREE.ImageUtils.loadTexture(url)
+		} );
+		mesh = new THREE.Mesh( geometry, material );
+		_scene.add( mesh );
+
+		//Renderer
+		_renderer = new THREE.WebGLRenderer();
+		_renderer.setPixelRatio( window.devicePixelRatio );
+		_renderer.setSize( container.innerWidth, container.innerHeight );
+		container.html( _renderer.domElement );
+
+		//Events
+		document.addEventListener( 'mousedown', _onDocumentMouseDown, false );
+		document.addEventListener( 'mousemove', _onDocumentMouseMove, false );
+		document.addEventListener( 'mouseup', _onDocumentMouseUp, false );
+		document.addEventListener( 'mousewheel', _onDocumentMouseWheel, false );
+		document.addEventListener( 'DOMMouseScroll', _onDocumentMouseWheel, false);
+		document.addEventListener( 'dragover', function ( event ) {
+			event.preventDefault();
+			event.dataTransfer.dropEffect = 'copy';
+		}, false );
+		document.addEventListener( 'dragenter', function ( event ) {
+			document.body.style.opacity = 0.5;
+		}, false );
+		document.addEventListener( 'dragleave', function ( event ) {
+			document.body.style.opacity = 1;
+		}, false );
+		document.addEventListener( 'drop', function ( event ) {
+			event.preventDefault();
+			var reader = new FileReader();
+			reader.addEventListener( 'load', function ( event ) {
+				material.map.image.src = event.target.result;
+				material.map.needsUpdate = true;
+			}, false );
+			reader.readAsDataURL( event.dataTransfer.files[ 0 ] );
+			document.body.style.opacity = 1;
+		}, false );
+		window.addEventListener( 'resize', _onWindowResize, false );
+	};
+	
+	function _onWindowResize() {
+		_camera.aspect = window.innerWidth / window.innerHeight;
+		_camera.updateProjectionMatrix();
+		_renderer.setSize( window.innerWidth, window.innerHeight );
+	}
+
+	function _onDocumentMouseDown( event ) {
+		event.preventDefault();
+		_isUserInteracting = true;
+		onPointerDownPointerX = event.clientX;
+		onPointerDownPointerY = event.clientY;
+		onPointerDownLon = _lon;
+		onPointerDownLat = _lat;
+	}
+
+	function _onDocumentMouseMove( event ) {
+		if ( _isUserInteracting === true ) {
+			_lon = ( onPointerDownPointerX - event.clientX ) * 0.1 + onPointerDownLon;
+			_lat = ( event.clientY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
+		}
+	}
+
+	function _onDocumentMouseUp( event ) {
+		_isUserInteracting = false;
+	}
+
+	function _onDocumentMouseWheel( event ) {
+		// WebKit
+		if ( event.wheelDeltaY ) {
+			_camera.fov -= event.wheelDeltaY * 0.05;
+		// Opera / Explorer 9
+		} else if ( event.wheelDelta ) {
+			_camera.fov -= event.wheelDelta * 0.05;
+		// Firefox
+		} else if ( event.detail ) {
+			_camera.fov += event.detail * 1.0;
+		}
+		_camera.updateProjectionMatrix();
+	}
+
+	function _animateSphere() {
+		requestAnimationFrame( _animateSphere );
+		_update();
+	}
+
+	function _update() {
+		if ( _isUserInteracting === false ) {
+			_lon += 0.1;
+		}
+		_lat = Math.max( - 85, Math.min( 85, _lat ) );
+		_phi = THREE.Math.degToRad( 90 - _lat );
+		_theta = THREE.Math.degToRad( _lon );
+		_camera.target.x = 500 * Math.sin( _phi ) * Math.cos( _theta );
+		_camera.target.y = 500 * Math.cos( _phi );
+		_camera.target.z = 500 * Math.sin( _phi ) * Math.sin( _theta );
+		_camera.lookAt( _camera.target );
+		_renderer.render( _scene, _camera );
+	}
 
 //INIT
 	_init();

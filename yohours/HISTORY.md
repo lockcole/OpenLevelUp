@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+18 june 2015
+------------
+* FullCalendary lib retrieved
+* Resize event from start enabled
+
 17 june 2015
 ------------
 * Calendar widget (FullCalendar) added

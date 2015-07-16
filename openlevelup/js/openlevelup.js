@@ -35,5 +35,14 @@ $.ajax({
        success: function(data) { STYLE = data; }
 });
 
+//Load PolygonFeatures file
+var POLYGON_FEATURES;
+$.ajax({
+	url: 'polygon_features.json',
+       async: false,
+       dataType: 'json',
+       success: function(data) { POLYGON_FEATURES = data; }
+});
+
 //Application core handler
 OLvlUp = function() {};

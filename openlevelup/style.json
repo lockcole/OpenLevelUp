@@ -73,6 +73,13 @@
 		},
 		{
 			"type": "Style",
+			"name": "Area",
+			"description": "Indoor areas ('OR' example for values)",
+			"onTags": [ { "indoor": "area|corridor", "access": "private" }, { "highway": "pedestrian|footway", "area": "yes", "access": "private" }, { "buildingpart": "corridor|hall", "access": "private" }, { "room": "corridor|entrance|hall|entry|gallery|collection", "access": "private" } ],
+			"style": { "fillColor": "#FDDCDC" }
+		},
+		{
+			"type": "Style",
 			"name": "Room",
 			"description": "Room icons",
 			"onTags": [ { "room": "*" } ],
