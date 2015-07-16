@@ -347,15 +347,14 @@ Ctrl: function() {
 					
 					//Request mapillary data
 					var mapillaryKeys = _data.getMapillaryKeys();
-					for(var i=0; i < mapillaryKeys.length; i++) {
+					var mapillaryNb = mapillaryKeys.length;
+					for(var i=0; i < mapillaryNb; i++) {
 						var key = mapillaryKeys[i];
+						var isLast = (i==mapillaryNb-1);
 						if(!_mapillaryData.has(key)) {
-							_self.requestMapillaryData(key);
+							_self.requestMapillaryData(key, isLast);
 						}
 					}
-					//TODO REMOVE
-					console.warn("remove dat");
-					_self.requestMapillaryData("uz6B88s_bqak0Ilo7vlJDw");
 				}
 			},
 			"text")
@@ -394,7 +393,7 @@ Ctrl: function() {
 	 * @param data The Flickr data, as JSON
 	 */
 	this.setFlickrData = function(data) {
-		console.log("[Flickr] Updating data");
+		//console.log("[Flickr] Updating data");
 		try {
 			//Parse JSON
 			parsedData = parseApiData(data);
@@ -464,15 +463,23 @@ Ctrl: function() {
 	/**
 	 * Request the information for a given mapillary photo
 	 * @param id The mapillary ID
+	 * @param isLast Is this the last mapillary download (default: false)
 	 */
-	this.requestMapillaryData = function(id) {
+	this.requestMapillaryData = function(id, isLast) {
+		isLast = isLast || false;
 		var params = 'g/'+id+'?client_id='+OLvlUp.controller.MAPILLARY_API_KEY;
 		var url = OLvlUp.controller.MAPILLARY_API_URL+params;
 		
 		//Download
 		$.get(
 			url,
-			controller.setMapillaryData,
+			function(data) {
+				controller.setMapillaryData(data);
+				if(isLast) {
+					_view.updatePhotosAdded();
+					console.log("[Mapillary] Done processing images");
+				}
+			},
 			"text"
 		).fail(controller.onMapillaryDownloadFail);
 	};
@@ -493,7 +500,7 @@ Ctrl: function() {
 					var key = parsedData.nodes[0].key;
 					_mapillaryData.add(key, parsedData.nodes[0]);
 					//_mapillaryData.add(key, parsedData);
-					console.log("[Mapillary] Done processing image "+key);
+					//console.log("[Mapillary] Done processing image "+key);
 				}
 				else {
 					console.error("[Mapillary] Error: received corrupted data");

@@ -1136,7 +1136,7 @@ FeatureView: function(main, feature) {
 		generalTxt += _addFormatedTag("description", "Details");
 		
 		//Image rendering
-		if(feature.hasImages()) {
+		if(feature.getImages().hasValidImages() || (!isMobile && feature.getImages().hasValidSpherical())) {
 			generalTxt += '<p class="popup-txt centered"><a href="#" id="images-open" onclick="controller.getView().getImagesView().open(\''+feature.getId()+'\')">See related images</a></p>';
 		}
 		
@@ -2114,12 +2114,9 @@ ImagesView: function(main) {
 	/*
 	 * Sphere related attributes
 	 */
-	var _camera, _scene, _renderer;
-	var _isUserInteracting = false,
-		_onMouseDownMouseX = 0, _onMouseDownMouseY = 0,
-		_lon = 0, _onMouseDownLon = 0,
-		_lat = 0, _onMouseDownLat = 0,
-		_phi = 0, _theta = 0;
+	var _camera, _scene, _renderer, _container,
+		_isUserInteracting, _onMouseDownMouseX, _onMouseDownMouseY,
+		_lon, _onMouseDownLon, _lat, _onMouseDownLat, _phi, _theta, _firstClick;
 	
 //CONSTRUCTOR
 	function _init() {
@@ -2155,16 +2152,20 @@ ImagesView: function(main) {
 		 * Set images tab
 		 */
 		//Common images
-		if(imagesData.length > 0) {
+		var hasCommon = imagesData.length > 0;
+		if(hasCommon) {
 			//Load base images
+			$("#tab-imgs").show();
 			Galleria.run('.galleria', { dataSource: imagesData });
 		}
 		else {
+			$("#tab-imgs").hide();
 			$("#tab-imgs div").html("No valid images");
 		}
 		
 		//Spherical images
-		if(sphericalImages != null) {
+		var hasSpherical = sphericalImages != null && !_mainView.isMobile();
+		if(hasSpherical) {
 			$("#tab-spheric").show();
 			_loadSphere(sphericalImages.url);
 			_animateSphere();
@@ -2180,7 +2181,14 @@ ImagesView: function(main) {
 		_self.updateStatus("flickr", status.flickr);
 		
 		//Open panel
-		$("#tab-imgs").addClass("selected");
+		if(hasCommon) {
+			$("#tab-imgs").addClass("selected");
+			$("#tab-spheric").removeClass("selected");
+		}
+		else if(hasSpherical) {
+			$("#tab-spheric").addClass("selected");
+			$("#tab-imgs").removeClass("selected");
+		}
 		$("#op-images").show();
 	};
 	
@@ -2215,11 +2223,25 @@ ImagesView: function(main) {
 	 * @param url The image URL
 	 */
 	function _loadSphere(url) {
-		var container, mesh;
-		container = $("#three-container");
+		//Init vars
+		_isUserInteracting = false;
+		_onMouseDownMouseX = 0;
+		_onMouseDownMouseY = 0;
+		_lon = 0;
+		_onMouseDownLon = 0;
+		_lat = 0;
+		_onMouseDownLat = 0;
+		_phi = 0;
+		_theta = 0;
+		_firstClick = true;
+		
+		var mesh;
+		var jContainer = $("#spherical-container");
+		jContainer.html("");
+		_container = document.getElementById("spherical-container");
 		
 		//Camera
-		_camera = new THREE.PerspectiveCamera( 75, container.innerWidth / container.innerHeight, 1, 1100 );
+		_camera = new THREE.PerspectiveCamera( 75, 16/9, 1, 1100 );
 		_camera.target = new THREE.Vector3( 0, 0, 0 );
 		
 		//Scene
@@ -2238,16 +2260,15 @@ ImagesView: function(main) {
 		//Renderer
 		_renderer = new THREE.WebGLRenderer();
 		_renderer.setPixelRatio( window.devicePixelRatio );
-		_renderer.setSize( container.innerWidth, container.innerHeight );
-		container.html( _renderer.domElement );
+		_container.appendChild(_renderer.domElement);
 
 		//Events
-		document.addEventListener( 'mousedown', _onDocumentMouseDown, false );
-		document.addEventListener( 'mousemove', _onDocumentMouseMove, false );
-		document.addEventListener( 'mouseup', _onDocumentMouseUp, false );
-		document.addEventListener( 'mousewheel', _onDocumentMouseWheel, false );
-		document.addEventListener( 'DOMMouseScroll', _onDocumentMouseWheel, false);
-		document.addEventListener( 'dragover', function ( event ) {
+		document.addEventListener('mousedown', _onDocumentMouseDown, false);
+		document.addEventListener('mousemove', _onDocumentMouseMove, false);
+		document.addEventListener('mouseup', _onDocumentMouseUp, false);
+		document.addEventListener('mousewheel', _onDocumentMouseWheel, false);
+		document.addEventListener('DOMMouseScroll', _onDocumentMouseWheel, false);
+		document.addEventListener('dragover', function ( event ) {
 			event.preventDefault();
 			event.dataTransfer.dropEffect = 'copy';
 		}, false );
@@ -2271,9 +2292,8 @@ ImagesView: function(main) {
 	};
 	
 	function _onWindowResize() {
-		_camera.aspect = window.innerWidth / window.innerHeight;
+		_camera.aspect = _container.clientWidth / _container.clientHeight;
 		_camera.updateProjectionMatrix();
-		_renderer.setSize( window.innerWidth, window.innerHeight );
 	}
 
 	function _onDocumentMouseDown( event ) {
@@ -2294,9 +2314,11 @@ ImagesView: function(main) {
 
 	function _onDocumentMouseUp( event ) {
 		_isUserInteracting = false;
+		_firstClick = false;
 	}
 
 	function _onDocumentMouseWheel( event ) {
+		var prevFov = _camera.fov;
 		// WebKit
 		if ( event.wheelDeltaY ) {
 			_camera.fov -= event.wheelDeltaY * 0.05;
@@ -2307,6 +2329,12 @@ ImagesView: function(main) {
 		} else if ( event.detail ) {
 			_camera.fov += event.detail * 1.0;
 		}
+		
+		//Limit wheel action
+		if(_camera.fov < 20 || _camera.fov > 100) {
+			_camera.fov = prevFov;
+		}
+		_camera.aspect = _container.clientWidth / _container.clientHeight;
 		_camera.updateProjectionMatrix();
 	}
 
@@ -2316,7 +2344,7 @@ ImagesView: function(main) {
 	}
 
 	function _update() {
-		if ( _isUserInteracting === false ) {
+		if (_firstClick && _isUserInteracting === false) {
 			_lon += 0.1;
 		}
 		_lat = Math.max( - 85, Math.min( 85, _lat ) );

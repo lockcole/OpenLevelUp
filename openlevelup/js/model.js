@@ -820,7 +820,7 @@ FeatureImages: function(feature) {
 	var _img = undefined;
 	
 	/** The image from mapillary=* tag **/
-	var _mapillary = "uz6B88s_bqak0Ilo7vlJDw"; //feature.getTag("mapillary");
+	var _mapillary = feature.getTag("mapillary");
 	
 	/** The Flickr images **/
 	var _flickr = [];
@@ -932,7 +932,14 @@ FeatureImages: function(feature) {
 	 * @return True if it has at least one valid image
 	 */
 	this.hasValidImages = function() {
-		return _self.get().length > 0 || _self.getSpherical() != null;
+		return _self.get().length > 0;
+	};
+	
+	/**
+	 * @return True if it has a valid spherical image
+	 */
+	this.hasValidSpherical = function() {
+		return _self.getSpherical() != null;
 	};
 
 //MODIFIERS

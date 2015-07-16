@@ -271,12 +271,12 @@ p.popup-txt.centered {
 	display: block;
 	float: left;
 	padding: 5px 10px;
-	background: #444;
+	background: #777;
 	z-index: 100;
 }
 
 .tabs > div.selected > a {
-	background: #666;
+	background: #555;
 	z-index: 101;
 }
 
@@ -290,7 +290,6 @@ p.popup-txt.centered {
 	bottom: 0;
 	right: 0;
 	padding: 10px 5px 0 5px;
-	border-top: 2px solid #666;
 	margin: 0 5px 5px 5px;
 	z-index: 100;
 }

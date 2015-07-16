@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+16 july 2015
+------------
+* Spherical images from Mapillary handled
+* Status check for Mapillary images
+
 8 july 2015
 -----------
 * CSS fix for Chrome
