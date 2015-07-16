@@ -36,6 +36,12 @@ FLICKR_API_URL: "https://api.flickr.com/services/rest/?",
 /** Flickr API Key **/
 FLICKR_API_KEY: "d06fb1ebb3ede5813b89c79320e11ab8",
 
+/** Mapillary API URL (with ending /) **/
+MAPILLARY_API_URL: "https://a.mapillary.com/v2/",
+
+/** Mapillary API Key **/
+MAPILLARY_API_KEY: "NzNRM2otQkR2SHJzaXJmNmdQWVQ0dzplMWU2NDQ5NDNmZjM5M2Iw",
+
 // ======= CLASSES =======
 /**
  * Application controller (as defined in MVC pattern).
@@ -48,6 +54,9 @@ Ctrl: function() {
 	
 	/** The cluster data container **/
 	var _clusterData = null;
+	
+	/** The mapillary data **/
+	var _mapillaryData = {};
 	
 	/** The current HTML view **/
 	var _view = null;
@@ -410,16 +419,16 @@ Ctrl: function() {
 					console.log("[Flickr] Done processing images ("+associatedPhotos+" associated)");
 				}
 				else {
-					console.log("[Flickr] Error: received corrupted data");
+					console.error("[Flickr] Error: received corrupted data");
 					console.log(data);
 				}
 			}
 			else {
-				console.log("[Flickr] Error: map data is not initialized");
+				console.error("[Flickr] Error: map data is not initialized");
 			}
 		}
 		catch(e) {
-			console.log("[Flickr] Error during data process: "+e);
+			console.error("[Flickr] Error during data process: "+e);
 		}
 	};
 	
@@ -427,7 +436,71 @@ Ctrl: function() {
 	 * This function is called when data download fails
 	 */
 	this.onFlickrDownloadFail = function() {
-		console.log("[Flickr] An error occured")
+		console.error("[Flickr] An error occured");
+	};
+
+/************************
+ * Mapillary management *
+ ************************/
+	/**
+	 * Request the information for a given mapillary photo
+	 * @param id The mapillary ID
+	 * @param images The feature images object to edit when information is retrieved
+	 */
+	this.requestMapillaryData = function(id, images) {
+		//If already downloaded image, update
+		if(_mapillaryData[id] != undefined) {
+			images.setMapillaryCaptureAngle(_mapillaryData[id].ca);
+		}
+		//Else, download information
+		else {
+			var params = 'im/'+id+'?client_id='+OLvlUp.controller.MAPILLARY_API_KEY;
+			var url = OLvlUp.controller.MAPILLARY_API_URL+params;
+			
+			//Download
+			$.get(
+				url,
+				function(data) { controller.setMapillaryData(data, images); },
+				"text"
+			).fail(controller.onMapillaryDownloadFail);
+		}
+	};
+	
+	/**
+	 * Processes the received Mapillary data, and updates the images data in model
+	 * @param data The Flickr data, as JSON
+	 */
+	this.setMapillaryData = function(data, images) {
+		try {
+			//Parse JSON
+			parsedData = parseApiData(data);
+			
+			if(_data.isInitialized() || images == undefined || images == null) {
+				var key = parsedData.key;
+				if(key != undefined) {
+					images.setMapillaryCaptureAngle(parsedData.ca);
+					_mapillaryData[key] = parsedData;
+					console.log("[Mapillary] Done processing image "+key);
+				}
+				else {
+					console.error("[Mapillary] Error: received corrupted data");
+					console.log(data);
+				}
+			}
+			else {
+				console.error("[Mapillary] Error: map data is not initialized");
+			}
+		}
+		catch(e) {
+			console.error("[Mapillary] Error during data process: "+e);
+		}
+	};
+	
+	/**
+	 * This function is called when data download fails
+	 */
+	this.onMapillaryDownloadFail = function() {
+		console.error("[Mapillary] An error occured");
 	};
 }
 };

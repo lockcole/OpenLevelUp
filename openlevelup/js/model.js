@@ -779,6 +779,9 @@ FeatureImages: function(feature) {
 	/** The image from mapillary=* tag **/
 	var _mapillary = feature.getTag("mapillary");
 	
+	/** Is the mapillary image spherical ? **/
+	var _isMapillarySpherical = false;
+	
 	/** The Flickr images **/
 	var _flickr = [];
 	
@@ -808,7 +811,7 @@ FeatureImages: function(feature) {
 			});
 		}
 		
-		if(_mapillary != undefined) {
+		if(_mapillary != undefined && !_isMapillarySpherical) {
 			result.push({
 				url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+_mapillary+'/thumb-2048.jpg',
 				source: "Mapillary",
@@ -820,6 +823,23 @@ FeatureImages: function(feature) {
 			result = mergeArrays(result, _flickr);
 		}
 
+		return result;
+	};
+	
+	/**
+	 * @return A spherical image of the feature or null if no one associated
+	 */
+	this.getSpherical = function() {
+		var result = null;
+		
+		if(_mapillary != undefined && _isMapillarySpherical) {
+			result = {
+				url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+_mapillary+'/thumb-2048.jpg',
+				source: "Mapillary",
+				tag: "mapillary = "+_mapillary
+			};
+		}
+		
 		return result;
 	};
 	
@@ -842,6 +862,16 @@ FeatureImages: function(feature) {
 			source: "Flickr",
 			tag: title
 		});
+	};
+	
+	/**
+	 * Sets the mapillary image capture angle
+	 * @param angle The capture angle (in degrees)
+	 */
+	this.setMapillaryCaptureAngle = function(angle) {
+		if(angle > 359) {
+			_isMapillarySpherical = true;
+		}
 	};
 
 //OTHER METHODS
