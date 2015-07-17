@@ -53,6 +53,8 @@ h1 {
 
 .clear {
 	clear: both;
+	margin: 0;
+	padding: 0;
 }
 
 /*******
@@ -102,9 +104,16 @@ header {
 
 .overlay-panel {
 	position: relative;
-	display: table-cell;
 	visibility: visible;
 	vertical-align: middle;
+}
+
+.overlay-panel.hide {
+	display: none;
+}
+
+.overlay-panel.show {
+	display: table-cell;
 }
 
 .overlay-panel > div {
@@ -130,20 +139,15 @@ header {
 	margin-bottom: 5px;
 }
 
+.overlay-panel > div > h2 > img {
+	vertical-align: middle;
+	margin-right: 10px;
+}
+
 /* Loading panel */
 #op-loading div {
 	position: relative;
 	text-align: left;
-}
-
-#op-loading h2 {
-	/*padding-left: 45px;*/
-}
-
-#op-loading img {
-	vertical-align: middle;
-	height: 32px;
-	margin-right: 5px;
 }
 
 #op-loading ul {
@@ -156,6 +160,14 @@ header {
 }
 
 /* About panel */
+#op-about {
+	visibility: hidden;
+}
+
+#op-about > div {
+	visibility: visible;
+}
+
 #op-about a {
 	color: #D2E2FF;
 }
@@ -248,14 +260,33 @@ p.popup-txt.centered {
  ************************/
 
 #op-images > div {
-	display: table;
-	border-collapse: separate;
-	border-spacing: 0 5px;
+	position: relative;
+	padding: 0;
+	height: 80%;
+	max-height: 80%;
+}
+
+#op-images > div > div {
+	display: block;
+	position: absolute;
+	width: 100%;
 }
 
 #op-images .small-row {
-	display: table-row;
-	height: 5%;
+	height: 50px;
+}
+
+#op-images-tabs-links {
+	top: 0;
+}
+
+#op-images-tabs-content {
+	top: 50px;
+	bottom: 50px;
+}
+
+#op-images-footer {
+	bottom: 0;
 }
 
 #op-images-tabs-links a {
@@ -264,7 +295,7 @@ p.popup-txt.centered {
 	text-align: center;
 	color: white;
 	padding: 5px 10px;
-	margin-right: 5px;
+	margin: 5px;
 	background: #777;
 	width: 32px;
 }
@@ -278,50 +309,30 @@ p.popup-txt.centered {
 	z-index: 101;
 }
 
-#op-images-tabs-content {
-	display: table-row;
+#op-images-tabs-content > div {
+	position: absolute;
 	width: 100%;
-}
-
-#tab-imgs, #tab-spheric {
-	display: table-cell;
 	height: 100%;
-	max-height: 800px;
-	width: 100%;
 }
 
-#spherical-container canvas {
+#tab-spheric canvas {
 	width: 100%;
 	height: 100%;
 }
 
 /* Images status */
-#op-images-footer {
-	display: table-row;
-}
-
 #op-images-footer > p {
 	display: inline-block;
+	position: absolute;
+	bottom: 5px;
 }
 
 #op-images-status {
-	display: table-cell;
-	vertical-align: middle;
-	margin-left: 10px;
-	margin-bottom: 5px;
-}
-
-#op-images .overlay-close a {
-	color: #D2E2FF;
-}
-
-#op-images .overlay-close a:hover {
-	color: #B3CEFF;
+	left: 10px;
 }
 
 #op-images-footer .overlay-close {
-	display: table-cell;
-	vertical-align: middle;
+	right: 10px;
 }
 
 #op-images-status a {
@@ -349,4 +360,12 @@ p.popup-txt.centered {
 
 .status.bad {
 	color: red;
+}
+
+#op-images .overlay-close a {
+	color: #D2E2FF;
+}
+
+#op-images .overlay-close a:hover {
+	color: #B3CEFF;
 }

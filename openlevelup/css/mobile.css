@@ -70,30 +70,12 @@ header {
  * Overlay optional panels *
  ***************************/
 
-.overlay-panel {
-	visibility: hidden;
-}
-
 .overlay-panel > div {
 	width: 70%;
 	max-width: 500px;
-	visibility: visible;
 }
 
 .overlay-panel > div.wide {
 	width: 90%;
 	max-width: 800px;
-}
-
-/************************
- * Images overlay panel *
- ************************/
-
-.tabs > div > a {
-	margin: 5px 5px 0 5px;
-}
-
-/* Tabs content */
-.tabs > div > div {
-	top: 34px;
 }

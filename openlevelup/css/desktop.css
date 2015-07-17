@@ -394,21 +394,3 @@ footer {
 .popup-tab.hidden {
 	display: none;
 }
-
-/************************
- * Images overlay panel *
- ************************/
-
-#op-images > div {
-	height: 80%;
-	max-height: 80%;
-}
-
-.tabs > div > a {
-	margin: 0 5px;
-}
-
-/* Tabs content */
-.tabs > div > div {
-	top: 27px;
-}

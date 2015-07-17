@@ -790,7 +790,7 @@ FeatureView: function(main, feature) {
 			//Look for an icon or a label
 			var hasIcon = style.icon != undefined;
 			var labelizable = _labelizable();
-			var hasPhoto = _mainView.getOptionsView().showPhotos() && (feature.getImages().hasValidImages() || (_mainView.hasWebGL() && feature.getImages().hasValidSpherical()));
+			var hasPhoto = _mainView.getOptionsView().showPhotos() && (feature.getImages().hasValidImages() || (_mainView.hasWebGL() && !_mainView.isMobile() && feature.getImages().hasValidSpherical()));
 			
 			if(hasIcon || labelizable || hasPhoto) {
 				switch(geomType) {
@@ -1146,7 +1146,7 @@ FeatureView: function(main, feature) {
 		generalTxt += _addFormatedTag("description", "Details");
 		
 		//Image rendering
-		if(feature.getImages().hasValidImages() || (_mainView.hasWebGL() && feature.getImages().hasValidSpherical())) {
+		if(feature.getImages().hasValidImages() || (_mainView.hasWebGL() && !_mainView.isMobile() && feature.getImages().hasValidSpherical())) {
 			generalTxt += '<p class="popup-txt centered"><a href="#" id="images-open" onclick="controller.getView().getImagesView().open(\''+feature.getId()+'\')">See related images</a></p>';
 		}
 		
@@ -2130,8 +2130,11 @@ ImagesView: function(main) {
 	
 //CONSTRUCTOR
 	function _init() {
-		$("#op-images").hide();
-		$("#images-close").click(function() { $("#op-images").hide(); });
+		//$("#op-images").hide();
+		$("#images-close").click(function() {
+			$("#op-images").removeClass("show");
+			$("#op-images").addClass("hide");
+		});
 		$("#tab-imgs-a").click(function() { controller.getView().getImagesView().changeTab("tab-imgs"); });
 		$("#tab-spheric-a").click(function() { controller.getView().getImagesView().changeTab("tab-spheric"); });
 	};
@@ -2162,34 +2165,28 @@ ImagesView: function(main) {
 		/*
 		 * Set images tab
 		 */
-		//Common images
 		var hasCommon = imagesData.length > 0;
+		var hasSpherical = sphericalImages != null && _mainView.hasWebGL() && !_mainView.isMobile();
+		
+		//Common images
 		if(hasCommon) {
 			//Load base images
-			$("#tab-imgs").show();
+			$("#tab-imgs-a").show();
 			Galleria.run('.galleria', { dataSource: imagesData });
 		}
 		else {
-			$("#tab-imgs").hide();
-			$("#tab-imgs div").html("No valid images");
+			$("#tab-imgs-a").hide();
 		}
 		
 		//Spherical images
-		var hasSpherical = sphericalImages != null && _mainView.hasWebGL();
 		if(hasSpherical) {
-			$("#tab-spheric").show();
+			$("#tab-spheric-a").show();
 			_loadSphere(sphericalImages.url);
 			_animateSphere();
 		}
 		else {
-			$("#tab-spheric").hide();
+			$("#tab-spheric-a").hide();
 		}
-		
-		//Update images status
-		var status = ftImgs.getStatus();
-		_self.updateStatus("web", status.web);
-		_self.updateStatus("mapillary", status.mapillary);
-		_self.updateStatus("flickr", status.flickr);
 		
 		//Open panel
 		if(hasCommon) {
@@ -2198,7 +2195,15 @@ ImagesView: function(main) {
 		else if(hasSpherical) {
 			_self.changeTab("tab-spheric");
 		}
-		$("#op-images").show();
+		
+		//Update images status
+		var status = ftImgs.getStatus();
+		_self.updateStatus("web", status.web);
+		_self.updateStatus("mapillary", status.mapillary);
+		_self.updateStatus("flickr", status.flickr);
+		
+		$("#op-images").removeClass("hide");
+		$("#op-images").addClass("show");
 	};
 	
  	/**
@@ -2247,9 +2252,9 @@ ImagesView: function(main) {
 		_firstClick = true;
 		
 		var mesh;
-		var jContainer = $("#spherical-container");
+		var jContainer = $("#tab-spheric");
 		jContainer.html("");
-		_container = document.getElementById("spherical-container");
+		_container = document.getElementById("tab-spheric");
 		
 		//Camera
 		_camera = new THREE.PerspectiveCamera( 75, 16/9, 1, 1100 );
@@ -2308,7 +2313,10 @@ ImagesView: function(main) {
 	};
 	
 	function _onWindowResize() {
-		_camera.aspect = _container.clientWidth / _container.clientHeight;
+		var aspect = _container.clientWidth / _container.clientHeight;
+		if(!isNaN(aspect) && aspect > 0) {
+			_camera.aspect = aspect;
+		}
 		_camera.updateProjectionMatrix();
 	}
 
@@ -2330,7 +2338,7 @@ ImagesView: function(main) {
 
 	function _onDocumentMouseUp( event ) {
 		_isUserInteracting = false;
-		if($('#spherical-container canvas:hover').length != 0) {
+		if($('#tab-spheric canvas:hover').length != 0) {
 			_firstClick = false;
 		}
 	}
@@ -2352,7 +2360,10 @@ ImagesView: function(main) {
 		if(_camera.fov < 20 || _camera.fov > 100) {
 			_camera.fov = prevFov;
 		}
-		_camera.aspect = _container.clientWidth / _container.clientHeight;
+		var aspect = _container.clientWidth / _container.clientHeight;
+		if(!isNaN(aspect) && aspect > 0) {
+			_camera.aspect = aspect;
+		}
 		_camera.updateProjectionMatrix();
 	}
 
@@ -2394,7 +2405,7 @@ LoadingView: function() {
 
 //CONSTRUCTOR
 	function _init() {
-		$("#op-loading").hide();
+		//$("#op-loading").hide();
 	};
 	
 //ACCESSORS
@@ -2414,11 +2425,13 @@ LoadingView: function() {
 		_loading = loading;
 		if(loading) {
 			$("#op-loading-info li").remove();
-			$("#op-loading").show();
+			$("#op-loading").removeClass("hide");
+			$("#op-loading").addClass("show");
 			_lastTime = (new Date()).getTime();
 		}
 		else {
-			$("#op-loading").hide();
+			$("#op-loading").removeClass("show");
+			$("#op-loading").addClass("hide");
 			$(document).trigger("loading_done");
 		}
 	};
@@ -2453,9 +2466,14 @@ LoadingView: function() {
  */
 AboutView: function() {
 //CONSTRUCTOR
-	$("#op-about").hide();
-	$("#about-link").click(function() { $("#op-about").toggle(); });
-	$("#about-close").click(function() { $("#op-about").hide(); });
+	//$("#op-about").hide();
+	$("#about-link").click(function() {
+		$("#op-about").toggleClass("hide show");
+	});
+	$("#about-close").click(function() {
+		$("#op-about").removeClass("show");
+		$("#op-about").addClass("hide");
+	});
 },
 
 

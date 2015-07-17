@@ -123,9 +123,6 @@
 	</div>
 
 	
-	<!--
-	Overlay optional panels
-	-->
 	<!-- Message/info box list -->
 	<div class="body-row">
 	<div id="infobox">
@@ -134,9 +131,13 @@
 	</div>
 	</div>
 
+	
+	<!--
+	Overlay optional panels
+	-->
 	<div class="overlay-panels">
 		<!-- Loading panel -->
-		<div class="overlay-panel" id="op-loading">
+		<div class="overlay-panel hide" id="op-loading">
 			<div>
 				<h2><img src="img/spinner.png" height="32" />Loading</h2>
 				<ul id="op-loading-info">
@@ -145,7 +146,7 @@
 		</div>
 		
 		<!-- About panel -->
-		<div class="overlay-panel" id="op-about">
+		<div class="overlay-panel hide" id="op-about">
 			<div class="centered">
 				<h2>About</h2>
 				<p>See <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project.
@@ -156,27 +157,25 @@
 		</div>
 		
 		<!-- Images panel -->
-		<div class="overlay-panel" id="op-images">
+		<div class="overlay-panel hide" id="op-images">
 			<div class="wide">
-				<div class="tabs">
-					<div id="tab-imgs">
-						<a href="#tab-imgs"><img src="img/picture.svg" alt="Simple" /></a>
-						<div class="galleria">
-						</div>
+				<div class="small-row" id="op-images-tabs-links">
+					<a id="tab-imgs-a" href="#tab-imgs"><img src="img/picture.svg" alt="Simple" /></a>
+					<a id="tab-spheric-a" href="#tab-spheric"><img src="img/spherical_picture.svg" alt="Sphere" /></a>
+				</div>
+				<div id="op-images-tabs-content">
+					<div class="op-images-tab galleria" id="tab-imgs">
 					</div>
-					<div id="tab-spheric">
-						<a href="#tab-spheric"><img src="img/spherical_picture.svg" alt="Sphere" /></a>
-						<div id="spherical-container"></div>
+					<div class="op-images-tab" id="tab-spheric">
 					</div>
 				</div>
-				<div id="op-images-footer">
+				<div class="small-row" id="op-images-footer">
 					<p id="op-images-status">
 						<img src="img/web.svg" alt="Web" title="Web" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-web" class="status">&#x25CF;</span></a>
 						<img src="img/mapillary.svg" alt="Mapillary" title="Mapillary" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-mapillary" class="status">&#x25CF;</span></a>
 						<img src="img/flickr.svg" alt="Flickr" title="Flickr" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-flickr" class="status">&#x25CF;</span></a>
 					</p>
 					<p class="overlay-close"><a id="images-close" href="#">Close</a></p>
-					<div class="clear"></div>
 				</div>
 			</div>
 		</div>
