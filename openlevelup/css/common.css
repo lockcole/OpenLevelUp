@@ -51,6 +51,10 @@ h1 {
 	margin: 10px 0;
 }
 
+.clear {
+	clear: both;
+}
+
 /*******
  * Map *
  *******/
@@ -85,35 +89,45 @@ header {
  ***************************/
 
 /* General definition */
-.overlay-panel {
-	height: 40%;
-	max-height: 40%;
-	width: 30%;
-	position: absolute;
-	top: 30%;
-	left: 35%;
+.overlay-panels {
+	width: 100%;
+	height: 100%;
 	z-index: 1000;
-	color: white;
-	text-align: center;
-	display: none;
+	visibility: hidden;
+	position: fixed;
+	left: 0;
+	top: 0;
+	display: table;
 }
 
-.overlay-panel * {
+.overlay-panel {
+	position: relative;
+	display: table-cell;
+	visibility: visible;
+	vertical-align: middle;
+}
+
+.overlay-panel > div {
+	background-color: rgba(128,128,128,0.8);
+	padding: 5px;
+	color: white;
+	margin: 0 auto;
+}
+
+.overlay-panel > div.centered {
+	text-align: center;
+}
+
+.overlay-panel > div * {
 	margin: 0;
 	padding: 0;
 }
 
-.overlay-content {
-	position: relative;
-	background-color: rgba(128,128,128,0.8);
-	padding: 0.1em;
-}
-
-.overlay-panel h2 {
+.overlay-panel > div > h2 {
 	background-color: #ddd;
 	color: #444;
 	padding: 5px;
-	margin: 5px;
+	margin-bottom: 5px;
 }
 
 /* Loading panel */
@@ -123,7 +137,13 @@ header {
 }
 
 #op-loading h2 {
-	padding-left: 45px;
+	/*padding-left: 45px;*/
+}
+
+#op-loading img {
+	vertical-align: middle;
+	height: 32px;
+	margin-right: 5px;
 }
 
 #op-loading ul {
@@ -134,23 +154,6 @@ header {
 #op-loading ul li {
 	margin-bottom: 5px;
 }
-
-#rotation {
-	font-size: 3em;
-	font-weight: bold;
-	position: absolute;
-	left: 35px;
-	top: 10px;
-	color: #444;
-	margin: -18px 0 0 -27px;
-	-webkit-animation:spin 0.7s linear infinite;
-	-moz-animation:spin 0.7s linear infinite;
-	animation:spin 0.7s linear infinite;
-}
-
-@-moz-keyframes spin { 100% { -moz-transform: rotate(-360deg); } }
-@-webkit-keyframes spin { 100% { -webkit-transform: rotate(-360deg); } }
-@keyframes spin { 100% { -webkit-transform: rotate(-360deg); transform:rotate(-360deg); } }
 
 /* About panel */
 #op-about a {
@@ -244,73 +247,47 @@ p.popup-txt.centered {
  * Images overlay panel *
  ************************/
 
-#op-images .overlay-close a {
-	color: #D2E2FF;
+#op-images > div {
+	display: table;
+	border-collapse: separate;
+	border-spacing: 0 5px;
 }
 
-#op-images .overlay-close a:hover {
-	color: #B3CEFF;
+#op-images .small-row {
+	display: table-row;
+	height: 5%;
 }
 
-/* Tabs block */
-.tabs {
-	height: 100%;
-	position: relative;
-	width: 100%;
-}
-
-/* Tabs links */
-.tabs > div {
-	display: inline;
-}
-
-.tabs > div > a {
-	position: relative;
+#op-images-tabs-links a {
+	display: inline-block;
 	text-decoration: none;
+	text-align: center;
 	color: white;
-	display: block;
-	float: left;
 	padding: 5px 10px;
+	margin-right: 5px;
 	background: #777;
-	z-index: 100;
+	width: 32px;
 }
 
-.tabs > div.selected > a {
+#op-images-tabs-links a img {
+	height: 24px;
+}
+
+#op-images-tabs-links a.selected {
 	background: #555;
 	z-index: 101;
 }
 
-.tabs > div.hide {
-	display: none;
+#op-images-tabs-content {
+	display: table-row;
+	width: 100%;
 }
 
-/* Tabs content */
-.tabs > div > div {
-	left: 0;
-	bottom: 0;
-	right: 0;
-	padding: 10px 5px 0 5px;
-	margin: 0 5px 5px 5px;
-	z-index: 100;
-}
-
-.tabs > div > div {
-	position: absolute;
-	display: none;
-}
-
-.tabs > div.selected > div {
-	position: absolute;
-	display: block;
-}
-
-.tabs > div > div img {
+#tab-imgs, #tab-spheric {
+	display: table-cell;
 	height: 100%;
-	max-width: 100%;
-}
-
-.tabs > div > a > img {
-	height: 24px;
+	max-height: 800px;
+	width: 100%;
 }
 
 #spherical-container canvas {
@@ -319,22 +296,32 @@ p.popup-txt.centered {
 }
 
 /* Images status */
+#op-images-footer {
+	display: table-row;
+}
+
 #op-images-footer > p {
 	display: inline-block;
 }
 
 #op-images-status {
-	float: left;
+	display: table-cell;
+	vertical-align: middle;
 	margin-left: 10px;
 	margin-bottom: 5px;
 }
 
-#op-images-footer .overlay-close {
-	float: right;
+#op-images .overlay-close a {
+	color: #D2E2FF;
 }
 
-#op-images-footer .clear {
-	clear: both;
+#op-images .overlay-close a:hover {
+	color: #B3CEFF;
+}
+
+#op-images-footer .overlay-close {
+	display: table-cell;
+	vertical-align: middle;
 }
 
 #op-images-status a {

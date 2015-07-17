@@ -257,28 +257,12 @@ footer {
  * Overlay optional panels *
  ***************************/
 
-/* General definition */
-.overlay-panel {
-	height: 40%;
-	max-height: 40%;
-	width: 30%;
-	top: 30%;
-	left: 35%;
+.overlay-panel > div {
+	width: 500px;
 }
 
-/* Room names */
-#op-rooms {
-	top: 15%;
-	height: 70%;
-}
-
-#op-rooms h2 {
-	text-align: left;
-}
-
-#op-rooms h2 img {
-	width: 32px;
-	vertical-align: middle;
+.overlay-panel > div.wide {
+	width: 800px;
 }
 
 /**************
@@ -415,12 +399,9 @@ footer {
  * Images overlay panel *
  ************************/
 
-#op-images {
-	height: 60%;
-	max-height: 60%;
-	width: 40%;
-	top: 20%;
-	left: 30%;
+#op-images > div {
+	height: 80%;
+	max-height: 80%;
 }
 
 .tabs > div > a {

@@ -2130,9 +2130,10 @@ ImagesView: function(main) {
 	
 //CONSTRUCTOR
 	function _init() {
+		$("#op-images").hide();
 		$("#images-close").click(function() { $("#op-images").hide(); });
-		$("#tab-imgs").click(function() { controller.getView().getImagesView().changeTab("tab-imgs"); });
-		$("#tab-spheric").click(function() { controller.getView().getImagesView().changeTab("tab-spheric"); });
+		$("#tab-imgs-a").click(function() { controller.getView().getImagesView().changeTab("tab-imgs"); });
+		$("#tab-spheric-a").click(function() { controller.getView().getImagesView().changeTab("tab-spheric"); });
 	};
 
 //OTHER METHODS
@@ -2192,12 +2193,10 @@ ImagesView: function(main) {
 		
 		//Open panel
 		if(hasCommon) {
-			$("#tab-imgs").addClass("selected");
-			$("#tab-spheric").removeClass("selected");
+			_self.changeTab("tab-imgs");
 		}
 		else if(hasSpherical) {
-			$("#tab-spheric").addClass("selected");
-			$("#tab-imgs").removeClass("selected");
+			_self.changeTab("tab-spheric");
 		}
 		$("#op-images").show();
 	};
@@ -2207,8 +2206,10 @@ ImagesView: function(main) {
  	 * @param tab The tab name
  	 */
  	this.changeTab = function(tab) {
- 		$("#op-images .tabs div").removeClass("selected");
- 		$("#"+tab).addClass("selected");
+		$("#op-images-tabs-links a").removeClass("selected");
+ 		$("#"+tab+"-a").addClass("selected");
+		$(".op-images-tab").hide();
+ 		$("#"+tab).show();
  	};
 	
 	/**
@@ -2391,6 +2392,11 @@ LoadingView: function() {
 	/** The last timestamp **/
 	var _lastTime = 0;
 
+//CONSTRUCTOR
+	function _init() {
+		$("#op-loading").hide();
+	};
+	
 //ACCESSORS
 	/**
 	 * @return True if loading
@@ -2435,6 +2441,9 @@ LoadingView: function() {
 		
 		_lastTime = currentTime;
 	};
+
+//INIT
+	_init();
 },
 
 
@@ -2444,6 +2453,7 @@ LoadingView: function() {
  */
 AboutView: function() {
 //CONSTRUCTOR
+	$("#op-about").hide();
 	$("#about-link").click(function() { $("#op-about").toggle(); });
 	$("#about-close").click(function() { $("#op-about").hide(); });
 },

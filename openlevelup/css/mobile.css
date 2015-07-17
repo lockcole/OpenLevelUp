@@ -70,15 +70,20 @@ header {
  * Overlay optional panels *
  ***************************/
 
-/* General definition */
 .overlay-panel {
-	height: 60%;
-	max-height: 60%;
-	width: 80%;
-	top: 20%;
-	left: 10%;
+	visibility: hidden;
 }
 
+.overlay-panel > div {
+	width: 70%;
+	max-width: 500px;
+	visibility: visible;
+}
+
+.overlay-panel > div.wide {
+	width: 90%;
+	max-width: 800px;
+}
 
 /************************
  * Images overlay panel *

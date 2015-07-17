@@ -199,47 +199,49 @@
 	<!--
 	Overlay optional panels
 	-->
-	<!-- Loading panel -->
-	<div class="overlay-panel" id="op-loading">
-		<div class="overlay-content">
-			<p id="rotation">&#8634;</p>
-			<h2>Loading</h2>
-			<ul id="op-loading-info">
-			</ul>
+	<div class="overlay-panels">
+		<!-- Loading panel -->
+		<div class="overlay-panel" id="op-loading">
+			<div>
+				<h2><img src="img/spinner.png" height="32" />Loading</h2>
+				<ul id="op-loading-info">
+				</ul>
+			</div>
 		</div>
-	</div>
-	
-	<!-- About panel -->
-	<div class="overlay-panel" id="op-about">
-		<div class="overlay-content">
-			<h2>About OpenLevelUp!</h2>
-			<p>This website allows you to see <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project. You can navigate through the building levels with the buttons on the left panel.<br />Want to know more about the project ? Look at the <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup">GitHub repository</a>. Want to contact the author ? <a href="mailto:panieravide@riseup.net">Here you go</a>.<br />This website is licensed under <a href="https://www.gnu.org/licenses/gpl.html">GPL v3</a>.</p>
-			<p class="overlay-close"><a id="about-close" href="#">Close</a></p>
+		
+		<!-- About panel -->
+		<div class="overlay-panel" id="op-about">
+			<div class="centered">
+				<h2>About OpenLevelUp!</h2>
+				<p>This website allows you to see <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project. You can navigate through the building levels with the buttons on the left panel.<br />Want to know more about the project ? Look at the <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup">GitHub repository</a>. Want to contact the author ? <a href="mailto:panieravide@riseup.net">Here you go</a>.<br />This website is licensed under <a href="https://www.gnu.org/licenses/gpl.html">GPL v3</a>.</p>
+				<p class="overlay-close"><a id="about-close" href="#">Close</a></p>
+			</div>
 		</div>
-	</div>
-	
-	<!-- Images panel -->
-	<div class="overlay-panel" id="op-images">
-		<div class="overlay-content">
-			<h2>Pictures</h2>
-			<div class="tabs">
-				<div id="tab-imgs">
-					<a href="#tab-imgs"><img src="img/picture.svg" alt="Simple" /></a>
-					<div class="galleria">
+		
+		<!-- Images panel -->
+		<div class="overlay-panel" id="op-images">
+			<div class="wide">
+				<div class="small-row" id="op-images-tabs-links">
+					<a id="tab-imgs-a" href="#tab-imgs"><img src="img/picture.svg" alt="Simple" /></a>
+					<a id="tab-spheric-a" href="#tab-spheric"><img src="img/spherical_picture.svg" alt="Sphere" /></a>
+				</div>
+				<div class="op-images-tabs-content">
+					<div class="op-images-tab" id="tab-imgs">
+						<div class="galleria img-area">
+						</div>
+					</div>
+					<div class="op-images-tab" id="tab-spheric">
+						<div class="img-area" id="spherical-container"></div>
 					</div>
 				</div>
-				<div id="tab-spheric">
-					<a href="#tab-spheric"><img src="img/spherical_picture.svg" alt="Sphere" /></a>
-					<div id="spherical-container"></div>
+				<div class="small-row" id="op-images-footer">
+					<p id="op-images-status">
+						<img src="img/web.svg" alt="Web" title="Web" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-web" class="status">&#x25CF;</span></a>
+						<img src="img/mapillary.svg" alt="Mapillary" title="Mapillary" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-mapillary" class="status">&#x25CF;</span></a>
+						<img src="img/flickr.svg" alt="Flickr" title="Flickr" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-flickr" class="status">&#x25CF;</span></a>
+					</p>
+					<p class="overlay-close"><a id="images-close" href="#">Close</a></p>
 				</div>
-			</div>
-			<div id="op-images-footer">
-				<p id="op-images-status">
-					<img src="img/web.svg" alt="Web" title="Web" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-web" class="status">&#x25CF;</span></a>
-					<img src="img/mapillary.svg" alt="Mapillary" title="Mapillary" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-mapillary" class="status">&#x25CF;</span></a>
-					<img src="img/flickr.svg" alt="Flickr" title="Flickr" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-flickr" class="status">&#x25CF;</span></a>
-				</p>
-				<p class="overlay-close"><a id="images-close" href="#">Close</a></p>
 				<div class="clear"></div>
 			</div>
 		</div>
