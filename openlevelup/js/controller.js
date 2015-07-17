@@ -476,8 +476,13 @@ Ctrl: function() {
 			function(data) {
 				controller.setMapillaryData(data);
 				if(isLast) {
-					_view.updatePhotosAdded();
-					console.log("[Mapillary] Done processing images");
+					setTimeout(
+						function() {
+							_view.updatePhotosAdded();
+							console.log("[Mapillary] Done processing images");
+						},
+						2000
+					);
 				}
 			},
 			"text"

@@ -1,10 +1,12 @@
 Changes history
 ===============
 
-16 july 2015
+17 july 2015
 ------------
 * Spherical images from Mapillary handled
 * Status check for Mapillary images
+* WebGL-capable browser detection
+* Icons added for images panel tabs
 
 8 july 2015
 -----------

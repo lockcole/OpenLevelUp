@@ -309,6 +309,15 @@ p.popup-txt.centered {
 	max-width: 100%;
 }
 
+.tabs > div > a > img {
+	height: 24px;
+}
+
+#spherical-container canvas {
+	width: 100%;
+	height: 100%;
+}
+
 /* Images status */
 #op-images-footer > p {
 	display: inline-block;

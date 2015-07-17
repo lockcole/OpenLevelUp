@@ -96,6 +96,9 @@ MainView: function(ctrl, mobile) {
 	/** Is the user using a mobile device ? **/
 	var _isMobile = mobile || false;
 	
+	/** Is the user using a WebGL capable browser ? **/
+	var _hasWebGL = Detector.webgl;
+	
 	/** The current object **/
 	var _self = this;
 	
@@ -152,6 +155,13 @@ MainView: function(ctrl, mobile) {
 	 */
 	this.isMobile = function() {
 		return _isMobile;
+	};
+	
+	/**
+	 * @return True if the browser is WebGL capable
+	 */
+	this.hasWebGL = function() {
+		return _hasWebGL;
 	};
 	
 	/**
@@ -780,7 +790,7 @@ FeatureView: function(main, feature) {
 			//Look for an icon or a label
 			var hasIcon = style.icon != undefined;
 			var labelizable = _labelizable();
-			var hasPhoto = _mainView.getOptionsView().showPhotos() && feature.hasImages();
+			var hasPhoto = _mainView.getOptionsView().showPhotos() && (feature.getImages().hasValidImages() || (_mainView.hasWebGL() && feature.getImages().hasValidSpherical()));
 			
 			if(hasIcon || labelizable || hasPhoto) {
 				switch(geomType) {
@@ -1136,7 +1146,7 @@ FeatureView: function(main, feature) {
 		generalTxt += _addFormatedTag("description", "Details");
 		
 		//Image rendering
-		if(feature.getImages().hasValidImages() || (!isMobile && feature.getImages().hasValidSpherical())) {
+		if(feature.getImages().hasValidImages() || (_mainView.hasWebGL() && feature.getImages().hasValidSpherical())) {
 			generalTxt += '<p class="popup-txt centered"><a href="#" id="images-open" onclick="controller.getView().getImagesView().open(\''+feature.getId()+'\')">See related images</a></p>';
 		}
 		
@@ -2164,7 +2174,7 @@ ImagesView: function(main) {
 		}
 		
 		//Spherical images
-		var hasSpherical = sphericalImages != null && !_mainView.isMobile();
+		var hasSpherical = sphericalImages != null && _mainView.hasWebGL();
 		if(hasSpherical) {
 			$("#tab-spheric").show();
 			_loadSphere(sphericalImages.url);
@@ -2246,21 +2256,26 @@ ImagesView: function(main) {
 		
 		//Scene
 		_scene = new THREE.Scene();
+
+		//Renderer
+		_renderer = new THREE.WebGLRenderer({ antialias: true });
+		_renderer.setPixelRatio( window.devicePixelRatio );
+		_container.appendChild(_renderer.domElement);
 		
 		//Sphere
 		var geometry = new THREE.SphereGeometry( 500, 60, 40 );
 		geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
 		THREE.ImageUtils.crossOrigin = "anonymous";
-		var material = new THREE.MeshBasicMaterial( {
-			map: THREE.ImageUtils.loadTexture(url)
-		} );
+		var texture = THREE.ImageUtils.loadTexture(url);
+		texture.anisotropy = _renderer.getMaxAnisotropy();
+		texture.magFilter = THREE.LinearFilter;
+		texture.minFilter = THREE.LinearMipMapLinearFilter;
+		var material = new THREE.MeshBasicMaterial({
+			map: texture,
+			side: THREE.FrontSide
+		});
 		mesh = new THREE.Mesh( geometry, material );
 		_scene.add( mesh );
-
-		//Renderer
-		_renderer = new THREE.WebGLRenderer();
-		_renderer.setPixelRatio( window.devicePixelRatio );
-		_container.appendChild(_renderer.domElement);
 
 		//Events
 		document.addEventListener('mousedown', _onDocumentMouseDown, false);
@@ -2314,7 +2329,9 @@ ImagesView: function(main) {
 
 	function _onDocumentMouseUp( event ) {
 		_isUserInteracting = false;
-		_firstClick = false;
+		if($('#spherical-container canvas:hover').length != 0) {
+			_firstClick = false;
+		}
 	}
 
 	function _onDocumentMouseWheel( event ) {

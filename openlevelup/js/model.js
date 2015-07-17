@@ -383,7 +383,8 @@ Feature: function(f, styleDef) {
 	 * @return True if the feature has related images
 	 */
 	this.hasImages = function() {
-		return (_images == undefined && (_tags.image != undefined || _tags.mapillary != undefined)) || (_images != undefined && _images != null && _images.hasValidImages());
+		return (_images == undefined && (_tags.image != undefined || _tags.mapillary != undefined))
+			|| (_images != undefined && _images != null && (_images.hasValidImages() || _images.hasValidSpherical()));
 	};
 	
 	/**

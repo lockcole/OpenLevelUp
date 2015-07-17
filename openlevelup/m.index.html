@@ -64,6 +64,10 @@
 	<link rel="stylesheet" href="lib/galleria/themes/classic/galleria.classic.css">
 	<script src="lib/galleria/themes/classic/galleria.classic.min.js"></script>
 	
+	<!-- Three JS includes -->
+	<script src="lib/Detector.js"></script>
+	<script src="lib/three.min.js"></script>
+	
 	<!-- Leaflet plugin includes -->
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.css" />
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.Default.css" />
@@ -156,20 +160,20 @@
 		<div class="overlay-content">
 			<div class="tabs">
 				<div id="tab-imgs">
-					<a href="#tab-imgs">Images</a>
+					<a href="#tab-imgs"><img src="img/picture.svg" alt="Simple" /></a>
 					<div class="galleria">
 					</div>
 				</div>
-				<!--div id="tab-spheric">
-					<a href="#tab-spheric">Sphere</a>
-					<div>Spherical images</div>
-				</div-->
+				<div id="tab-spheric">
+					<a href="#tab-spheric"><img src="img/spherical_picture.svg" alt="Sphere" /></a>
+					<div id="spherical-container"></div>
+				</div>
 			</div>
 			<div id="op-images-footer">
 				<p id="op-images-status">
-					<img src="img/web.svg" alt="Web" title="Web" /> <a title="Green = OK | Red = Invalid | White = No image | Orange = Processing"><span id="status-web" class="status">&#x25CF;</span></a>
-					<img src="img/mapillary.svg" alt="Mapillary" title="Mapillary" /> <a title="Green = OK | Red = Invalid | White = No image | Orange = Processing"><span id="status-mapillary" class="status">&#x25CF;</span></a>
-					<img src="img/flickr.svg" alt="Flickr" title="Flickr" /> <a title="Green = OK | Red = Invalid | White = No image | Orange = Processing"><span id="status-flickr" class="status">&#x25CF;</span></a>
+					<img src="img/web.svg" alt="Web" title="Web" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-web" class="status">&#x25CF;</span></a>
+					<img src="img/mapillary.svg" alt="Mapillary" title="Mapillary" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-mapillary" class="status">&#x25CF;</span></a>
+					<img src="img/flickr.svg" alt="Flickr" title="Flickr" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-flickr" class="status">&#x25CF;</span></a>
 				</p>
 				<p class="overlay-close"><a id="images-close" href="#">Close</a></p>
 				<div class="clear"></div>
