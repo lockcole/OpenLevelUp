@@ -2252,9 +2252,9 @@ ImagesView: function(main) {
 		_firstClick = true;
 		
 		var mesh;
-		var jContainer = $("#tab-spheric");
+		var jContainer = $("#spherical-content");
 		jContainer.html("");
-		_container = document.getElementById("tab-spheric");
+		_container = document.getElementById("spherical-content");
 		
 		//Camera
 		_camera = new THREE.PerspectiveCamera( 75, 16/9, 1, 1100 );

@@ -104,7 +104,6 @@ header {
 
 .overlay-panel {
 	position: relative;
-	visibility: visible;
 	vertical-align: middle;
 }
 
@@ -121,6 +120,7 @@ header {
 	padding: 5px;
 	color: white;
 	margin: 0 auto;
+	visibility: visible;
 }
 
 .overlay-panel > div.centered {
@@ -145,9 +145,8 @@ header {
 }
 
 /* Loading panel */
-#op-loading div {
-	position: relative;
-	text-align: left;
+#op-loading {
+	visibility: visible;
 }
 
 #op-loading ul {
@@ -160,14 +159,6 @@ header {
 }
 
 /* About panel */
-#op-about {
-	visibility: hidden;
-}
-
-#op-about > div {
-	visibility: visible;
-}
-
 #op-about a {
 	color: #D2E2FF;
 }
@@ -263,7 +254,7 @@ p.popup-txt.centered {
 	position: relative;
 	padding: 0;
 	height: 80%;
-	max-height: 80%;
+	max-height: 800px;
 }
 
 #op-images > div > div {
@@ -315,9 +306,19 @@ p.popup-txt.centered {
 	height: 100%;
 }
 
-#tab-spheric canvas {
+#tab-spheric {
+	display: table;
+}
+
+#tab-spheric #spherical-content {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#tab-spheric #spherical-content canvas {
 	width: 100%;
 	height: 100%;
+	max-height: 500px;
 }
 
 /* Images status */
