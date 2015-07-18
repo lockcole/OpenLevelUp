@@ -409,7 +409,7 @@ Ctrl: function() {
 						var photo = photoList[i];
 						
 						//Update objects according to machine tags
-						var machineTags = photo.machine_tags.split(',');
+						var machineTags = photo.machine_tags.split(' ');
 						for(var j in machineTags) {
 							var machineTag = machineTags[j].split('=');
 							var key = machineTag[0];
