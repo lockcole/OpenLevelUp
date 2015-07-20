@@ -76,6 +76,14 @@ TILE_LAYERS:
 			attribution: 'Cadastre (DGFiP)',
 			minZoom: 1,
 			maxZoom: 20
+		},
+		4: {
+			name: "MapQuest",
+			URL: "http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg",
+			attribution: 'Tiles <a href="http://open.mapquest.com/">MapQuest</a>',
+			minZoom: 1,
+			maxZoom: 19,
+			subdomains: '1234'
 		}
 	},
 
@@ -147,6 +155,11 @@ MainView: function(ctrl, mobile) {
 		_cExport.hideButton();
 		_cNames.hideButton();
 		_cLevel.disable();
+		
+		//Link on logo
+		$("#logo-link").click(function() {
+			controller.getView().getMapView().resetView();
+		});
 	};
 
 //ACCESSORS
@@ -431,13 +444,18 @@ MapView: function(main) {
 		
 		for(var l in OLvlUp.view.TILE_LAYERS) {
 			var currentLayer = OLvlUp.view.TILE_LAYERS[l];
+			var tileOptions = {
+				minZoom: currentLayer.minZoom,
+				maxZoom: currentLayer.maxZoom,
+				attribution: currentLayer.attribution+" | "+OLvlUp.view.ATTRIBUTION,
+			};
+			if(currentLayer.subdomains != undefined) {
+				tileOptions.subdomains = currentLayer.subdomains;
+			}
+			
 			tileLayers[currentLayer.name] = new L.TileLayer(
 				currentLayer.URL,
-				{
-					minZoom: currentLayer.minZoom,
-					maxZoom: currentLayer.maxZoom,
-					attribution: currentLayer.attribution+" | "+OLvlUp.view.ATTRIBUTION
-				}
+				tileOptions
 			);
 			
 			if(firstLayer && tiles == undefined) {
@@ -486,6 +504,13 @@ MapView: function(main) {
 	 */
 	this.resetVars = function() {
 		_oldZoom = null;
+	};
+	
+	/**
+	 * Zoom and set center on default position
+	 */
+	this.resetView = function() {
+		_map.setView(L.latLng(47, 2), 6);
 	};
 	
 	/**

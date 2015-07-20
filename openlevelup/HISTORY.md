@@ -5,6 +5,8 @@ Changes history
 ------------
 * Links in pop-ups are corrected if protocol is missing
 * Invalid status for images is more explicit
+* Click on logo resets map view instead of fully reload page
+* MapQuest tiles added
 
 17 july 2015
 ------------

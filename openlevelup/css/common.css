@@ -86,6 +86,10 @@ header {
 	vertical-align: middle;
 }
 
+#logo-link {
+	cursor: pointer;
+}
+
 /***************************
  * Overlay optional panels *
  ***************************/
