@@ -27,7 +27,6 @@
 	<!--
 		TODO (by priority)
 		* Handle all GeoJSON types
-		* Handle bad website values (no http://)
 		* Shortcuts for changing levels
 		* Path finding in a building
 	-->
@@ -234,9 +233,9 @@
 				</div>
 				<div class="small-row" id="op-images-footer">
 					<p id="op-images-status">
-						<img src="img/web.svg" alt="Web" title="Web" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-web" class="status">&#x25CF;</span></a>
-						<img src="img/mapillary.svg" alt="Mapillary" title="Mapillary" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-mapillary" class="status">&#x25CF;</span></a>
-						<img src="img/flickr.svg" alt="Flickr" title="Flickr" /> <a title="Green = OK | Red = Error | White = No image | Orange = Processing"><span id="status-flickr" class="status">&#x25CF;</span></a>
+						<img src="img/web.svg" alt="Web" title="Web" /> <a id="status-web"><span class="status">&#x25CF;</span></a>
+						<img src="img/mapillary.svg" alt="Mapillary" title="Mapillary" /> <a id="status-mapillary"><span class="status">&#x25CF;</span></a>
+						<img src="img/flickr.svg" alt="Flickr" title="Flickr" /> <a id="status-flickr"><span class="status">&#x25CF;</span></a>
 					</p>
 					<p class="overlay-close"><a id="images-close" href="#">Close</a></p>
 				</div>

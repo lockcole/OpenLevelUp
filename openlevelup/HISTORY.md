@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+20 july 2015
+------------
+* Links in pop-ups are corrected if protocol is missing
+* Invalid status for images is more explicit
+
 17 july 2015
 ------------
 * Spherical images from Mapillary handled

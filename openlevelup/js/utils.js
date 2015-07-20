@@ -224,7 +224,31 @@ function removeUscore(v) {
  * @return The string as a HTML link
  */
 function asWebLink(v) {
-	return '<a href="'+v+'">Link</a>';
+	return '<a href="'+correctWebLink(v)+'">Link</a>';
+}
+
+/**
+ * Corrects website URL
+ * @param url The website URL
+ * @return The corrected URL (or the same if invalid)
+ */
+function correctWebLink(url) {
+	var result;
+	var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+$/;
+	var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+$/;
+	
+	if(url.match(regexUrl)) {
+		result = url;
+	}
+	else if(url.match(regexUrlNoProtocol)) {
+		result = 'http://'+url;
+	}
+	else {
+		console.warn("[Website] Invalid URL: "+url);
+		result = url;
+	}
+	
+	return result;
 }
 
 /**

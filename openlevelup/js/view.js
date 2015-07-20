@@ -1191,7 +1191,7 @@ FeatureView: function(main, feature) {
 				//URLs
 				var urlTags = ["image", "website", "contact:website", "url"];
 				if(urlTags.indexOf(i) >= 0) {
-					text += i+' = <a href="'+ftTags[i]+'">'+ftTags[i]+'</a>';
+					text += i+' = <a href="'+correctWebLink(ftTags[i])+'">'+ftTags[i]+'</a>';
 				}
 				//Wikimedia commons
 				else if(i == "wikimedia_commons") {
@@ -2146,7 +2146,8 @@ ImagesView: function(main) {
 	 */
 	this.open = function(ftId) {
 		//Retrieve feature
-		var ftImgs = _mainView.getData().getFeature(ftId).getImages();
+		var ft = _mainView.getData().getFeature(ftId);
+		var ftImgs = ft.getImages();
 		var images = ftImgs.get();
 		var sphericalImages = ftImgs.getSpherical();
 		
@@ -2198,8 +2199,8 @@ ImagesView: function(main) {
 		
 		//Update images status
 		var status = ftImgs.getStatus();
-		_self.updateStatus("web", status.web);
-		_self.updateStatus("mapillary", status.mapillary);
+		_self.updateStatus("web", status.web, ft.getTag("image"));
+		_self.updateStatus("mapillary", status.mapillary, ft.getTag("mapillary"));
 		_self.updateStatus("flickr", status.flickr);
 		
 		$("#op-images").removeClass("hide");
@@ -2221,13 +2222,40 @@ ImagesView: function(main) {
 	 * Changes the status for a given source
 	 * @param source The image source (mapillary, flickr, web)
 	 * @param status The image status (ok, missing, bad, unknown)
+	 * @param baselink The image link (optional)
 	 */
-	this.updateStatus = function(source, status) {
-		var element = $("#status-"+source);
+	this.updateStatus = function(source, status, baselink) {
+		var link = $("#status-"+source);
+		var element = $("#status-"+source+" span");
+		
 		element.removeClass("ok missing bad");
 		if(status != "unknown") {
 			element.addClass(status);
 		}
+		
+		//Update title
+		var title;
+		switch(status) {
+			case "ok":
+				title = "The image link is valid";
+				break;
+			case "missing":
+				title = "No image link defined";
+				break;
+			case "bad":
+				title = "The image link is broken";
+				if(source == "mapillary") {
+					title += " (Mapillary ID: "+baselink+")";
+				}
+				else if(source == "web") {
+					title += " (URL: "+baselink+")";
+				}
+				break;
+			case "unknown":
+				title = "The image is still potentially loading";
+				break;
+		}
+		link.prop("title", title);
 	};
 	
 	/*
