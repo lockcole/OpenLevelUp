@@ -69,7 +69,8 @@
     position: absolute;
 }
 .galleria-theme-classic .galleria-info-text {
-    background-color: #000;
+	background-color: #000;
+    background-color: rgba(0,0,0,0.5);
     padding: 12px;
     display: none;
     /* IE7 */ zoom:1;

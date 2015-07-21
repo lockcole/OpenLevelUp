@@ -377,7 +377,7 @@ Ctrl: function() {
 	 * @param bbox The bounding box
 	 */
 	this.downloadFlickr = function(bbox) {
-		var params = 'method=flickr.photos.search&api_key='+OLvlUp.controller.FLICKR_API_KEY+'&bbox='+bbox.toBBoxString()+'&machine_tags=osm:&has_geo=1&extras=machine_tags,url_c&format=json&nojsoncallback=1';
+		var params = 'method=flickr.photos.search&api_key='+OLvlUp.controller.FLICKR_API_KEY+'&bbox='+bbox.toBBoxString()+'&machine_tags=osm:&has_geo=1&extras=machine_tags,url_c,date_taken,owner_name&format=json&nojsoncallback=1';
 		var url = OLvlUp.controller.FLICKR_API_URL+params;
 		
 		//Download
@@ -424,7 +424,7 @@ Ctrl: function() {
 								//Update given object
 								var feature = _data.getFeature(ftId);
 								if(feature != undefined) {
-									feature.getImages().addFlickrImage(photo.title, photo.url_c);
+									feature.getImages().addFlickrImage(photo.title, photo.url_c, new Date(photo.datetaken).getTime(), photo.ownername);
 									associatedPhotos++;
 								}
 							}

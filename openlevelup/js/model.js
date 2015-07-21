@@ -234,6 +234,20 @@ MapillaryData: function() {
 		return _data[key].special_type == "pano";
 	};
 	
+	/**
+	 * @return the picture author
+	 */
+	this.getAuthor = function(key) {
+		return _data[key].username;
+	};
+	
+	/**
+	 * @return The capture date (as Unix timestamp)
+	 */
+	this.getDate = function(key) {
+		return _data[key].captured_at;
+	};
+	
 //MODIFIERS
 	/**
 	 * Adds a new information set
@@ -861,7 +875,9 @@ FeatureImages: function(feature) {
 			result.push({
 				url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+_mapillary+'/thumb-2048.jpg',
 				source: "Mapillary",
-				tag: "mapillary = "+_mapillary
+				tag: "mapillary = "+_mapillary,
+				author: mapillaryData.getAuthor(_mapillary),
+				date: mapillaryData.getDate(_mapillary)
 			});
 		}
 		
@@ -887,7 +903,9 @@ FeatureImages: function(feature) {
 			result = {
 				url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+_mapillary+'/thumb-2048.jpg',
 				source: "Mapillary",
-				tag: "mapillary = "+_mapillary
+				tag: "mapillary = "+_mapillary,
+				author: "",
+				date: ""
 			};
 		}
 		
@@ -948,12 +966,16 @@ FeatureImages: function(feature) {
 	 * Adds a Flickr image to this object
 	 * @param title The image title
 	 * @param url The image URL
+	 * @param date The capture timestamp
+	 * @param author The picture author
 	 */
-	this.addFlickrImage = function(title, url) {
+	this.addFlickrImage = function(title, url, date, author) {
 		_flickr.push({
 			url: url,
 			source: "Flickr",
-			tag: title
+			tag: title,
+			author: author,
+			date: date
 		});
 	};
 

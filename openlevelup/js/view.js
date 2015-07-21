@@ -2180,11 +2180,20 @@ ImagesView: function(main) {
 		var imagesData = [];
 		for(var i in images) {
 			var img = images[i];
+			
+			var description = "";
+			if(img.author != undefined) { description += img.author }
+			if(img.date != undefined && img.date > 0) {
+				if(description != "") { description += ", "; }
+				description += new Date(img.date).toLocaleString('fr-FR');
+			}
+			description += "<br />"+img.tag;
+			
 			imagesData.push({
 				image: img.url,
 				link: img.url,
 				title: img.source,
-				description: img.tag
+				description: description
 			});
 		}
 		
@@ -2198,7 +2207,7 @@ ImagesView: function(main) {
 		if(hasCommon) {
 			//Load base images
 			$("#tab-imgs-a").show();
-			Galleria.run('.galleria', { dataSource: imagesData });
+			Galleria.run('.galleria', { dataSource: imagesData, popupLinks: true, _toggleInfo: false });
 		}
 		else {
 			$("#tab-imgs-a").hide();
