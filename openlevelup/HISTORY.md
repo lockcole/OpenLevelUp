@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+21 july 2015
+------------
+* Author and capture date added in images information
+* Marker for objects with icons have a radius depending of the amount of associated images
+
 20 july 2015
 ------------
 * Links in pop-ups are corrected if protocol is missing

@@ -1071,11 +1071,14 @@ FeatureView: function(main, feature) {
 	 * @return The marker as leaflet layer
 	 */
 	function _createPhotoIcon(latlng) {
+		var size = feature.getImages().countImages();
+		
 		return L.circleMarker(latlng,{
 			color: "green",
 			fill: false,
 			opacity: 0.7,
-			radius: OLvlUp.view.ICON_SIZE/2 + 1
+			radius: OLvlUp.view.ICON_SIZE/2 + size,
+			weight: 1 + size
 		})
 	};
 	
@@ -2180,20 +2183,12 @@ ImagesView: function(main) {
 		var imagesData = [];
 		for(var i in images) {
 			var img = images[i];
-			
-			var description = "";
-			if(img.author != undefined) { description += img.author }
-			if(img.date != undefined && img.date > 0) {
-				if(description != "") { description += ", "; }
-				description += new Date(img.date).toLocaleString('fr-FR');
-			}
-			description += "<br />"+img.tag;
-			
+
 			imagesData.push({
 				image: img.url,
 				link: img.url,
 				title: img.source,
-				description: description
+				description: _getLegend(img)
 			});
 		}
 		
@@ -2216,6 +2211,8 @@ ImagesView: function(main) {
 		//Spherical images
 		if(hasSpherical) {
 			$("#tab-spheric-a").show();
+			$("#spherical-legend-title").html(sphericalImages.source);
+			$("#spherical-legend-text").html(_getLegend(sphericalImages));
 			_loadSphere(sphericalImages.url);
 			_animateSphere();
 		}
@@ -2292,6 +2289,23 @@ ImagesView: function(main) {
 		link.prop("title", title);
 	};
 	
+	/**
+	 * @param img The image details
+	 * @return The description
+	 */
+	function _getLegend(img) {
+		var description = "";
+		
+		if(img.author != undefined) { description += img.author }
+		if(img.date != undefined && img.date > 0) {
+			if(description != "") { description += ", "; }
+			description += new Date(img.date).toLocaleString('fr-FR');
+		}
+		description += "<br />"+img.tag;
+		
+		return description;
+	};
+	
 	/*
 	 * Sphere related methods
 	 */
@@ -2314,8 +2328,7 @@ ImagesView: function(main) {
 		_firstClick = true;
 		
 		var mesh;
-		var jContainer = $("#spherical-content");
-		jContainer.html("");
+		$("#spherical-content canvas").remove();
 		_container = document.getElementById("spherical-content");
 		
 		//Camera
@@ -2384,11 +2397,13 @@ ImagesView: function(main) {
 
 	function _onDocumentMouseDown( event ) {
 		event.preventDefault();
-		_isUserInteracting = true;
-		onPointerDownPointerX = event.clientX;
-		onPointerDownPointerY = event.clientY;
-		onPointerDownLon = _lon;
-		onPointerDownLat = _lat;
+		if($('#spherical-content canvas:hover').length != 0) {
+			_isUserInteracting = true;
+			onPointerDownPointerX = event.clientX;
+			onPointerDownPointerY = event.clientY;
+			onPointerDownLon = _lon;
+			onPointerDownLat = _lat;
+		}
 	}
 
 	function _onDocumentMouseMove( event ) {
@@ -2400,7 +2415,7 @@ ImagesView: function(main) {
 
 	function _onDocumentMouseUp( event ) {
 		_isUserInteracting = false;
-		if($('#tab-spheric canvas:hover').length != 0) {
+		if($('#spherical-content canvas:hover').length != 0) {
 			_firstClick = false;
 		}
 	}

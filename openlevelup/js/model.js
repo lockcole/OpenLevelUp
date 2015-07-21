@@ -862,7 +862,8 @@ FeatureImages: function(feature) {
 			result.push({
 				url: _img,
 				source: "Web",
-				tag: "image = "+feature.getTag("image")
+				tag: "image = "+feature.getTag("image"),
+				date: 0
 			});
 		}
 		
@@ -884,6 +885,8 @@ FeatureImages: function(feature) {
 		if(_flickr.length > 0) {
 			result = mergeArrays(result, _flickr);
 		}
+		
+		result.sort(_sortByDate);
 
 		return result;
 	};
@@ -904,8 +907,8 @@ FeatureImages: function(feature) {
 				url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+_mapillary+'/thumb-2048.jpg',
 				source: "Mapillary",
 				tag: "mapillary = "+_mapillary,
-				author: "",
-				date: ""
+				author: mapillaryData.getAuthor(_mapillary),
+				date: mapillaryData.getDate(_mapillary)
 			};
 		}
 		
@@ -960,6 +963,15 @@ FeatureImages: function(feature) {
 	this.hasValidSpherical = function() {
 		return _self.getSpherical() != null;
 	};
+	
+	/**
+	 * @return The amount of valid images
+	 */
+	this.countImages = function() {
+		var size = _self.get().length;
+		if(_self.hasValidSpherical()) { size++; }
+		return size;
+	};
 
 //MODIFIERS
 	/**
@@ -1006,6 +1018,10 @@ FeatureImages: function(feature) {
 		}
 		
 		return result;
+	};
+	
+	function _sortByDate(a, b) {
+		return b.date - a.date;
 	};
 
 //INIT

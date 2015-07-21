@@ -424,7 +424,12 @@ Ctrl: function() {
 								//Update given object
 								var feature = _data.getFeature(ftId);
 								if(feature != undefined) {
-									feature.getImages().addFlickrImage(photo.title, photo.url_c, new Date(photo.datetaken).getTime(), photo.ownername);
+									feature.getImages().addFlickrImage(
+										photo.title,
+										photo.url_c,
+										new Date(photo.datetaken.replace(" ", "T")).getTime(),
+										photo.ownername
+									);
 									associatedPhotos++;
 								}
 							}
