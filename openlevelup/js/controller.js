@@ -56,7 +56,7 @@ Ctrl: function() {
 	var _clusterData = null;
 	
 	/** The mapillary data **/
-	var _mapillaryData = new OLvlUp.model.MapillaryData();
+	var _mapillaryData = new MapillaryData();
 	
 	/** The current HTML view **/
 	var _view = null;
@@ -244,7 +244,7 @@ Ctrl: function() {
 					bbox = bbox.pad(1.1 + 0.5 * diffZoom);
 					
 					//Download data
-					_data = new OLvlUp.model.OSMData(bbox, STYLE);
+					_data = new OSMData(bbox, STYLE);
 					_self.downloadData("data", _data.init, bbox);
 					//When download is done, endMapUpdate() will be called.
 				}
@@ -268,7 +268,7 @@ Ctrl: function() {
 					}
 					
 					//Download data
-					_clusterData = new OLvlUp.model.OSMClusterData(bbox);
+					_clusterData = new OSMClusterData(bbox);
 					_self.downloadData("cluster", _clusterData.init, bbox);
 					//When download is done, endMapClusterUpdate() will be called.
 				}
