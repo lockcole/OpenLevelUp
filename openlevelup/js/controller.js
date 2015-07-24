@@ -23,6 +23,30 @@
  * Controller JS class
  */
 
+//Global conf (cache enabled)
+$.ajaxSetup({ cache: true });
+
+//Load JSON style file
+var STYLE;
+$.ajax({
+	url: 'style.json',
+       async: false,
+       dataType: 'json',
+       success: function(data) { STYLE = data; }
+});
+
+//Load PolygonFeatures file
+var POLYGON_FEATURES;
+$.ajax({
+	url: 'polygon_features.json',
+       async: false,
+       dataType: 'json',
+       success: function(data) { POLYGON_FEATURES = data; }
+});
+
+//Application core handler
+OLvlUp = function() {};
+
 OLvlUp.controller = {
 // ====== CONSTANTS ====== 
 /** Overpass API server URL **/
@@ -41,69 +65,68 @@ MAPILLARY_API_URL: "https://a.mapillary.com/v2/",
 
 /** Mapillary API Key **/
 MAPILLARY_API_KEY: "NzNRM2otQkR2SHJzaXJmNmdQWVQ0dzplMWU2NDQ5NDNmZjM5M2Iw",
+};
 
 // ======= CLASSES =======
 /**
  * Application controller (as defined in MVC pattern).
  * Updates view and model depending of user actions in view.
  */
-Ctrl: function() {
+var Ctrl = function() {
 //ATTRIBUTES
 	/** The data container **/
-	var _data = null;
+	this._data = null;
 	
 	/** The cluster data container **/
-	var _clusterData = null;
+	this._clusterData = null;
 	
 	/** The mapillary data **/
-	var _mapillaryData = new MapillaryData();
+	this._mapillaryData = new MapillaryData();
 	
 	/** The current HTML view **/
-	var _view = null;
-	
-	/** The current object **/
-	var _self = this;
+	this._view = null;
+};
 	
 //ACCESSORS
 	/**
 	 * @return The current view
 	 */
-	this.getView = function() {
-		return _view;
+	Ctrl.prototype.getView = function() {
+		return this._view;
 	};
 	
 	/**
 	 * @return The current map data object
 	 */
-	this.getData = function() {
-		return _data;
+	Ctrl.prototype.getData = function() {
+		return this._data;
 	};
 	
 	/**
 	 * @return The cluster data
 	 */
-	this.getClusterData = function() {
-		return _clusterData;
+	Ctrl.prototype.getClusterData = function() {
+		return this._clusterData;
 	};
 	
 	/**
 	 * @return The mapillary data
 	 */
-	this.getMapillaryData = function() {
-		return _mapillaryData;
+	Ctrl.prototype.getMapillaryData = function() {
+		return this._mapillaryData;
 	};
 
 //OTHER METHODS
 	/**
 	 * This function initializes the controller
 	 */
-	this.init = function(mobile) {
+	Ctrl.prototype.init = function(mobile) {
 		mobile = mobile || false;
 		
-		_view = new OLvlUp.view.MainView(_self, mobile);
+		this._view = new MainView(this, mobile);
 		
 		//Init leaflet map
- 		_self.onMapUpdate();
+ 		this.onMapUpdate();
 	};
 
 
@@ -113,78 +136,44 @@ Ctrl: function() {
 	/**
 	 * Called when level up is needed
 	 */
-	this.onLevelUp = function() {
-		_view.getLevelView().up();
-		_view.updateLevelChanged();
+	Ctrl.prototype.onLevelUp = function() {
+		if(controller.getView().getLevelView().up()) {
+			controller.getView().updateLevelChanged();
+		}
 	};
 	
 	/**
 	 * Called when level down is needed
 	 */
-	this.onLevelDown = function() {
-		_view.getLevelView().down();
-		_view.updateLevelChanged();
+	Ctrl.prototype.onLevelDown = function() {
+		if(controller.getView().getLevelView().down()) {
+			controller.getView().updateLevelChanged();
+		}
 	};
 	
 	/**
 	 * Called when level changes
 	 */
-	this.onLevelChange = function() {
-		_view.getLevelView().set();
-		_view.updateLevelChanged();
+	Ctrl.prototype.onLevelChange = function() {
+		if(controller.getView().getLevelView().set()) {
+			controller.getView().updateLevelChanged();
+		}
 	};
 	
 	/**
 	 * Makes the map go to the given level
 	 * @param lvl The new level to display
 	 */
-	this.toLevel = function(lvl) {
+	Ctrl.prototype.toLevel = function(lvl) {
 		try {
-		_view.getLevelView().set(lvl);
-		_view.updateLevelChanged();
+			if(controller.getView().getLevelView().set(lvl)) {
+				controller.getView().updateLevelChanged();
+			}
 		}
 		catch(e) {
-			_view.getMessagesView().displayMessage(e.message, "error");
+			controller.getView().getMessagesView().displayMessage(e.message, "error");
 		}
 	};
-
-	/**
-	 * This function is called when user wants to export the currently shown level
-	 */
-// 	this.onExportLevel = function() {
-// 		var level = _view.getLevelView().get();
-// 		var dataGeoJSON = _view.getMapView().getDataAsGeoJSON();
-// 		
-// 		if(level != null && dataGeoJSON != null) {
-// 			var data = new Blob(
-// 				[JSON.stringify(dataGeoJSON, null, '\t')],
-// 				{ type: "application/json;charset=tf-8;" }
-// 			);
-// 			saveAs(data, "level_"+level+".geojson");
-// 		}
-// 		else {
-// 			_view.displayMessage("No level available for export", "alert");
-// 		}
-// 	};
-	
-	/**
-	 * This function is called when user wants to export the currently shown level as an image
-	 */
-// 	this.onExportLevelImage = function() {
-// 		$("#svg-area").empty();
-// 		var level = _view.getLevelView().get();
-// 		var dataGeoJSON = _view.getMapView().getDataAsGeoJSON();
-// 		if(level != null && dataGeoJSON != null) {
-// 			var levelExporter = new OLvlUp.controller.LevelExporter(dataGeoJSON);
-// 			levelExporter.exportAsSVG(_view.getMapView().get());
-// 			
-// 			var data = new Blob([$("#svg-area").html()],{ type: "image/svg+xml;" });
-// 			saveAs(data, "level_"+_view.getCurrentLevel()+".svg");
-// 		}
-// 		else {
-// 			_view.getMessagesView().displayMessage("No level available for export", "alert");
-// 		}
-// 	};
 
 
 /*******************
@@ -193,72 +182,72 @@ Ctrl: function() {
 	/**
 	 * This function is called when base layer on map changes
 	 */
-	this.onMapLayerChange = function(e) {
+	Ctrl.prototype.onMapLayerChange = function(e) {
 		if(e.name != undefined) {
-			_view.getMapView().setTileLayer(e.name);
+			controller.getView().getMapView().setTileLayer(e.name);
 		}
 	};
 	
 	/**
 	 * This function is called when a layer was added on map
 	 */
-	this.onMapLayerAdd = function(e) {
+	Ctrl.prototype.onMapLayerAdd = function(e) {
 		//Stop loading when cluster is added
 		if(e.layer._childClusters != undefined) {
-			_view.getLoadingView().setLoading(false);
+			controller.getView().getLoadingView().setLoading(false);
 		}
-		_view.getMapView().changeTilesOpacity();
+		controller.getView().getMapView().changeTilesOpacity();
 	};
 	
 	/**
 	 * This function is called when map was moved or zoomed in/out.
 	 * @param force Force data download (optional, default: false)
 	 */
-	this.onMapUpdate = function(force) {
+	Ctrl.prototype.onMapUpdate = function(force) {
 		force = force || false;
 
-		var map = _view.getMapView().get();
+		var map = this._view.getMapView().get();
 		var bbox = map.getBounds();
 		var zoom = map.getZoom();
 		
 		//Clear messages
-		_view.getMessagesView().clear();
+		this._view.getMessagesView().clear();
 		
 		//Check if zoom is high enough to download data
 		if(zoom >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
-			_view.getLoadingView().setLoading(true);
-			_view.getLoadingView().addLoadingInfo("Prepare update");
+			this._view.getLoadingView().setLoading(true);
+			this._view.getLoadingView().addLoadingInfo("Prepare update");
 			
 			//High zoom data download
 			if(zoom >= OLvlUp.view.DATA_MIN_ZOOM) {
-				_oldLevel = _view.getLevelView().get();
+				this._oldLevel = this._view.getLevelView().get();
 				
 				//Download data only if new BBox isn't contained in previous one
 				if(force
-					|| _data == null
-					|| !_data.isInitialized()
-					|| !_data.getBBox().contains(bbox)
+					|| this._data == null
+					|| !this._data.isInitialized()
+					|| !this._data.getBBox().contains(bbox)
 				) {
 					//Resize BBox for small areas (avoid multiple Overpass API calls)
 					var diffZoom = zoom - OLvlUp.view.DATA_MIN_ZOOM;
 					bbox = bbox.pad(1.1 + 0.5 * diffZoom);
 					
 					//Download data
-					_self.downloadData("data", bbox);
+					this.downloadData("data", bbox);
 					//When download is done, endMapUpdate() will be called.
 				}
 				//Else, we just update view
 				else {
-					_self.endMapUpdate();
+					this.endMapUpdate();
 				}
 			}
 			//Low zoom data download (cluster)
 			else {
 				//Download data only if new BBox isn't contained in previous one
 				if(force
-					|| _clusterData == null
-					|| !_clusterData.isInitialized()
-					|| !_clusterData.getBBox().contains(bbox)
+					|| this._clusterData == null
+					|| !this._clusterData.isInitialized()
+					|| !this._clusterData.getBBox().contains(bbox)
 				) {
 					if(zoom > OLvlUp.view.CLUSTER_MIN_ZOOM) {
 						//Resize BBox for small areas (avoid multiple Overpass API calls)
@@ -267,37 +256,37 @@ Ctrl: function() {
 					}
 					
 					//Download data
-					_self.downloadData("cluster", bbox);
+					this.downloadData("cluster", bbox);
 					//When download is done, endMapClusterUpdate() will be called.
 				}
 				//Else, we just update view
 				else {
-					_self.endMapClusterUpdate();
+					this.endMapClusterUpdate();
 				}
 			}
 		}
 		//Else, clean map
 		else {
-			_view.updateMapMoved();
+			this._view.updateMapMoved();
 		}
 	};
 	
 	/**
 	 * This function is called after data download finishes
 	 */
-	this.endMapUpdate = function() {
-		_view.getLoadingView().addLoadingInfo("Refresh map");
-		_view.updateMapMoved();
-		_view.getLoadingView().setLoading(false);
+	Ctrl.prototype.endMapUpdate = function() {
+		this._view.getLoadingView().addLoadingInfo("Refresh map");
+		this._view.updateMapMoved();
+		this._view.getLoadingView().setLoading(false);
 	};
 	
 	/**
 	 * This function is called after cluster data download finishes
 	 */
-	this.endMapClusterUpdate = function() {
-		_view.getLoadingView().addLoadingInfo("Refresh map");
-		_view.updateMapMoved();
-		_view.getLoadingView().setLoading(false);
+	Ctrl.prototype.endMapClusterUpdate = function() {
+		this._view.getLoadingView().addLoadingInfo("Refresh map");
+		this._view.updateMapMoved();
+		this._view.getLoadingView().setLoading(false);
 	};
 
 
@@ -310,11 +299,11 @@ Ctrl: function() {
 	 * @param type The kind of request ("data" or "cluster")
 	 * @param bbox The bounding box
 	 */
-	this.downloadData = function(type, bbox) {
+	Ctrl.prototype.downloadData = function(type, bbox) {
 		var oapiRequest = null;
 		var bounds = boundsString(bbox);
 		
-		_view.getLoadingView().addLoadingInfo("Request Overpass API");
+		this._view.getLoadingView().addLoadingInfo("Request Overpass API");
 		
 		//Prepare request depending of type
 		if(type == "cluster") {
@@ -329,43 +318,43 @@ Ctrl: function() {
 		$.get(
 			OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest),
 			function(data) {
-				controller.getView().getLoadingView().addLoadingInfo("Process received data");
+				this.getView().getLoadingView().addLoadingInfo("Process received data");
 				
 				if(type == "cluster") {
-					_clusterData = new OSMClusterData(bbox, data);
-					controller.getView().getMapView().resetVars();
-					controller.endMapClusterUpdate();
+					this._clusterData = new OSMClusterData(bbox, data);
+					this.getView().getMapView().resetVars();
+					this.endMapClusterUpdate();
 				}
 				else {
-					_data = new OSMData(bbox, data, STYLE);
-					controller.getView().getMapView().resetVars();
-					controller.endMapUpdate();
+					this._data = new OSMData(bbox, data, STYLE);
+					this.getView().getMapView().resetVars();
+					this.endMapUpdate();
 					
 					//Download Flickr data
-					controller.downloadFlickr(bbox);
+					this.downloadFlickr(bbox);
 					
 					//Request mapillary data
-					var mapillaryKeys = _data.getMapillaryKeys();
+					var mapillaryKeys = this._data.getMapillaryKeys();
 					var mapillaryNb = mapillaryKeys.length;
 					for(var i=0; i < mapillaryNb; i++) {
 						var key = mapillaryKeys[i];
 						var isLast = (i==mapillaryNb-1);
-						if(!_mapillaryData.has(key)) {
-							_self.requestMapillaryData(key, isLast);
+						if(!this._mapillaryData.has(key)) {
+							this.requestMapillaryData(key, isLast);
 						}
 					}
 				}
-			},
+			}.bind(this),
 			"text")
-		.fail(controller.onDownloadFail);
+		.fail(controller.onDownloadFail.bind(this));
 	};
 	
 	/**
 	 * This function is called when data download fails
 	 */
-	this.onDownloadFail = function() {
-		controller.getView().getLoadingView().setLoading(false);
-		controller.getView().getMessagesView().displayMessage("An error occured during data download", "error");
+	Ctrl.prototype.onDownloadFail = function() {
+		this.getView().getLoadingView().setLoading(false);
+		this.getView().getMessagesView().displayMessage("An error occured during data download", "error");
 	};
 
 /*********************
@@ -375,14 +364,14 @@ Ctrl: function() {
 	 * Retrieves picture data from Flickr
 	 * @param bbox The bounding box
 	 */
-	this.downloadFlickr = function(bbox) {
+	Ctrl.prototype.downloadFlickr = function(bbox) {
 		var params = 'method=flickr.photos.search&api_key='+OLvlUp.controller.FLICKR_API_KEY+'&bbox='+bbox.toBBoxString()+'&machine_tags=osm:&has_geo=1&extras=machine_tags,url_c,date_taken,owner_name&format=json&nojsoncallback=1';
 		var url = OLvlUp.controller.FLICKR_API_URL+params;
 		
 		//Download
 		$.get(
 			url,
-			controller.setFlickrData,
+			controller.setFlickrData.bind(this),
 			"text"
 		).fail(controller.onFlickrDownloadFail);
 	};
@@ -391,13 +380,13 @@ Ctrl: function() {
 	 * Processes the received Flickr data, and updates the model objects
 	 * @param data The Flickr data, as JSON
 	 */
-	this.setFlickrData = function(data) {
+	Ctrl.prototype.setFlickrData = function(data) {
 		//console.log("[Flickr] Updating data");
 		try {
 			//Parse JSON
 			parsedData = parseApiData(data);
 			
-			if(_data.isInitialized()) {
+			if(this._data.isInitialized()) {
 				if(parsedData.stat == "ok") {
 					var associatedPhotos = 0;
 					var osmKeyRegex = /^(osm:)(node|way|relation)$/;
@@ -421,7 +410,7 @@ Ctrl: function() {
 								var ftId = type+'/'+value;
 								
 								//Update given object
-								var feature = _data.getFeature(ftId);
+								var feature = this._data.getFeature(ftId);
 								if(feature != undefined) {
 									feature.getImages().addFlickrImage(
 										photo.title,
@@ -436,7 +425,7 @@ Ctrl: function() {
 					}
 					
 					if(associatedPhotos > 0) {
-						_view.updatePhotosAdded();
+						this._view.updatePhotosAdded();
 					}
 					console.log("[Flickr] Done processing images ("+associatedPhotos+" associated)");
 				}
@@ -457,7 +446,7 @@ Ctrl: function() {
 	/**
 	 * This function is called when data download fails
 	 */
-	this.onFlickrDownloadFail = function() {
+	Ctrl.prototype.onFlickrDownloadFail = function() {
 		console.error("[Flickr] An error occured");
 	};
 
@@ -469,7 +458,7 @@ Ctrl: function() {
 	 * @param id The mapillary ID
 	 * @param isLast Is this the last mapillary download (default: false)
 	 */
-	this.requestMapillaryData = function(id, isLast) {
+	Ctrl.prototype.requestMapillaryData = function(id, isLast) {
 		isLast = isLast || false;
 		var params = 'g/'+id+'?client_id='+OLvlUp.controller.MAPILLARY_API_KEY;
 		var url = OLvlUp.controller.MAPILLARY_API_URL+params;
@@ -478,17 +467,17 @@ Ctrl: function() {
 		$.get(
 			url,
 			function(data) {
-				controller.setMapillaryData(data);
+				this.setMapillaryData(data);
 				if(isLast) {
 					setTimeout(
 						function() {
-							_view.updatePhotosAdded();
+							this._view.updatePhotosAdded();
 							console.log("[Mapillary] Done processing images");
-						},
+						}.bind(this),
 						2000
 					);
 				}
-			},
+			}.bind(this),
 			"text"
 		).fail(controller.onMapillaryDownloadFail);
 	};
@@ -497,17 +486,17 @@ Ctrl: function() {
 	 * Processes the received Mapillary data, and updates the images data in model
 	 * @param data The Flickr data, as JSON
 	 */
-	this.setMapillaryData = function(data) {
+	Ctrl.prototype.setMapillaryData = function(data) {
 		try {
 			//Parse JSON
 			parsedData = parseApiData(data);
 			
-			if(_data.isInitialized()) {
+			if(this._data.isInitialized()) {
 				//var key = parsedData.key;
 				//if(key != undefined) {
 				if(parsedData.nodes.length > 0) {
 					var key = parsedData.nodes[0].key;
-					_mapillaryData.add(key, parsedData.nodes[0]);
+					this._mapillaryData.add(key, parsedData.nodes[0]);
 					//_mapillaryData.add(key, parsedData);
 					//console.log("[Mapillary] Done processing image "+key);
 				}
@@ -528,8 +517,6 @@ Ctrl: function() {
 	/**
 	 * This function is called when data download fails
 	 */
-	this.onMapillaryDownloadFail = function() {
+	Ctrl.prototype.onMapillaryDownloadFail = function() {
 		console.error("[Mapillary] An error occured");
 	};
-}
-};

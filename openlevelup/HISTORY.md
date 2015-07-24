@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+24 july 2015
+------------
+* Performance improved by changing array loops and using prototypes for function definition
+
 21 july 2015
 ------------
 * Author and capture date added in images information
