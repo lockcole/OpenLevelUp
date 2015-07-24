@@ -66,11 +66,18 @@ function mergeArrays(a1, a2) {
 };
 
 /**
+ * Sorts a number array
+ */
+function sortNumberArray(a, b) {
+	return a-b;
+};
+
+/**
  * Parses levels list.
  * @param str The levels as a string (for example "1;5", "1,3", "1-3", "-1--6", "from 1 to 42" or "-2 to 6")
- * @return The parsed levels as a string array, or null if invalid
+ * @return The parsed levels as a float array, or null if invalid
  */
-function parseLevelsStr(str) {
+function parseLevelsFloat(str) {
 	var result = null;
 	
 	//Level values separated by ';'
@@ -81,9 +88,17 @@ function parseLevelsStr(str) {
 	
 	if(regex1.test(str)) {
 		result = str.split(';');
+		for(var i=0; i < result.length; i++) {
+			result[i] = parseFloat(result[i]);
+		}
+		result.sort(sortNumberArray);
 	}
 	else if(regex2.test(str)) {
 		result = str.split(',');
+		for(var i=0; i < result.length; i++) {
+			result[i] = parseFloat(result[i]);
+		}
+		result.sort(sortNumberArray);
 	}
 	//Level intervals
 	else {
@@ -110,36 +125,21 @@ function parseLevelsStr(str) {
 		
 		//Add values between min and max
 		if(regexResult != null && min != null && max != null) {
-			result = new Array();
+			result = [];
+			if(min > max) {
+				var tmp = min;
+				min = max;
+				max = tmp;
+			}
 			
 			//Add intermediate values
 			for(var i=min; i != max; i=i+((max-min)/Math.abs(max-min))) {
-				result.push(i.toString());
+				result.push(i);
 			}
-			result.push(max.toString());
+			result.push(max);
 		}
 	}
 	
-	//If levels available, sort them
-	if(result != null) {
-		result.sort(function (a,b) { return parseFloat(a)-parseFloat(b); });
-	}
-	
-	return result;
-}
-
-/**
- * Parses levels list.
- * @param str The levels as a string (for example "1;5", "1,3", "1-3", "-1--6", "from 1 to 42" or "-2 to 6")
- * @return The parsed levels as a float array, or null if invalid
- */
-function parseLevelsFloat(str) {
-	var result = parseLevelsStr(str);
-	if(result != null) {
-		for(var i in result) {
-			result[i] = parseFloat(result[i]);
-		}
-	}
 	return result;
 }
 
@@ -268,7 +268,7 @@ function decToBase62(val) {
 	
 	var i = 0;
 	var qi = val;
-	var r = new Array();
+	var r = [];
 	
 	while(qi > 0) {
 		r[i+1] = qi % 62;

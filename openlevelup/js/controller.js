@@ -244,8 +244,7 @@ Ctrl: function() {
 					bbox = bbox.pad(1.1 + 0.5 * diffZoom);
 					
 					//Download data
-					_data = new OSMData(bbox, STYLE);
-					_self.downloadData("data", _data.init, bbox);
+					_self.downloadData("data", bbox);
 					//When download is done, endMapUpdate() will be called.
 				}
 				//Else, we just update view
@@ -268,8 +267,7 @@ Ctrl: function() {
 					}
 					
 					//Download data
-					_clusterData = new OSMClusterData(bbox);
-					_self.downloadData("cluster", _clusterData.init, bbox);
+					_self.downloadData("cluster", bbox);
 					//When download is done, endMapClusterUpdate() will be called.
 				}
 				//Else, we just update view
@@ -310,10 +308,9 @@ Ctrl: function() {
 	 * Downloads data from Overpass API
 	 * Then calls another function to process it.
 	 * @param type The kind of request ("data" or "cluster")
-	 * @param handler The handler function, which will process the data
 	 * @param bbox The bounding box
 	 */
-	this.downloadData = function(type, handler, bbox) {
+	this.downloadData = function(type, bbox) {
 		var oapiRequest = null;
 		var bounds = boundsString(bbox);
 		
@@ -334,12 +331,14 @@ Ctrl: function() {
 			function(data) {
 				controller.getView().getLoadingView().addLoadingInfo("Process received data");
 				
-				handler(data);
-				controller.getView().getMapView().resetVars();
 				if(type == "cluster") {
+					_clusterData = new OSMClusterData(bbox, data);
+					controller.getView().getMapView().resetVars();
 					controller.endMapClusterUpdate();
 				}
 				else {
+					_data = new OSMData(bbox, data, STYLE);
+					controller.getView().getMapView().resetVars();
 					controller.endMapUpdate();
 					
 					//Download Flickr data
@@ -405,12 +404,12 @@ Ctrl: function() {
 					
 					//Read photos
 					var photoList = parsedData.photos.photo;
-					for(var i in photoList) {
+					for(var i=0; i < photoList.length; i++) {
 						var photo = photoList[i];
 						
 						//Update objects according to machine tags
 						var machineTags = photo.machine_tags.split(' ');
-						for(var j in machineTags) {
+						for(var j=0; j < machineTags.length; j++) {
 							var machineTag = machineTags[j].split('=');
 							var key = machineTag[0];
 							var value = machineTag[1];

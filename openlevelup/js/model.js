@@ -27,7 +27,7 @@
  * The OSM global data container.
  * It contains the parsed object from Overpass call.
  */
-var OSMData = function(bbox, styleDef) {
+var OSMData = function(bbox, data, styleDef) {
 //ATTRIBUTES
 	/** The feature objects **/
 	this._features = null;
@@ -40,54 +40,65 @@ var OSMData = function(bbox, styleDef) {
 	
 	/** The names of objects, by level **/
 	this._names = new Object();
-};
 
 //CONSTRUCTOR
-	/**
-	 * Class constructor, initializes this object with received data.
-	 */
-	OSMData.prototype.init = function(data) {
-		//Parse OSM data
-		var geojson = parseOsmData(data);
-		
-		//Create features
-		this._features = new Object();
+	var timeStart = new Date().getTime();
+	
+	//Parse OSM data
+	var geojson = parseOsmData(data);
+	
+	//Create features
+	this._features = new Object();
 
-		for(var i in geojson.features) {
-			var f = geojson.features[i];
-			var id = f.id;
-			var currentFeature = new Feature(f, styleDef);
-			
-			if(this._features[id] == undefined) {
-				this._features[id] = currentFeature;
-			}
-//			else {
-//				console.log("Duplicate: "+id);
-//				console.log(currentFeature.getTags());
-//			}
+	var id, f, i, currentFeature, ftLevels, name, lvlId, lvl;
+	for(i=0; i < geojson.features.length; i++) {
+		f = geojson.features[i];
+		id = f.id;
+		currentFeature = new Feature(f, styleDef);
+		
+		if(this._features[id] == undefined) {
+			this._features[id] = currentFeature;
 			
 			//Add levels to list
-			var ftLevels = currentFeature.onLevels();
+			ftLevels = currentFeature.onLevels();
 			this._levels = mergeArrays(this._levels, ftLevels);
 			
 			//Add name to list
-			var name = currentFeature.getTag("name");
+			name = currentFeature.getTag("name");
 			if(name != undefined) {
-				for(var lvlId in ftLevels) {
-					var lvl = ftLevels[lvlId];
+				for(var lvlId=0; lvlId < ftLevels.length; lvlId++) {
+					lvl = ftLevels[lvlId];
 					
 					//Create given level in names if needed
 					if(this._names[lvl] == undefined) {
-						this._names[lvl] = new Array();
+						this._names[lvl] = [];
 					}
 					
 					this._names[lvl][name] = currentFeature;
 				}
 			}
 		}
-		
-		this._levels.sort(function (a,b) { return a-b;});
-	};
+		// else {
+			// console.log("Duplicate: "+id);
+			// console.log(currentFeature.getTags());
+		// }
+	}
+	
+	//Clear tmp objects
+	geojson = null;
+	id = null;
+	f = null;
+	i = null;
+	currentFeature = null;
+	ftLevels = null;
+	name = null;
+	lvlId = null;
+	lvl = null;
+	
+	this._levels.sort(sortNumberArray);
+	
+	console.log("[Time] Model parsing: "+((new Date().getTime()) - timeStart));
+};
 
 //ACCESSORS
 	/**
@@ -154,23 +165,14 @@ var OSMData = function(bbox, styleDef) {
  * The OSM cluster data container.
  * It contains the parsed object from Overpass call.
  */
-var OSMClusterData = function(bbox) {
-	//ATTRIBUTES
+var OSMClusterData = function(bbox, data) {
+//ATTRIBUTES
 	/** The feature objects **/
-	this._data = null;
+	this._data = parseOsmData(data);
 
 	/** The bounding box of the data **/
 	this._bbox = bbox;
 };
-
-//CONSTRUCTOR
-	/**
-	 * Class constructor, initializes this object with received data.
-	 */
-	OSMClusterData.prototype.init = function(data) {
-		//Parse OSM data
-		this._data = parseOsmData(data);
-	};
 
 //ACCESSORS
 	/**
@@ -345,7 +347,7 @@ var Feature = function(f, styleDef) {
 		currentLevel = [];
 		
 		//Try to find type=level relations, and add level value in level array
-		for(var i in relations) {
+		for(var i=0; i < relations.length; i++) {
 			var rel = relations[i];
 			if(rel.reltags.type == "level" && rel.reltags.level != undefined) {
 				var relLevel = parseLevelsFloat(rel.reltags.level);
@@ -366,7 +368,7 @@ var Feature = function(f, styleDef) {
 	
 	//Save found levels
 	if(currentLevel != null) {
-		currentLevel.sort(function(a,b) { return a - b; });
+		currentLevel.sort(sortNumberArray);
 		this._onLevels = currentLevel;
 	} else {
 		//console.log("No valid level found for "+_id);
@@ -479,42 +481,43 @@ var FeatureGeometry = function(fGeometry) {
 		}
 		else if(type == "LineString") {
 			result = [0, 0];
+			var length = this._geom.coordinates.length;
 			
-			for(var i in this._geom.coordinates) {
-				if(i < this._geom.coordinates.length) {
-					result[0] += this._geom.coordinates[i][0];
-					result[1] += this._geom.coordinates[i][1];
-				}
+			for(var i=0; i < length; i++) {
+				result[0] += this._geom.coordinates[i][0];
+				result[1] += this._geom.coordinates[i][1];
 			}
 			
-			result[0] = result[0] / (this._geom.coordinates.length);
-			result[1] = result[1] / (this._geom.coordinates.length);
+			result[0] = result[0] / length;
+			result[1] = result[1] / length;
 		}
 		else if(type == "Polygon") {
 			result = [0, 0];
+			var length = this._geom.coordinates[0].length;
 			
-			for(var i in this._geom.coordinates[0]) {
-				if(i < this._geom.coordinates[0].length - 1) {
+			for(var i=0; i < length; i++) {
+				if(i < length - 1) {
 					result[0] += this._geom.coordinates[0][i][0];
 					result[1] += this._geom.coordinates[0][i][1];
 				}
 			}
 			
-			result[0] = result[0] / (this._geom.coordinates[0].length -1);
-			result[1] = result[1] / (this._geom.coordinates[0].length -1);
+			result[0] = result[0] / (length -1);
+			result[1] = result[1] / (length -1);
 		}
 		else if(type == "MultiPolygon") {
 			result = [0, 0];
+			var length = this._geom.coordinates[0][0].length;
 			
-			for(var i in this._geom.coordinates[0][0]) {
-				if(i < this._geom.coordinates[0][0].length - 1) {
+			for(var i = 0; i < length; i++) {
+				if(i < length - 1) {
 					result[0] += this._geom.coordinates[0][0][i][0];
 					result[1] += this._geom.coordinates[0][0][i][1];
 				}
 			}
 			
-			result[0] = result[0] / (this._geom.coordinates[0][0].length -1);
-			result[1] = result[1] / (this._geom.coordinates[0][0].length -1);
+			result[0] = result[0] / (length -1);
+			result[1] = result[1] / (length -1);
 		}
 		else {
 			console.log("Unknown type: "+this._geom.type);
@@ -552,18 +555,20 @@ var FeatureGeometry = function(fGeometry) {
 				
 			case "LineString":
 				result = [];
+				var coords;
 				for(var i = 0; i < this._geom.coordinates.length; i++) {
-					var coords = this._geom.coordinates[i];
+					coords = this._geom.coordinates[i];
 					result[i] = L.latLng(coords[1], coords[0]);
 				}
 				break;
 				
 			case "Polygon":
 				result = [];
+				var coords;
 				for(var i = 0; i < this._geom.coordinates.length; i++) {
 					result[i] = [];
 					for(var j=0; j < this._geom.coordinates[i].length; j++) {
-						var coords = this._geom.coordinates[i][j];
+						coords = this._geom.coordinates[i][j];
 						result[i][j] = L.latLng(coords[1], coords[0]);
 					}
 				}
@@ -571,12 +576,13 @@ var FeatureGeometry = function(fGeometry) {
 				
 			case "MultiPolygon":
 				result = [];
+				var coords;
 				for(var i = 0; i < this._geom.coordinates.length; i++) {
 					result[i] = [];
 					for(var j=0; j < this._geom.coordinates[i].length; j++) {
 						result[i][j] = [];
 						for(var k=0; k < this._geom.coordinates[i][j]; k++) {
-							var coords = this._geom.coordinates[i][j][k];
+							coords = this._geom.coordinates[i][j][k];
 							result[i][j][k] = L.latLng(coords[1], coords[0]);
 						}
 					}
@@ -626,9 +632,10 @@ var FeatureGeometry = function(fGeometry) {
 				minlon = this._geom.coordinates[0][0][0];
 				maxlon = this._geom.coordinates[0][0][0];
 				
+				var coords;
 				for(var i = 0; i < this._geom.coordinates.length; i++) {
 					for(var j=0; j < this._geom.coordinates[i].length; j++) {
-						var coords = this._geom.coordinates[i][j];
+						coords = this._geom.coordinates[i][j];
 						if(coords[0] < minlon) { minlon = coords[0]; }
 						else if(coords[0] > maxlon) { maxlon = coords[0]; }
 						if(coords[1] < minlat) { minlat = coords[1]; }
@@ -643,10 +650,11 @@ var FeatureGeometry = function(fGeometry) {
 				minlon = this._geom.coordinates[0][0][0];
 				maxlon = this._geom.coordinates[0][0][0];
 				
+				var coords;
 				for(var i = 0; i < this._geom.coordinates.length; i++) {
 					for(var j=0; j < this._geom.coordinates[i].length; j++) {
-						for(var k=0; k < this._geom.coordinates[i][j]; k++) {
-							var coords = this._geom.coordinates[i][j][k];
+						for(var k=0; k < this._geom.coordinates[i][j].length; k++) {
+							coords = this._geom.coordinates[i][j][k];
 							if(coords[0] < minlon) { minlon = coords[0]; }
 							else if(coords[0] > maxlon) { maxlon = coords[0]; }
 							if(coords[1] < minlat) { minlat = coords[1]; }
@@ -688,22 +696,23 @@ var FeatureStyle = function(feature, jsonStyle) {
 	/** The feature **/
 	this._feature = feature;
 
-//OTHER METHODS
-	/**
-	 * Checks if a given style is applyable on a given feature
-	 * @param feature The feature to test
-	 * @param style The JSON style to test
-	 * @return True if the style is applyable
-	 */
-	function _isStyleApplyable(feature, style) {
-		var applyable = false;
+//CONSTRUCTOR
+	var applyable, tagList, val, featureVal;
+	//Find potential styles depending on tags
+	for(var i=0; i < jsonStyle.styles.length; i++) {
+		var style = jsonStyle.styles[i];
 		
-		for(var j in style.onTags) {
-			var tagList = style.onTags[j];
+		/*
+		 * Check if style is applyable
+		 */
+		applyable = false;
+		
+		for(var j=0; j < style.onTags.length; j++) {
+			tagList = style.onTags[j];
 			applyable = true;
 			for(var key in tagList) {
-				var val = tagList[key];
-				var featureVal = feature.getTag(key);
+				val = tagList[key];
+				featureVal = feature.getTag(key);
 				
 				//If this rule is not applyable, stop
 				if(featureVal == undefined
@@ -717,16 +726,8 @@ var FeatureStyle = function(feature, jsonStyle) {
 			if(applyable) { break; }
 		}
 		
-		return applyable;
-	}
-	
-//CONSTRUCTOR
-	//Find potential styles depending on tags
-	for(var i in jsonStyle.styles) {
-		var style = jsonStyle.styles[i];
-		
 		//If applyable, we update the result style
-		if(_isStyleApplyable(feature, style)) {
+		if(applyable) {
 			this._name = style.name;
 			for(var param in style.style) {
 				this._style[param] = style.style[param];
@@ -736,6 +737,12 @@ var FeatureStyle = function(feature, jsonStyle) {
 	
 	//Change icon=no into undefined
 	if(this._style.icon == "no") { this._style.icon = undefined; }
+	
+	//Clean tmp objects
+	applyable = null;
+	tagList = null;
+	val = null;
+	featureVal = null;
 };
 
 //ACCESSORS
@@ -803,43 +810,38 @@ var FeatureImages = function(feature) {
 	
 	/** The feature */
 	this._feature = feature;
-
-//OTHER METHODS
-	function _parseImageTag(image) {
-		var result = undefined;
-		
+	
+//CONSTRUCTOR
+	var imageTag = feature.getTag("image");
+	if(imageTag != undefined) {
+		/*
+		 * Parse image tag
+		 */
 		var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|PNG|gif|GIF|jpg|JPG|jpeg|JPEG|bmp|BMP)$/;
 		var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|PNG|gif|GIF|jpg|JPG|jpeg|JPEG|bmp|BMP)$/;
 		var regexWiki = /^(File):.+\.(png|gif|jpg|jpeg|bmp)$/i;
 		
-		if(image.match(regexUrl)) {
-			result = image;
+		if(imageTag.match(regexUrl)) {
+			this._img = imageTag;
 		}
-		else if(image.match(regexUrlNoProtocol) && !image.match(regexWiki)) {
-			result = 'http://'+image;
+		else if(imageTag.match(regexUrlNoProtocol) && !imageTag.match(regexWiki)) {
+			this._img = 'http://'+imageTag;
 		}
-		else if(image.match(regexWiki)) {
-			var file = image.substring(5);
+		else if(imageTag.match(regexWiki)) {
+			var file = imageTag.substring(5);
 			var imageUtf8 = file.replace(/ /g, '_');
 			var digest = md5(imageUtf8);
 			var folder = digest[0] + '/' + digest[0] + digest[1] + '/' + encodeURIComponent(imageUtf8);
-			result = 'http://upload.wikimedia.org/wikipedia/commons/' + folder;
+			this._img = 'http://upload.wikimedia.org/wikipedia/commons/' + folder;
 		}
 		else {
-			console.warn("[Images] Invalid key: "+image);
-			result = null;
+			console.warn("[Images] Invalid key: "+imageTag);
+			this._img = null;
 		}
-		
-		return result;
-	};
+	}
 	
-//CONSTRUCTOR
-	//function _init() {
-		var imageTag = feature.getTag("image");
-		if(imageTag != undefined) {
-			this._img = _parseImageTag(imageTag);
-		}
-	//};
+	//Clean tmp objects
+	imageTag = null;
 };
 
 //ACCESSORS

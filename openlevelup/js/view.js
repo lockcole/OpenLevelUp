@@ -48,36 +48,36 @@ ICON_FOLDER: "img",
 
 /** The available tile layers (IDs must be integers and constant in time) **/
 TILE_LAYERS:
-	{
-		0: {
+	[
+		{
 			name: "OpenStreetMap",
 			URL: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 			attribution: 'Tiles <a href="http://openstreetmap.org/">OSM</a>',
 			minZoom: 1,
 			maxZoom: 19
 		},
-		1: {
+		{
 			name: "OpenStreetMap FR",
 			URL: "http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
 			attribution: 'Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a>',
 			minZoom: 1,
 			maxZoom: 20
 		},
-		2: {
+		{
 			name: "Stamen Toner",
 			URL: 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png',
 			attribution: 'Tiles <a href="http://maps.stamen.com/">Stamen Toner</a>',
 			minZoom: 1,
 			maxZoom: 20
 		},
-		3: {
+		{
 			name: "Cadastre FR",
 			URL: "http://tms.cadastre.openstreetmap.fr/*/tout/{z}/{x}/{y}.png",
 			attribution: 'Cadastre (DGFiP)',
 			minZoom: 1,
 			maxZoom: 20
 		},
-		4: {
+		{
 			name: "MapQuest",
 			URL: "http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg",
 			attribution: 'Tiles <a href="http://open.mapquest.com/">MapQuest</a>',
@@ -85,7 +85,7 @@ TILE_LAYERS:
 			maxZoom: 19,
 			subdomains: '1234'
 		}
-	},
+	],
 
 /** The default attribution, refering to OSM data **/
 ATTRIBUTION: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
@@ -421,7 +421,7 @@ MapView: function(main) {
 			var search = L.Control.geocoder({ position: "topright" });
 			//Limit max zoom in order to avoid having no tiles in background for small objects
 			var minimalMaxZoom = OLvlUp.view.TILE_LAYERS[0].maxZoom;
-			for(var i in OLvlUp.view.TILE_LAYERS) {
+			for(var i=0; i < OLvlUp.view.TILE_LAYERS.length; i++) {
 				if(OLvlUp.view.TILE_LAYERS[i].maxZoom < minimalMaxZoom) {
 					minimalMaxZoom = OLvlUp.view.TILE_LAYERS[i].maxZoom;
 				}
@@ -442,7 +442,7 @@ MapView: function(main) {
 		var tileLayers = new Array();
 		var firstLayer = true;
 		
-		for(var l in OLvlUp.view.TILE_LAYERS) {
+		for(var l=0; l < OLvlUp.view.TILE_LAYERS.length; l++) {
 			var currentLayer = OLvlUp.view.TILE_LAYERS[l];
 			var tileOptions = {
 				minZoom: currentLayer.minZoom,
@@ -535,6 +535,8 @@ MapView: function(main) {
 	 * Refreshes data on map
 	 */
 	this.update = function() {
+		var timeStart = new Date().getTime();
+		
 		//Delete previous data
 		if(_dataLayer != null) {
 			_map.removeLayer(_dataLayer);
@@ -556,7 +558,7 @@ MapView: function(main) {
 				
 				//Order layers
 				var featureLayersKeys = Object.keys(fullData).sort(function(a,b) { return parseInt(a) - parseInt(b); });
-				for(var i in featureLayersKeys) {
+				for(var i=0; i < featureLayersKeys.length; i++) {
 					var featureLayerGroup = fullData[featureLayersKeys[i]];
 					_dataLayer.addLayer(featureLayerGroup);
 				}
@@ -581,6 +583,8 @@ MapView: function(main) {
 		_oldZoom = _map.getZoom();
 		
 		_self.changeTilesOpacity();
+		
+		console.log("[Time] View update: "+((new Date().getTime()) - timeStart));
 	};
 	
 	/**
@@ -588,7 +592,7 @@ MapView: function(main) {
 	 * @param name The tile layer name
 	 */
 	this.setTileLayer = function(name) {
-		for(var i in OLvlUp.view.TILE_LAYERS) {
+		for(var i=0; i < OLvlUp.view.TILE_LAYERS.length; i++) {
 			if(OLvlUp.view.TILE_LAYERS[i].name == name) {
 				_tileLayer = i;
 				break;
@@ -897,15 +901,16 @@ FeatureView: function(main, feature) {
 						for(var i=0; i < nbPolygons; i++) {
 							var coordMid = [0, 0];
 							var coordsPolygon = ftGeomJSON.coordinates[i];
-							for(var i in coordsPolygon[0]) {
-								if(i < coordsPolygon[0].length - 1) {
+							var length = coordsPolygon[0].length;
+							for(var i=0; i < length; i++) {
+								if(i < length - 1) {
 									coordMid[0] += coordsPolygon[0][i][0];
 									coordMid[1] += coordsPolygon[0][i][1];
 								}
 							}
 							
-							coordMid[0] = coordMid[0] / (coordsPolygon[0].length -1);
-							coordMid[1] = coordMid[1] / (coordsPolygon[0].length -1);
+							coordMid[0] = coordMid[0] / (length -1);
+							coordMid[1] = coordMid[1] / (length -1);
 							var coord = L.latLng(coordMid[1], coordMid[0]);
 							
 							if(hasIcon) {
@@ -2045,7 +2050,7 @@ NamesView: function(main) {
 				var levelsKeys = Object.keys(roomNamesFiltered);
 				levelsKeys.sort(function (a,b) { return parseFloat(a)-parseFloat(b);});
 				
-				for(var i in levelsKeys) {
+				for(var i=0; i < levelsKeys.length; i++) {
 					var lvl = levelsKeys[i];
 					//Create new level row
 					var newRow = document.createElement("div");
@@ -2181,7 +2186,7 @@ ImagesView: function(main) {
 		
 		//Create images list
 		var imagesData = [];
-		for(var i in images) {
+		for(var i=0; i < images.length; i++) {
 			var img = images[i];
 
 			imagesData.push({
