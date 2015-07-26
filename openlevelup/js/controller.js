@@ -44,6 +44,8 @@ $.ajax({
        success: function(data) { POLYGON_FEATURES = data; }
 });
 
+addCompatibility();
+
 //Application core handler
 OLvlUp = function() {};
 
