@@ -45,14 +45,12 @@
 		},
 		{
 			"type": "Style",
-			"name": "Oneway path",
 			"description": "Oneway path",
 			"onTags": [ { "oneway": "yes" }, { "conveying": "forward" } ],
 			"style": { "icon": "arrow1_up.png", "rotateIcon": true }
 		},
 		{
 			"type": "Style",
-			"name": "Oneway path",
 			"description": "Oneway path",
 			"onTags": [ { "oneway": "-1" }, { "conveying": "backward" } ],
 			"style": { "icon": "arrow1_down.png", "rotateIcon": true }
@@ -290,9 +288,9 @@
 		},
 		{
 			"type": "Style",
-			"name": "Conveying stairs",
-			"description": "Conveying stairs",
-			"onTags": [ { "highway": "steps", "conveying": "yes|forward|backward" } ],
+			"name": "Conveying path",
+			"description": "Conveying path",
+			"onTags": [ { "highway": "steps|footway", "conveying": "yes|forward|backward" } ],
 			"style": { "color": "#848484", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "3,1" }
 		},
 		{
@@ -430,10 +428,10 @@
 		},
 		{
 			"type": "Style",
-			"name": "Emergency phone",
-			"description": "Emergency phone",
-			"onTags": [ { "emergency": "phone" } ],
-			"style": { "icon": "PublicInformationSymbol_EmergencyTelephone.png" }
+			"name": "Emergency",
+			"description": "Emergency",
+			"onTags": [ { "emergency": "*" } ],
+			"style": { "icon": "emergency_${emergency}.png" }
 		},
 		{
 			"type": "Style",
@@ -501,6 +499,7 @@
 		"amenity_nursery.png",
 		"amenity_parking.png",
 		"amenity_pharmacy.png",
+		"amenity_photo_booth.png",
 		"amenity_piano.png",
 		"amenity_place_of_worship.png",
 		"amenity_playground.png",
@@ -553,7 +552,12 @@
 		"door_sliding.png",
 		"door.png",
 		"Elevator_icon.png",
+		"emergency_assembly_point.png",
 		"emergency_door.png",
+		"emergency_defibrillator.png",
+		"emergency_fire_extinguisher.png",
+		"emergency_phone.png",
+		"emergency_siren.png",
 		"Emergency_stairs.png",
 		"export.png",
 		"Farm-Fresh_newspaper.png",
@@ -572,7 +576,6 @@
 		"Octicons-circuit-board.png",
 		"physics.png",
 		"poi_place_hamlet.png",
-		"PublicInformationSymbol_EmergencyTelephone.png",
 		"room_administration.png",
 		"room_auditorium.png",
 		"room_bedroom.png",
@@ -655,7 +658,6 @@
 		"tourism_picnic_site.png",
 		"tourism_viewpoint.png",
 		"tourism_zoo.png",
-		"Trash_can.png",
 		"Video_surveillance_logo.png"
 	]
 }
