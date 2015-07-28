@@ -2078,6 +2078,12 @@ var ImagesView = function(main) {
 	/** The main view **/
 	this._mainView = main;
 	
+	/** The currently shown spherical image **/
+	this._currentSpherical = -1;
+	
+	/** The available spherical images **/
+	this._sphericalImages = null;
+	
 	/*
 	 * Sphere related attributes
 	 */
@@ -2095,6 +2101,7 @@ var ImagesView = function(main) {
 	this._phi = null;
 	this._theta = null;
 	this._firstClick = null;
+	this._mesh = null;
 	
 //CONSTRUCTOR
 	//$("#op-images").hide();
@@ -2104,6 +2111,8 @@ var ImagesView = function(main) {
 	});
 	$("#tab-imgs-a").click(function() { controller.getView().getImagesView().changeTab("tab-imgs"); });
 	$("#tab-spheric-a").click(function() { controller.getView().getImagesView().changeTab("tab-spheric"); });
+	$("#spherical-nav-left").click(function() { controller.getView().getImagesView().previousSpherical(); });
+	$("#spherical-nav-right").click(function() { controller.getView().getImagesView().nextSpherical(); });
 };
 
 //OTHER METHODS
@@ -2116,7 +2125,7 @@ var ImagesView = function(main) {
 		var ft = this._mainView.getData().getFeature(ftId);
 		var ftImgs = ft.getImages();
 		var images = ftImgs.get();
-		var sphericalImages = ftImgs.getSpherical();
+		this._sphericalImages = ftImgs.getSpherical();
 		
 		//Create images list
 		var imagesData = [];
@@ -2135,7 +2144,7 @@ var ImagesView = function(main) {
 		 * Set images tab
 		 */
 		var hasCommon = imagesData.length > 0;
-		var hasSpherical = sphericalImages != null && this._mainView.hasWebGL() && !this._mainView.isMobile();
+		var hasSpherical = this._sphericalImages.length > 0 && this._mainView.hasWebGL() && !this._mainView.isMobile();
 		
 		//Common images
 		if(hasCommon) {
@@ -2149,13 +2158,19 @@ var ImagesView = function(main) {
 		
 		//Spherical images
 		if(hasSpherical) {
+			this._currentSpherical = 0;
 			$("#tab-spheric-a").show();
-			$("#spherical-legend-title").html(sphericalImages.source);
-			$("#spherical-legend-text").html(this._getLegend(sphericalImages));
-			this._loadSphere(sphericalImages.url);
-			this._animateSphere();
+			var sceneInit = this._scene == null;
+			if(sceneInit) {
+				this._initSphere();
+			}
+			this._loadSphere();
+			if(sceneInit) {
+				this._animateSphere();
+			}
 		}
 		else {
+			this._currentSpherical = -1;
 			$("#tab-spheric-a").hide();
 		}
 		
@@ -2215,7 +2230,7 @@ var ImagesView = function(main) {
 			case "bad":
 				title = "The image link is broken";
 				if(source == "mapillary") {
-					title += " (Mapillary ID: "+baselink+")";
+					title += " (Check mapillary:* tags)";
 				}
 				else if(source == "web") {
 					title += " (URL: "+baselink+")";
@@ -2248,55 +2263,52 @@ var ImagesView = function(main) {
 	/*
 	 * Sphere related methods
 	 */
-	 
+	
 	/**
-	 * Loads the ThreeJS sphere
-	 * @param url The image URL
+	 * Changes the spherical to the previous one (if any)
 	 */
-	ImagesView.prototype._loadSphere = function(url) {
-		//Init vars
-		this._isUserInteracting = false;
-		this._onMouseDownMouseX = 0;
-		this._onMouseDownMouseY = 0;
-		this._lon = 0;
-		this._onMouseDownLon = 0;
-		this._lat = 0;
-		this._onMouseDownLat = 0;
-		this._phi = 0;
-		this._theta = 0;
-		this._firstClick = true;
-		
-		var mesh;
+	ImagesView.prototype.previousSpherical = function() {
+		if(this._sphericalImages.length > 1) {
+			if(this._currentSpherical > 0) {
+				this._currentSpherical--;
+			}
+			else {
+				this._currentSpherical = this._sphericalImages.length -1;
+			}
+			this._loadSphere();
+		}
+	};
+	
+	/**
+	 * Changes the spherical to the previous one (if any)
+	 */
+	ImagesView.prototype.nextSpherical = function() {
+		if(this._sphericalImages.length > 1) {
+			if(this._currentSpherical < this._sphericalImages.length -1) {
+				this._currentSpherical++;
+			}
+			else {
+				this._currentSpherical = 0;
+			}
+			this._loadSphere();
+		}
+	};
+	
+	/**
+	 * Initializes the ThreeJS sphere
+	 */
+	ImagesView.prototype._initSphere = function() {
 		$("#spherical-content canvas").remove();
 		this._container = document.getElementById("spherical-content");
 		
-		//Camera
-		this._camera = new THREE.PerspectiveCamera( 75, 16/9, 1, 1100 );
-		this._camera.target = new THREE.Vector3( 0, 0, 0 );
-		
 		//Scene
 		this._scene = new THREE.Scene();
-
+		
 		//Renderer
 		this._renderer = new THREE.WebGLRenderer({ antialias: true });
 		this._renderer.setPixelRatio( window.devicePixelRatio );
 		this._container.appendChild(this._renderer.domElement);
 		
-		//Sphere
-		var geometry = new THREE.SphereGeometry( 500, 60, 40 );
-		geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
-		THREE.ImageUtils.crossOrigin = "anonymous";
-		var texture = THREE.ImageUtils.loadTexture(url);
-		texture.anisotropy = this._renderer.getMaxAnisotropy();
-		texture.magFilter = THREE.LinearFilter;
-		texture.minFilter = THREE.LinearMipMapLinearFilter;
-		var material = new THREE.MeshBasicMaterial({
-			map: texture,
-			side: THREE.FrontSide
-		});
-		mesh = new THREE.Mesh( geometry, material );
-		this._scene.add( mesh );
-
 		//Events
 		document.addEventListener('mousedown', this._onDocumentMouseDown.bind(this), false);
 		document.addEventListener('mousemove', this._onDocumentMouseMove.bind(this), false);
@@ -2313,6 +2325,52 @@ var ImagesView = function(main) {
 		document.addEventListener( 'dragleave', function ( event ) {
 			document.body.style.opacity = 1;
 		}.bind(this), false );
+		window.addEventListener( 'resize', this._onWindowResize.bind(this), false );
+	};
+	
+	/**
+	 * Loads the ThreeJS sphere with current spherical image
+	 */
+	ImagesView.prototype._loadSphere = function() {
+		var sphericalImg = this._sphericalImages[this._currentSpherical];
+		$("#spherical-legend-title").html(sphericalImg.source);
+		$("#spherical-legend-text").html(this._getLegend(sphericalImg));
+		
+		//Init vars
+		this._isUserInteracting = false;
+		this._onMouseDownMouseX = 0;
+		this._onMouseDownMouseY = 0;
+		this._lon = 0;
+		this._onMouseDownLon = 0;
+		this._lat = 0;
+		this._onMouseDownLat = 0;
+		this._phi = 0;
+		this._theta = 0;
+		this._firstClick = true;
+
+		//Camera
+		this._camera = new THREE.PerspectiveCamera( 75, 16/9, 1, 1100 );
+		this._camera.target = new THREE.Vector3( 0, 0, 0 );
+		
+		//Sphere
+		if(this._mesh != null) {
+			this._scene.remove(this._mesh);
+		}
+		var geometry = new THREE.SphereGeometry( 500, 60, 40 );
+		geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
+		THREE.ImageUtils.crossOrigin = "anonymous";
+		var texture = THREE.ImageUtils.loadTexture(sphericalImg.url);
+		texture.anisotropy = this._renderer.getMaxAnisotropy();
+		texture.magFilter = THREE.LinearFilter;
+		texture.minFilter = THREE.LinearMipMapLinearFilter;
+		var material = new THREE.MeshBasicMaterial({
+			map: texture,
+			side: THREE.FrontSide
+		});
+		this._mesh = new THREE.Mesh( geometry, material );
+		this._scene.add( this._mesh );
+		
+		//Events
 		document.addEventListener( 'drop', function ( event ) {
 			event.preventDefault();
 			var reader = new FileReader();
@@ -2323,7 +2381,6 @@ var ImagesView = function(main) {
 			reader.readAsDataURL( event.dataTransfer.files[ 0 ] );
 			document.body.style.opacity = 1;
 		}.bind(this), false );
-		window.addEventListener( 'resize', this._onWindowResize.bind(this), false );
 	};
 	
 	ImagesView.prototype._onWindowResize = function() {

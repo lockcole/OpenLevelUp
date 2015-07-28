@@ -149,11 +149,17 @@ var OSMData = function(bbox, data, styleDef) {
 	 */
 	OSMData.prototype.getMapillaryKeys = function() {
 		var keys = [];
-		for(var ftId in this._features) {
-			var feature = this._features[ftId];
-			var mapillary = feature.getTag("mapillary");
-			if(mapillary != undefined) {
-				keys.push(mapillary);
+		var ftId, feature, i, mapillaryVal;
+		var mapillaryTags = [ "mapillary", "mapillary:front", "mapillary:back", "mapillary:right", "mapillary:left", "mapillary:large", "mapillary:detail" ];
+		
+		for(ftId in this._features) {
+			feature = this._features[ftId];
+
+			for(i=0; i < mapillaryTags.length; i++) {
+				mapillaryVal = feature.getTag(mapillaryTags[i]);
+				if(mapillaryVal != undefined) {
+					keys.push(mapillaryVal);
+				}
 			}
 		}
 		return keys;
@@ -803,7 +809,7 @@ var FeatureImages = function(feature) {
 	this._img = undefined;
 	
 	/** The image from mapillary=* tag **/
-	this._mapillary = feature.getTag("mapillary");
+	this._mapillary = []; //feature.getTag("mapillary");
 	
 	/** The Flickr images **/
 	this._flickr = [];
@@ -840,6 +846,27 @@ var FeatureImages = function(feature) {
 		}
 	}
 	
+	/*
+	 * Read mapillary images
+	 */
+	var mapillaryImgs = [
+		{ key: "mapillary", val: feature.getTag("mapillary") },
+		{ key: "mapillary:front", val: feature.getTag("mapillary:front") },
+		{ key: "mapillary:back", val: feature.getTag("mapillary:back") },
+		{ key: "mapillary:right", val: feature.getTag("mapillary:right") },
+		{ key: "mapillary:left", val: feature.getTag("mapillary:left") },
+		{ key: "mapillary:large", val: feature.getTag("mapillary:large") },
+		{ key: "mapillary:detail", val: feature.getTag("mapillary:detail") }
+	];
+	
+	var mapillaryImg = null;
+	for(var i=0; i < mapillaryImgs.length; i++) {
+		mapillaryImg = mapillaryImgs[i];
+		if(mapillaryImg.val != undefined) {
+			this._mapillary.push(mapillaryImg);
+		}
+	}
+	
 	//Clean tmp objects
 	imageTag = null;
 };
@@ -861,18 +888,19 @@ var FeatureImages = function(feature) {
 		}
 		
 		var mapillaryData = controller.getMapillaryData();
-		if(
-			this._mapillary != undefined
-			&& mapillaryData.has(this._mapillary)
-			&& !mapillaryData.isSpherical(this._mapillary)
-		) {
-			result.push({
-				url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+this._mapillary+'/thumb-2048.jpg',
-				source: "Mapillary",
-				tag: "mapillary = "+this._mapillary,
-				author: mapillaryData.getAuthor(this._mapillary),
-				date: mapillaryData.getDate(this._mapillary)
-			});
+		var mapillaryImg = null;
+		for(var i=0; i < this._mapillary.length; i++) {
+			mapillaryImg = this._mapillary[i];
+			
+			if(mapillaryData.has(mapillaryImg.val) && !mapillaryData.isSpherical(mapillaryImg.val)) {
+				result.push({
+					url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+mapillaryImg.val+'/thumb-2048.jpg',
+					source: "Mapillary",
+					tag: mapillaryImg.key+" = "+mapillaryImg.val,
+					author: mapillaryData.getAuthor(mapillaryImg.val),
+					date: mapillaryData.getDate(mapillaryImg.val)
+				});
+			}
 		}
 		
 		if(this._flickr.length > 0) {
@@ -885,25 +913,28 @@ var FeatureImages = function(feature) {
 	};
 	
 	/**
-	 * @return A spherical image of the feature or null if no one associated
+	 * @return Spherical images of the feature (as an array)
 	 */
 	FeatureImages.prototype.getSpherical = function() {
-		var result = null;
+		var result = [];
 		
 		var mapillaryData = controller.getMapillaryData();
-		if(
-			this._mapillary != undefined
-			&& mapillaryData.has(this._mapillary)
-			&& mapillaryData.isSpherical(this._mapillary)
-		) {
-			result = {
-				url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+this._mapillary+'/thumb-2048.jpg',
-				source: "Mapillary",
-				tag: "mapillary = "+this._mapillary,
-				author: mapillaryData.getAuthor(this._mapillary),
-				date: mapillaryData.getDate(this._mapillary)
-			};
+		var mapillaryImg = null;
+		for(var i=0; i < this._mapillary.length; i++) {
+			mapillaryImg = this._mapillary[i];
+			
+			if(mapillaryData.has(mapillaryImg.val) && mapillaryData.isSpherical(mapillaryImg.val)) {
+				result.push({
+					url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+mapillaryImg.val+'/thumb-2048.jpg',
+					source: "Mapillary",
+					tag: mapillaryImg.key+" = "+mapillaryImg.val,
+					author: mapillaryData.getAuthor(mapillaryImg.val),
+					date: mapillaryData.getDate(mapillaryImg.val)
+				});
+			}
 		}
+		
+		result.sort(this._sortByDate);
 		
 		return result;
 	};
@@ -927,14 +958,21 @@ var FeatureImages = function(feature) {
 		
 		//Mapillary
 		var mapillaryData = controller.getMapillaryData();
-		if(this._mapillary == undefined) {
+		if(this._mapillary.length == 0) {
 			status.mapillary = "missing";
 		}
-		else if(mapillaryData.has(this._mapillary)) {
-			status.mapillary = "ok";
-		}
 		else {
-			status.mapillary = "bad";
+			var isMapillaryOK = true;
+			var i = 0;
+			
+			while(isMapillaryOK && i < this._mapillary.length) {
+				if(!mapillaryData.has(this._mapillary[i].val)) {
+					isMapillaryOK = false;
+				}
+				i++;
+			}
+			
+			status.mapillary = (isMapillaryOK) ? "ok" : "bad";
 		}
 		
 		//Flickr
@@ -954,16 +992,14 @@ var FeatureImages = function(feature) {
 	 * @return True if it has a valid spherical image
 	 */
 	FeatureImages.prototype.hasValidSpherical = function() {
-		return this.getSpherical() != null;
+		return this.getSpherical().length > 0;
 	};
 	
 	/**
 	 * @return The amount of valid images
 	 */
 	FeatureImages.prototype.countImages = function() {
-		var size = this.get().length;
-		if(this.hasValidSpherical()) { size++; }
-		return size;
+		return this.get().length + this.getSpherical().length;
 	};
 
 //MODIFIERS

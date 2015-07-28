@@ -1,6 +1,15 @@
 Changes history
 ===============
 
+28 july 2015
+------------
+* Multiple spherical images from Mapillary handled
+* mapillary:front/back/right/left/large/detail tags handled
+
+27 july 2015
+------------
+* amenity=piano rendered
+
 24 july 2015
 ------------
 * Performance improved by changing array loops and using prototypes for function definition

@@ -310,6 +310,7 @@ p.popup-txt.centered {
 	height: 100%;
 }
 
+/* Spherical images tab */
 #tab-spheric {
 	display: table;
 }
@@ -346,6 +347,28 @@ p.popup-txt.centered {
 	height: 100%;
 	/*max-height: 500px;*/
 	cursor: pointer;
+}
+
+#spherical-nav > div {
+	color: #ccc;
+	font-size: 3em;
+	position: absolute;
+	top: 50%;
+	margin-top: -31px;
+	line-height: 62px;
+	cursor: pointer;
+}
+
+#spherical-nav > div:hover {
+	color: white;
+}
+
+#spherical-nav-right {
+	right: 10px;
+}
+
+#spherical-nav-left {
+	left: 10px;
 }
 
 /* Images status */
