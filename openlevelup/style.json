@@ -45,18 +45,6 @@
 		},
 		{
 			"type": "Style",
-			"description": "Oneway path",
-			"onTags": [ { "oneway": "yes" }, { "conveying": "forward" } ],
-			"style": { "icon": "arrow1_up.png", "rotateIcon": true }
-		},
-		{
-			"type": "Style",
-			"description": "Oneway path",
-			"onTags": [ { "oneway": "-1" }, { "conveying": "backward" } ],
-			"style": { "icon": "arrow1_down.png", "rotateIcon": true }
-		},
-		{
-			"type": "Style",
 			"name": "Path (Guide strips)",
 			"description": "Path with guide strips",
 			"onTags": [ { "highway": "*", "guide_strips": "yes" } ],
@@ -290,8 +278,14 @@
 			"type": "Style",
 			"name": "Conveying path",
 			"description": "Conveying path",
-			"onTags": [ { "highway": "steps|footway", "conveying": "yes|forward|backward" } ],
+			"onTags": [ { "conveying": "yes|forward|backward" } ],
 			"style": { "color": "#848484", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "3,1" }
+		},
+		{
+			"type": "Style",
+			"description": "Conveying path",
+			"onTags": [ { "highway": "footway", "conveying": "yes|forward|backward" } ],
+			"style": { "dashArray": "3,2" }
 		},
 		{
 			"type": "Style",
@@ -460,6 +454,18 @@
 			"description": "Mall surface",
 			"onTags": [ { "shop": "mall" } ],
 			"style" : { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -9 }
+		},
+		{
+			"type": "Style",
+			"description": "Oneway path",
+			"onTags": [ { "oneway": "yes" }, { "conveying": "forward" } ],
+			"style": { "icon": "arrow1_up.png", "rotateIcon": true }
+		},
+		{
+			"type": "Style",
+			"description": "Oneway path",
+			"onTags": [ { "oneway": "-1" }, { "conveying": "backward" } ],
+			"style": { "icon": "arrow1_down.png", "rotateIcon": true }
 		}
 	],
 	"images": [
