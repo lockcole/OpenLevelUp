@@ -1204,11 +1204,11 @@ var FeatureView = function(main, feature) {
 				//URLs
 				var urlTags = ["image", "website", "contact:website", "url"];
 				if(urlTags.indexOf(i) >= 0) {
-					text += i+' = <a href="'+correctWebLink(ftTags[i])+'">'+ftTags[i]+'</a>';
+					text += i+' = <a href="'+correctWebLink(ftTags[i])+'" target="_blank">'+ftTags[i]+'</a>';
 				}
 				//Wikimedia commons
 				else if(i == "wikimedia_commons") {
-					text += i+' = <a href="https://commons.wikimedia.org/wiki/'+ftTags[i]+'">'+ftTags[i]+'</a>';
+					text += i+' = <a href="https://commons.wikimedia.org/wiki/'+ftTags[i]+'" target="_blank">'+ftTags[i]+'</a>';
 				}
 				else {
 					text += i+" = "+ftTags[i];
@@ -1226,7 +1226,7 @@ var FeatureView = function(main, feature) {
 		 * Footer
 		 */
 		//Link to osm.org object
-		text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+this._feature.getId()+'">See this on OSM.org</a></p>';
+		text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+this._feature.getId()+'" target="_blank">See this on OSM.org</a></p>';
 		
 		coords = this._feature.getGeometry().getCentroid();
 		

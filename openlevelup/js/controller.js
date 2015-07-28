@@ -85,6 +85,12 @@ var Ctrl = function() {
 	/** The mapillary data **/
 	this._mapillaryData = new MapillaryData();
 	
+	/** The download start time **/
+	this._downloadStart = null;
+	
+	/** The amount of requested Mapillary pictures **/
+	this._nbMapillaryRequests = null;
+	
 	/** The current HTML view **/
 	this._view = null;
 };
@@ -302,6 +308,8 @@ var Ctrl = function() {
 	 * @param bbox The bounding box
 	 */
 	Ctrl.prototype.downloadData = function(type, bbox) {
+		this._downloadStart = (new Date()).getTime();
+		
 		var oapiRequest = null;
 		var bounds = boundsString(bbox);
 		
@@ -309,10 +317,10 @@ var Ctrl = function() {
 		
 		//Prepare request depending of type
 		if(type == "cluster") {
-			oapiRequest = '[out:json][timeout:25];(way["indoor"]["indoor"!="yes"]["level"]('+bounds+');way["buildingpart"]["level"]('+bounds+'););out body center;';
+			oapiRequest = '[out:json][timeout:25][bbox:'+bounds+'];(way["indoor"]["indoor"!="yes"]["level"];way["buildingpart"]["level"];);out ids center;';
 		}
 		else {
-			oapiRequest = '[out:json][timeout:25];(node["door"]('+bounds+');<;>;node["entrance"]('+bounds+');<;>;node["level"]('+bounds+');way["level"]('+bounds+');relation["type"="multipolygon"]["level"]('+bounds+');node["repeat_on"]('+bounds+');way["repeat_on"]('+bounds+');way["min_level"]('+bounds+');way["max_level"]('+bounds+');relation["type"="level"]('+bounds+'));out body;>;out skel qt;';
+			oapiRequest = '[out:json][timeout:25][bbox:'+bounds+'];(node["repeat_on"];way["repeat_on"];relation["repeat_on"];node[~"^.*level$"~"."];way[~"^.*level$"~"."];relation[~"^.*level$"~"."];);out body;>;out qt skel;';
 		}
 
 		//Download data
@@ -320,6 +328,7 @@ var Ctrl = function() {
 		$.get(
 			OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest),
 			function(data) {
+				console.log("[Time] Overpass download: "+((new Date()).getTime() - this._downloadStart));
 				this.getView().getLoadingView().addLoadingInfo("Process received data");
 				
 				if(type == "cluster") {
@@ -329,21 +338,30 @@ var Ctrl = function() {
 				}
 				else {
 					this._data = new OSMData(bbox, data, STYLE);
-					this.getView().getMapView().resetVars();
-					this.endMapUpdate();
+					this.getView().getLoadingView().addLoadingInfo("Download photos metadata");
 					
 					//Download Flickr data
 					this.downloadFlickr(bbox);
 					
+					this.getView().getMapView().resetVars();
+					
 					//Request mapillary data
 					var mapillaryKeys = this._data.getMapillaryKeys();
 					var mapillaryNb = mapillaryKeys.length;
+					var anyMapillary = false;
+					
+					this._nbMapillaryRequests = 0;
 					for(var i=0; i < mapillaryNb; i++) {
 						var key = mapillaryKeys[i];
-						var isLast = (i==mapillaryNb-1);
 						if(!this._mapillaryData.has(key)) {
-							this.requestMapillaryData(key, isLast);
+							anyMapillary = true;
+							this._nbMapillaryRequests++;
+							this.requestMapillaryData(key);
 						}
+					}
+
+					if(!anyMapillary) {
+						this.endMapUpdate();
 					}
 				}
 			}.bind(this),
@@ -371,11 +389,12 @@ var Ctrl = function() {
 		var url = OLvlUp.controller.FLICKR_API_URL+params;
 		
 		//Download
-		$.get(
-			url,
-			controller.setFlickrData.bind(this),
-			"text"
-		).fail(controller.onFlickrDownloadFail);
+		$.ajax({
+			url: url,
+			async: false,
+			dataType: 'json',
+			success: this.setFlickrData.bind(this)
+		}).fail(this.onFlickrDownloadFail);
 	};
 	
 	/**
@@ -383,18 +402,14 @@ var Ctrl = function() {
 	 * @param data The Flickr data, as JSON
 	 */
 	Ctrl.prototype.setFlickrData = function(data) {
-		//console.log("[Flickr] Updating data");
 		try {
-			//Parse JSON
-			parsedData = parseApiData(data);
-			
 			if(this._data.isInitialized()) {
-				if(parsedData.stat == "ok") {
+				if(data.stat == "ok") {
 					var associatedPhotos = 0;
 					var osmKeyRegex = /^(osm:)(node|way|relation)$/;
 					
 					//Read photos
-					var photoList = parsedData.photos.photo;
+					var photoList = data.photos.photo;
 					for(var i=0; i < photoList.length; i++) {
 						var photo = photoList[i];
 						
@@ -426,9 +441,6 @@ var Ctrl = function() {
 						}
 					}
 					
-					if(associatedPhotos > 0) {
-						this._view.updatePhotosAdded();
-					}
 					console.log("[Flickr] Done processing images ("+associatedPhotos+" associated)");
 				}
 				else {
@@ -470,17 +482,13 @@ var Ctrl = function() {
 			url,
 			function(data) {
 				this.setMapillaryData(data);
-				if(isLast) {
-					setTimeout(
-						function() {
-							this._view.updatePhotosAdded();
-							console.log("[Mapillary] Done processing images");
-						}.bind(this),
-						2000
-					);
+				this._nbMapillaryRequests--;
+				if(this._nbMapillaryRequests == 0) {
+					console.log("[Mapillary] Done processing images");
+					this.endMapUpdate();
 				}
 			}.bind(this),
-			"text"
+			'json'
 		).fail(controller.onMapillaryDownloadFail);
 	};
 	
@@ -490,17 +498,10 @@ var Ctrl = function() {
 	 */
 	Ctrl.prototype.setMapillaryData = function(data) {
 		try {
-			//Parse JSON
-			parsedData = parseApiData(data);
-			
 			if(this._data.isInitialized()) {
-				//var key = parsedData.key;
-				//if(key != undefined) {
-				if(parsedData.nodes.length > 0) {
-					var key = parsedData.nodes[0].key;
-					this._mapillaryData.add(key, parsedData.nodes[0]);
-					//_mapillaryData.add(key, parsedData);
-					//console.log("[Mapillary] Done processing image "+key);
+				if(data.nodes.length > 0) {
+					var key = data.nodes[0].key;
+					this._mapillaryData.add(key, data.nodes[0]);
 				}
 				else {
 					console.error("[Mapillary] Error: received corrupted data");
