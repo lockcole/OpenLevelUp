@@ -794,6 +794,15 @@ var FeatureStyle = function(feature, jsonStyle) {
 	 * @return The style name
 	 */
 	FeatureStyle.prototype.getName = function() {
+		//Replace tag var in name
+		var regex = /\$\{(\w+)\}/;
+		if(regex.test(this._name)) {
+			//Replace tag name with actual tag value
+			var tagName = regex.exec(this._name)[1];
+			this._name = removeUscore(this._name.replace(regex, this._tags[tagName]));
+			this._name = this._name.charAt(0).toUpperCase() + this._name.substr(1);
+		}
+		
 		return this._name;
 	};
 

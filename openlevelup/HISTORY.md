@@ -7,6 +7,7 @@ Changes history
 * mapillary:front/back/right/left/large/detail tags handled
 * Style added for amenity=photo_booth and emergency=siren/fire_extinguisher/defibrillator/assembly_point
 * Style changed for highway=footway + conveying=*
+* More precise name in pop-ups for objects without a name tag
 
 27 july 2015
 ------------

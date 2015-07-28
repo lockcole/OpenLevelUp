@@ -78,7 +78,7 @@
 		},
 		{
 			"type": "Style",
-			"name": "Room",
+			"name": "${room}",
 			"description": "Room icons",
 			"onTags": [ { "room": "*" } ],
 			"style": { "icon": "room_${room}.png", "showMissingIcon": false }
@@ -204,35 +204,35 @@
 		},
 		{
 			"type": "Style",
-			"name": "Amenity",
+			"name": "${amenity} (amenity)",
 			"description": "Amenities icons",
 			"onTags": [ { "amenity": "*" } ],
 			"style": { "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
 		},
 		{
 			"type": "Style",
-			"name": "Shop",
+			"name": "${shop} (shop)",
 			"description": "Shopping specific style",
 			"onTags": [ { "shop": "*" } ],
 			"style": { "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
 		},
 		{
 			"type": "Style",
-			"name": "Barrier",
+			"name": "${barrier} (barrier)",
 			"description": "Barrier icons",
 			"onTags": [ { "barrier": "*" } ],
 			"style": { "icon": "barrier_${barrier}.png", "showMissingIcon": false }
 		},
 		{
 			"type": "Style",
-			"name": "Tourism",
+			"name": "${tourism} (tourism)",
 			"description": "Tourism icons",
 			"onTags": [ { "tourism": "*" } ],
 			"style": { "icon": "tourism_${tourism}.png", "color": "#ECC7A6", "fillColor": "#ECC7A6", "opacity": 1, "fillOpacity": 1, "weight": 3, "label": "name", "labelStyle": "tourism" }
 		},
 		{
 			"type": "Style",
-			"name": "Information",
+			"name": "${information} (information)",
 			"description": "Information icons",
 			"onTags": [ { "information": "*" } ],
 			"style": { "icon": "information_${information}.png" }
@@ -330,7 +330,7 @@
 		},
 		{
 			"type": "Style",
-			"name": "Rail",
+			"name": "${railway} (rail)",
 			"description": "Rail",
 			"onTags": [ { "railway": "rail|subway|light_rail|monorail|narrow_gauge|tram" } ],
 			"style": { "color": "#888888", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "5,5", "label": "name", "labelStyle": "railway" }
@@ -421,14 +421,14 @@
 		},
 		{
 			"type": "Style",
-			"name": "Advert",
+			"name": "${advertising} (advert)",
 			"description": "Advertising",
 			"onTags": [ { "advertising": "*" } ],
 			"style": { "icon": "advertising.png" }
 		},
 		{
 			"type": "Style",
-			"name": "Emergency",
+			"name": "${emergency}",
 			"description": "Emergency",
 			"onTags": [ { "emergency": "*" } ],
 			"style": { "icon": "emergency_${emergency}.png" }
