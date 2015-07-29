@@ -361,8 +361,14 @@ var MapView = function(main) {
 	/** The map object **/
 	this._map = null;
 	
+	/** The tile layers objects **/
+	this._tileLayers = null;
+	
 	/** The current tile layer **/
 	this._tileLayer = null;
+	
+	/** The opacity for tiles to use **/
+	this._tileOpacity = 1;
 	
 	/** The current data layer **/
 	this._dataLayer = null;
@@ -433,6 +439,7 @@ var MapView = function(main) {
 	}
 	
 	//Create tile layers
+	this._tileLayers = [];
 	var tileLayers = [];
 	var firstLayer = true;
 	
@@ -451,6 +458,7 @@ var MapView = function(main) {
 			currentLayer.URL,
 			tileOptions
 		);
+		this._tileLayers.push(tileLayers[currentLayer.name]);
 		
 		if(firstLayer && tiles == undefined) {
 			this._map.addLayer(tileLayers[currentLayer.name]);
@@ -505,22 +513,6 @@ var MapView = function(main) {
 	 */
 	MapView.prototype.resetView = function() {
 		this._map.setView(L.latLng(47, 2), 6);
-	};
-	
-	/**
-	 * Updates the popup for the given feature
-	 * @param ftId The feature ID
-	 * @return True if popup found and updated
-	 */
-	MapView.prototype.updatePopup = function(ftId) {
-		var result = false;
-		if(this._dataPopups[ftId] != undefined) {
-			var ftViewTmp = new FeatureView(this._mainView, this._mainView.getData().getFeature(ftId));
-			var popup = ftViewTmp.createPopup();
-			var featureViewLayer = this._dataPopups[ftId].bindPopup(popup);
-			result = true;
-		}
-		return result;
 	};
 
 //OTHER METHODS
@@ -592,6 +584,7 @@ var MapView = function(main) {
 				break;
 			}
 		}
+		this._tileLayers[this._tileLayer].setOpacity(this._tileOpacity);
 		this._mainView.getUrlView().tilesChanged();
 	};
 
@@ -667,7 +660,7 @@ var MapView = function(main) {
 	 * Changes the tiles opacity, depending of shown level
 	 */
 	MapView.prototype.changeTilesOpacity = function() {
-		var newOpacity = 1;
+		this._tileOpacity = 1;
 		
 		if(this._map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM && this._mainView.getData() != null) {
 			var levelsArray = this._mainView.getData().getLevels();
@@ -687,24 +680,20 @@ var MapView = function(main) {
 				var idPos = levelsPositive.indexOf(currentLevel);
 				if(idNeg >= 0) {
 					var coef = idNeg / levelsNegative.length * (OLvlUp.view.TILES_MAX_OPACITY - OLvlUp.view.TILES_MIN_OPACITY);
-					newOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
+					this._tileOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
 				}
 				else if(idPos >= 0) {
 					var coef = (levelsPositive.length - 1 - idPos) / levelsPositive.length * (OLvlUp.view.TILES_MAX_OPACITY - OLvlUp.view.TILES_MIN_OPACITY);
-					newOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
+					this._tileOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
 				}
 				else {
-					newOpacity = OLvlUp.view.TILES_MAX_OPACITY;
+					this._tileOpacity = OLvlUp.view.TILES_MAX_OPACITY;
 				}
 			}
 		}
 		
 		//Update tiles opacity
-		this._map.eachLayer(function(layer) {
-			if(layer instanceof L.TileLayer) {
-				layer.setOpacity(newOpacity);
-			}
-		});
+		this._tileLayers[this._tileLayer].setOpacity(this._tileOpacity);
 	};
 	
 	/**
@@ -734,7 +723,7 @@ var MapView = function(main) {
 				}.bind(this));
 			}
 			else {
-				_dataPopups[ftId].openPopup(centroidLatLng);
+				this._dataPopups[ftId].openPopup(centroidLatLng);
 			}
 		}.bind(this),
 		300);
@@ -825,22 +814,23 @@ var FeatureView = function(main, feature) {
 					var nbSegments = ftGeomJSON.coordinates.length - 1;
 					
 					//For each segment, add an icon
-					for(var i=0; i < nbSegments; i++) {
-						var coord1 = ftGeomJSON.coordinates[i];
-						var coord2 = ftGeomJSON.coordinates[i+1];
-						var coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
-						var angle = azimuth({lat: coord1[1], lng: coord1[0], elv: 0}, {lat: coord2[1], lng: coord2[0], elv: 0}).azimuth;
-						var coord = L.latLng(coordMid[1], coordMid[0]);
+					var i, coord1, coord2, coordMid, angle, coord, marker;
+					for(i=0; i < nbSegments; i++) {
+						coord1 = ftGeomJSON.coordinates[i];
+						coord2 = ftGeomJSON.coordinates[i+1];
+						coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
+						angle = azimuth({lat: coord1[1], lng: coord1[0], elv: 0}, {lat: coord2[1], lng: coord2[0], elv: 0}).azimuth;
+						coord = L.latLng(coordMid[1], coordMid[0]);
 						
 						if(hasIcon) {
 							if(style.rotateIcon) {
-								var marker = this._createMarker(coord, angle);
+								marker = this._createMarker(coord, angle);
 								if(marker != null) {
 									this._layer.addLayer(marker);
 								}
 							}
 							else {
-								var marker = this._createMarker(coord);
+								marker = this._createMarker(coord);
 								if(marker != null) {
 									this._layer.addLayer(marker);
 								}
@@ -884,23 +874,24 @@ var FeatureView = function(main, feature) {
 					var nbPolygons = ftGeomJSON.coordinates.length;
 					
 					//For each polygon, add an icon
+					var coordMid, coordsPolygon, length, coord, marker;
 					for(var i=0; i < nbPolygons; i++) {
-						var coordMid = [0, 0];
-						var coordsPolygon = ftGeomJSON.coordinates[i];
-						var length = coordsPolygon[0].length;
-						for(var i=0; i < length; i++) {
-							if(i < length - 1) {
-								coordMid[0] += coordsPolygon[0][i][0];
-								coordMid[1] += coordsPolygon[0][i][1];
+						coordMid = [0, 0];
+						coordsPolygon = ftGeomJSON.coordinates[i];
+						length = coordsPolygon[0].length;
+						for(var j=0; j < length; j++) {
+							if(j < length - 1) {
+								coordMid[0] += coordsPolygon[0][j][0];
+								coordMid[1] += coordsPolygon[0][j][1];
 							}
 						}
 						
 						coordMid[0] = coordMid[0] / (length -1);
 						coordMid[1] = coordMid[1] / (length -1);
-						var coord = L.latLng(coordMid[1], coordMid[0]);
+						coord = L.latLng(coordMid[1], coordMid[0]);
 						
 						if(hasIcon) {
-							var marker = this._createMarker(coord);
+							marker = this._createMarker(coord);
 							if(marker != null) {
 								this._layer.addLayer(marker);
 							}
@@ -1234,11 +1225,9 @@ var FeatureView = function(main, feature) {
 		//Link to osm.org object
 		text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+this._feature.getId()+'" target="_blank">See this on OSM.org</a></p>';
 		
-		coords = this._feature.getGeometry().getCentroid();
-		
 		var options = (isMobile) ? { autoPan: false } : { minWidth: 100 };
 		
-		return L.popup(options).setContent(text).setLatLng(L.latLng(coords[1], coords[0]));
+		return L.popup(options).setContent(text);
 	}
 	
 	/**
@@ -1250,10 +1239,12 @@ var FeatureView = function(main, feature) {
 	 */
 	FeatureView.prototype._addFormatedTag = function(key, cleanName, tagCleaner) {
 		var text = '';
-		if(tagCleaner == undefined) { tagCleaner = function(v) { return v; }; }
+		var tag = this._feature.getTag(key);
 		
-		if(this._feature.getTag(key) != undefined) {
-			text = '<b>'+cleanName+':</b> '+tagCleaner(this._feature.getTag(key))+'<br />';
+		if(tag != undefined) {
+			text = (tagCleaner == undefined) ?
+				'<b>'+cleanName+':</b> '+tag+'<br />'
+				: '<b>'+cleanName+':</b> '+tagCleaner(tag)+'<br />';
 		}
 		
 		return text;

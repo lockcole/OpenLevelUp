@@ -293,15 +293,6 @@ var Feature = function(f, styleDef) {
 	/** The feature images (if any) **/
 	this._images = undefined;
 
-//ACCESSORS
-	/**
-	 * @return True if the feature has related images
-	 */
-	this.hasImages = function() {
-		return (this._images == undefined && (this._tags.image != undefined || this._tags.mapillary != undefined))
-			|| (this._images != undefined && this._images != null && (this._images.hasValidImages() || this._images.hasValidSpherical()));
-	};
-
 //CONSTRUCTOR
 	/*
 	 * Init some vars
@@ -381,7 +372,7 @@ var Feature = function(f, styleDef) {
 	/*
 	 * Check if the feature could have images
 	 */
-	this._images = (this.hasImages()) ? new FeatureImages(this) : null;
+	this._images = (this._tags.image != undefined || this._tags.mapillary != undefined) ? new FeatureImages(this) : null;
 };
 
 //ACCESSORS
@@ -397,6 +388,13 @@ var Feature = function(f, styleDef) {
 	 */
 	Feature.prototype.getId = function() {
 		return this._id;
+	};
+	
+	/**
+	 * @return True if the feature has related images
+	 */
+	Feature.prototype.hasImages = function() {
+		return this._images != null && (this._images.hasValidImages() || this._images.hasValidSpherical());
 	};
 	
 	/**
