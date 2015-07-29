@@ -45,20 +45,6 @@
 		},
 		{
 			"type": "Style",
-			"name": "Oneway path",
-			"description": "Oneway path",
-			"onTags": [ { "oneway": "yes" }, { "conveying": "forward" } ],
-			"style": { "icon": "arrow1_up.png", "rotateIcon": true }
-		},
-		{
-			"type": "Style",
-			"name": "Oneway path",
-			"description": "Oneway path",
-			"onTags": [ { "oneway": "-1" }, { "conveying": "backward" } ],
-			"style": { "icon": "arrow1_down.png", "rotateIcon": true }
-		},
-		{
-			"type": "Style",
 			"name": "Path (Guide strips)",
 			"description": "Path with guide strips",
 			"onTags": [ { "highway": "*", "guide_strips": "yes" } ],
@@ -80,7 +66,7 @@
 		},
 		{
 			"type": "Style",
-			"name": "Room",
+			"name": "${room}",
 			"description": "Room icons",
 			"onTags": [ { "room": "*" } ],
 			"style": { "icon": "room_${room}.png", "showMissingIcon": false }
@@ -206,35 +192,35 @@
 		},
 		{
 			"type": "Style",
-			"name": "Amenity",
+			"name": "${amenity} (amenity)",
 			"description": "Amenities icons",
 			"onTags": [ { "amenity": "*" } ],
 			"style": { "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
 		},
 		{
 			"type": "Style",
-			"name": "Shop",
+			"name": "${shop} (shop)",
 			"description": "Shopping specific style",
 			"onTags": [ { "shop": "*" } ],
 			"style": { "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
 		},
 		{
 			"type": "Style",
-			"name": "Barrier",
+			"name": "${barrier} (barrier)",
 			"description": "Barrier icons",
 			"onTags": [ { "barrier": "*" } ],
 			"style": { "icon": "barrier_${barrier}.png", "showMissingIcon": false }
 		},
 		{
 			"type": "Style",
-			"name": "Tourism",
+			"name": "${tourism} (tourism)",
 			"description": "Tourism icons",
 			"onTags": [ { "tourism": "*" } ],
 			"style": { "icon": "tourism_${tourism}.png", "color": "#ECC7A6", "fillColor": "#ECC7A6", "opacity": 1, "fillOpacity": 1, "weight": 3, "label": "name", "labelStyle": "tourism" }
 		},
 		{
 			"type": "Style",
-			"name": "Information",
+			"name": "${information} (information)",
 			"description": "Information icons",
 			"onTags": [ { "information": "*" } ],
 			"style": { "icon": "information_${information}.png" }
@@ -290,10 +276,16 @@
 		},
 		{
 			"type": "Style",
-			"name": "Conveying stairs",
-			"description": "Conveying stairs",
-			"onTags": [ { "highway": "steps", "conveying": "yes|forward|backward" } ],
+			"name": "Conveying path",
+			"description": "Conveying path",
+			"onTags": [ { "conveying": "yes|forward|backward" } ],
 			"style": { "color": "#848484", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "3,1" }
+		},
+		{
+			"type": "Style",
+			"description": "Conveying path",
+			"onTags": [ { "highway": "footway", "conveying": "yes|forward|backward" } ],
+			"style": { "dashArray": "3,2" }
 		},
 		{
 			"type": "Style",
@@ -332,7 +324,7 @@
 		},
 		{
 			"type": "Style",
-			"name": "Rail",
+			"name": "${railway} (rail)",
 			"description": "Rail",
 			"onTags": [ { "railway": "rail|subway|light_rail|monorail|narrow_gauge|tram" } ],
 			"style": { "color": "#888888", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "5,5", "label": "name", "labelStyle": "railway" }
@@ -423,17 +415,17 @@
 		},
 		{
 			"type": "Style",
-			"name": "Advert",
+			"name": "${advertising} (advert)",
 			"description": "Advertising",
 			"onTags": [ { "advertising": "*" } ],
 			"style": { "icon": "advertising.png" }
 		},
 		{
 			"type": "Style",
-			"name": "Emergency phone",
-			"description": "Emergency phone",
-			"onTags": [ { "emergency": "phone" } ],
-			"style": { "icon": "PublicInformationSymbol_EmergencyTelephone.png" }
+			"name": "${emergency}",
+			"description": "Emergency",
+			"onTags": [ { "emergency": "*" } ],
+			"style": { "icon": "emergency_${emergency}.png" }
 		},
 		{
 			"type": "Style",
@@ -462,6 +454,18 @@
 			"description": "Mall surface",
 			"onTags": [ { "shop": "mall" } ],
 			"style" : { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -9 }
+		},
+		{
+			"type": "Style",
+			"description": "Oneway path",
+			"onTags": [ { "oneway": "yes" }, { "conveying": "forward" } ],
+			"style": { "icon": "arrow1_up.png", "rotateIcon": true }
+		},
+		{
+			"type": "Style",
+			"description": "Oneway path",
+			"onTags": [ { "oneway": "-1" }, { "conveying": "backward" } ],
+			"style": { "icon": "arrow1_down.png", "rotateIcon": true }
 		}
 	],
 	"images": [
@@ -501,6 +505,7 @@
 		"amenity_nursery.png",
 		"amenity_parking.png",
 		"amenity_pharmacy.png",
+		"amenity_photo_booth.png",
 		"amenity_piano.png",
 		"amenity_place_of_worship.png",
 		"amenity_playground.png",
@@ -553,7 +558,12 @@
 		"door_sliding.png",
 		"door.png",
 		"Elevator_icon.png",
+		"emergency_assembly_point.png",
 		"emergency_door.png",
+		"emergency_defibrillator.png",
+		"emergency_fire_extinguisher.png",
+		"emergency_phone.png",
+		"emergency_siren.png",
 		"Emergency_stairs.png",
 		"export.png",
 		"Farm-Fresh_newspaper.png",
@@ -572,7 +582,6 @@
 		"Octicons-circuit-board.png",
 		"physics.png",
 		"poi_place_hamlet.png",
-		"PublicInformationSymbol_EmergencyTelephone.png",
 		"room_administration.png",
 		"room_auditorium.png",
 		"room_bedroom.png",
@@ -655,7 +664,6 @@
 		"tourism_picnic_site.png",
 		"tourism_viewpoint.png",
 		"tourism_zoo.png",
-		"Trash_can.png",
 		"Video_surveillance_logo.png"
 	]
 }

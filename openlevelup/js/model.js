@@ -703,10 +703,10 @@ var FeatureStyle = function(feature, jsonStyle) {
 	this._feature = feature;
 
 //CONSTRUCTOR
-	var applyable, tagList, val, featureVal;
+	var applyable, tagList, val, featureVal, style;
 	//Find potential styles depending on tags
 	for(var i=0; i < jsonStyle.styles.length; i++) {
-		var style = jsonStyle.styles[i];
+		style = jsonStyle.styles[i];
 		
 		/*
 		 * Check if style is applyable
@@ -734,9 +734,14 @@ var FeatureStyle = function(feature, jsonStyle) {
 		
 		//If applyable, we update the result style
 		if(applyable) {
-			this._name = style.name;
+			if(style.name != undefined) {
+				this._name = style.name;
+			}
+			
 			for(var param in style.style) {
-				this._style[param] = style.style[param];
+				if(style.style[param] != undefined) {
+					this._style[param] = style.style[param];
+				}
 			}
 		}
 	}
@@ -749,6 +754,7 @@ var FeatureStyle = function(feature, jsonStyle) {
 	tagList = null;
 	val = null;
 	featureVal = null;
+	style = null;
 };
 
 //ACCESSORS
@@ -794,6 +800,15 @@ var FeatureStyle = function(feature, jsonStyle) {
 	 * @return The style name
 	 */
 	FeatureStyle.prototype.getName = function() {
+		//Replace tag var in name
+		var regex = /\$\{(\w+)\}/;
+		if(regex.test(this._name)) {
+			//Replace tag name with actual tag value
+			var tagName = regex.exec(this._name)[1];
+			this._name = removeUscore(this._name.replace(regex, this._tags[tagName]));
+			this._name = this._name.charAt(0).toUpperCase() + this._name.substr(1);
+		}
+		
 		return this._name;
 	};
 
