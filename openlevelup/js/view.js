@@ -2335,6 +2335,7 @@ var ImagesView = function(main) {
 		var sphericalImg = this._sphericalImages[this._currentSpherical];
 		$("#spherical-legend-title").html(sphericalImg.source);
 		$("#spherical-legend-text").html(this._getLegend(sphericalImg));
+		$("#spherical-counter span").html((this._currentSpherical+1)+' / '+this._sphericalImages.length);
 		
 		//Init vars
 		this._isUserInteracting = false;

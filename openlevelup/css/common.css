@@ -371,6 +371,17 @@ p.popup-txt.centered {
 	left: 10px;
 }
 
+#spherical-counter {
+	position: absolute;
+	bottom: 15px;
+	left: 15px;
+	color: #BBB;
+	font: 11px/1 arial,sans-serif;
+	background-color: #000;
+	background-color: rgba(0,0,0,0.5);
+	padding: 12px;
+}
+
 /* Images status */
 #op-images-footer > p {
 	display: inline-block;
