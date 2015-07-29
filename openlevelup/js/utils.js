@@ -249,8 +249,8 @@ function asWebLink(v) {
  */
 function correctWebLink(url) {
 	var result;
-	var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+$/;
-	var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+$/;
+	var regexUrl = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/[\w#!:.?+=&%@!\-\/]+)?$/;
+	var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/[\w#!:.?+=&%@!\-\/]+)?$/;
 	
 	if(url.match(regexUrl)) {
 		result = url;
