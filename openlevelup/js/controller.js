@@ -365,7 +365,7 @@ var Ctrl = function() {
 					}
 				}
 			}.bind(this),
-			"text")
+			"json")
 		.fail(controller.onDownloadFail.bind(this));
 	};
 	

@@ -24,28 +24,16 @@
  */
 
 /**
- * Parses raw OSM XML data, and return result.
- * @param data The OSM XML data.
+ * Parses raw OSM data, and return result.
+ * @param data The OSM data.
  * @return The OSM parsed data (GeoJSON)
  */
 function parseOsmData(data) {
-	//Convert XML to GeoJSON
-	data = data || "<osm></osm>";
-	return osmtogeojson(parseApiData(data), { polygonFeatures: POLYGON_FEATURES });
-};
-
-/**
- * Parses whatever API data
- * @param data The data as JSON or XML
- * @return The parsed data
- */
-function parseApiData(data) {
-	try {
-		data = $.parseXML(data);
-	} catch(e) {
-		data = JSON.parse(data);
+	if(!data) {
+		console.error(data);
+		throw new Error("Invalid data");
 	}
-	return data;
+	return osmtogeojson(data, { polygonFeatures: POLYGON_FEATURES });
 };
 
 function addCompatibility() {

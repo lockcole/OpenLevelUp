@@ -61,7 +61,7 @@ var OSMData = function(bbox, data, styleDef) {
 			
 			//Add levels to list
 			ftLevels = currentFeature.onLevels();
-			this._levels = mergeArrays(this._levels, ftLevels);
+			$.merge(this._levels, ftLevels);
 			
 			//Add name to list
 			name = currentFeature.getTag("name");
@@ -84,6 +84,11 @@ var OSMData = function(bbox, data, styleDef) {
 		// }
 	}
 	
+	//Sort and remove duplicates in levels array
+	this._levels = this._levels.sort(sortNumberArray).filter(function(item, pos, ary) {
+        return !pos || item != ary[pos - 1];
+    });
+
 	//Clear tmp objects
 	geojson = null;
 	id = null;
@@ -94,8 +99,6 @@ var OSMData = function(bbox, data, styleDef) {
 	name = null;
 	lvlId = null;
 	lvl = null;
-	
-	this._levels.sort(sortNumberArray);
 	
 	console.log("[Time] Model parsing: "+((new Date().getTime()) - timeStart));
 };
@@ -281,7 +284,7 @@ var Feature = function(f, styleDef) {
 	this._onLevels = null;
 	
 	/** The OSM object tags **/
-	this._tags = null;
+	this._tags = f.properties.tags;
 	
 	/** The feature geometry **/
 	this._geometry = null;
@@ -291,9 +294,6 @@ var Feature = function(f, styleDef) {
 	
 	/** The feature images (if any) **/
 	this._images = undefined;
-	
-	/** The base feature **/
-	this._feature = f;
 
 //ACCESSORS
 	/**
@@ -308,9 +308,8 @@ var Feature = function(f, styleDef) {
 	/*
 	 * Init some vars
 	 */
-	this._tags = this._feature.properties.tags;
 	this._style = new FeatureStyle(this, styleDef);
-	this._geometry = new FeatureGeometry(this._feature.geometry);
+	this._geometry = new FeatureGeometry(f.geometry);
 	
 	/*
 	 * Find a name for this object
@@ -330,7 +329,7 @@ var Feature = function(f, styleDef) {
 	 */
 	//try to find levels for this feature
 	var currentLevel = null;
-	var relations = this._feature.properties.relations;
+	var relations = f.properties.relations;
 	
 	//Tag level
 	if(this._tags.level != undefined) {
@@ -682,11 +681,8 @@ var FeatureGeometry = function(fGeometry) {
 /**
  * This class represents a feature style, defined from JSON rules
  */
-var FeatureStyle = function(feature, jsonStyle) {
+var FeatureStyle = function(feature) {
 //ATTRIBUTES
-	/** The feature tags **/
-	this._tags = feature.getTags();
-	
 	/** The style **/
 	this._style = new Object();
 	
@@ -695,18 +691,15 @@ var FeatureStyle = function(feature, jsonStyle) {
 	
 	/** The style name **/
 	this._name = "Object";
-	
-	/** The JSON style **/
-	this._jsonStyle = jsonStyle;
-	
+
 	/** The feature **/
 	this._feature = feature;
 
 //CONSTRUCTOR
 	var applyable, tagList, val, featureVal, style;
 	//Find potential styles depending on tags
-	for(var i=0; i < jsonStyle.styles.length; i++) {
-		style = jsonStyle.styles[i];
+	for(var i=0; i < STYLE.styles.length; i++) {
+		style = STYLE.styles[i];
 		
 		/*
 		 * Check if style is applyable
@@ -718,7 +711,7 @@ var FeatureStyle = function(feature, jsonStyle) {
 			applyable = true;
 			for(var key in tagList) {
 				val = tagList[key];
-				featureVal = feature.getTag(key);
+				featureVal = this._feature.getTag(key);
 				
 				//If this rule is not applyable, stop
 				if(featureVal == undefined
@@ -784,10 +777,10 @@ var FeatureStyle = function(feature, jsonStyle) {
 			if(regex.test(this._icon)) {
 				//Replace tag name with actual tag value
 				var tagName = regex.exec(this._icon)[1];
-				this._icon = this._icon.replace(regex, this._tags[tagName]);
+				this._icon = this._icon.replace(regex, this._feature.getTag(tagName));
 				
 				//Check if icon file exists (to avoid exotic values)
-				if(this._jsonStyle.images.indexOf(this._icon) < 0) {
+				if(STYLE.images.indexOf(this._icon) < 0) {
 					this._icon = null;
 				}
 			}
@@ -805,7 +798,7 @@ var FeatureStyle = function(feature, jsonStyle) {
 		if(regex.test(this._name)) {
 			//Replace tag name with actual tag value
 			var tagName = regex.exec(this._name)[1];
-			this._name = removeUscore(this._name.replace(regex, this._tags[tagName]));
+			this._name = removeUscore(this._name.replace(regex, this._feature.getTag(tagName)));
 			this._name = this._name.charAt(0).toUpperCase() + this._name.substr(1);
 		}
 		
@@ -820,21 +813,20 @@ var FeatureStyle = function(feature, jsonStyle) {
  */
 var FeatureImages = function(feature) {
 //ATTRIBUTES
-	/** The image from image=* tag **/
+	/** The image retrieved from image=* tag **/
 	this._img = undefined;
 	
+	/** The original image tag **/
+	this._imgTag = feature.getTag("image");
+	
 	/** The image from mapillary=* tag **/
-	this._mapillary = []; //feature.getTag("mapillary");
+	this._mapillary = [];
 	
 	/** The Flickr images **/
 	this._flickr = [];
 	
-	/** The feature */
-	this._feature = feature;
-	
 //CONSTRUCTOR
-	var imageTag = feature.getTag("image");
-	if(imageTag != undefined) {
+	if(this._imgTag != undefined) {
 		/*
 		 * Parse image tag
 		 */
@@ -842,21 +834,21 @@ var FeatureImages = function(feature) {
 		var regexUrlNoProtocol = /^(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?\/[\w#!:.?+=&%@!\-\/]+\.(png|PNG|gif|GIF|jpg|JPG|jpeg|JPEG|bmp|BMP)$/;
 		var regexWiki = /^(File):.+\.(png|gif|jpg|jpeg|bmp)$/i;
 		
-		if(imageTag.match(regexUrl)) {
-			this._img = imageTag;
+		if(this._imgTag.match(regexUrl)) {
+			this._img = this._imgTag;
 		}
-		else if(imageTag.match(regexUrlNoProtocol) && !imageTag.match(regexWiki)) {
-			this._img = 'http://'+imageTag;
+		else if(this._imgTag.match(regexUrlNoProtocol) && !this._imgTag.match(regexWiki)) {
+			this._img = 'http://'+this._imgTag;
 		}
-		else if(imageTag.match(regexWiki)) {
-			var file = imageTag.substring(5);
+		else if(this._imgTag.match(regexWiki)) {
+			var file = this._imgTag.substring(5);
 			var imageUtf8 = file.replace(/ /g, '_');
 			var digest = md5(imageUtf8);
 			var folder = digest[0] + '/' + digest[0] + digest[1] + '/' + encodeURIComponent(imageUtf8);
 			this._img = 'http://upload.wikimedia.org/wikipedia/commons/' + folder;
 		}
 		else {
-			console.warn("[Images] Invalid key: "+imageTag);
+			console.warn("[Images] Invalid key: "+this._imgTag);
 			this._img = null;
 		}
 	}
@@ -883,7 +875,8 @@ var FeatureImages = function(feature) {
 	}
 	
 	//Clean tmp objects
-	imageTag = null;
+	mapillaryImgs = null;
+	mapillaryImg = null;
 };
 
 //ACCESSORS

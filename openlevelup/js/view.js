@@ -1230,7 +1230,7 @@ var FeatureView = function(main, feature) {
 		
 		coords = this._feature.getGeometry().getCentroid();
 		
-		var options = (isMobile) ? { autoPan: false } : {};
+		var options = (isMobile) ? { autoPan: false } : { minWidth: 100 };
 		
 		return L.popup(options).setContent(text).setLatLng(L.latLng(coords[1], coords[0]));
 	}
