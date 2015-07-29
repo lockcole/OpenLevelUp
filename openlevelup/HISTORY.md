@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+29 july 2015
+------------
+* amenity=photo_booth icon changed
+* Images counter for spherical pictures added
+
 28 july 2015
 ------------
 * Multiple spherical images from Mapillary handled
