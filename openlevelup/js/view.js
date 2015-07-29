@@ -88,7 +88,13 @@ TILE_LAYERS:
 	],
 
 /** The default attribution, referring to OSM data **/
-ATTRIBUTION: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+ATTRIBUTION: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+
+/** The default spherical images width **/
+SPHERICAL_WIDTH: 600,
+
+/** The default spherical images height **/
+SPHERICAL_HEIGHT: 350
 };
 
 // ======= CLASSES =======
@@ -2168,6 +2174,7 @@ var ImagesView = function(main) {
 			if(sceneInit) {
 				this._animateSphere();
 			}
+			this._renderer.setSize(this._getSphereWidth(), this._getSphereHeight());
 		}
 		else {
 			this._currentSpherical = -1;
@@ -2264,6 +2271,17 @@ var ImagesView = function(main) {
 	 * Sphere related methods
 	 */
 	
+	ImagesView.prototype._getSphereWidth = function() {
+		var w = $("#op-images > div").width();
+		return (w > 0) ? w : OLvlUp.view.SPHERICAL_WIDTH;
+	};
+	
+	ImagesView.prototype._getSphereHeight = function() {
+		var h = window.innerHeight * 0.8;
+		h = (h > 800) ? 700 : h - 100;
+		return (h > 0) ? h : OLvlUp.view.SPHERICAL_HEIGHT;
+	};
+	
 	/**
 	 * Changes the spherical to the previous one (if any)
 	 */
@@ -2348,16 +2366,16 @@ var ImagesView = function(main) {
 		this._phi = 0;
 		this._theta = 0;
 		this._firstClick = true;
-
+		
 		//Camera
-		this._camera = new THREE.PerspectiveCamera( 75, 16/9, 1, 1100 );
+		this._camera = new THREE.PerspectiveCamera(75, this._getSphereWidth() / this._getSphereHeight(), 1, 1000);
 		this._camera.target = new THREE.Vector3( 0, 0, 0 );
 		
 		//Sphere
 		if(this._mesh != null) {
 			this._scene.remove(this._mesh);
 		}
-		var geometry = new THREE.SphereGeometry( 500, 60, 40 );
+		var geometry = new THREE.SphereGeometry(100, 30, 30);
 		geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
 		THREE.ImageUtils.crossOrigin = "anonymous";
 		var texture = THREE.ImageUtils.loadTexture(sphericalImg.url);
@@ -2385,11 +2403,12 @@ var ImagesView = function(main) {
 	};
 	
 	ImagesView.prototype._onWindowResize = function() {
-		var aspect = this._container.clientWidth / this._container.clientHeight;
+		var aspect = this._getSphereWidth() / this._getSphereHeight(); //this._container.clientWidth / this._container.clientHeight;
 		if(!isNaN(aspect) && aspect > 0) {
 			this._camera.aspect = aspect;
+			this._camera.updateProjectionMatrix();
+			this._renderer.setSize(this._getSphereWidth(), this._getSphereHeight());
 		}
-		this._camera.updateProjectionMatrix();
 	};
 
 	ImagesView.prototype._onDocumentMouseDown = function( event ) {
@@ -2431,12 +2450,8 @@ var ImagesView = function(main) {
 		}
 		
 		//Limit wheel action
-		if(this._camera.fov < 20 || this._camera.fov > 100) {
+		if(this._camera.fov < 40 || this._camera.fov > 100) {
 			this._camera.fov = prevFov;
-		}
-		var aspect = this._container.clientWidth / this._container.clientHeight;
-		if(!isNaN(aspect) && aspect > 0) {
-			this._camera.aspect = aspect;
 		}
 		this._camera.updateProjectionMatrix();
 	};
