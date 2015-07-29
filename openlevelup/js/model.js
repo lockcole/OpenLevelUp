@@ -85,9 +85,7 @@ var OSMData = function(bbox, data, styleDef) {
 	}
 	
 	//Sort and remove duplicates in levels array
-	this._levels = this._levels.sort(sortNumberArray).filter(function(item, pos, ary) {
-        return !pos || item != ary[pos - 1];
-    });
+	this._levels = this._levels.sort(sortNumberArray).filter(rmDuplicatesSortedArray);
 
 	//Clear tmp objects
 	geojson = null;
@@ -165,7 +163,7 @@ var OSMData = function(bbox, data, styleDef) {
 				}
 			}
 		}
-		return keys;
+		return keys.sort().filter(rmDuplicatesSortedArray);
 	};
 
 

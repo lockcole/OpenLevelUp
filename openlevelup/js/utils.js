@@ -88,6 +88,13 @@ function sortNumberArray(a, b) {
 };
 
 /**
+ * Removes duplicates elements in a sorted array
+ */
+function rmDuplicatesSortedArray(item, pos, ary) {
+	return !pos || item != ary[pos - 1];
+};
+
+/**
  * Parses levels list.
  * @param str The levels as a string (for example "1;5", "1,3", "1-3", "-1--6", "from 1 to 42" or "-2 to 6")
  * @return The parsed levels as a float array, or null if invalid

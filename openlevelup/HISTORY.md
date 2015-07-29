@@ -5,6 +5,7 @@ Changes history
 ------------
 * amenity=photo_booth icon changed
 * Images counter for spherical pictures added
+* Pictures metadata requests optimized (fully asynchronized and deduplicated requests for mapillary)
 
 28 july 2015
 ------------

@@ -88,8 +88,8 @@ var Ctrl = function() {
 	/** The download start time **/
 	this._downloadStart = null;
 	
-	/** The amount of requested Mapillary pictures **/
-	this._nbMapillaryRequests = null;
+	/** The amount of requested pictures metadata via Ajax **/
+	this._nbPhotoRequests = null;
 	
 	/** The current HTML view **/
 	this._view = null;
@@ -338,31 +338,26 @@ var Ctrl = function() {
 				}
 				else {
 					this._data = new OSMData(bbox, data, STYLE);
+					this.getView().getMapView().resetVars();
+
 					this.getView().getLoadingView().addLoadingInfo("Download photos metadata");
+					this._nbPhotoRequests = 0;
 					
 					//Download Flickr data
 					this.downloadFlickr(bbox);
 					
-					this.getView().getMapView().resetVars();
-					
 					//Request mapillary data
 					var mapillaryKeys = this._data.getMapillaryKeys();
 					var mapillaryNb = mapillaryKeys.length;
-					var anyMapillary = false;
 					
-					this._nbMapillaryRequests = 0;
 					for(var i=0; i < mapillaryNb; i++) {
 						var key = mapillaryKeys[i];
 						if(!this._mapillaryData.has(key)) {
-							anyMapillary = true;
-							this._nbMapillaryRequests++;
 							this.requestMapillaryData(key);
 						}
 					}
 
-					if(!anyMapillary) {
-						this.endMapUpdate();
-					}
+					this.checkPhotosRequestsDone();
 				}
 			}.bind(this),
 			"json")
@@ -375,6 +370,31 @@ var Ctrl = function() {
 	Ctrl.prototype.onDownloadFail = function() {
 		this.getView().getLoadingView().setLoading(false);
 		this.getView().getMessagesView().displayMessage("An error occured during data download", "error");
+	};
+	
+	/**
+	 * Checks if all metadata for pictures have been retrieved, and if so ends map update.
+	 */
+	Ctrl.prototype.checkPhotosRequestsDone = function(almost) {
+		almost = almost || false;
+		
+		if(this._nbPhotoRequests == 0) {
+			if(almost) {
+				this.endMapUpdate();
+			}
+			else {
+				setTimeout(
+					function() { this.checkPhotosRequestsDone(true); }.bind(this),
+					1000
+				);
+			}
+		}
+		else {
+			setTimeout(
+				this.checkPhotosRequestsDone.bind(this),
+				1000
+			);
+		}
 	};
 
 /*********************
@@ -389,9 +409,10 @@ var Ctrl = function() {
 		var url = OLvlUp.controller.FLICKR_API_URL+params;
 		
 		//Download
+		this._nbPhotoRequests++;
 		$.ajax({
 			url: url,
-			async: false,
+			async: true,
 			dataType: 'json',
 			success: this.setFlickrData.bind(this)
 		}).fail(this.onFlickrDownloadFail);
@@ -455,6 +476,7 @@ var Ctrl = function() {
 		catch(e) {
 			console.error("[Flickr] Error during data process: "+e);
 		}
+		this._nbPhotoRequests--;
 	};
 	
 	/**
@@ -478,6 +500,7 @@ var Ctrl = function() {
 		var url = OLvlUp.controller.MAPILLARY_API_URL+params;
 		
 		//Download
+		this._nbPhotoRequests++;
 		$.get(
 			url,
 			function(data) {
@@ -515,6 +538,7 @@ var Ctrl = function() {
 		catch(e) {
 			console.error("[Mapillary] Error during data process: "+e);
 		}
+		this._nbPhotoRequests--;
 	};
 	
 	/**
