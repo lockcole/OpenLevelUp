@@ -740,7 +740,7 @@ var FeatureStyle = function(feature) {
 	}
 	
 	//Change icon=no into undefined
-	if(this._style.icon == "no") { this._style.icon = undefined; }
+	if(this._style.icon == "none") { this._style.icon = undefined; }
 	
 	//Clean tmp objects
 	applyable = null;

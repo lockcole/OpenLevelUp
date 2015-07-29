@@ -160,7 +160,7 @@
 			"name": "Passage",
 			"description": "Door=no nodes",
 			"onTags": [ { "door": "no" } ],
-			"style": { "color": "#0BB848", "fillColor": "#0BB848", "opacity": 1, "fillOpacity": 1, "radius": 3, "icon": null, "dashArray": "none" }
+			"style": { "color": "#0BB848", "fillColor": "#0BB848", "opacity": 1, "fillOpacity": 1, "radius": 3, "icon": "none", "dashArray": "none" }
 		},
 		{
 			"type": "Style",
@@ -341,14 +341,14 @@
 			"name": "Fence",
 			"description": "Fence",
 			"onTags": [ { "barrier": "fence" } ],
-			"style": { "color": "#5B5B5B", "opacity": 1, "weight": 5, "lineCap": "butt", "icon": "no" }
+			"style": { "color": "#5B5B5B", "opacity": 1, "weight": 5, "lineCap": "butt", "icon": "none" }
 		},
 		{
 			"type": "Style",
 			"name": "Hedge",
 			"description": "Hedge",
 			"onTags": [ { "barrier": "hedge" } ],
-			"style": { "color": "#8CD16E", "opacity": 1, "weight": 5, "lineCap": "butt", "icon": "no" }
+			"style": { "color": "#8CD16E", "opacity": 1, "weight": 5, "lineCap": "butt", "icon": "none" }
 		},
 		{
 			"type": "Style",
