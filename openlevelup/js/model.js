@@ -582,7 +582,7 @@ var FeatureGeometry = function(fGeometry) {
 					result[i] = [];
 					for(var j=0; j < this._geom.coordinates[i].length; j++) {
 						result[i][j] = [];
-						for(var k=0; k < this._geom.coordinates[i][j]; k++) {
+						for(var k=0; k < this._geom.coordinates[i][j].length; k++) {
 							coords = this._geom.coordinates[i][j][k];
 							result[i][j][k] = L.latLng(coords[1], coords[0]);
 						}
@@ -728,7 +728,7 @@ var FeatureStyle = function(feature) {
 			}
 			
 			for(var param in style.style) {
-				if(style.style[param] != undefined) {
+				if(style.style[param] != undefined && (param != "icon" || this._createIconUrl(style.style["icon"]) != null)) {
 					this._style[param] = style.style[param];
 				}
 			}
@@ -767,22 +767,29 @@ var FeatureStyle = function(feature) {
 	 */
 	FeatureStyle.prototype.getIconUrl = function() {
 		if(this._icon == undefined) {
-			this._icon = this._style.icon;
-			
-			var regex = /\$\{(\w+)\}/;
-			if(regex.test(this._icon)) {
-				//Replace tag name with actual tag value
-				var tagName = regex.exec(this._icon)[1];
-				this._icon = this._icon.replace(regex, this._feature.getTag(tagName));
-				
-				//Check if icon file exists (to avoid exotic values)
-				if(STYLE.images.indexOf(this._icon) < 0) {
-					this._icon = null;
-				}
-			}
+			this._icon = this._createIconUrl(this._style.icon);
 		}
 		
 		return this._icon;
+	};
+	
+	/**
+	 * Replaces if needed the variable tag in an icon URL
+	 */
+	FeatureStyle.prototype._createIconUrl = function(icon) {
+		var regex = /\$\{(\w+)\}/;
+		if(regex.test(icon)) {
+			//Replace tag name with actual tag value
+			var tagName = regex.exec(icon)[1];
+			icon = icon.replace(regex, this._feature.getTag(tagName));
+			
+			//Check if icon file exists (to avoid exotic values)
+			if(STYLE.images.indexOf(icon) < 0) {
+				icon = null;
+			}
+		}
+		
+		return icon;
 	};
 	
 	/**
