@@ -692,9 +692,9 @@ var FeatureStyle = function(feature) {
 	this._feature = feature;
 
 //CONSTRUCTOR
-	var applyable, tagList, val, featureVal, style;
+	var applyable, tagList, val, featureVal, style, key;
 	//Find potential styles depending on tags
-	for(var i=0; i < STYLE.styles.length; i++) {
+	for(var i=0, until = STYLE.styles.length; i < until; i++) {
 		style = STYLE.styles[i];
 		
 		/*
@@ -702,10 +702,10 @@ var FeatureStyle = function(feature) {
 		 */
 		applyable = false;
 		
-		for(var j=0; j < style.onTags.length; j++) {
+		for(var j=0, until2 = style.onTags.length; j < until2; j++) {
 			tagList = style.onTags[j];
 			applyable = true;
-			for(var key in tagList) {
+			for(key in tagList) {
 				val = tagList[key];
 				featureVal = this._feature.getTag(key);
 				
