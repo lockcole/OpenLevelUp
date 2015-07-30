@@ -5,6 +5,7 @@ Changes history
 ------------
 * Navigation buttons for spherical images hidden if an object has a single picture
 * Links to original images pages added to legends
+* Photo sphere looking in camera direction when loaded
 
 29 july 2015
 ------------

@@ -2392,6 +2392,7 @@ var ImagesView = function(main) {
 			side: THREE.FrontSide
 		});
 		this._mesh = new THREE.Mesh( geometry, material );
+		this._mesh.rotation.y = 2*Math.PI/3;
 		this._scene.add( this._mesh );
 		
 		//Events
