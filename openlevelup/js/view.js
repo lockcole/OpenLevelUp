@@ -624,7 +624,7 @@ var MapView = function(main) {
 					}
 				}
 				catch(e) {
-					console.error("[View] "+e);
+					console.error(e);
 				}
 			}
 			
@@ -2165,7 +2165,17 @@ var ImagesView = function(main) {
 			if(sceneInit) {
 				this._animateSphere();
 			}
+			
+			//Other settings
 			this._renderer.setSize(this._getSphereWidth(), this._getSphereHeight());
+			
+			//Navigation buttons
+			if(this._sphericalImages.length > 1) {
+				$("#spherical-nav").show();
+			}
+			else {
+				$("#spherical-nav").hide();
+			}
 		}
 		else {
 			this._currentSpherical = -1;
@@ -2252,6 +2262,10 @@ var ImagesView = function(main) {
 		if(img.date != undefined && img.date > 0) {
 			if(description != "") { description += ", "; }
 			description += new Date(img.date).toLocaleString();
+		}
+		if(img.page != undefined) {
+			if(description != "") { description += " - "; }
+			description += '<a href="'+img.page+'" target="_blank">Page</a>';
 		}
 		description += "<br />"+img.tag;
 		

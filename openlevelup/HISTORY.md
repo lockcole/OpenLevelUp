@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+30 july 2015
+------------
+* Navigation buttons for spherical images hidden if an object has a single picture
+* Links to original images pages added to legends
+
 29 july 2015
 ------------
 * amenity=photo_booth icon changed

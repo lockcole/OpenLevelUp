@@ -454,7 +454,9 @@ var Ctrl = function() {
 										photo.title,
 										photo.url_c,
 										new Date(photo.datetaken.replace(" ", "T")).getTime(),
-										photo.ownername
+										photo.ownername,
+										photo.owner,
+										photo.id
 									);
 									associatedPhotos++;
 								}

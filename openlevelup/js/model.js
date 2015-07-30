@@ -817,7 +817,7 @@ var FeatureImages = function(feature) {
 	
 	/** The image from mapillary=* tag **/
 	this._mapillary = [];
-	
+
 	/** The Flickr images **/
 	this._flickr = [];
 	
@@ -844,7 +844,7 @@ var FeatureImages = function(feature) {
 			this._img = 'http://upload.wikimedia.org/wikipedia/commons/' + folder;
 		}
 		else {
-			console.warn("[Images] Invalid key: "+this._imgTag);
+			console.warn("[Images] Invalid key: "+this._imgTag+ " for "+feature.getId());
 			this._img = null;
 		}
 	}
@@ -886,7 +886,8 @@ var FeatureImages = function(feature) {
 			result.push({
 				url: this._img,
 				source: "Web",
-				tag: "image = "+this._feature.getTag("image"),
+				tag: "image = "+this._imgTag,
+				page: this._img,
 				date: 0
 			});
 		}
@@ -902,6 +903,7 @@ var FeatureImages = function(feature) {
 					source: "Mapillary",
 					tag: mapillaryImg.key+" = "+mapillaryImg.val,
 					author: mapillaryData.getAuthor(mapillaryImg.val),
+					page: 'http://www.mapillary.com/map/im/'+mapillaryImg.val,
 					date: mapillaryData.getDate(mapillaryImg.val)
 				});
 			}
@@ -933,6 +935,7 @@ var FeatureImages = function(feature) {
 					source: "Mapillary",
 					tag: mapillaryImg.key+" = "+mapillaryImg.val,
 					author: mapillaryData.getAuthor(mapillaryImg.val),
+					page: 'http://www.mapillary.com/map/im/'+mapillaryImg.val,
 					date: mapillaryData.getDate(mapillaryImg.val)
 				});
 			}
@@ -1014,12 +1017,13 @@ var FeatureImages = function(feature) {
 	 * @param date The capture timestamp
 	 * @param author The picture author
 	 */
-	FeatureImages.prototype.addFlickrImage = function(title, url, date, author) {
+	FeatureImages.prototype.addFlickrImage = function(title, url, date, author, authorId, imgId) {
 		this._flickr.push({
 			url: url,
 			source: "Flickr",
 			tag: title,
 			author: author,
+			page: 'https://www.flickr.com/photos/'+authorId+'/'+imgId,
 			date: date
 		});
 	};
