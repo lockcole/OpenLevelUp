@@ -48,7 +48,7 @@
 			"name": "Path (Guide strips)",
 			"description": "Path with guide strips",
 			"onTags": [ { "highway": "*", "guide_strips": "yes" } ],
-			"style": { "color": "#316EDD", "icon": "visually_impaired.png" }
+			"style": { "color": "#316EDD", "icon": "guide_strips.png" }
 		},
 		{
 			"type": "Style",
@@ -83,21 +83,21 @@
 			"name": "Biology laboratory",
 			"description": "Biology laboratory",
 			"onTags": [ { "room": "laboratory", "laboratory": "biology|biological" } ],
-			"style": { "icon": "Biohazard_symbol.png" }
+			"style": { "icon": "laboratory_biology.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Physics laboratory",
 			"description": "Physics laboratory",
 			"onTags": [ { "room": "laboratory", "laboratory": "physical" } ],
-			"style": { "icon": "physics.png" }
+			"style": { "icon": "laboratory_physics.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Electronics laboratory",
 			"description": "Electronics laboratory",
 			"onTags": [ { "room": "laboratory", "laboratory": "electronics|electronic" } ],
-			"style": { "icon": "Octicons-circuit-board.png" }
+			"style": { "icon": "laboratory_electronics.png" }
 		},
 		{
 			"type": "Style",
@@ -146,7 +146,7 @@
 			"name": "Platform",
 			"description": "Railway platform",
 			"onTags": [ { "railway": "platform" }, { "public_transport": "platform" } ],
-			"style": { "color": "#B4ADB3", "opacity": 1, "weight": 1, "fillColor": "#BABABA", "fillOpacity": 1, "icon": "Bahn_aus_Zusatzzeichen_1024-15_A.png", "layer": -1 }
+			"style": { "color": "#B4ADB3", "opacity": 1, "weight": 1, "fillColor": "#BABABA", "fillOpacity": 1, "icon": "railway_platform.png", "layer": -1 }
 		},
 		{
 			"type": "Style",
@@ -167,7 +167,7 @@
 			"name": "Subway entrance",
 			"description": "Subway entrance",
 			"onTags": [ { "railway": "subway_entrance" } ],
-			"style": { "icon": "subway.png" }
+			"style": { "icon": "railway_subway_entrance.png" }
 		},
 		{
 			"type": "Style",
@@ -185,24 +185,17 @@
 		},
 		{
 			"type": "Style",
-			"name": "Amenity",
-			"description": "Amenities, shops (default)",
-			"onTags": [ { "amenity": "*" }, { "shop": "*" } ],
-			"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2" }
-		},
-		{
-			"type": "Style",
 			"name": "${amenity} (amenity)",
-			"description": "Amenities icons",
+			"description": "Amenities",
 			"onTags": [ { "amenity": "*" } ],
-			"style": { "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
+			"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2", "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
 		},
 		{
 			"type": "Style",
 			"name": "${shop} (shop)",
-			"description": "Shopping specific style",
+			"description": "Shops",
 			"onTags": [ { "shop": "*" } ],
-			"style": { "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
+			"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2", "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
 		},
 		{
 			"type": "Style",
@@ -227,6 +220,12 @@
 		},
 		{
 			"type": "Style",
+			"description": "Information default icon",
+			"onTags": [ { "tourism": "information" } ],
+			"style": { "icon": "tourism_information.png" }
+		},
+		{
+			"type": "Style",
 			"name": "Airport",
 			"description": "Aeroway icons",
 			"onTags": [ { "aeroway": "*" } ],
@@ -234,24 +233,17 @@
 		},
 		{
 			"type": "Style",
-			"name": "Ticket validator",
-			"description": "Ticket validator",
-			"onTags": [ { "amenity": "ticket_validator" } ],
-			"style": { "icon": "tickets_valid.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Ticket vending",
-			"description": "Ticket vending machine ('AND' example for tags)",
-			"onTags": [ { "amenity": "vending_machine", "vending": "public_transport_tickets" } ],
-			"style": { "icon": "tickets_vending.png" }
+			"name": "${vending} (vending)",
+			"description": "Vending",
+			"onTags": [ { "vending": "*" } ],
+			"style": { "icon": "vending_${vending}.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Newspapers vending",
 			"description": "Newspapers vending machine",
-			"onTags": [ { "amenity": "vending_machine", "vending": "newspapers" },  { "amenity": "vending_machine", "vending": "news_papers" }, { "shop": "newsagent" } ],
-			"style": { "icon": "Farm-Fresh_newspaper.png" }
+			"onTags": [ { "vending": "news_papers" } ],
+			"style": { "icon": "vending_newspapers.png" }
 		},
 		{
 			"type": "Style",
@@ -299,28 +291,28 @@
 			"name": "Elevator",
 			"description": "Elevator",
 			"onTags": [ { "highway": "elevator|lift" }, { "buildingpart:verticalpassage": "elevator" } ],
-			"style": { "icon": "Elevator_icon.png" }
+			"style": { "icon": "passage_elevator.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Stairs",
 			"description": "Stairs (verticalpassage)",
 			"onTags": [ { "buildingpart:verticalpassage": "stairway" }, { "room": "stairs" } ],
-			"style": { "icon": "NingboRT_Stairs_Logo.png" }
+			"style": { "icon": "passage_stairs.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Emergency stairs",
 			"description": "Stairs for emergency only (as polygons)",
 			"onTags": [ { "buildingpart": "verticalpassage", "access": "emergency" } ],
-			"style": { "color": "#009262", "fillColor": "#C0FFCB", "icon": "Emergency_stairs.png" }
+			"style": { "color": "#009262", "fillColor": "#C0FFCB", "icon": "emergency_stairs.png" }
 		},
 		{
 			"type": "Style",
 			"name": "Escalator",
 			"description": "Escalator (verticalpassage)",
 			"onTags": [ { "buildingpart:verticalpassage": "escalator" }, { "room": "escalator" } ],
-			"style": { "icon": "Aiga_escalator_mirror.png" }
+			"style": { "icon": "passage_escalator.png" }
 		},
 		{
 			"type": "Style",
@@ -376,14 +368,7 @@
 			"name": "Statue",
 			"description": "Statue icons",
 			"onTags": [ { "artwork_type": "statue|sculpture|stone|bust" } ],
-			"style": { "icon": "statue.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Information",
-			"description": "Information for travelers",
-			"onTags": [ { "tourism": "information" } ],
-			"style": { "icon": "Infobox_info_icon.png" }
+			"style": { "icon": "artwork_type_statue.png" }
 		},
 		{
 			"type": "Style",
@@ -439,7 +424,7 @@
 			"name": "CCTV",
 			"description": "Surveillance",
 			"onTags": [ { "man_made": "surveillance" } ],
-			"style": { "icon": "Video_surveillance_logo.png" }
+			"style": { "icon": "man_made_surveillance.png" }
 		},
 		{
 			"type": "Style",
@@ -459,13 +444,13 @@
 			"type": "Style",
 			"description": "Oneway path",
 			"onTags": [ { "oneway": "yes" }, { "conveying": "forward" } ],
-			"style": { "icon": "arrow1_up.png", "rotateIcon": true }
+			"style": { "icon": "arrow_up_1.png", "rotateIcon": true }
 		},
 		{
 			"type": "Style",
 			"description": "Oneway path",
 			"onTags": [ { "oneway": "-1" }, { "conveying": "backward" } ],
-			"style": { "icon": "arrow1_down.png", "rotateIcon": true }
+			"style": { "icon": "arrow_down_1.png", "rotateIcon": true }
 		}
 	],
 	"images": [
@@ -475,7 +460,6 @@
 		"aeroway_gate.png",
 		"aeroway_helipad.png",
 		"aeroway_terminal.png",
-		"Aiga_escalator_mirror.png",
 		"amenity_atm.png",
 		"amenity_bank.png",
 		"amenity_bar.png",
@@ -522,6 +506,7 @@
 		"amenity_taxi.png",
 		"amenity_telephone.png",
 		"amenity_theatre.png",
+		"amenity_ticket_validator.png",
 		"amenity_toilets_disabled.png",
 		"amenity_toilets_men.png",
 		"amenity_toilets.png",
@@ -531,13 +516,13 @@
 		"amenity_vending_machine.png",
 		"amenity_veterinary.png",
 		"amenity_waste_basket.png",
-		"arrow1_down.png",
-		"arrow1_up.png",
-		"arrow2_down.png",
-		"arrow2_up.png",
-		"arrow_down.png",
-		"arrow_up.png",
-		"Bahn_aus_Zusatzzeichen_1024-15_A.png",
+		"arrow_down_1.png",
+		"arrow_down_2.png",
+		"arrow_down_3.png",
+		"arrow_up_1.png",
+		"arrow_up_2.png",
+		"arrow_up_3.png",
+		"artwork_type_statue.png",
 		"barrier_blocks.png",
 		"barrier_bollard.png",
 		"barrier_cattle_grid.png",
@@ -551,37 +536,37 @@
 		"barrier_stile.png",
 		"barrier_toll_booth.png",
 		"barrier_turnstile.png",
-		"bench.png",
-		"Biohazard_symbol.png",
-		"default.png",
 		"door_no.png",
 		"door_sliding.png",
 		"door.png",
-		"Elevator_icon.png",
 		"emergency_assembly_point.png",
 		"emergency_door.png",
 		"emergency_defibrillator.png",
 		"emergency_fire_extinguisher.png",
 		"emergency_phone.png",
 		"emergency_siren.png",
-		"Emergency_stairs.png",
-		"export.png",
-		"Farm-Fresh_newspaper.png",
+		"emergency_stairs.png",
+		"guide_strips.png",
 		"highway_bus_stop.png",
 		"historic_tomb.png",
-		"Infobox_info_icon.png",
 		"information_audioguide.png",
 		"information_guidepost.png",
 		"information_map.png",
+		"laboratory_biology.png",
+		"laboratory_electronics.png",
+		"laboratory_physics.png",
+		"man_made_surveillance.png",
 		"man_made_survey_point.png",
 		"map_default.png",
 		"map_scheme.png",
 		"map_street.png",
-		"NingboRT_Stairs_Logo.png",
-		"North_Pointer.png",
-		"Octicons-circuit-board.png",
-		"physics.png",
+		"passage_elevator.png",
+		"passage_escalator.png",
+		"passage_stairs.png",
 		"poi_place_hamlet.png",
+		"railway_buffer_stop.png",
+		"railway_platform.png",
+		"railway_subway_entrance.png",
 		"room_administration.png",
 		"room_auditorium.png",
 		"room_bedroom.png",
@@ -600,13 +585,11 @@
 		"room_restaurant.png",
 		"room_security_check.png",
 		"room_sport.png",
-		"rooms.png",
 		"room_storage.png",
 		"room_technical.png",
 		"room_toilets.png",
 		"room_toilet.png",
 		"room_waiting.png",
-		"settings.png",
 		"shopping_alcohol.png",
 		"shopping_bakery.png",
 		"shopping_bicycle.png",
@@ -636,7 +619,7 @@
 		"shopping_mobile_phone.png",
 		"shopping_motorcycle.png",
 		"shopping_music.png",
-		"shopping_newspaper.png",
+		"shopping_newsagent.png",
 		"shopping_optician.png",
 		"shopping_pet.png",
 		"shopping_photo.png",
@@ -645,10 +628,6 @@
 		"shopping_tobacco.png",
 		"shopping_toys.png",
 		"shopping_video_rental.png",
-		"statue.png",
-		"subway.png",
-		"tickets_valid.png",
-		"tickets_vending.png",
 		"tourism_artwork.png",
 		"tourism_attraction.png",
 		"tourism_bed_and_breakfast.png",
@@ -664,6 +643,7 @@
 		"tourism_picnic_site.png",
 		"tourism_viewpoint.png",
 		"tourism_zoo.png",
-		"Video_surveillance_logo.png"
+		"vending_newspapers.png",
+		"vending_public_transport_tickets.png"
 	]
 }

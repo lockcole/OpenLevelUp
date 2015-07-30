@@ -1018,7 +1018,7 @@ var FeatureView = function(main, feature) {
 				iconUrl = OLvlUp.view.ICON_FOLDER+'/'+tmpUrl;
 			}
 			else if(style.showMissingIcon == undefined || style.showMissingIcon) {
-				iconUrl = OLvlUp.view.ICON_FOLDER+'/default.png';
+				iconUrl = OLvlUp.view.ICON_FOLDER+'/icon_default.png';
 			}
 		}
 		else if(style.showMissingIcon == undefined || style.showMissingIcon) {
@@ -1095,11 +1095,11 @@ var FeatureView = function(main, feature) {
 			//Able to go up ?
 			var levelId = ftLevels.indexOf(this._mainView.getLevelView().get());
 			if(levelId < ftLevels.length -1) {
-				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_up.png" title="Go up" alt="Up!" /></a>';
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_up_3.png" title="Go up" alt="Up!" /></a>';
 			}
 			//Able to go down ?
 			if(levelId > 0) {
-				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_down.png" title="Go down" alt="Down!" /></a>';
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_down_3.png" title="Go down" alt="Down!" /></a>';
 			}
 		}
 		
@@ -2022,7 +2022,7 @@ var NamesView = function(main) {
 						roomHtml += '<li class="ref"><a href="#" onclick="controller.getView().getMapView().goTo(\''+roomNamesFiltered[lvl][room].getId()+'\',\''+lvl+'\')">';
 						
 						if(STYLE != undefined) {
-							roomHtml += '<img src="'+OLvlUp.view.ICON_FOLDER+'/'+((STYLE.images.indexOf(roomNamesFiltered[lvl][room].getStyle().getIconUrl()) >= 0) ? roomNamesFiltered[lvl][room].getStyle().getIconUrl() : 'default.png')+'" width="'+OLvlUp.view.ICON_SIZE+'px"> '+room;
+							roomHtml += '<img src="'+OLvlUp.view.ICON_FOLDER+'/'+((STYLE.images.indexOf(roomNamesFiltered[lvl][room].getStyle().getIconUrl()) >= 0) ? roomNamesFiltered[lvl][room].getStyle().getIconUrl() : 'icon_default.png')+'" width="'+OLvlUp.view.ICON_SIZE+'px"> '+room;
 						}
 						
 						roomHtml += '</a></li>';
