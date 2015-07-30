@@ -1011,17 +1011,15 @@ var FeatureView = function(main, feature) {
 		var style = this._feature.getStyle().get();
 		angle = angle || null;
 		
-		if(style.icon != undefined && style.icon != null && style.icon != '') {
-			var tmpUrl = this._feature.getStyle().getIconUrl();
-			
-			if(tmpUrl != null) {
-				iconUrl = OLvlUp.view.ICON_FOLDER+'/'+tmpUrl;
-			}
-			else if(style.showMissingIcon == undefined || style.showMissingIcon) {
-				iconUrl = OLvlUp.view.ICON_FOLDER+'/icon_default.png';
-			}
+		var tmpUrl = this._feature.getStyle().getIconUrl();
+		
+		if(tmpUrl != null) {
+			iconUrl = OLvlUp.view.ICON_FOLDER+'/'+tmpUrl;
 		}
 		else if(style.showMissingIcon == undefined || style.showMissingIcon) {
+			iconUrl = OLvlUp.view.ICON_FOLDER+'/icon_default.png';
+		}
+		else if(this._feature.getGeometry().getType() == "Point") {
 			result = L.circleMarker(latlng, style);
 		}
 		
@@ -1040,9 +1038,6 @@ var FeatureView = function(main, feature) {
 				result = L.marker(latlng, {icon: myIcon});
 			}
 		}
-//		else {
-//			result = L.circleMarker(latlng, { opacity: 0, fillOpacity: 0 });
-//		}
 			
 		return result;
 	}
