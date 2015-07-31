@@ -471,7 +471,7 @@ var FeatureGeometry = function(fGeometry) {
 	};
 	
 	/**
-	 * @return The centroid, as [longitude, latitude]
+	 * @return The centroid, as LatLng
 	 */
 	FeatureGeometry.prototype.getCentroid = function() {
 		var result = null;
@@ -524,7 +524,7 @@ var FeatureGeometry = function(fGeometry) {
 			console.log("Unknown type: "+this._geom.type);
 		}
 		
-		return result;
+		return L.latLng(result[1], result[0]);
 	};
 	
 	/**
@@ -533,7 +533,7 @@ var FeatureGeometry = function(fGeometry) {
 	 */
 	FeatureGeometry.prototype.getCentroidAsString = function() {
 		var c = this.getCentroid();
-		return c[1]+", "+c[0];
+		return c.lat+", "+c.lng;
 	};
 	
 	/**
@@ -692,7 +692,7 @@ var FeatureStyle = function(feature) {
 	this._feature = feature;
 
 //CONSTRUCTOR
-	var applyable, tagList, val, featureVal, style, key;
+	var applyable, tagList, val, featureVal, style, key, param;
 	//Find potential styles depending on tags
 	for(var i=0, until = STYLE.styles.length; i < until; i++) {
 		style = STYLE.styles[i];
@@ -705,13 +705,14 @@ var FeatureStyle = function(feature) {
 		for(var j=0, until2 = style.onTags.length; j < until2; j++) {
 			tagList = style.onTags[j];
 			applyable = true;
+			
 			for(key in tagList) {
 				val = tagList[key];
 				featureVal = this._feature.getTag(key);
 				
 				//If this rule is not applyable, stop
 				if(featureVal == undefined
-					|| (val != "*" && val != featureVal && val.split("|").indexOf(featureVal) < 0)) {
+					|| (val != featureVal && val != "*" && !contains(val.split("|"), featureVal))) {
 					
 					applyable = false;
 					break;
@@ -727,7 +728,7 @@ var FeatureStyle = function(feature) {
 				this._name = style.name;
 			}
 			
-			for(var param in style.style) {
+			for(param in style.style) {
 				if(style.style[param] != undefined && (param != "icon" || this._createIconUrl(style.style["icon"]) != null)) {
 					this._style[param] = style.style[param];
 				}
@@ -784,7 +785,7 @@ var FeatureStyle = function(feature) {
 			icon = icon.replace(regex, this._feature.getTag(tagName));
 			
 			//Check if icon file exists (to avoid exotic values)
-			if(STYLE.images.indexOf(icon) < 0) {
+			if(!contains(STYLE.images, icon)) {
 				icon = null;
 			}
 		}

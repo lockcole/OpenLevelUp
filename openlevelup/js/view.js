@@ -710,8 +710,7 @@ var MapView = function(main) {
 		var feature = this._mainView.getData().getFeature(ftId);
 		
 		//Zoom on feature
-		var centroid = feature.getGeometry().getCentroid();
-		var centroidLatLng = L.latLng(centroid[1], centroid[0]);
+		var centroidLatLng = feature.getGeometry().getCentroid();
 		this._map.setView(centroidLatLng, 21);
 		
 		//Open popup
@@ -765,28 +764,31 @@ var FeatureView = function(main, feature) {
 		var geom = this._feature.getGeometry();
 		var geomType = geom.getType();
 		var hasIcon = style.icon != undefined;
+		var geomLatLng = geom.getLatLng();
 		this._layer = L.featureGroup();
 		
 		//Init layer object, depending of geometry type
 		switch(geomType) {
 			case "Point":
-				var marker = this._createMarker(geom.getLatLng());
+				var marker = this._createMarker(geomLatLng);
 				if(marker != null) {
 					this._layer.addLayer(marker);
 					hasIcon = true;
+					
+					marker = null;
 				}
 				break;
 				
 			case "LineString":
-				this._layer.addLayer(L.polyline(geom.getLatLng(), style));
+				this._layer.addLayer(L.polyline(geomLatLng, style));
 				break;
 				
 			case "Polygon":
-				this._layer.addLayer(L.polygon(geom.getLatLng(), style));
+				this._layer.addLayer(L.polygon(geomLatLng, style));
 				break;
 				
 			case "MultiPolygon":
-				this._layer.addLayer(L.multiPolygon(geom.getLatLng(), style));
+				this._layer.addLayer(L.multiPolygon(geomLatLng, style));
 				break;
 				
 			default:
@@ -802,11 +804,11 @@ var FeatureView = function(main, feature) {
 				case "Point":
 					//Labels
 					if(labelizable) {
-						this._layer.addLayer(this._createLabel(geom.getLatLng(), hasIcon));
+						this._layer.addLayer(this._createLabel(geomLatLng, hasIcon));
 					}
 					
 					if(hasPhoto) {
-						this._layer.addLayer(this._createPhotoIcon(geom.getLatLng()));
+						this._layer.addLayer(this._createPhotoIcon(geomLatLng));
 					}
 					break;
 					
@@ -815,8 +817,8 @@ var FeatureView = function(main, feature) {
 					var nbSegments = ftGeomJSON.coordinates.length - 1;
 					
 					//For each segment, add an icon
-					var i, coord1, coord2, coordMid, angle, coord, marker;
-					for(i=0; i < nbSegments; i++) {
+					var coord1, coord2, coordMid, angle, coord, marker;
+					for(var i=0; i < nbSegments; i++) {
 						coord1 = ftGeomJSON.coordinates[i];
 						coord2 = ftGeomJSON.coordinates[i+1];
 						coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
@@ -847,11 +849,19 @@ var FeatureView = function(main, feature) {
 							this._layer.addLayer(this._createPhotoIcon(coord));
 						}
 					}
+					
+					//Clear tmp objects
+					coord1 = null;
+					coord2 = null;
+					coordMid = null;
+					angle = null;
+					coord = null;
+					marker = null;
+					
 					break;
 					
 				case "Polygon":
-					var centroid = geom.getCentroid();
-					var coord = L.latLng(centroid[1], centroid[0]);
+					var coord = geom.getCentroid();
 					
 					if(hasIcon) {
 						var marker = this._createMarker(coord);
@@ -868,6 +878,10 @@ var FeatureView = function(main, feature) {
 					if(hasPhoto) {
 						this._layer.addLayer(this._createPhotoIcon(coord));
 					}
+					
+					//Clear tmp objects
+					coord = null;
+					
 					break;
 				
 				case "MultiPolygon":
@@ -907,6 +921,16 @@ var FeatureView = function(main, feature) {
 							this._layer.addLayer(this._createPhotoIcon(coord));
 						}
 					}
+					
+					//Clear tmp objects
+					ftGeomJSON = null;
+					nbPolygons = null;
+					coordMid = null;
+					coordsPolygon = null;
+					length = null;
+					coord = null;
+					marker = null;
+					
 					break;
 					
 				default:
@@ -919,6 +943,15 @@ var FeatureView = function(main, feature) {
 			this._layer.bindPopup(this.createPopup());
 			this._hasPopup = true;
 		}
+		
+		//Clear tmp objects
+		style = null;
+		geom = null;
+		geomType = null;
+		hasIcon = null;
+		geomLatLng = null;
+		labelizable = null;
+		hasPhoto = null;
 	}
 };
 
@@ -1065,9 +1098,9 @@ var FeatureView = function(main, feature) {
 	 * @return The popup object
 	 */
 	FeatureView.prototype.createPopup = function() {
-		var name = this._feature.getName();
 		var style = this._feature.getStyle().get();
 		var isMobile = this._mainView.isMobile();
+		var iconUrl = this._feature.getStyle().getIconUrl();
 		
 		/*
 		 * Title
@@ -1075,15 +1108,12 @@ var FeatureView = function(main, feature) {
 		var text = '<h1 class="popup">';
 		
 		//Add icon in title
-		if(style.icon != undefined) {
-			var iconUrl = this._feature.getStyle().getIconUrl();
-			if(iconUrl != null) {
-				text += '<img class="icon" src="'+OLvlUp.view.ICON_FOLDER+'/'+iconUrl+'" /> ';
-			}
+		if(iconUrl != null) {
+			text += '<img class="icon" src="'+OLvlUp.view.ICON_FOLDER+'/'+iconUrl+'" /> ';
 		}
 		
 		//Object name (its name tag or its type)
-		text += (this._feature.getTag("name") != undefined) ? this._feature.getTag("name") : name;
+		text += this._feature.getName();
 		
 		//Add up and down icons if levelup property == true
 		var ftLevels = this._feature.onLevels();
@@ -1192,11 +1222,12 @@ var FeatureView = function(main, feature) {
 			//List all tags
 			text += '<p class="popup-txt">';
 			var ftTags = this._feature.getTags();
+			var urlTags = ["image", "website", "contact:website", "url"];
+			
 			for(i in ftTags) {
 				//Render specific tags
 				//URLs
-				var urlTags = ["image", "website", "contact:website", "url"];
-				if(urlTags.indexOf(i) >= 0) {
+				if(contains(urlTags, i)) {
 					text += i+' = <a href="'+correctWebLink(ftTags[i])+'" target="_blank">'+ftTags[i]+'</a>';
 				}
 				//Wikimedia commons

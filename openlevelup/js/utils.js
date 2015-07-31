@@ -37,6 +37,7 @@ function parseOsmData(data) {
 };
 
 function addCompatibility() {
+	//Bind
 	if (!Function.prototype.bind) {
 		Function.prototype.bind = function(oThis) {
 			if (typeof this !== 'function') {
@@ -61,6 +62,15 @@ function addCompatibility() {
 			return fBound;
 		};
 	}
+	
+	//Object.keys
+	if (!Object.keys) Object.keys = function(o) {
+		if (o !== Object(o))
+			throw new TypeError('Object.keys called on a non-object');
+		var k=[],p;
+		for (p in o) if (Object.prototype.hasOwnProperty.call(o,p)) k.push(p);
+		return k;
+	}
 };
 
 /**
@@ -78,6 +88,22 @@ function mergeArrays(a1, a2) {
 		}
 	}
 	return a;
+};
+
+/**
+ * Does the array contains the given object
+ * @param a The array
+ * @param obj The object to look for
+ * @return True if obj in array
+ */
+function contains(a, obj) {
+	var i = a.length;
+	while (i--) {
+		if (a[i] === obj) {
+			return true;
+		}
+	}
+	return false;
 };
 
 /**
