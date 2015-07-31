@@ -994,7 +994,6 @@ var FeatureView = function(main, feature) {
 	 * @return True if yes
 	 */
 	FeatureView.prototype._isDisplayable = function() {
-		var ftGeom = this._feature.getGeometry();
 		var ftTags = this._feature.getTags();
 		var ftLevels = this._feature.onLevels();
 		var options = this._mainView.getOptionsView();
@@ -1266,12 +1265,11 @@ var FeatureView = function(main, feature) {
 	 */
 	FeatureView.prototype._addFormatedTag = function(key, cleanName, tagCleaner) {
 		var text = '';
-		var tag = this._feature.getTag(key);
 		
-		if(tag != undefined) {
+		if(this._feature.hasTag(key)) {
 			text = (tagCleaner == undefined) ?
-				'<b>'+cleanName+':</b> '+tag+'<br />'
-				: '<b>'+cleanName+':</b> '+tagCleaner(tag)+'<br />';
+				'<b>'+cleanName+':</b> '+this._feature.getTag(key)+'<br />'
+				: '<b>'+cleanName+':</b> '+tagCleaner(this._feature.getTag(key))+'<br />';
 		}
 		
 		return text;
@@ -1283,7 +1281,7 @@ var FeatureView = function(main, feature) {
 	 */
 	FeatureView.prototype._labelizable = function() {
 		var ftStyle = this._feature.getStyle().get();
-		return ftStyle.label != undefined && ftStyle.label != null && this._feature.getTag(ftStyle.label) != undefined;
+		return ftStyle.label != undefined && ftStyle.label != null && this._feature.hasTag(ftStyle.label);
 	};
 	
 	/**

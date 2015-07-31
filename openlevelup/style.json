@@ -1,458 +1,400 @@
 {
 	"type": "Styles",
-	"styles": [
-		{
-			"type": "Style",
-			"name": "Building",
-			"description": "No pop-ups for buildings",
-			"onTags": [ { "building": "*" } ],
-			"style": { "popup": "no" }
-		},
-		{
-			"type": "Style",
-			"name": "Building",
-			"description": "Buildings",
-			"onTags": [ { "building": "*" }, { "building:part": "*" } ],
-			"style": { "color": "#ADA5A5", "opacity": 1, "weight": 1, "fillColor": "#D4CACA", "fillOpacity": 1, "layer": -10 }
-		},
-		{
-			"type": "Style",
-			"name": "Room",
-			"description": "Indoor rooms",
-			"onTags": [ { "indoor": "room" }, { "room": "*" }, { "buildingpart": "room" } ],
-			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes" }
-		},
-		{
-			"type": "Style",
-			"name": "Wall",
-			"description": "Indoor walls",
-			"onTags": [ { "indoor": "wall" }, { "buildingpart": "wall" }, { "barrier": "wall" } ],
-			"style": { "color": "#999999", "opacity": 1, "weight": 2, "fillColor": "red", "fillOpacity": 1, "popup": "yes" }
-		},
-		{
-			"type": "Style",
-			"name": "Amenity",
-			"description": "Set layer for amenities which are kind of landuses",
-			"onTags": [ { "amenity": "school|college|university|hospital" } ],
-			"style": { "layer": -9 }
-		},
-		{
-			"type": "Style",
-			"name": "Path",
-			"description": "Highways (default)",
-			"onTags": [ { "highway": "*" } ],
-			"style": { "color": "#F98072", "opacity": 0.2 }
-		},
-		{
-			"type": "Style",
-			"name": "Path (Guide strips)",
-			"description": "Path with guide strips",
-			"onTags": [ { "highway": "*", "guide_strips": "yes" } ],
-			"style": { "color": "#316EDD", "icon": "guide_strips.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Area",
-			"description": "Indoor areas ('OR' example for values)",
-			"onTags": [ { "indoor": "area|corridor" }, { "highway": "pedestrian|footway", "area": "yes" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|entrance|hall|entry|gallery|collection" } ],
-			"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6, "label": "name", "labelStyle": "area" }
-		},
-		{
-			"type": "Style",
-			"name": "Area",
-			"description": "Indoor areas ('OR' example for values)",
-			"onTags": [ { "indoor": "area|corridor", "access": "private" }, { "highway": "pedestrian|footway", "area": "yes", "access": "private" }, { "buildingpart": "corridor|hall", "access": "private" }, { "room": "corridor|entrance|hall|entry|gallery|collection", "access": "private" } ],
-			"style": { "fillColor": "#FDDCDC" }
-		},
-		{
-			"type": "Style",
-			"name": "${room}",
-			"description": "Room icons",
-			"onTags": [ { "room": "*" } ],
-			"style": { "icon": "room_${room}.png", "showMissingIcon": false }
-		},
-		{
-			"type": "Style",
-			"name": "Computer lab",
-			"description": "Computer laboratory icon",
-			"onTags": [ { "room": "laboratory", "laboratory": "computer" } ],
-			"style": { "icon": "room_computer.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Biology laboratory",
-			"description": "Biology laboratory",
-			"onTags": [ { "room": "laboratory", "laboratory": "biology|biological" } ],
-			"style": { "icon": "laboratory_biology.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Physics laboratory",
-			"description": "Physics laboratory",
-			"onTags": [ { "room": "laboratory", "laboratory": "physical" } ],
-			"style": { "icon": "laboratory_physics.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Electronics laboratory",
-			"description": "Electronics laboratory",
-			"onTags": [ { "room": "laboratory", "laboratory": "electronics|electronic" } ],
-			"style": { "icon": "laboratory_electronics.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Amphitheatre",
-			"description": "Amphitheatre",
-			"onTags": [ { "room": "amphitheatre" } ],
-			"style": { "icon": "room_auditorium.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Reception",
-			"description": "Reception",
-			"onTags": [ { "room": "reception" } ],
-			"style": { "icon": "room_administration.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Refectory",
-			"description": "Refectory",
-			"onTags": [ { "room": "refectory" } ],
-			"style": { "icon": "room_restaurant.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Checkroom",
-			"description": "Checkroom",
-			"onTags": [ { "room": "checkroom" } ],
-			"style": { "icon": "room_locker.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Grass",
-			"description": "Grass landuse",
-			"onTags": [ { "landuse": "grass" } ],
-			"style": { "opacity": 0, "weight": 0, "fillColor": "#CFECA8", "fillOpacity": 1, "layer": -1 }
-		},
-		{
-			"type": "Style",
-			"name": "Historic",
-			"description": "Historic element",
-			"onTags": [ { "historic": "yes" } ],
-			"style": { "color": "#C0B0A2", "opacity": 0.5, "weight": 0.5, "fillColor": "#C0B0A2", "fillOpacity": 0.5, "layer": -1 }
-		},
-		{
-			"type": "Style",
-			"name": "Platform",
-			"description": "Railway platform",
-			"onTags": [ { "railway": "platform" }, { "public_transport": "platform" } ],
-			"style": { "color": "#B4ADB3", "opacity": 1, "weight": 1, "fillColor": "#BABABA", "fillOpacity": 1, "icon": "railway_platform.png", "layer": -1 }
-		},
-		{
-			"type": "Style",
-			"name": "Door",
-			"description": "Door nodes ('OR' example for tags)",
-			"onTags": [ { "door": "*" }, { "entrance": "*" }, { "buildingpart": "door" } ],
-			"style": { "icon": "door.png", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" }
-		},
-		{
-			"type": "Style",
-			"name": "Passage",
-			"description": "Door=no nodes",
-			"onTags": [ { "door": "no" } ],
-			"style": { "color": "#0BB848", "fillColor": "#0BB848", "opacity": 1, "fillOpacity": 1, "radius": 3, "icon": "none", "showMissingIcon": false, "dashArray": "none" }
-		},
-		{
-			"type": "Style",
-			"name": "Subway entrance",
-			"description": "Subway entrance",
-			"onTags": [ { "railway": "subway_entrance" } ],
-			"style": { "icon": "railway_subway_entrance.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Sliding door",
-			"description": "Door=sliding nodes",
-			"onTags": [ { "door": "sliding" } ],
-			"style": { "icon": "door_sliding.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Emergency exit",
-			"description": "Emergency exit",
-			"onTags": [ { "entrance": "emergency" } ],
-			"style": { "icon": "emergency_door.png" }
-		},
-		{
-			"type": "Style",
-			"name": "${amenity} (amenity)",
-			"description": "Amenities",
-			"onTags": [ { "amenity": "*" } ],
-			"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2", "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
-		},
-		{
-			"type": "Style",
-			"name": "${shop} (shop)",
-			"description": "Shops",
-			"onTags": [ { "shop": "*" } ],
-			"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2", "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
-		},
-		{
-			"type": "Style",
-			"name": "${barrier} (barrier)",
-			"description": "Barrier icons",
-			"onTags": [ { "barrier": "*" } ],
-			"style": { "icon": "barrier_${barrier}.png", "showMissingIcon": false }
-		},
-		{
-			"type": "Style",
-			"name": "${tourism} (tourism)",
-			"description": "Tourism icons",
-			"onTags": [ { "tourism": "*" } ],
-			"style": { "icon": "tourism_${tourism}.png", "color": "#ECC7A6", "fillColor": "#ECC7A6", "opacity": 1, "fillOpacity": 1, "weight": 3, "label": "name", "labelStyle": "tourism" }
-		},
-		{
-			"type": "Style",
-			"name": "${information} (information)",
-			"description": "Information icons",
-			"onTags": [ { "information": "*" } ],
-			"style": { "icon": "information_${information}.png" }
-		},
-		{
-			"type": "Style",
-			"description": "Information default icon",
-			"onTags": [ { "tourism": "information" } ],
-			"style": { "icon": "tourism_information.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Airport",
-			"description": "Aeroway icons",
-			"onTags": [ { "aeroway": "*" } ],
-			"style": { "icon": "aeroway_${aeroway}.png" }
-		},
-		{
-			"type": "Style",
-			"name": "${vending} (vending)",
-			"description": "Vending",
-			"onTags": [ { "vending": "*" } ],
-			"style": { "icon": "vending_${vending}.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Newspapers vending",
-			"description": "Newspapers vending machine",
-			"onTags": [ { "vending": "news_papers" } ],
-			"style": { "icon": "vending_newspapers.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Bus stop",
-			"description": "Bus stop",
-			"onTags": [ { "highway": "bus_stop" } ],
-			"style": { "icon": "highway_bus_stop.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Stairs",
-			"description": "Fix for room=stairs|escalator layer",
-			"onTags": [ { "room": "stairs" }, { "room": "escalator" } ],
-			"style": { "layer": -1 }
-		},
-		{
-			"type": "Style",
-			"name": "Stairs",
-			"description": "Stairs",
-			"onTags": [ { "highway": "steps" } ],
-			"style": { "color": "#F98072", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "2,1", "levelup": true, "level": -1 }
-		},
-		{
-			"type": "Style",
-			"name": "Conveying path",
-			"description": "Conveying path",
-			"onTags": [ { "conveying": "yes|forward|backward" } ],
-			"style": { "color": "#848484", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "3,1", "levelup": true }
-		},
-		{
-			"type": "Style",
-			"description": "Conveying path",
-			"onTags": [ { "highway": "footway", "conveying": "yes|forward|backward" } ],
-			"style": { "dashArray": "3,2" }
-		},
-		{
-			"type": "Style",
-			"name": "Vertical passage",
-			"description": "Elevetor, stairs (as polygons)",
-			"onTags": [ { "highway": "elevator|lift" }, { "buildingpart": "verticalpassage" }, { "room": "stairs" } ],
-			"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "level": -1 }
-		},
-		{
-			"type": "Style",
-			"name": "Elevator",
-			"description": "Elevator",
-			"onTags": [ { "highway": "elevator|lift" }, { "buildingpart:verticalpassage": "elevator" } ],
-			"style": { "icon": "passage_elevator.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Stairs",
-			"description": "Stairs (verticalpassage)",
-			"onTags": [ { "buildingpart:verticalpassage": "stairway" }, { "room": "stairs" } ],
-			"style": { "icon": "passage_stairs.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Emergency stairs",
-			"description": "Stairs for emergency only (as polygons)",
-			"onTags": [ { "buildingpart": "verticalpassage", "access": "emergency" } ],
-			"style": { "color": "#009262", "fillColor": "#C0FFCB", "icon": "emergency_stairs.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Escalator",
-			"description": "Escalator (verticalpassage)",
-			"onTags": [ { "buildingpart:verticalpassage": "escalator" }, { "room": "escalator" } ],
-			"style": { "icon": "passage_escalator.png" }
-		},
-		{
-			"type": "Style",
-			"name": "${railway} (rail)",
-			"description": "Rail",
-			"onTags": [ { "railway": "rail|subway|light_rail|monorail|narrow_gauge|tram" } ],
-			"style": { "color": "#888888", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "5,5", "label": "name", "labelStyle": "railway" }
-		},
-		{
-			"type": "Style",
-			"name": "Buffer stop",
-			"description": "Rail buffer stop",
-			"onTags": [ { "railway": "buffer_stop" } ],
-			"style": { "icon": "railway_buffer_stop.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Fence",
-			"description": "Fence",
-			"onTags": [ { "barrier": "fence" } ],
-			"style": { "color": "#5B5B5B", "opacity": 1, "weight": 5, "lineCap": "butt", "icon": "none" }
-		},
-		{
-			"type": "Style",
-			"name": "Hedge",
-			"description": "Hedge",
-			"onTags": [ { "barrier": "hedge" } ],
-			"style": { "color": "#8CD16E", "opacity": 1, "weight": 5, "lineCap": "butt", "icon": "none" }
-		},
-		{
-			"type": "Style",
-			"name": "Turnstile",
-			"description": "Turnstile",
-			"onTags": [ { "barrier": "turnstile" } ],
-			"style": { "icon": "barrier_turnstile.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Pillar",
-			"description": "Pillar",
-			"onTags": [ { "man_made": "pillar" }, { "buildingpart": "pillar" }, { "building:part": "column" }, { "indoor": "column" } ],
-			"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
-		},
-		{
-			"type": "Style",
-			"name": "Glass cabinet",
-			"description": "Glass cabinet",
-			"onTags": [ { "indoor": "glass_cabinet" } ],
-			"style": { "color": "#A2CCC8", "fillColor": "#E3F3F5", "opacity": 1, "fillOpacity": 1, "lineJoin": "miter", "weight": 3, "layer": -1 }
-		},
-		{
-			"type": "Style",
-			"name": "Statue",
-			"description": "Statue icons",
-			"onTags": [ { "artwork_type": "statue|sculpture|stone|bust" } ],
-			"style": { "icon": "artwork_type_statue.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Audioguide",
-			"description": "Audioguide",
-			"onTags": [ { "information": "audioguide" } ],
-			"style": { "icon": "information_audioguide.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Map",
-			"description": "Map",
-			"onTags": [ { "information": "map" } ],
-			"style": { "icon": "map_default.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Street map",
-			"description": "Map",
-			"onTags": [ { "information": "map", "map_type": "street" } ],
-			"style": { "icon": "map_street.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Scheme map",
-			"description": "Map",
-			"onTags": [ { "information": "map", "map_type": "scheme" } ],
-			"style": { "icon": "map_scheme.png" }
-		},
-		{
-			"type": "Style",
-			"name": "${advertising} (advert)",
-			"description": "Advertising",
-			"onTags": [ { "advertising": "*" } ],
-			"style": { "icon": "advertising.png" }
-		},
-		{
-			"type": "Style",
-			"name": "${emergency}",
-			"description": "Emergency",
-			"onTags": [ { "emergency": "*" } ],
-			"style": { "icon": "emergency_${emergency}.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Landmark sign",
-			"description": "Landmark sign",
-			"onTags": [ { "pole": "landmark_sign" } ],
-			"style": { "icon": "poi_place_hamlet.png", "label": "ref" }
-		},
-		{
-			"type": "Style",
-			"name": "CCTV",
-			"description": "Surveillance",
-			"onTags": [ { "man_made": "surveillance" } ],
-			"style": { "icon": "man_made_surveillance.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Tomb",
-			"description": "Tomb",
-			"onTags": [ { "historic": "tomb" } ],
-			"style": { "icon": "historic_tomb.png" }
-		},
-		{
-			"type": "Style",
-			"name": "Mall",
-			"description": "Mall surface",
-			"onTags": [ { "shop": "mall" } ],
-			"style" : { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -9 }
-		},
-		{
-			"type": "Style",
-			"description": "Oneway path",
-			"onTags": [ { "oneway": "yes" }, { "conveying": "forward" } ],
-			"style": { "icon": "arrow_up_1.png", "rotateIcon": true }
-		},
-		{
-			"type": "Style",
-			"description": "Oneway path",
-			"onTags": [ { "oneway": "-1" }, { "conveying": "backward" } ],
-			"style": { "icon": "arrow_down_1.png", "rotateIcon": true }
-		}
-	],
+	"styles": {
+
+		"building|building:part": [
+			{
+				"name": "Building",
+				"description": "Building",
+				"onTags": [ { "building": "*" } ],
+				"style": { "color": "#ADA5A5", "opacity": 1, "weight": 1, "fillColor": "#D4CACA", "fillOpacity": 1, "layer": -10, "popup": "no" }
+			},
+			{
+				"name": "Pillar",
+				"description": "Pillar",
+				"onTags": [ { "building:part": "column" } ],
+				"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
+			}
+		],
+		
+		"buildingpart|indoor": [
+			{
+				"name": "Room",
+				"description": "Indoor rooms",
+				"onTags": [ { "indoor": "room" }, { "buildingpart": "room" } ],
+				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes" }
+			},
+			{
+				"name": "Wall",
+				"description": "Indoor walls",
+				"onTags": [ { "indoor": "wall" }, { "buildingpart": "wall" } ],
+				"style": { "color": "#999999", "opacity": 1, "weight": 2, "fillColor": "red", "fillOpacity": 1, "popup": "yes" }
+			},
+			{
+				"name": "Area",
+				"description": "Indoor areas",
+				"onTags": [ { "indoor": "area|corridor" }, { "buildingpart": "corridor|hall" } ],
+				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6, "label": "name", "labelStyle": "area" }
+			},
+			{
+				"name": "Vertical passage",
+				"description": "Elevetor, stairs (as polygons)",
+				"onTags": [ { "buildingpart": "verticalpassage" }, { "room": "stairs|escalator" } ],
+				"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "level": -1 }
+			},
+			{
+				"name": "Elevator",
+				"description": "Elevator",
+				"onTags": [ { "buildingpart:verticalpassage": "elevator" } ],
+				"style": { "icon": "passage_elevator.png" }
+			},
+			{
+				"name": "Stairs",
+				"description": "Stairs (verticalpassage)",
+				"onTags": [ { "buildingpart:verticalpassage": "stairway" }, { "room": "stairs" } ],
+				"style": { "icon": "passage_stairs.png" }
+			},
+			{
+				"name": "Escalator",
+				"description": "Escalator (verticalpassage)",
+				"onTags": [ { "buildingpart:verticalpassage": "escalator" }, { "room": "escalator" } ],
+				"style": { "icon": "passage_escalator.png" }
+			},
+			{
+				"name": "Emergency stairs",
+				"description": "Stairs for emergency only (as polygons)",
+				"onTags": [ { "buildingpart": "verticalpassage", "access": "emergency" }, { "room": "stairs", "access": "emergency" } ],
+				"style": { "color": "#009262", "fillColor": "#C0FFCB", "icon": "emergency_stairs.png" }
+			},
+			{
+				"name": "Pillar",
+				"description": "Pillar",
+				"onTags": [ { "indoor": "column" } ],
+				"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
+			},
+			{
+				"name": "Glass cabinet",
+				"description": "Glass cabinet",
+				"onTags": [ { "indoor": "glass_cabinet" } ],
+				"style": { "color": "#A2CCC8", "fillColor": "#E3F3F5", "opacity": 1, "fillOpacity": 1, "lineJoin": "miter", "weight": 3, "layer": -1 }
+			},
+			{
+				"name": "Door",
+				"description": "Default door",
+				"onTags": [ { "buildingpart": "door" }, { "indoor": "door" } ],
+				"style": { "icon": "door.png", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" }
+			}
+		],
+		
+		"room": [
+			{
+				"name": "${room}",
+				"description": "Room icons",
+				"onTags": [ { "room": "*" } ],
+				"style": {
+					"icon": "room_${room}.png",
+					"iconAlias": { "amphitheatre": "auditorium", "reception": "administration", "refectory": "restaurant", "checkroom": "locker" },
+					"showMissingIcon": false
+				}
+			},
+			{
+				"name": "Stairs",
+				"description": "Fix for room=stairs|escalator layer",
+				"onTags": [ { "room": "stairs|escalator" } ],
+				"style": { "layer": -1 }
+			},
+			{
+				"name": "Area",
+				"description": "Indoor areas",
+				"onTags": [ { "room": "corridor|entrance|hall|entry|gallery|collection" } ],
+				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6, "label": "name", "labelStyle": "area" }
+			},
+			{
+				"name": "${laboratory} lab",
+				"description": "Laboratory icons",
+				"onTags": [ { "laboratory": "*" } ],
+				"style": {
+					"icon": "laboratory_${laboratory}.png",
+					"iconAlias": { "biological": "biology", "physical": "physics", "electronic": "electronics" }
+				}
+			}
+		],
+		
+		"door|entrance": [
+			{
+				"name": "Door",
+				"description": "Default door",
+				"onTags": [ { "door": "*" }, { "entrance": "*" } ],
+				"style": { "icon": "door.png", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" }
+			},
+			{
+				"name": "Passage",
+				"description": "door=no nodes",
+				"onTags": [ { "door": "no" } ],
+				"style": { "color": "#0BB848", "fillColor": "#0BB848", "opacity": 1, "fillOpacity": 1, "radius": 3, "icon": "none", "showMissingIcon": false, "dashArray": "none" }
+			},
+			{
+				"name": "Sliding door",
+				"description": "Door=sliding nodes",
+				"onTags": [ { "door": "sliding" } ],
+				"style": { "icon": "door_sliding.png" }
+			},
+			{
+				"name": "Emergency exit",
+				"description": "Emergency exit",
+				"onTags": [ { "entrance": "emergency" } ],
+				"style": { "icon": "emergency_door.png" }
+			}
+		],
+		
+		"highway": [
+			{
+				"name": "Path",
+				"description": "Highways (default)",
+				"onTags": [ { "highway": "*" } ],
+				"style": { "color": "#F98072", "opacity": 0.2 }
+			},
+			{
+				"name": "Path (Guide strips)",
+				"description": "Path with guide strips",
+				"onTags": [ { "highway": "*", "guide_strips": "yes" } ],
+				"style": { "color": "#316EDD", "icon": "guide_strips.png" }
+			},
+			{
+				"name": "Area",
+				"description": "Pedestrian areas",
+				"onTags": [ { "highway": "pedestrian|footway", "area": "yes" } ],
+				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6, "label": "name", "labelStyle": "area" }
+			},
+			{
+				"name": "Bus stop",
+				"description": "Bus stop",
+				"onTags": [ { "highway": "bus_stop" } ],
+				"style": { "icon": "highway_bus_stop.png" }
+			},
+			{
+				"name": "Stairs",
+				"description": "Stairs",
+				"onTags": [ { "highway": "steps" } ],
+				"style": { "color": "#F98072", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "2,1", "levelup": true, "level": -1 }
+			},
+			{
+				"name": "Conveying path",
+				"description": "Conveying path",
+				"onTags": [ { "conveying": "yes|forward|backward" } ],
+				"style": { "color": "#848484", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "3,1", "levelup": true }
+			},
+			{
+				"description": "Conveying path",
+				"onTags": [ { "highway": "footway", "conveying": "yes|forward|backward" } ],
+				"style": { "dashArray": "3,2" }
+			},
+			{
+				"name": "Vertical passage",
+				"description": "Elevetor, stairs (as polygons)",
+				"onTags": [ { "highway": "elevator|lift" } ],
+				"style": { "icon": "passage_elevator.png", "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "level": -1 }
+			},
+			{
+				"description": "Oneway path",
+				"onTags": [ { "oneway": "yes" }, { "conveying": "forward" } ],
+				"style": { "icon": "arrow_up_1.png", "rotateIcon": true }
+			},
+			{
+				"description": "Oneway path",
+				"onTags": [ { "oneway": "-1" }, { "conveying": "backward" } ],
+				"style": { "icon": "arrow_down_1.png", "rotateIcon": true }
+			}
+		],
+		
+		
+		
+		"amenity": [
+			{
+				"name": "${amenity} (amenity)",
+				"description": "Amenities",
+				"onTags": [ { "amenity": "*" } ],
+				"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2", "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
+			},
+			{
+				"description": "Set layer for amenities which are kind of landuses",
+				"onTags": [ { "amenity": "school|college|university|hospital" } ],
+				"style": { "layer": -9 }
+			},
+			{
+				"name": "${vending} (vending)",
+				"description": "Vending",
+				"onTags": [ { "vending": "*" } ],
+				"style": {
+					"icon": "vending_${vending}.png",
+					"iconAlias": { "news_papers": "newspapers" }
+				}
+			}
+		],
+		
+		"barrier": [
+			{
+				"name": "${barrier} (barrier)",
+				"description": "Barrier icons",
+				"onTags": [ { "barrier": "*" } ],
+				"style": { "icon": "barrier_${barrier}.png", "opacity": 1, "weight": 5, "lineCap": "butt", "showMissingIcon": false }
+			},
+			{
+				"name": "Fence",
+				"description": "Fence",
+				"onTags": [ { "barrier": "fence" } ],
+				"style": { "color": "#5B5B5B", "icon": "none" }
+			},
+			{
+				"name": "Hedge",
+				"description": "Hedge",
+				"onTags": [ { "barrier": "hedge" } ],
+				"style": { "color": "#8CD16E", "icon": "none" }
+			}
+		],
+		
+		
+		"emergency": [
+			{
+				"name": "${emergency}",
+				"description": "Emergency",
+				"onTags": [ { "emergency": "*" } ],
+				"style": { "icon": "emergency_${emergency}.png" }
+			}
+		],
+		
+		"man_made": [
+			{
+				"name": "Pillar",
+				"description": "Pillar",
+				"onTags": [ { "man_made": "pillar" } ],
+				"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
+			},
+			{
+				"name": "CCTV",
+				"description": "Surveillance",
+				"onTags": [ { "man_made": "surveillance" } ],
+				"style": { "icon": "man_made_surveillance.png" }
+			}
+		],
+		
+		"railway|public_transport": [
+			{
+				"name": "${railway} (rail)",
+				"description": "Rail",
+				"onTags": [ { "railway": "rail|subway|light_rail|monorail|narrow_gauge|tram" } ],
+				"style": { "color": "#888888", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "5,5", "label": "name", "labelStyle": "railway" }
+			},
+			{
+				"name": "Platform",
+				"description": "Railway platform",
+				"onTags": [ { "railway": "platform" }, { "public_transport": "platform" } ],
+				"style": { "color": "#B4ADB3", "opacity": 1, "weight": 1, "fillColor": "#BABABA", "fillOpacity": 1, "layer": -1 }
+			},
+			{
+				"name": "${railway}",
+				"description": "Railway icons",
+				"onTags": [ { "railway": "platform|subway_entrance|buffer_stop" } ],
+				"style": { "icon": "railway_${railway}.png" }
+			}
+		],
+		
+		"shop": [
+			{
+				"name": "${shop} (shop)",
+				"description": "Shops",
+				"onTags": [ { "shop": "*" } ],
+				"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2", "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
+			},
+			{
+				"name": "Mall",
+				"description": "Mall surface",
+				"onTags": [ { "shop": "mall" } ],
+				"style" : { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -9 }
+			}
+		],
+		
+		"tourism": [
+			{
+				"name": "${tourism} (tourism)",
+				"description": "Tourism icons",
+				"onTags": [ { "tourism": "*" } ],
+				"style": { "icon": "tourism_${tourism}.png", "color": "#ECC7A6", "fillColor": "#ECC7A6", "opacity": 1, "fillOpacity": 1, "weight": 3, "label": "name", "labelStyle": "tourism" }
+			},
+			{
+				"name": "${information} (information)",
+				"description": "Information icons",
+				"onTags": [ { "information": "*" } ],
+				"style": { "icon": "information_${information}.png" }
+			},
+			{
+				"name": "Street map",
+				"description": "Map",
+				"onTags": [ { "map_type": "street|scheme" } ],
+				"style": { "icon": "map_type_${map_type}.png" }
+			},
+			{
+				"name": "Statue",
+				"description": "Statue icons",
+				"onTags": [ { "artwork_type": "statue|sculpture|stone|bust" } ],
+				"style": { "icon": "artwork_type_statue.png" }
+			}
+		],
+
+		
+		
+		"advertising": [
+			{
+				"name": "${advertising}",
+				"description": "Advertising icons",
+				"onTags": [ { "advertising": "*" } ],
+				"style": { "icon": "advertising.png" }
+			}
+		],
+		
+		"aeroway": [
+			{
+				"name": "${aeroway}",
+				"description": "Airport-related icons",
+				"onTags": [ { "aeroway": "*" } ],
+				"style": { "icon": "aeroway_${aeroway}.png" }
+			}
+		],
+		
+		"historic": [
+			{
+				"name": "Historic",
+				"description": "Historic element",
+				"onTags": [ { "historic": "*" } ],
+				"style": { "color": "#C0B0A2", "opacity": 0.5, "weight": 0.5, "fillColor": "#C0B0A2", "fillOpacity": 0.5, "layer": -1 }
+			},
+			{
+				"name": "Tomb",
+				"description": "Tomb",
+				"onTags": [ { "historic": "tomb" } ],
+				"style": { "icon": "historic_tomb.png" }
+			}
+		],
+		
+		"landuse": [
+			{
+				"name": "Grass",
+				"description": "Grass landuse",
+				"onTags": [ { "landuse": "grass" } ],
+				"style": { "opacity": 0, "weight": 0, "fillColor": "#CFECA8", "fillOpacity": 1, "layer": -1 }
+			}
+		],
+		
+		"pole": [
+			{
+				"name": "Landmark sign",
+				"description": "Landmark sign",
+				"onTags": [ { "pole": "landmark_sign" } ],
+				"style": { "icon": "pole_landmark_sign.png", "label": "ref" }
+			}
+		]
+	},
+
 	"images": [
 		"advertising.png",
 		"aeroway_aerodrome.png",
@@ -553,17 +495,17 @@
 		"information_guidepost.png",
 		"information_map.png",
 		"laboratory_biology.png",
+		"laboratory_computer.png",
 		"laboratory_electronics.png",
 		"laboratory_physics.png",
 		"man_made_surveillance.png",
 		"man_made_survey_point.png",
-		"map_default.png",
-		"map_scheme.png",
-		"map_street.png",
+		"map_type_scheme.png",
+		"map_type_street.png",
 		"passage_elevator.png",
 		"passage_escalator.png",
 		"passage_stairs.png",
-		"poi_place_hamlet.png",
+		"pole_landmark_sign.png",
 		"railway_buffer_stop.png",
 		"railway_platform.png",
 		"railway_subway_entrance.png",

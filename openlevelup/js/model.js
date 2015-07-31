@@ -27,7 +27,7 @@
  * The OSM global data container.
  * It contains the parsed object from Overpass call.
  */
-var OSMData = function(bbox, data, styleDef) {
+var OSMData = function(bbox, data) {
 //ATTRIBUTES
 	/** The feature objects **/
 	this._features = null;
@@ -50,11 +50,11 @@ var OSMData = function(bbox, data, styleDef) {
 	//Create features
 	this._features = new Object();
 
-	var id, f, i, currentFeature, ftLevels, name, lvlId, lvl;
+	var id, f, i, currentFeature, ftLevels, lvlId, lvl;
 	for(i=0; i < geojson.features.length; i++) {
 		f = geojson.features[i];
 		id = f.id;
-		currentFeature = new Feature(f, styleDef);
+		currentFeature = new Feature(f);
 		
 		if(this._features[id] == undefined) {
 			this._features[id] = currentFeature;
@@ -64,8 +64,7 @@ var OSMData = function(bbox, data, styleDef) {
 			$.merge(this._levels, ftLevels);
 			
 			//Add name to list
-			name = currentFeature.getTag("name");
-			if(name != undefined) {
+			if(currentFeature.hasTag("name")) {
 				for(var lvlId=0; lvlId < ftLevels.length; lvlId++) {
 					lvl = ftLevels[lvlId];
 					
@@ -74,7 +73,7 @@ var OSMData = function(bbox, data, styleDef) {
 						this._names[lvl] = [];
 					}
 					
-					this._names[lvl][name] = currentFeature;
+					this._names[lvl][currentFeature.getTag("name")] = currentFeature;
 				}
 			}
 		}
@@ -94,7 +93,6 @@ var OSMData = function(bbox, data, styleDef) {
 	i = null;
 	currentFeature = null;
 	ftLevels = null;
-	name = null;
 	lvlId = null;
 	lvl = null;
 	
@@ -150,16 +148,15 @@ var OSMData = function(bbox, data, styleDef) {
 	 */
 	OSMData.prototype.getMapillaryKeys = function() {
 		var keys = [];
-		var ftId, feature, i, mapillaryVal;
+		var ftId, feature, i;
 		var mapillaryTags = [ "mapillary", "mapillary:front", "mapillary:back", "mapillary:right", "mapillary:left", "mapillary:large", "mapillary:detail" ];
 		
 		for(ftId in this._features) {
 			feature = this._features[ftId];
 
 			for(i=0; i < mapillaryTags.length; i++) {
-				mapillaryVal = feature.getTag(mapillaryTags[i]);
-				if(mapillaryVal != undefined) {
-					keys.push(mapillaryVal);
+				if(feature.hasTag(mapillaryTags[i])) {
+					keys.push(feature.getTag(mapillaryTags[i]));
 				}
 			}
 		}
@@ -270,7 +267,7 @@ var MapillaryData = function() {
 /**
  * A feature is a geolocated object with properties, style, geometry, ...
  */
-var Feature = function(f, styleDef) {
+var Feature = function(f) {
 //ATTRIBUTES
 	/** The human readable name of the object **/
 	this._name = null;
@@ -280,6 +277,9 @@ var Feature = function(f, styleDef) {
 	
 	/** The levels in which this object is present **/
 	this._onLevels = null;
+	
+	/** The OSM keys **/
+	this._keys = null;
 	
 	/** The OSM object tags **/
 	this._tags = f.properties.tags;
@@ -297,7 +297,8 @@ var Feature = function(f, styleDef) {
 	/*
 	 * Init some vars
 	 */
-	this._style = new FeatureStyle(this, styleDef);
+	this._keys = Object.keys(this._tags);
+	this._style = new FeatureStyle(this);
 	this._geometry = new FeatureGeometry(f.geometry);
 	
 	/*
@@ -425,6 +426,14 @@ var Feature = function(f, styleDef) {
 	 */
 	Feature.prototype.getTag = function(key) {
 		return this._tags[key];
+	};
+	
+	/**
+	 * @param key The OSM key
+	 * @return True if this key is defined in this object
+	 */
+	Feature.prototype.hasTag = function(key) {
+		return contains(this._keys, key);
 	};
 	
 	/**
@@ -694,43 +703,51 @@ var FeatureStyle = function(feature) {
 //CONSTRUCTOR
 	var applyable, tagList, val, featureVal, style, key, param;
 	//Find potential styles depending on tags
-	for(var i=0, until = STYLE.styles.length; i < until; i++) {
-		style = STYLE.styles[i];
-		
-		/*
-		 * Check if style is applyable
-		 */
-		applyable = false;
-		
-		for(var j=0, until2 = style.onTags.length; j < until2; j++) {
-			tagList = style.onTags[j];
-			applyable = true;
-			
-			for(key in tagList) {
-				val = tagList[key];
-				featureVal = this._feature.getTag(key);
+	for(var mainKey in STYLE.styles) {
+		if(this._hasKey(mainKey)) {
+			for(var i=0, until=STYLE.styles[mainKey].length; i < until; i++) {
+				style = STYLE.styles[mainKey][i];
 				
-				//If this rule is not applyable, stop
-				if(featureVal == undefined
-					|| (val != featureVal && val != "*" && !contains(val.split("|"), featureVal))) {
+				/*
+				 * Check if style is applyable
+				 */
+				applyable = false;
+				
+				for(var j=0, until2 = style.onTags.length; j < until2; j++) {
+					tagList = style.onTags[j];
+					applyable = true;
 					
-					applyable = false;
-					break;
+					for(key in tagList) {
+						val = tagList[key];
+						
+						//If this rule is not applyable, stop
+						if(!this._feature.hasTag(key)) {
+							applyable = false;
+							break;
+						}
+						else {
+							featureVal = this._feature.getTag(key);
+							if(val != featureVal && val != "*" && !contains(val.split("|"), featureVal)) {
+								applyable = false;
+								break;
+							}
+						}
+					}
+					//If style still applyable after looking for all tags in a taglist, then it's applyable
+					if(applyable) { break; }
 				}
-			}
-			//If style still applyable after looking for all tags in a taglist, then it's applyable
-			if(applyable) { break; }
-		}
-		
-		//If applyable, we update the result style
-		if(applyable) {
-			if(style.name != undefined) {
-				this._name = style.name;
-			}
-			
-			for(param in style.style) {
-				if(style.style[param] != undefined && (param != "icon" || this._createIconUrl(style.style["icon"]) != null)) {
-					this._style[param] = style.style[param];
+				
+				//If applyable, we update the result style
+				if(applyable) {
+					if(style.name != undefined) {
+						this._name = style.name;
+					}
+					
+					for(param in style.style) {
+						if(style.style[param] != undefined && (param != "icon" || this._createIconUrl(style.style) != null)) {
+							this._style[param] = style.style[param];
+						}
+					}
 				}
 			}
 		}
@@ -768,7 +785,7 @@ var FeatureStyle = function(feature) {
 	 */
 	FeatureStyle.prototype.getIconUrl = function() {
 		if(this._icon == undefined) {
-			this._icon = this._createIconUrl(this._style.icon);
+			this._icon = this._createIconUrl(this._style);
 		}
 		
 		return this._icon;
@@ -777,12 +794,20 @@ var FeatureStyle = function(feature) {
 	/**
 	 * Replaces if needed the variable tag in an icon URL
 	 */
-	FeatureStyle.prototype._createIconUrl = function(icon) {
+	FeatureStyle.prototype._createIconUrl = function(style) {
 		var regex = /\$\{(\w+)\}/;
+		var icon = style.icon;
 		if(regex.test(icon)) {
 			//Replace tag name with actual tag value
 			var tagName = regex.exec(icon)[1];
-			icon = icon.replace(regex, this._feature.getTag(tagName));
+			var tagValue = this._feature.getTag(tagName);
+			
+			//If an alias exists for the given value, replace
+			if(style.iconAlias != undefined && style.iconAlias[tagValue] != undefined) {
+				tagValue = style.iconAlias[tagValue];
+			}
+			
+			icon = icon.replace(regex, tagValue);
 			
 			//Check if icon file exists (to avoid exotic values)
 			if(!contains(STYLE.images, icon)) {
@@ -791,6 +816,19 @@ var FeatureStyle = function(feature) {
 		}
 		
 		return icon;
+	};
+	
+	/**
+	 * Checks if the feature has one of the given key defined
+	 */
+	FeatureStyle.prototype._hasKey = function(keys) {
+		keys = keys.split("|");
+		for(var i=0; i < keys.length; i++) {
+			if(this._feature.hasTag(keys[i])) {
+				return true;
+			}
+		}
+		return false;
 	};
 	
 	/**

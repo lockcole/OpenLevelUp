@@ -33,7 +33,7 @@ $.ajax({
        async: false,
        dataType: 'json',
        success: function(data) { STYLE = data; }
-});
+}).fail(function() { console.error("[Controller] Error while retrieving STYLE"); });
 
 //Load PolygonFeatures file
 var POLYGON_FEATURES;
@@ -42,7 +42,7 @@ $.ajax({
        async: false,
        dataType: 'json',
        success: function(data) { POLYGON_FEATURES = data; }
-});
+}).fail(function() { console.error("[Controller] Error while retrieving POLYGON_FEATURES"); });
 
 addCompatibility();
 
@@ -337,7 +337,7 @@ var Ctrl = function() {
 					this.endMapClusterUpdate();
 				}
 				else {
-					this._data = new OSMData(bbox, data, STYLE);
+					this._data = new OSMData(bbox, data);
 					this.getView().getMapView().resetVars();
 
 					this.getView().getLoadingView().addLoadingInfo("Download photos metadata");
