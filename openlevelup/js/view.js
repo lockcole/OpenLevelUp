@@ -764,6 +764,7 @@ var FeatureView = function(main, feature) {
 		var style = this._feature.getStyle().get();
 		var geom = this._feature.getGeometry();
 		var geomType = geom.getType();
+		var hasIcon = style.icon != undefined;
 		this._layer = L.featureGroup();
 		
 		//Init layer object, depending of geometry type
@@ -772,6 +773,7 @@ var FeatureView = function(main, feature) {
 				var marker = this._createMarker(geom.getLatLng());
 				if(marker != null) {
 					this._layer.addLayer(marker);
+					hasIcon = true;
 				}
 				break;
 				
@@ -792,7 +794,6 @@ var FeatureView = function(main, feature) {
 		}
 		
 		//Look for an icon or a label
-		var hasIcon = style.icon != undefined;
 		var labelizable = this._labelizable();
 		var hasPhoto = this._mainView.getOptionsView().showPhotos() && (this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && !this._mainView.isMobile() && this._feature.getImages().hasValidSpherical()));
 		
@@ -1011,17 +1012,15 @@ var FeatureView = function(main, feature) {
 		var style = this._feature.getStyle().get();
 		angle = angle || null;
 		
-		if(style.icon != undefined && style.icon != null && style.icon != '') {
-			var tmpUrl = this._feature.getStyle().getIconUrl();
-			
-			if(tmpUrl != null) {
-				iconUrl = OLvlUp.view.ICON_FOLDER+'/'+tmpUrl;
-			}
-			else if(style.showMissingIcon == undefined || style.showMissingIcon) {
-				iconUrl = OLvlUp.view.ICON_FOLDER+'/icon_default.png';
-			}
+		var tmpUrl = this._feature.getStyle().getIconUrl();
+		
+		if(tmpUrl != null) {
+			iconUrl = OLvlUp.view.ICON_FOLDER+'/'+tmpUrl;
 		}
 		else if(style.showMissingIcon == undefined || style.showMissingIcon) {
+			iconUrl = OLvlUp.view.ICON_FOLDER+'/icon_default.png';
+		}
+		else if(this._feature.getGeometry().getType() == "Point") {
 			result = L.circleMarker(latlng, style);
 		}
 		
@@ -1040,9 +1039,6 @@ var FeatureView = function(main, feature) {
 				result = L.marker(latlng, {icon: myIcon});
 			}
 		}
-//		else {
-//			result = L.circleMarker(latlng, { opacity: 0, fillOpacity: 0 });
-//		}
 			
 		return result;
 	}

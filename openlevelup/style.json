@@ -160,7 +160,7 @@
 			"name": "Passage",
 			"description": "Door=no nodes",
 			"onTags": [ { "door": "no" } ],
-			"style": { "color": "#0BB848", "fillColor": "#0BB848", "opacity": 1, "fillOpacity": 1, "radius": 3, "icon": "none", "dashArray": "none" }
+			"style": { "color": "#0BB848", "fillColor": "#0BB848", "opacity": 1, "fillOpacity": 1, "radius": 3, "icon": "none", "showMissingIcon": false, "dashArray": "none" }
 		},
 		{
 			"type": "Style",
@@ -271,7 +271,7 @@
 			"name": "Conveying path",
 			"description": "Conveying path",
 			"onTags": [ { "conveying": "yes|forward|backward" } ],
-			"style": { "color": "#848484", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "3,1" }
+			"style": { "color": "#848484", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "3,1", "levelup": true }
 		},
 		{
 			"type": "Style",
