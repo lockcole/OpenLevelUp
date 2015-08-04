@@ -143,6 +143,9 @@ var MainView = function(ctrl, mobile) {
 	/** The levels component **/
 	this._cLevel = null;
 	
+	/** The tags component **/
+	this._cTags = null;
+
 	/** The map component **/
 	this._cMap = null;
 
@@ -153,6 +156,7 @@ var MainView = function(ctrl, mobile) {
 	this._cImages = new ImagesView(this);
 	this._cLevel = new LevelView(this);
 	this._cExport = new ExportView(this);
+	this._cTags = new TagsView(this);
 	
 	this._cExport.hideButton();
 	this._cNames.hideButton();
@@ -226,6 +230,13 @@ var MainView = function(ctrl, mobile) {
 	 */
 	MainView.prototype.getLevelView = function() {
 		return this._cLevel;
+	};
+	
+	/**
+	 * @return The tags component
+	 */
+	MainView.prototype.getTagsView = function() {
+		return this._cTags;
 	};
 	
 	/**
@@ -1131,127 +1142,112 @@ var FeatureView = function(main, feature) {
 		//End title
 		text += '</h1>';
 		
-		//Navigation bar
-		if(!isMobile) {
-			text += '<div class="popup-nav"><div class="row">';
-			text += '<div class="item selected" id="item-general"><a href="#" onclick="controller.getView().getMapView().changePopupTab(\'general\');">General</a></div>';
-			text += '<div class="item" id="item-technical"><a href="#" onclick="controller.getView().getMapView().changePopupTab(\'technical\');">Technical</a></div>';
-			text += '<div class="item" id="item-tags"><a href="#" onclick="controller.getView().getMapView().changePopupTab(\'tags\');">Tags</a></div>';
-			text += '</div></div>';
-		}
-		
-		/*
-		 * Tab 1 : general information
-		 */
-		text += '<div class="popup-tab" id="popup-tab-general">';
-		generalTxt = '';
-		generalTxt += this._addFormatedTag("vending", "Selling", removeUscore);
-		generalTxt += this._addFormatedTag("information", "Type", removeUscore);
-		generalTxt += this._addFormatedTag("artwork_type", "Type", removeUscore);
-		generalTxt += this._addFormatedTag("access", "Access");
-		generalTxt += this._addFormatedTag("artist", "Creator");
-		generalTxt += this._addFormatedTag("artist_name", "Creator");
-		generalTxt += this._addFormatedTag("architect", "Architect");
-		generalTxt += this._addFormatedTag("opening_hours", "Opening hours");
-		generalTxt += this._addFormatedTag("start_date", "Created in");
-		generalTxt += this._addFormatedTag("historic:era", "Era", removeUscore);
-		generalTxt += this._addFormatedTag("historic:period", "Period", removeUscore);
-		generalTxt += this._addFormatedTag("historic:civilization", "Civilization", removeUscore);
-		generalTxt += this._addFormatedTag("website", "Website", asWebLink);
-		generalTxt += this._addFormatedTag("contact:website", "Website", asWebLink);
-		generalTxt += this._addFormatedTag("phone", "Phone");
-		generalTxt += this._addFormatedTag("contact:phone", "Phone");
-		generalTxt += this._addFormatedTag("email", "E-mail");
-		generalTxt += this._addFormatedTag("contact:email", "E-mail");
-		generalTxt += this._addFormatedTag("fee", "Fee");
-		generalTxt += this._addFormatedTag("atm", "With ATM");
-		generalTxt += this._addFormatedTag("payment:coins", "Pay with coins");
-		generalTxt += this._addFormatedTag("payment:credit_cards", "Pay with credit cards");
-		generalTxt += this._addFormatedTag("currency:EUR", "Pay in €");
-		generalTxt += this._addFormatedTag("currency:USD", "Pay in US $");
-		generalTxt += this._addFormatedTag("female", "For women");
-		generalTxt += this._addFormatedTag("male", "For men");
-		generalTxt += this._addFormatedTag("bicycle", "For bicycle");
-		generalTxt += this._addFormatedTag("foot", "On foot");
-		generalTxt += this._addFormatedTag("wheelchair", "For wheelchair");
-		generalTxt += this._addFormatedTag("seats", "Seats");
-		generalTxt += this._addFormatedTag("waste", "Waste",removeUscore);
-		generalTxt += this._addFormatedTag("cuisine", "Cuisine", removeUscore);
-		
-		generalTxt += this._addFormatedTag("description", "Details");
-		
-		//Image rendering
-		if(this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && !this._mainView.isMobile() && this._feature.getImages().hasValidSpherical())) {
-			generalTxt += '<p class="popup-txt centered"><a href="#" id="images-open" onclick="controller.getView().getImagesView().open(\''+this._feature.getId()+'\')">See related images</a></p>';
-		}
-		
-		if(generalTxt == '' && !isMobile) { generalTxt = "No general information (look at tags)"; }
-		text += generalTxt;
-		
-		text += '</div>';
-		
-		/*
-		 * Tab 2 : technical information
-		 */
-		if(!isMobile) {
-			text += '<div class="popup-tab hidden" id="popup-tab-technical">';
-			
-			technicalTxt = '';
-			technicalTxt += this._addFormatedTag("width", "Width", addDimensionUnit);
-			technicalTxt += this._addFormatedTag("height", "Height", addDimensionUnit);
-			technicalTxt += this._addFormatedTag("length", "Length", addDimensionUnit);
-			technicalTxt += this._addFormatedTag("direction", "Direction", orientationValue);
-			technicalTxt += this._addFormatedTag("camera:direction", "Direction (camera)", orientationValue);
-			technicalTxt += this._addFormatedTag("operator", "Operator");
-			technicalTxt += this._addFormatedTag("ref", "Reference");
-			technicalTxt += this._addFormatedTag("material", "Made of");
-			
-			if(technicalTxt == '') { technicalTxt = "No technical information (look at tags)"; }
-			text += technicalTxt;
-			
-			text += '</div>';
-		}
-		
-		/*
-		 * Tab 3 : tags
-		 */
-		if(!isMobile) {
-			text += '<div class="popup-tab hidden" id="popup-tab-tags">';
-			
-			//List all tags
-			text += '<p class="popup-txt">';
-			var ftTags = this._feature.getTags();
-			var urlTags = ["image", "website", "contact:website", "url"];
-			
-			for(i in ftTags) {
-				//Render specific tags
-				//URLs
-				if(contains(urlTags, i)) {
-					text += i+' = <a href="'+correctWebLink(ftTags[i])+'" target="_blank">'+ftTags[i]+'</a>';
-				}
-				//Wikimedia commons
-				else if(i == "wikimedia_commons") {
-					text += i+' = <a href="https://commons.wikimedia.org/wiki/'+ftTags[i]+'" target="_blank">'+ftTags[i]+'</a>';
-				}
-				else {
-					text += i+" = "+ftTags[i];
-				}
-				text += "<br />";
-			}
+// 		/*
+// 		 * General information
+// 		 */
+// 		text += '<div class="popup-content">';
+// 		generalTxt = '';
+// 		generalTxt += this._addFormatedTag("access", "Access");
+// 		generalTxt += this._addFormatedTag("artist", "Creator");
+// 		generalTxt += this._addFormatedTag("artist_name", "Creator");
+// 		generalTxt += this._addFormatedTag("architect", "Architect");
+// 		generalTxt += this._addFormatedTag("opening_hours", "Opening hours");
+// 		generalTxt += this._addFormatedTag("start_date", "Created in");
+// 		generalTxt += this._addFormatedTag("historic:era", "Era", removeUscore);
+// 		generalTxt += this._addFormatedTag("historic:period", "Period", removeUscore);
+// 		generalTxt += this._addFormatedTag("historic:civilization", "Civilization", removeUscore);
+// 		generalTxt += this._addFormatedTag("website", "Website", asWebLink);
+// 		generalTxt += this._addFormatedTag("contact:website", "Website", asWebLink);
+// 		generalTxt += this._addFormatedTag("phone", "Phone");
+// 		generalTxt += this._addFormatedTag("contact:phone", "Phone");
+// 		generalTxt += this._addFormatedTag("email", "E-mail");
+// 		generalTxt += this._addFormatedTag("contact:email", "E-mail");
+// 		generalTxt += this._addFormatedTag("fee", "Fee");
+// 		generalTxt += this._addFormatedTag("atm", "With ATM");
+// 		generalTxt += this._addFormatedTag("female", "For women");
+// 		generalTxt += this._addFormatedTag("male", "For men");
+// 		generalTxt += this._addFormatedTag("bicycle", "For bicycle");
+// 		generalTxt += this._addFormatedTag("foot", "On foot");
+// 		generalTxt += this._addFormatedTag("wheelchair", "For wheelchair");
+// 		generalTxt += this._addFormatedTag("waste", "Waste",removeUscore);
+// 		generalTxt += this._addFormatedTag("cuisine", "Cuisine", removeUscore);
+// 		
+// 		generalTxt += this._addFormatedTag("description", "Details");
+// 		text += generalTxt;
 
-			//text += this._feature.properties.style.getStyle().layer;
-			text += "</p>";
-			
-			text += '</div>';
-		}
 		
+// 		/*
+// 		 * Technical information
+// 		 */
+// 		if(!isMobile) {
+// 			text += '<div class="popup-tab hidden" id="popup-tab-technical">';
+// 			
+// 			technicalTxt = '';
+// 			technicalTxt += this._addFormatedTag("width", "Width", addDimensionUnit);
+// 			technicalTxt += this._addFormatedTag("height", "Height", addDimensionUnit);
+// 			technicalTxt += this._addFormatedTag("length", "Length", addDimensionUnit);
+// 			technicalTxt += this._addFormatedTag("direction", "Direction", orientationValue);
+// 			technicalTxt += this._addFormatedTag("camera:direction", "Direction (camera)", orientationValue);
+// 			technicalTxt += this._addFormatedTag("operator", "Operator");
+// 			technicalTxt += this._addFormatedTag("ref", "Reference");
+// 			technicalTxt += this._addFormatedTag("material", "Made of");
+// 			
+// 			if(technicalTxt == '') { technicalTxt = "No technical information (look at tags)"; }
+// 			text += technicalTxt;
+// 			
+// 			text += '</div>';
+// 		}
+// 		
+// 		/*
+// 		 * Tab 3 : tags
+// 		 */
+// 		if(!isMobile) {
+// 			text += '<div class="popup-tab hidden" id="popup-tab-tags">';
+// 			
+// 			//List all tags
+// 			text += '<p class="popup-txt">';
+// 			var ftTags = this._feature.getTags();
+// 			var urlTags = ["image", "website", "contact:website", "url"];
+// 			
+// 			for(i in ftTags) {
+// 				//Render specific tags
+// 				//URLs
+// 				if(contains(urlTags, i)) {
+// 					text += i+' = <a href="'+correctWebLink(ftTags[i])+'" target="_blank">'+ftTags[i]+'</a>';
+// 				}
+// 				//Wikimedia commons
+// 				else if(i == "wikimedia_commons") {
+// 					text += i+' = <a href="https://commons.wikimedia.org/wiki/'+ftTags[i]+'" target="_blank">'+ftTags[i]+'</a>';
+// 				}
+// 				else {
+// 					text += i+" = "+ftTags[i];
+// 				}
+// 				text += "<br />";
+// 			}
+// 
+// 			//text += this._feature.properties.style.getStyle().layer;
+// 			text += "</p>";
+// 			
+// 			text += '</div>';
+// 		}
+		
+// 		text += '</div>';
+
 		/*
 		 * Footer
 		 */
 		//Link to osm.org object
-		text += '<p class="popup-txt centered"><a href="http://www.openstreetmap.org/'+this._feature.getId()+'" target="_blank">See this on OSM.org</a></p>';
+		text += '<div class="popup-footer">';
 		
-		var options = (isMobile) ? { autoPan: false } : { minWidth: 100 };
+		//Picture link
+		if(this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && !this._mainView.isMobile() && this._feature.getImages().hasValidSpherical())) {
+			text += '<a href="#" id="images-open" title="Related pictures" onclick="controller.getView().getImagesView().open(\''+this._feature.getId()+'\')"><img src="img/icon_picture_2.svg" alt="Pictures" /></a> ';
+		}
+		
+		text += '<a href="#" id="tags-open" title="Tags" onclick="controller.getView().getTagsView().open(\''+this._feature.getId()+'\')"><img src="img/icon_tags.svg" alt="Tags" /></a>';
+		text += '<a href="http://www.openstreetmap.org/'+this._feature.getId()+'" title="See this on OSM.org" target="_blank"><img src="img/icon_osm.svg" alt="OSM.org" /></a></div>';
+		
+		var options = (isMobile) ? { autoPan: false } : { };
 		
 		return L.popup(options).setContent(text);
 	}
@@ -1316,6 +1312,36 @@ var FeatureView = function(main, feature) {
 		});
 		
 		return label;
+	};
+
+
+
+/**
+ * The tags overlay component
+ */
+var TagsView = function(main) {
+//ATTRIBUTES
+	/** The main view **/
+	this._mainView = main;
+
+//CONSTRUCTOR
+	$("#tags-close").click(function() {
+		$("#op-tags").removeClass("show");
+		$("#op-tags").addClass("hide");
+	});
+};
+
+//OTHER METHODS
+	/**
+	* Opens and set tags for the given feature
+	* @param ftId The feature ID
+	*/
+	TagsView.prototype.open = function(ftId) {
+		//Retrieve feature
+		var ft = this._mainView.getData().getFeature(ftId);
+		
+		$("#op-tags").removeClass("hide");
+		$("#op-tags").addClass("show");
 	};
 
 

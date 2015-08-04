@@ -148,6 +148,19 @@ header {
 	margin-right: 10px;
 }
 
+.overlay-close {
+	text-align: right;
+	margin: 0.2em;
+}
+
+.overlay-close a {
+	color: #D2E2FF;
+}
+
+.overlay-close a:hover {
+	color: #B3CEFF;
+}
+
 /* Loading panel */
 #op-loading {
 	visibility: visible;
@@ -169,11 +182,6 @@ header {
 
 #op-about a:hover {
 	color: #B3CEFF;
-}
-
-.overlay-close {
-	text-align: right;
-	margin: 0.2em;
 }
 
 /*******************
@@ -203,13 +211,20 @@ h2.popup {
 	font-size: 100%;
 }
 
-/* Popup text */
-.leaflet-popup-content p.popup-txt {
-	margin: 0;
+/* Popup content */
+.popup-content {
+	text-align: left;
 }
 
-p.popup-txt.centered {
+/* Popup footer */
+.popup-footer {
+	margin: 5px 0 0 0;
 	text-align: center;
+}
+
+.popup-footer img {
+	height: 24px;
+	padding: 0 10px;
 }
 
 /****************
@@ -427,10 +442,28 @@ p.popup-txt.centered {
 	color: red;
 }
 
-#op-images .overlay-close a {
-	color: #D2E2FF;
+/**********************
+ * Tags overlay panel *
+ **********************/
+
+#op-tags-list {
+	margin: 10px 0;
 }
 
-#op-images .overlay-close a:hover {
-	color: #B3CEFF;
+#op-tags-details {
+	border-bottom: 1px solid #ddd;
+	margin-bottom: 10px;
+	padding: 5px 0;
+}
+
+.osm-tag {
+	background: #DDE none repeat scroll 0% 0%;
+	white-space: nowrap;
+	font-family: monospace,Courier;
+	color: #252525;
+}
+
+a.osm-key, a.osm-val {
+	text-decoration: none;
+	color: #0645AD;
 }

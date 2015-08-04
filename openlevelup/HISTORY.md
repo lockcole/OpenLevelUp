@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+31 july 2015
+------------
+* FeatureStyle class optimization
+
 30 july 2015
 ------------
 * Navigation buttons for spherical images hidden if an object has a single picture
