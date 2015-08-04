@@ -1044,7 +1044,7 @@ var FeatureView = function(main, feature) {
 		
 		//Add icon in title
 		if(iconUrl != null) {
-			text += '<img class="icon" src="'+CONFIG.view.icons.size+'/'+iconUrl+'" /> ';
+			text += '<img class="icon" src="'+CONFIG.view.icons.folder+'/'+iconUrl+'" /> ';
 		}
 		
 		//Object name (its name tag or its type)
@@ -1056,11 +1056,11 @@ var FeatureView = function(main, feature) {
 			//Able to go up ?
 			var levelId = ftLevels.indexOf(this._mainView.getLevelView().get());
 			if(levelId < ftLevels.length -1) {
-				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+CONFIG.view.icons.size+'/arrow_up_3.png" title="Go up" alt="Up!" /></a>';
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+CONFIG.view.icons.folder+'/arrow_up_3.png" title="Go up" alt="Up!" /></a>';
 			}
 			//Able to go down ?
 			if(levelId > 0) {
-				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+CONFIG.view.icons.size+'/arrow_down_3.png" title="Go down" alt="Down!" /></a>';
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+CONFIG.view.icons.folder+'/arrow_down_3.png" title="Go down" alt="Down!" /></a>';
 			}
 		}
 
@@ -1151,13 +1151,16 @@ var TagsView = function(main) {
 		//Retrieve feature
 		var ft = this._mainView.getData().getFeature(ftId);
 		
-		//List tags
 		var tagList = "";
+		var detailsTxt = '';
 		var tags = ft.getTags();
 		var first = true;
-		var val = null;
+		var val, detail;
 		
 		for(var k in tags) {
+			/*
+			 * List tags
+			 */
 			if(!first) {
 				tagList += ' + ';
 			}
@@ -1167,56 +1170,84 @@ var TagsView = function(main) {
 			
 			val = tags[k];
 			tagList += '<span class="osm-tag"><a href="http://wiki.openstreetmap.org/wiki/Key:'+k+'" target="_blank" class="osm-key">'+k+'</a>=<span class="osm-val">'+val+'</span></span>';
+			
+			/*
+			 * Details about the feature
+			 */
+			detail = STYLE.details[k];
+			if(detail != undefined) {
+				detailsTxt += '<span class="detail"><span class="label">';
+				
+				//Label
+				if(detail.img != undefined) {
+					detailsTxt += '<img src="'+CONFIG.view.icons.folder+'/'+detail.img+'" title="'+k+'" />';
+				}
+				else if(detail.name != undefined) {
+					detailsTxt += detail.name;
+				}
+				else {
+					detailsTxt += k;
+				}
+				
+				detailsTxt += '</span><span class="value">';
+				
+				//Value
+				/*switch(detail.values) {
+					default:
+				}*/
+				
+				detailsTxt += '</span></span>';
+			}
 		}
 		
 		$("#op-tags-list").html(tagList);
 		
-		var text = '';
+		// var text = '';
 		/*
 		 * General information
 		 */
-		text += this._addFormatedTag(ftId, "access", "Access");
-		text += this._addFormatedTag(ftId, "artist", "Creator");
-		text += this._addFormatedTag(ftId, "artist_name", "Creator");
-		text += this._addFormatedTag(ftId, "architect", "Architect");
-		text += this._addFormatedTag(ftId, "opening_hours", "Opening hours");
-		text += this._addFormatedTag(ftId, "start_date", "Created in");
-		text += this._addFormatedTag(ftId, "historic:era", "Era", removeUscore);
-		text += this._addFormatedTag(ftId, "historic:period", "Period", removeUscore);
-		text += this._addFormatedTag(ftId, "historic:civilization", "Civilization", removeUscore);
-		text += this._addFormatedTag(ftId, "website", "Website", asWebLink);
-		text += this._addFormatedTag(ftId, "contact:website", "Website", asWebLink);
-		text += this._addFormatedTag(ftId, "phone", "Phone");
-		text += this._addFormatedTag(ftId, "contact:phone", "Phone");
-		text += this._addFormatedTag(ftId, "email", "E-mail");
-		text += this._addFormatedTag(ftId, "contact:email", "E-mail");
-		text += this._addFormatedTag(ftId, "fee", "Fee");
-		text += this._addFormatedTag(ftId, "atm", "With ATM");
-		text += this._addFormatedTag(ftId, "female", "For women");
-		text += this._addFormatedTag(ftId, "male", "For men");
-		text += this._addFormatedTag(ftId, "bicycle", "For bicycle");
-		text += this._addFormatedTag(ftId, "foot", "On foot");
-		text += this._addFormatedTag(ftId, "wheelchair", "For wheelchair");
-		text += this._addFormatedTag(ftId, "waste", "Waste",removeUscore);
-		text += this._addFormatedTag(ftId, "cuisine", "Cuisine", removeUscore);
-		text += this._addFormatedTag(ftId, "description", "Details");
+		// text += this._addFormatedTag(ftId, "access", "Access");
+		// text += this._addFormatedTag(ftId, "artist", "Creator");
+		// text += this._addFormatedTag(ftId, "artist_name", "Creator");
+		// text += this._addFormatedTag(ftId, "architect", "Architect");
+		// text += this._addFormatedTag(ftId, "opening_hours", "Opening hours");
+		// text += this._addFormatedTag(ftId, "start_date", "Created in");
+		// text += this._addFormatedTag(ftId, "historic:era", "Era", removeUscore);
+		// text += this._addFormatedTag(ftId, "historic:period", "Period", removeUscore);
+		// text += this._addFormatedTag(ftId, "historic:civilization", "Civilization", removeUscore);
+		// text += this._addFormatedTag(ftId, "website", "Website", asWebLink);
+		// text += this._addFormatedTag(ftId, "contact:website", "Website", asWebLink);
+		// text += this._addFormatedTag(ftId, "phone", "Phone");
+		// text += this._addFormatedTag(ftId, "contact:phone", "Phone");
+		// text += this._addFormatedTag(ftId, "email", "E-mail");
+		// text += this._addFormatedTag(ftId, "contact:email", "E-mail");
+		// text += this._addFormatedTag(ftId, "fee", "Fee");
+		// text += this._addFormatedTag(ftId, "atm", "With ATM");
+		// text += this._addFormatedTag(ftId, "female", "For women");
+		// text += this._addFormatedTag(ftId, "male", "For men");
+		// text += this._addFormatedTag(ftId, "bicycle", "For bicycle");
+		// text += this._addFormatedTag(ftId, "foot", "On foot");
+		// text += this._addFormatedTag(ftId, "wheelchair", "For wheelchair");
+		// text += this._addFormatedTag(ftId, "waste", "Waste",removeUscore);
+		// text += this._addFormatedTag(ftId, "cuisine", "Cuisine", removeUscore);
+		// text += this._addFormatedTag(ftId, "description", "Details");
 
 		
 		/*
 		 * Technical information
 		 */
-		text += this._addFormatedTag(ftId, "width", "Width", addDimensionUnit);
-		text += this._addFormatedTag(ftId, "height", "Height", addDimensionUnit);
-		text += this._addFormatedTag(ftId, "length", "Length", addDimensionUnit);
-		text += this._addFormatedTag(ftId, "direction", "Direction", orientationValue);
-		text += this._addFormatedTag(ftId, "camera:direction", "Direction (camera)", orientationValue);
-		text += this._addFormatedTag(ftId, "operator", "Operator");
-		text += this._addFormatedTag(ftId, "ref", "Reference");
-		text += this._addFormatedTag(ftId, "material", "Made of");
+		// text += this._addFormatedTag(ftId, "width", "Width", addDimensionUnit);
+		// text += this._addFormatedTag(ftId, "height", "Height", addDimensionUnit);
+		// text += this._addFormatedTag(ftId, "length", "Length", addDimensionUnit);
+		// text += this._addFormatedTag(ftId, "direction", "Direction", orientationValue);
+		// text += this._addFormatedTag(ftId, "camera:direction", "Direction (camera)", orientationValue);
+		// text += this._addFormatedTag(ftId, "operator", "Operator");
+		// text += this._addFormatedTag(ftId, "ref", "Reference");
+		// text += this._addFormatedTag(ftId, "material", "Made of");
 		
-		if(text != '') {
+		if(detailsTxt != '') {
 			$("#op-tags-details").show();
-			$("#op-tags-details").html(text);
+			$("#op-tags-details").html(detailsTxt);
 		}
 		else {
 			$("#op-tags-details").hide();

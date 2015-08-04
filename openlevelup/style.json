@@ -1,5 +1,4 @@
 {
-	"type": "Styles",
 	"styles": {
 
 		"building|building:part": [
@@ -393,6 +392,65 @@
 				"style": { "icon": "pole_landmark_sign.png", "label": "ref" }
 			}
 		]
+	},
+	
+	"details": {
+		"access": {
+			"name": "Access",
+			"values": "icons",
+			"icons": "access_${access}.png"
+		},
+		"bicycle": {
+			"img": "icon_bicycle.svg",
+			"values": "icons",
+			"icons": "icon_status_${bicycle}.png"
+		},
+		"contact:email": {
+			"name": "@",
+			"values": "link",
+			"link": "mailto:${contact:email}"
+		},
+		"contact:website": {
+			"img": "icon_web.svg",
+			"values": "link"
+		},
+		"cuisine": {
+			"icon": "icon_cuisine.png",
+			"values": "text"
+		},
+		"description": {
+			"name": "Description",
+			"values": "text"
+		},
+		"email": {
+			"name": "@",
+			"values": "link",
+			"link": "mailto:${email}"
+		},
+		"female": {
+			"img": "icon_female.svg",
+			"values": "icons",
+			"icons": "icon_status_${female}.png"
+		},
+		"foot": {
+			"img": "icon_walk.svg",
+			"values": "icons",
+			"icons": "icon_status_${foot}.png"
+		},
+		"male": {
+			"img": "icon_male.svg",
+			"values": "icons",
+			"icons": "icon_status_${male}.png"
+		},
+		"website": {
+			"img": "icon_web.svg",
+			"values": "link"
+		},
+		"wheelchair": {
+			"img": "icon_wheelchair.svg",
+			"values": "icons",
+			"icons": "icon_status_${wheelchair}.png"
+		}
 	},
 
 	"images": [

@@ -22,11 +22,7 @@ and upload the **openlevelup/** folder in your own FTP or web server. That's all
 ### Configuration
 
 If you want to change some parameters, such as the Overpass API server or the available tile servers,
-just edit the following constants in source code:
-* URL for Overpass API: __API_URL__ in _controller.js_
-* Tile layers: __TILE_LAYERS__ in _view.js_
-
-Some other parameters are available there.
+just edit the **config.json** file. You can also change the objects style by editing **style.json** file.
 
 
 License
