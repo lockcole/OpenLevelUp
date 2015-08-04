@@ -1,0 +1,81 @@
+{
+	"_comment": "OpenLevelUp configuration file (JSON)",
+	
+	"view": {
+		"icons": {
+			"folder": "img",
+			"size": 24
+		},
+		
+		"map": {
+			"cluster_min_zoom": 5,
+			"data_min_zoom": 18,
+			"max_zoom": 24,
+			"tiles_min_opacity": 0.1,
+			"tiles_max_opacity": 0.3
+		},
+		
+		"images": {
+			"spherical": {
+				"width": 600,
+				"height": 350
+			}
+		}
+	},
+	
+	"osm": {
+		"api": "http://www.overpass-api.de/api/interpreter?data=",
+		"attribution": "Map data © <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors"
+	},
+	
+	"images": {
+		"flickr": {
+			"api": "https://api.flickr.com/services/rest/?",
+			"key": "d06fb1ebb3ede5813b89c79320e11ab8"
+		},
+		
+		"mapillary": {
+			"api": "https://a.mapillary.com/v2/",
+			"key": "NzNRM2otQkR2SHJzaXJmNmdQWVQ0dzplMWU2NDQ5NDNmZjM5M2Iw"
+		}
+	},
+	
+	"tiles": [
+		{
+			"name": "OpenStreetMap",
+			"URL": "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+			"attribution": "Tiles <a href=\"http://openstreetmap.org/\">OSM</a>",
+			"minZoom": 1,
+			"maxZoom": 19
+		},
+		{
+			"name": "OpenStreetMap FR",
+			"URL": "http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
+			"attribution": "Tiles <a href=\"http://tile.openstreetmap.fr/\">OSMFR</a>",
+			"minZoom": 1,
+			"maxZoom": 20
+		},
+		{
+			"name": "Stamen Toner",
+			"URL": "http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png",
+			"attribution": "Tiles <a href=\"http://maps.stamen.com/\">Stamen Toner</a>",
+			"minZoom": 1,
+			"maxZoom": 20
+		},
+		{
+			"name": "Cadastre FR",
+			"URL": "http://tms.cadastre.openstreetmap.fr/*/tout/{z}/{x}/{y}.png",
+			"attribution": "Cadastre (DGFiP)",
+			"minZoom": 1,
+			"maxZoom": 20
+		},
+		{
+			"name": "MapQuest",
+			"URL": "http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg",
+			"attribution": "Tiles <a href=\"http://open.mapquest.com/\">MapQuest</a>",
+			"minZoom": 1,
+			"maxZoom": 19,
+			"subdomains": "1234"
+		}
+	]
+}

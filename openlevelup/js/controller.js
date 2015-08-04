@@ -23,8 +23,21 @@
  * Controller JS class
  */
 
+/***********************
+ * Configuration files *
+ ***********************/
+
 //Global conf (cache enabled)
 $.ajaxSetup({ cache: true });
+
+//Load config file
+var CONFIG;
+$.ajax({
+	url: 'config.json',
+       async: false,
+       dataType: 'json',
+       success: function(data) { CONFIG = data; }
+}).fail(function() { console.error("[Controller] Error while retrieving CONFIG"); });
 
 //Load JSON style file
 var STYLE;
@@ -46,30 +59,11 @@ $.ajax({
 
 addCompatibility();
 
-//Application core handler
-OLvlUp = function() {};
 
-OLvlUp.controller = {
-// ====== CONSTANTS ====== 
-/** Overpass API server URL **/
-API_URL: "http://www.overpass-api.de/api/interpreter?data=",
-//API_URL: "http://api.openstreetmap.fr/oapi/interpreter?data=",
-//API_URL: "http://overpass.osm.rambler.ru/cgi/interpreter?data=",
+/***********
+ * Classes *
+ ***********/
 
-/** Flickr API URL **/
-FLICKR_API_URL: "https://api.flickr.com/services/rest/?",
-
-/** Flickr API Key **/
-FLICKR_API_KEY: "d06fb1ebb3ede5813b89c79320e11ab8",
-
-/** Mapillary API URL (with ending /) **/
-MAPILLARY_API_URL: "https://a.mapillary.com/v2/",
-
-/** Mapillary API Key **/
-MAPILLARY_API_KEY: "NzNRM2otQkR2SHJzaXJmNmdQWVQ0dzplMWU2NDQ5NDNmZjM5M2Iw",
-};
-
-// ======= CLASSES =======
 /**
  * Application controller (as defined in MVC pattern).
  * Updates view and model depending of user actions in view.
@@ -222,12 +216,12 @@ var Ctrl = function() {
 		this._view.getMessagesView().clear();
 		
 		//Check if zoom is high enough to download data
-		if(zoom >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
+		if(zoom >= CONFIG.view.map.cluster_min_zoom) {
 			this._view.getLoadingView().setLoading(true);
 			this._view.getLoadingView().addLoadingInfo("Prepare update");
 			
 			//High zoom data download
-			if(zoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+			if(zoom >= CONFIG.view.map.data_min_zoom) {
 				this._oldLevel = this._view.getLevelView().get();
 				
 				//Download data only if new BBox isn't contained in previous one
@@ -237,7 +231,7 @@ var Ctrl = function() {
 					|| !this._data.getBBox().contains(bbox)
 				) {
 					//Resize BBox for small areas (avoid multiple Overpass API calls)
-					var diffZoom = zoom - OLvlUp.view.DATA_MIN_ZOOM;
+					var diffZoom = zoom - CONFIG.view.map.data_min_zoom;
 					bbox = bbox.pad(1.1 + 0.5 * diffZoom);
 					
 					//Download data
@@ -257,9 +251,9 @@ var Ctrl = function() {
 					|| !this._clusterData.isInitialized()
 					|| !this._clusterData.getBBox().contains(bbox)
 				) {
-					if(zoom > OLvlUp.view.CLUSTER_MIN_ZOOM) {
+					if(zoom > CONFIG.view.map.cluster_min_zoom) {
 						//Resize BBox for small areas (avoid multiple Overpass API calls)
-						var diffZoom = zoom - OLvlUp.view.CLUSTER_MIN_ZOOM;
+						var diffZoom = zoom - CONFIG.view.map.cluster_min_zoom;
 						bbox = bbox.pad(1.1 + 0.5 * diffZoom);
 					}
 					
@@ -326,7 +320,7 @@ var Ctrl = function() {
 		//Download data
 		$(document).ajaxError(function( event, jqxhr, settings, thrownError ) { console.log("Error: "+thrownError+"\nURL: "+settings.url); });
 		$.get(
-			OLvlUp.controller.API_URL+encodeURIComponent(oapiRequest),
+			CONFIG.osm.api+encodeURIComponent(oapiRequest),
 			function(data) {
 				console.log("[Time] Overpass download: "+((new Date()).getTime() - this._downloadStart));
 				this.getView().getLoadingView().addLoadingInfo("Process received data");
@@ -405,8 +399,8 @@ var Ctrl = function() {
 	 * @param bbox The bounding box
 	 */
 	Ctrl.prototype.downloadFlickr = function(bbox) {
-		var params = 'method=flickr.photos.search&api_key='+OLvlUp.controller.FLICKR_API_KEY+'&bbox='+bbox.toBBoxString()+'&machine_tags=osm:&has_geo=1&extras=machine_tags,url_c,date_taken,owner_name&format=json&nojsoncallback=1';
-		var url = OLvlUp.controller.FLICKR_API_URL+params;
+		var params = 'method=flickr.photos.search&api_key='+CONFIG.images.flickr.key+'&bbox='+bbox.toBBoxString()+'&machine_tags=osm:&has_geo=1&extras=machine_tags,url_c,date_taken,owner_name&format=json&nojsoncallback=1';
+		var url = CONFIG.images.flickr.api+params;
 		
 		//Download
 		this._nbPhotoRequests++;
@@ -498,8 +492,8 @@ var Ctrl = function() {
 	 */
 	Ctrl.prototype.requestMapillaryData = function(id, isLast) {
 		isLast = isLast || false;
-		var params = 'g/'+id+'?client_id='+OLvlUp.controller.MAPILLARY_API_KEY;
-		var url = OLvlUp.controller.MAPILLARY_API_URL+params;
+		var params = 'g/'+id+'?client_id='+CONFIG.images.mapillary.key;
+		var url = CONFIG.images.mapillary.api+params;
 		
 		//Download
 		this._nbPhotoRequests++;

@@ -23,81 +23,6 @@
  * View JS classes
  */
 
-OLvlUp.view = {
-// ====== CONSTANTS ======
-/** The minimal zoom to display cluster data on map, should be less than DATA_MIN_ZOOM **/
-CLUSTER_MIN_ZOOM: 5,
-
-/** The minimal zoom to display actual data on map **/
-DATA_MIN_ZOOM: 18,
-
-/** The maximal zoom of map **/
-MAX_ZOOM: 24,
-
-/** The minimal tiles opacity (between 0 and 1) **/
-TILES_MIN_OPACITY: 0.1,
-
-/** The maximal tiles opacity (between 0 and 1) **/
-TILES_MAX_OPACITY: 0.3,
-
-/** The icon size for objects **/
-ICON_SIZE: 24,
-
-/** The folder containing icons **/
-ICON_FOLDER: "img",
-
-/** The available tile layers (position in array must not change) **/
-TILE_LAYERS:
-	[
-		{
-			name: "OpenStreetMap",
-			URL: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-			attribution: 'Tiles <a href="http://openstreetmap.org/">OSM</a>',
-			minZoom: 1,
-			maxZoom: 19
-		},
-		{
-			name: "OpenStreetMap FR",
-			URL: "http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
-			attribution: 'Tiles <a href="http://tile.openstreetmap.fr/">OSMFR</a>',
-			minZoom: 1,
-			maxZoom: 20
-		},
-		{
-			name: "Stamen Toner",
-			URL: 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png',
-			attribution: 'Tiles <a href="http://maps.stamen.com/">Stamen Toner</a>',
-			minZoom: 1,
-			maxZoom: 20
-		},
-		{
-			name: "Cadastre FR",
-			URL: "http://tms.cadastre.openstreetmap.fr/*/tout/{z}/{x}/{y}.png",
-			attribution: 'Cadastre (DGFiP)',
-			minZoom: 1,
-			maxZoom: 20
-		},
-		{
-			name: "MapQuest",
-			URL: "http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg",
-			attribution: 'Tiles <a href="http://open.mapquest.com/">MapQuest</a>',
-			minZoom: 1,
-			maxZoom: 19,
-			subdomains: '1234'
-		}
-	],
-
-/** The default attribution, referring to OSM data **/
-ATTRIBUTION: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
-
-/** The default spherical images width **/
-SPHERICAL_WIDTH: 600,
-
-/** The default spherical images height **/
-SPHERICAL_HEIGHT: 350
-};
-
-// ======= CLASSES =======
 /**
  * The main view class.
  * It handles the index page, and contains links to sub-components.
@@ -262,12 +187,12 @@ var MainView = function(ctrl, mobile) {
 		var oldZoom = this._cMap.getOldZoom();
 		
 		//Check new zoom value
-		if(zoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+		if(zoom >= CONFIG.view.map.data_min_zoom) {
 			//Update levels
 			this._cLevel.update();
 			
 			//Add names and export buttons if needed
-			if(oldZoom == null || oldZoom < OLvlUp.view.DATA_MIN_ZOOM) {
+			if(oldZoom == null || oldZoom < CONFIG.view.map.data_min_zoom) {
 				this._cExport.showButton();
 				this._cNames.showButton();
 				this._cLevel.enable();
@@ -275,16 +200,16 @@ var MainView = function(ctrl, mobile) {
 				this._cMap.update();
 			}
 		}
-		else if(zoom >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
+		else if(zoom >= CONFIG.view.map.cluster_min_zoom) {
 			//Remove names and export buttons if needed
-			if(oldZoom == null || oldZoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
 				this._cExport.hideButton();
 				this._cNames.hideButton();
 				this._cLevel.disable();
 				this._cOptions.disable();
 			}
 			
-			if(oldZoom == null || oldZoom >= OLvlUp.view.DATA_MIN_ZOOM || oldZoom < OLvlUp.view.CLUSTER_MIN_ZOOM) {
+			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom || oldZoom < CONFIG.view.map.cluster_min_zoom) {
 				this._cMap.update();
 			}
 		}
@@ -292,7 +217,7 @@ var MainView = function(ctrl, mobile) {
 			this._cMessages.displayMessage("Zoom in to see more information", "info");
 			
 			//Remove names and export buttons if needed
-			if(oldZoom == null || oldZoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
 				this._cExport.hideButton();
 				this._cNames.hideButton();
 				this._cLevel.disable();
@@ -300,7 +225,7 @@ var MainView = function(ctrl, mobile) {
 			}
 			
 			//Reset map
-			if(oldZoom == null || oldZoom >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
+			if(oldZoom == null || oldZoom >= CONFIG.view.map.cluster_min_zoom) {
 				this._cMap.update();
 			}
 		}
@@ -402,7 +327,7 @@ var MapView = function(main) {
 	var tiles = url.getTiles();
 	
 	//Init map center and zoom
-	this._map = L.map('map', {minZoom: 1, maxZoom: OLvlUp.view.MAX_ZOOM, zoomControl: false});
+	this._map = L.map('map', {minZoom: 1, maxZoom: CONFIG.view.map.max_zoom, zoomControl: false});
 	if(bbox != undefined) {
 		//Get latitude and longitude information from BBox string
 		var coordinates = bbox.split(',');
@@ -431,10 +356,10 @@ var MapView = function(main) {
 	if(!isMobile) {
 		var search = L.Control.geocoder({ position: "topright" });
 		//Limit max zoom in order to avoid having no tiles in background for small objects
-		var minimalMaxZoom = OLvlUp.view.TILE_LAYERS[0].maxZoom;
-		for(var i=0; i < OLvlUp.view.TILE_LAYERS.length; i++) {
-			if(OLvlUp.view.TILE_LAYERS[i].maxZoom < minimalMaxZoom) {
-				minimalMaxZoom = OLvlUp.view.TILE_LAYERS[i].maxZoom;
+		var minimalMaxZoom = CONFIG.tiles[0].maxZoom;
+		for(var i=0; i < CONFIG.tiles.length; i++) {
+			if(CONFIG.tiles[i].maxZoom < minimalMaxZoom) {
+				minimalMaxZoom = CONFIG.tiles[i].maxZoom;
 			}
 		}
 		//Redefine markGeocode to avoid having an icon for the result
@@ -454,12 +379,12 @@ var MapView = function(main) {
 	var tileLayers = [];
 	var firstLayer = true;
 	
-	for(var l=0; l < OLvlUp.view.TILE_LAYERS.length; l++) {
-		var currentLayer = OLvlUp.view.TILE_LAYERS[l];
+	for(var l=0; l < CONFIG.tiles.length; l++) {
+		var currentLayer = CONFIG.tiles[l];
 		var tileOptions = {
 			minZoom: currentLayer.minZoom,
 			maxZoom: currentLayer.maxZoom,
-			attribution: currentLayer.attribution+" | "+OLvlUp.view.ATTRIBUTION,
+			attribution: currentLayer.attribution+" | "+CONFIG.osm.attribution,
 		};
 		if(currentLayer.subdomains != undefined) {
 			tileOptions.subdomains = currentLayer.subdomains;
@@ -544,7 +469,7 @@ var MapView = function(main) {
 		//Create data (specific to level)
 		var zoom = this._map.getZoom();
 		
-		if(zoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+		if(zoom >= CONFIG.view.map.data_min_zoom) {
 			var fullData = this._createFullData();
 			
 			//Add data to map
@@ -564,7 +489,7 @@ var MapView = function(main) {
 				this._mainView.getMessagesView().displayMessage("There is no available data in this area", "alert");
 			}
 		}
-		else if(zoom >= OLvlUp.view.CLUSTER_MIN_ZOOM) {
+		else if(zoom >= CONFIG.view.map.cluster_min_zoom) {
 			this._dataLayer = this._createClusterData();
 			
 			//Add data to map
@@ -589,8 +514,8 @@ var MapView = function(main) {
 	 * @param name The tile layer name
 	 */
 	MapView.prototype.setTileLayer = function(name) {
-		for(var i=0; i < OLvlUp.view.TILE_LAYERS.length; i++) {
-			if(OLvlUp.view.TILE_LAYERS[i].name == name) {
+		for(var i=0; i < CONFIG.tiles.length; i++) {
+			if(CONFIG.tiles[i].name == name) {
 				this._tileLayer = i;
 				break;
 			}
@@ -673,7 +598,7 @@ var MapView = function(main) {
 	MapView.prototype.changeTilesOpacity = function() {
 		this._tileOpacity = 1;
 		
-		if(this._map.getZoom() >= OLvlUp.view.DATA_MIN_ZOOM && this._mainView.getData() != null) {
+		if(this._map.getZoom() >= CONFIG.view.map.data_min_zoom && this._mainView.getData() != null) {
 			var levelsArray = this._mainView.getData().getLevels();
 			
 			//Find level 0 index in levels array
@@ -690,15 +615,15 @@ var MapView = function(main) {
 				var idNeg = levelsNegative.indexOf(currentLevel);
 				var idPos = levelsPositive.indexOf(currentLevel);
 				if(idNeg >= 0) {
-					var coef = idNeg / levelsNegative.length * (OLvlUp.view.TILES_MAX_OPACITY - OLvlUp.view.TILES_MIN_OPACITY);
-					this._tileOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
+					var coef = idNeg / levelsNegative.length * (CONFIG.view.map.tiles_max_opacity - CONFIG.view.map.tiles_min_opacity);
+					this._tileOpacity = CONFIG.view.map.tiles_min_opacity + coef;
 				}
 				else if(idPos >= 0) {
-					var coef = (levelsPositive.length - 1 - idPos) / levelsPositive.length * (OLvlUp.view.TILES_MAX_OPACITY - OLvlUp.view.TILES_MIN_OPACITY);
-					this._tileOpacity = OLvlUp.view.TILES_MIN_OPACITY + coef;
+					var coef = (levelsPositive.length - 1 - idPos) / levelsPositive.length * (CONFIG.view.map.tiles_max_opacity - CONFIG.view.map.tiles_min_opacity);
+					this._tileOpacity = CONFIG.view.map.tiles_min_opacity + coef;
 				}
 				else {
-					this._tileOpacity = OLvlUp.view.TILES_MAX_OPACITY;
+					this._tileOpacity = CONFIG.view.map.tiles_max_opacity;
 				}
 			}
 		}
@@ -1058,10 +983,10 @@ var FeatureView = function(main, feature) {
 		var tmpUrl = this._feature.getStyle().getIconUrl();
 		
 		if(tmpUrl != null) {
-			iconUrl = OLvlUp.view.ICON_FOLDER+'/'+tmpUrl;
+			iconUrl = CONFIG.view.icons.folder+'/'+tmpUrl;
 		}
 		else if(style.showMissingIcon == undefined || style.showMissingIcon) {
-			iconUrl = OLvlUp.view.ICON_FOLDER+'/icon_default.png';
+			iconUrl = CONFIG.view.icons.folder+'/icon_default.png';
 		}
 		else if(this._feature.getGeometry().getType() == "Point") {
 			result = L.circleMarker(latlng, style);
@@ -1070,9 +995,9 @@ var FeatureView = function(main, feature) {
 		if(iconUrl != null) {
 			var myIcon = L.icon({
 				iconUrl: iconUrl,
-				iconSize: [OLvlUp.view.ICON_SIZE, OLvlUp.view.ICON_SIZE],
-				iconAnchor: [OLvlUp.view.ICON_SIZE/2, OLvlUp.view.ICON_SIZE/2],
-				popupAnchor: [0, -OLvlUp.view.ICON_SIZE/2]
+				iconSize: [CONFIG.view.icons.size, CONFIG.view.icons.size],
+				iconAnchor: [CONFIG.view.icons.size/2, CONFIG.view.icons.size/2],
+				popupAnchor: [0, -CONFIG.view.icons.size/2]
 			});
 			
 			if(angle != null) {
@@ -1098,7 +1023,7 @@ var FeatureView = function(main, feature) {
 			color: "green",
 			fill: false,
 			opacity: 0.7,
-			radius: OLvlUp.view.ICON_SIZE/2 + size,
+			radius: CONFIG.view.icons.size/2 + size,
 			weight: 1 + size
 		})
 	};
@@ -1119,7 +1044,7 @@ var FeatureView = function(main, feature) {
 		
 		//Add icon in title
 		if(iconUrl != null) {
-			text += '<img class="icon" src="'+OLvlUp.view.ICON_FOLDER+'/'+iconUrl+'" /> ';
+			text += '<img class="icon" src="'+CONFIG.view.icons.size+'/'+iconUrl+'" /> ';
 		}
 		
 		//Object name (its name tag or its type)
@@ -1131,11 +1056,11 @@ var FeatureView = function(main, feature) {
 			//Able to go up ?
 			var levelId = ftLevels.indexOf(this._mainView.getLevelView().get());
 			if(levelId < ftLevels.length -1) {
-				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_up_3.png" title="Go up" alt="Up!" /></a>';
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+CONFIG.view.icons.size+'/arrow_up_3.png" title="Go up" alt="Up!" /></a>';
 			}
 			//Able to go down ?
 			if(levelId > 0) {
-				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_down_3.png" title="Go down" alt="Down!" /></a>';
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+CONFIG.view.icons.size+'/arrow_down_3.png" title="Go down" alt="Down!" /></a>';
 			}
 		}
 
@@ -1183,7 +1108,7 @@ var FeatureView = function(main, feature) {
 		
 		var classes = (styleRules.labelStyle != undefined) ? ' '+styleRules.labelStyle : '';
 		var text = this._feature.getTag(styleRules.label);
-		var iconAnchor = (hasMarker) ? [ null, -OLvlUp.view.ICON_SIZE/2] : [ null, OLvlUp.view.ICON_SIZE/2 ];
+		var iconAnchor = (hasMarker) ? [ null, -CONFIG.view.icons.size/2] : [ null, CONFIG.view.icons.size/2 ];
 		var rotation = (angle) ? ' style="transform: rotate('+angle+'deg);"' : '';
 		
 		var label = L.marker(coordinates, {
@@ -1422,7 +1347,7 @@ var LevelView = function(main) {
 	LevelView.prototype.up = function() {
 		var result = false;
 		
-		if(this._mainView.getMapView().get().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
+		if(this._mainView.getMapView().get().getZoom() >= CONFIG.view.map.data_min_zoom) {
 			var currentLevelId = this._levels.indexOf(this._level);
 			
 			if(currentLevelId == -1) {
@@ -1447,7 +1372,7 @@ var LevelView = function(main) {
 	LevelView.prototype.down = function() {
 		var result = false;
 		
-		if(this._mainView.getMapView().get().getZoom() >= OLvlUp.view.DATA_MIN_ZOOM) {
+		if(this._mainView.getMapView().get().getZoom() >= CONFIG.view.map.data_min_zoom) {
 			var currentLevelId = this._levels.indexOf(this._level);
 			
 			if(currentLevelId == -1) {
@@ -1879,7 +1804,7 @@ var URLView = function(main) {
 		var optionsView = this._mainView.getOptionsView();
 		var params = "lat="+this._lat+"&lon="+this._lon+"&zoom="+this._zoom+"&tiles="+this._tiles;
 		
-		if(this._zoom >= OLvlUp.view.DATA_MIN_ZOOM) {
+		if(this._zoom >= CONFIG.view.map.data_min_zoom) {
 			if(this._level != null) {
 				params += "&level="+this._level;
 			}
@@ -2051,7 +1976,7 @@ var NamesView = function(main) {
 						roomHtml += '<li class="ref"><a href="#" onclick="controller.getView().getMapView().goTo(\''+roomNamesFiltered[lvl][room].getId()+'\',\''+lvl+'\')">';
 						
 						if(STYLE != undefined) {
-							roomHtml += '<img src="'+OLvlUp.view.ICON_FOLDER+'/'+((STYLE.images.indexOf(roomNamesFiltered[lvl][room].getStyle().getIconUrl()) >= 0) ? roomNamesFiltered[lvl][room].getStyle().getIconUrl() : 'icon_default.png')+'" width="'+OLvlUp.view.ICON_SIZE+'px"> '+room;
+							roomHtml += '<img src="'+CONFIG.view.icons.folder+'/'+((STYLE.images.indexOf(roomNamesFiltered[lvl][room].getStyle().getIconUrl()) >= 0) ? roomNamesFiltered[lvl][room].getStyle().getIconUrl() : 'icon_default.png')+'" width="'+CONFIG.view.icons.size+'px"> '+room;
 						}
 						
 						roomHtml += '</a></li>';
@@ -2307,13 +2232,13 @@ var ImagesView = function(main) {
 	
 	ImagesView.prototype._getSphereWidth = function() {
 		var w = $("#op-images > div").width();
-		return (w > 0) ? w : OLvlUp.view.SPHERICAL_WIDTH;
+		return (w > 0) ? w : CONFIG.view.images.spherical.width;
 	};
 	
 	ImagesView.prototype._getSphereHeight = function() {
 		var h = window.innerHeight * 0.8;
 		h = (h > 800) ? 700 : h - 100;
-		return (h > 0) ? h : OLvlUp.view.SPHERICAL_HEIGHT;
+		return (h > 0) ? h : CONFIG.view.images.spherical.height;
 	};
 	
 	/**
