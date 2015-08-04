@@ -252,6 +252,13 @@ var MapillaryData = function() {
 		return this._data[key].captured_at;
 	};
 	
+	/**
+	 * @return The capture angle (in degrees, North = 0°)
+	 */
+	MapillaryData.prototype.getAngle = function(key) {
+		return this._data[key].ca;
+	};
+	
 //MODIFIERS
 	/**
 	 * Adds a new information set
@@ -982,7 +989,8 @@ var FeatureImages = function(feature) {
 					tag: mapillaryImg.key+" = "+mapillaryImg.val,
 					author: mapillaryData.getAuthor(mapillaryImg.val),
 					page: 'http://www.mapillary.com/map/im/'+mapillaryImg.val,
-					date: mapillaryData.getDate(mapillaryImg.val)
+					date: mapillaryData.getDate(mapillaryImg.val),
+					angle: mapillaryData.getAngle(mapillaryImg.val)
 				});
 			}
 		}

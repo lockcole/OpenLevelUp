@@ -1197,41 +1197,6 @@ var FeatureView = function(main, feature) {
 // 			
 // 			text += '</div>';
 // 		}
-// 		
-// 		/*
-// 		 * Tab 3 : tags
-// 		 */
-// 		if(!isMobile) {
-// 			text += '<div class="popup-tab hidden" id="popup-tab-tags">';
-// 			
-// 			//List all tags
-// 			text += '<p class="popup-txt">';
-// 			var ftTags = this._feature.getTags();
-// 			var urlTags = ["image", "website", "contact:website", "url"];
-// 			
-// 			for(i in ftTags) {
-// 				//Render specific tags
-// 				//URLs
-// 				if(contains(urlTags, i)) {
-// 					text += i+' = <a href="'+correctWebLink(ftTags[i])+'" target="_blank">'+ftTags[i]+'</a>';
-// 				}
-// 				//Wikimedia commons
-// 				else if(i == "wikimedia_commons") {
-// 					text += i+' = <a href="https://commons.wikimedia.org/wiki/'+ftTags[i]+'" target="_blank">'+ftTags[i]+'</a>';
-// 				}
-// 				else {
-// 					text += i+" = "+ftTags[i];
-// 				}
-// 				text += "<br />";
-// 			}
-// 
-// 			//text += this._feature.properties.style.getStyle().layer;
-// 			text += "</p>";
-// 			
-// 			text += '</div>';
-// 		}
-		
-// 		text += '</div>';
 
 		/*
 		 * Footer
@@ -1340,6 +1305,27 @@ var TagsView = function(main) {
 		//Retrieve feature
 		var ft = this._mainView.getData().getFeature(ftId);
 		
+		//List tags
+		var tagList = "";
+		var tags = ft.getTags();
+		var first = true;
+		var val = null;
+		
+		for(var k in tags) {
+			if(!first) {
+				tagList += ' + ';
+			}
+			else {
+				first = false;
+			}
+			
+			val = tags[k];
+			tagList += '<span class="osm-tag"><a href="http://wiki.openstreetmap.org/wiki/Key:'+k+'" target="_blank" class="osm-key">'+k+'</a>=<span class="osm-val">'+val+'</span></span>';
+		}
+		
+		$("#op-tags-list").html(tagList);
+		
+		//Show panel
 		$("#op-tags").removeClass("hide");
 		$("#op-tags").addClass("show");
 	};
@@ -2443,7 +2429,7 @@ var ImagesView = function(main) {
 			side: THREE.FrontSide
 		});
 		this._mesh = new THREE.Mesh( geometry, material );
-		this._mesh.rotation.y = 2*Math.PI/3;
+		this._mesh.rotation.y = 2*Math.PI/3; //-Math.PI/2 - THREE.Math.degToRad(sphericalImg.angle); //Pointing to north
 		this._scene.add( this._mesh );
 		
 		//Events
@@ -2529,6 +2515,7 @@ var ImagesView = function(main) {
 		this._camera.target.y = 500 * Math.cos( this._phi );
 		this._camera.target.z = 500 * Math.sin( this._phi ) * Math.sin( this._theta );
 		this._camera.lookAt( this._camera.target );
+		$("#spherical-direction").html((THREE.Math.radToDeg(this._phi) % 360)+"° "+(THREE.Math.radToDeg(this._theta) % 360)+"°");
 		this._renderer.render( this._scene, this._camera );
 	};
 
