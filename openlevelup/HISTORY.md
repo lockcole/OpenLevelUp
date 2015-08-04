@@ -5,6 +5,7 @@ Changes history
 -------------
 * Spherical images rotation depending of mapillary tag (mapillary:N/W/S/E/NW...)
 * Separated configuration file for whole application
+* Icons and simple description for feature details
 
 31 july 2015
 ------------

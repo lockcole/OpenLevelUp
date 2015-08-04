@@ -996,7 +996,7 @@ var FeatureImages = function(feature) {
 					page: 'http://www.mapillary.com/map/im/'+mapillaryImg.val,
 					date: mapillaryData.getDate(mapillaryImg.val),
 					angle: mapillaryData.getAngle(mapillaryImg.val),
-					initialDirection: initDir
+					relativeDirection: initDir
 				});
 			}
 		}

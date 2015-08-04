@@ -1155,7 +1155,15 @@ var TagsView = function(main) {
 		var detailsTxt = '';
 		var tags = ft.getTags();
 		var first = true;
-		var val, detail;
+		var val, detail, link, icon, tagValue, vInt, v, vOk;
+		var regex = /\$\{(\w+)\}/;
+		var txtVals = {
+			N: "North", NNE: "North North-east", NE:"North-east", ENE: "East North-east",
+			E: "East", ESE: "East South-east", SE: "South-east", SSE: "South South-east",
+			S: "South", SSW: "South South-west", SW: "South-west", WSW:"West South-west",
+			W: "West", WNW: "West North-west", NW: "North-west", NNW: "North North-west",
+			north: "North", south: "South", east: "East", west: "West"
+		};
 		
 		for(var k in tags) {
 			/*
@@ -1192,58 +1200,107 @@ var TagsView = function(main) {
 				detailsTxt += '</span><span class="value">';
 				
 				//Value
-				/*switch(detail.values) {
+				switch(detail.values) {
+					case "icons":
+						if(detail.icons != undefined) {
+							//Replace tag value in icon URL
+							icon = detail.icons;
+							if(regex.test(icon)) {
+								//If an alias exists for the given value, replace
+								if(detail.iconsAlias != undefined && detail.iconsAlias[val] != undefined) {
+									icon = icon.replace(regex, detail.iconsAlias[val]);
+								}
+								else {
+									icon = icon.replace(regex, val);
+								}
+								
+								//Check if icon file exists (to avoid exotic values)
+								if(!contains(STYLE.images, icon)) {
+									console.warn("[View] Invalid icon for details "+icon);
+									detailsTxt += val;
+								}
+								else {
+									detailsTxt += '<img src="'+CONFIG.view.icons.folder+'/'+icon+'" title="'+val+'" />';
+								}
+							}
+							else {
+								detailsTxt += '<img src="'+CONFIG.view.icons.folder+'/'+detail.icons+'" title="'+val+'" />';
+							}
+						}
+						else {
+							console.warn("[View] Missing icon "+details.icons);
+						}
+						break;
+
+					case "link":
+						link = val;
+						if(detail.link != undefined) {
+							link = detail.link.replace(regex, val);
+						}
+						detailsTxt += '<a href="'+link+'" target="_blank"><img src="'+CONFIG.view.icons.folder+'/icon_link.svg" alt="Link" /></a>';
+						break;
+
+					case "direction":
+						//Is the orientation a number value or not ?
+						vInt = parseInt(val);
+						if(isNaN(vInt)) {
+							vOk = txtVals[val];
+							v = (vOk == undefined) ? "Invalid" : vOk;
+						}
+						else {
+							//Define a simple direction
+							if((vInt >= 337 && vInt < 360) || (vInt >= 0 && vInt < 22)) {
+								v = "North";
+							}
+							else if(vInt >= 22 && vInt < 67) {
+								v = "North-east";
+							}
+							else if(vInt >= 67 && vInt < 112) {
+								v = "East";
+							}
+							else if(vInt >= 112 && vInt < 157) {
+								v = "South-east";
+							}
+							else if(vInt >= 157 && vInt < 202) {
+								v = "South";
+							}
+							else if(vInt >= 202 && vInt < 247) {
+								v = "South-west";
+							}
+							else if(vInt >= 247 && vInt < 292) {
+								v = "West";
+							}
+							else if(vInt >= 292 && vInt < 337) {
+								v = "North-west";
+							}
+							else {
+								v = "Invalid";
+							}
+						}
+						
+						detailsTxt += v;
+						break;
+					
+					case "measure":
+						v = parseFloat(val);
+						if(isNaN(v)) {
+							detailsTxt += val;
+						}
+						else {
+							detailsTxt += val+detail.unit;
+						}
+						break;
+
+					case "text":
 					default:
-				}*/
+						detailsTxt += val;
+				}
 				
 				detailsTxt += '</span></span>';
 			}
 		}
 		
 		$("#op-tags-list").html(tagList);
-		
-		// var text = '';
-		/*
-		 * General information
-		 */
-		// text += this._addFormatedTag(ftId, "access", "Access");
-		// text += this._addFormatedTag(ftId, "artist", "Creator");
-		// text += this._addFormatedTag(ftId, "artist_name", "Creator");
-		// text += this._addFormatedTag(ftId, "architect", "Architect");
-		// text += this._addFormatedTag(ftId, "opening_hours", "Opening hours");
-		// text += this._addFormatedTag(ftId, "start_date", "Created in");
-		// text += this._addFormatedTag(ftId, "historic:era", "Era", removeUscore);
-		// text += this._addFormatedTag(ftId, "historic:period", "Period", removeUscore);
-		// text += this._addFormatedTag(ftId, "historic:civilization", "Civilization", removeUscore);
-		// text += this._addFormatedTag(ftId, "website", "Website", asWebLink);
-		// text += this._addFormatedTag(ftId, "contact:website", "Website", asWebLink);
-		// text += this._addFormatedTag(ftId, "phone", "Phone");
-		// text += this._addFormatedTag(ftId, "contact:phone", "Phone");
-		// text += this._addFormatedTag(ftId, "email", "E-mail");
-		// text += this._addFormatedTag(ftId, "contact:email", "E-mail");
-		// text += this._addFormatedTag(ftId, "fee", "Fee");
-		// text += this._addFormatedTag(ftId, "atm", "With ATM");
-		// text += this._addFormatedTag(ftId, "female", "For women");
-		// text += this._addFormatedTag(ftId, "male", "For men");
-		// text += this._addFormatedTag(ftId, "bicycle", "For bicycle");
-		// text += this._addFormatedTag(ftId, "foot", "On foot");
-		// text += this._addFormatedTag(ftId, "wheelchair", "For wheelchair");
-		// text += this._addFormatedTag(ftId, "waste", "Waste",removeUscore);
-		// text += this._addFormatedTag(ftId, "cuisine", "Cuisine", removeUscore);
-		// text += this._addFormatedTag(ftId, "description", "Details");
-
-		
-		/*
-		 * Technical information
-		 */
-		// text += this._addFormatedTag(ftId, "width", "Width", addDimensionUnit);
-		// text += this._addFormatedTag(ftId, "height", "Height", addDimensionUnit);
-		// text += this._addFormatedTag(ftId, "length", "Length", addDimensionUnit);
-		// text += this._addFormatedTag(ftId, "direction", "Direction", orientationValue);
-		// text += this._addFormatedTag(ftId, "camera:direction", "Direction (camera)", orientationValue);
-		// text += this._addFormatedTag(ftId, "operator", "Operator");
-		// text += this._addFormatedTag(ftId, "ref", "Reference");
-		// text += this._addFormatedTag(ftId, "material", "Made of");
 		
 		if(detailsTxt != '') {
 			$("#op-tags-details").show();
@@ -2357,7 +2414,7 @@ var ImagesView = function(main) {
 		this._firstClick = true;
 		
 		//Set initial direction
-		this._lon = (sphericalImg.initialDirection != undefined) ? sphericalImg.initialDirection : sphericalImg.angle;
+		this._lon = (sphericalImg.relativeDirection != undefined) ? sphericalImg.relativeDirection - 180 : sphericalImg.angle;
 		
 		//Camera
 		this._camera = new THREE.PerspectiveCamera(75, this._getSphereWidth() / this._getSphereHeight(), 1, 1000);
@@ -2466,9 +2523,10 @@ var ImagesView = function(main) {
 		this._camera.target.z = 500 * Math.sin( this._phi ) * Math.sin( this._theta );
 		this._camera.lookAt( this._camera.target );
 		
-		var angle = Math.round(THREE.Math.radToDeg(this._theta) % 360);
-		if(angle < 0) { angle += 360; }
-		$("#spherical-direction").html(angle+"°");
+		//var angle = Math.round(THREE.Math.radToDeg(this._theta) % 360);
+		//if(angle < 0) { angle += 360; }
+		//$("#spherical-direction").html(angle+"°");
+		
 		this._renderer.render( this._scene, this._camera );
 	};
 

@@ -244,57 +244,6 @@ function addDimensionUnit(v) {
 }
 
 /**
- * @return An understandable value for OSM direction tag
- */
-function orientationValue(v) {
-	//Is the orientation a number value or not ?
-	var vInt = parseInt(v);
-	if(isNaN(vInt)) {
-		var txtVals = {
-			N: "North", NNE: "North North-east", NE:"North-east", ENE: "East North-east",
-			E: "East", ESE: "East South-east", SE: "South-east", SSE: "South South-east",
-			S: "South", SSW: "South South-west", SW: "South-west", WSW:"West South-west",
-			W: "West", WNW: "West North-west", NW: "North-west", NNW: "North North-west",
-			north: "North", south: "South", east: "East", west: "West"
-		};
-		var vOk = txtVals[v];
-		v = (vOk == undefined) ? "Invalid value ("+v+")" : vOk;
-	}
-	else {
-		//Define a simple direction
-		if((vInt >= 337 && vInt < 360) || (vInt >= 0 && vInt < 22)) {
-			v = "North";
-		}
-		else if(vInt >= 22 && vInt < 67) {
-			v = "North-east";
-		}
-		else if(vInt >= 67 && vInt < 112) {
-			v = "East";
-		}
-		else if(vInt >= 112 && vInt < 157) {
-			v = "South-east";
-		}
-		else if(vInt >= 157 && vInt < 202) {
-			v = "South";
-		}
-		else if(vInt >= 202 && vInt < 247) {
-			v = "South-west";
-		}
-		else if(vInt >= 247 && vInt < 292) {
-			v = "West";
-		}
-		else if(vInt >= 292 && vInt < 337) {
-			v = "North-west";
-		}
-		else {
-			v = "Invalid direction ("+vInt+")";
-		}
-	}
-	
-	return v;
-}
-
-/**
  * @return The string with all underscores replace by spaces
  */
 function removeUscore(v) {

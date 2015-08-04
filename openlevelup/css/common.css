@@ -224,7 +224,7 @@ h2.popup {
 
 .popup-footer img {
 	height: 24px;
-	padding: 0 10px;
+	padding: 0 5px;
 }
 
 /****************
@@ -471,8 +471,12 @@ h2.popup {
 /* Human readable details */
 .overlay-panel > div .detail {
 	display: inline-block;
-	white-space: nowrap;
 	margin: 0 20px;
+}
+
+.detail img {
+	vertical-align: middle;
+	height: 24px;
 }
 
 .detail .label {
@@ -481,6 +485,7 @@ h2.popup {
 }
 
 .detail .value {
+	font-style: italic;
 }
 
 /* OSM tags */
@@ -489,6 +494,7 @@ h2.popup {
 	white-space: nowrap;
 	font-family: monospace,Courier;
 	color: #252525;
+	font-size: 85%;
 }
 
 a.osm-key, a.osm-val {

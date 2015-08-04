@@ -398,49 +398,108 @@
 		"access": {
 			"name": "Access",
 			"values": "icons",
-			"icons": "access_${access}.png"
+			"icons": "access_${v}.png",
+			"iconsAlias": { "private": "no" }
+		},
+		"architect": {
+			"name": "Architect",
+			"values": "text"
+		},
+		"artist": {
+			"name": "Artist",
+			"values": "text"
+		},
+		"artist_name": {
+			"name": "Artist",
+			"values": "text"
 		},
 		"bicycle": {
 			"img": "icon_bicycle.svg",
 			"values": "icons",
-			"icons": "icon_status_${bicycle}.png"
+			"icons": "icon_status_${v}.png",
+			"iconsAlias": { "private": "no", "designated": "yes" }
+		},
+		"capacity": {
+			"name": "Capacity",
+			"values": "text"
 		},
 		"contact:email": {
 			"name": "@",
 			"values": "link",
-			"link": "mailto:${contact:email}"
+			"link": "mailto:${v}"
+		},
+		"contact:phone": {
+			"img": "icon_phone.svg",
+			"values": "text"
 		},
 		"contact:website": {
 			"img": "icon_web.svg",
 			"values": "link"
 		},
 		"cuisine": {
-			"icon": "icon_cuisine.png",
+			"img": "icon_cuisine.png",
 			"values": "text"
 		},
 		"description": {
 			"name": "Description",
 			"values": "text"
 		},
+		"direction": {
+			"img": "icon_compass.svg",
+			"values": "direction"
+		},
 		"email": {
 			"name": "@",
 			"values": "link",
-			"link": "mailto:${email}"
+			"link": "mailto:${v}"
+		},
+		"fee": {
+			"img": "access_customers.png",
+			"values": "text"
 		},
 		"female": {
 			"img": "icon_female.svg",
 			"values": "icons",
-			"icons": "icon_status_${female}.png"
+			"icons": "icon_status_${v}.png"
 		},
 		"foot": {
 			"img": "icon_walk.svg",
 			"values": "icons",
-			"icons": "icon_status_${foot}.png"
+			"icons": "icon_status_${v}.png",
+			"iconsAlias": { "private": "no", "designated": "yes" }
+		},
+		"height": {
+			"img": "icon_height.svg",
+			"values": "measure",
+			"unit": "m"
+		},
+		"length": {
+			"img": "icon_length.svg",
+			"values": "measure",
+			"unit": "m"
 		},
 		"male": {
 			"img": "icon_male.svg",
 			"values": "icons",
-			"icons": "icon_status_${male}.png"
+			"icons": "icon_status_${v}.png"
+		},
+		"material": {
+			"name": "Material",
+			"values": "icons",
+			"icons": "material_${v}.png",
+			"iconsAlias": { "steel": "metal", "reinforced_concrete": "concrete" }
+		},
+		"operator": {
+			"name": "Operator",
+			"values": "text"
+		},
+		"phone": {
+			"img": "icon_phone.svg",
+			"values": "text"
+		},
+		"seats": {
+			"img": "icon_seats.svg",
+			"values": "text"
 		},
 		"website": {
 			"img": "icon_web.svg",
@@ -449,11 +508,19 @@
 		"wheelchair": {
 			"img": "icon_wheelchair.svg",
 			"values": "icons",
-			"icons": "icon_status_${wheelchair}.png"
+			"icons": "icon_status_${v}.png"
+		},
+		"width": {
+			"img": "icon_width.svg",
+			"values": "measure",
+			"unit": "m"
 		}
 	},
 
 	"images": [
+		"access_customers.png",
+		"access_no.png",
+		"access_yes.png",
 		"advertising.png",
 		"aeroway_aerodrome.png",
 		"aeroway_airport.png",
@@ -549,6 +616,9 @@
 		"guide_strips.png",
 		"highway_bus_stop.png",
 		"historic_tomb.png",
+		"icon_status_limited.png",
+		"icon_status_no.png",
+		"icon_status_yes.png",
 		"information_audioguide.png",
 		"information_guidepost.png",
 		"information_map.png",
@@ -560,6 +630,11 @@
 		"man_made_survey_point.png",
 		"map_type_scheme.png",
 		"map_type_street.png",
+		"material_concrete.png",
+		"material_metal.png",
+		"material_plastic.png",
+		"material_stone.png",
+		"material_wood.png",
 		"passage_elevator.png",
 		"passage_escalator.png",
 		"passage_stairs.png",
