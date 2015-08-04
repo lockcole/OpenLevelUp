@@ -459,6 +459,7 @@ h2.popup {
 
 #op-tags-list {
 	margin: 10px 0;
+	overflow: auto;
 }
 
 #op-tags-details {
@@ -467,6 +468,22 @@ h2.popup {
 	padding: 5px 0;
 }
 
+/* Human readable details */
+.overlay-panel > div .detail {
+	display: inline-block;
+	white-space: nowrap;
+	margin: 0 20px;
+}
+
+.detail .label {
+	font-weight: bold;
+	margin-right: 10px;
+}
+
+.detail .value {
+}
+
+/* OSM tags */
 .osm-tag {
 	background: #DDE none repeat scroll 0% 0%;
 	white-space: nowrap;

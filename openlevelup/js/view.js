@@ -1138,102 +1138,23 @@ var FeatureView = function(main, feature) {
 				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+OLvlUp.view.ICON_FOLDER+'/arrow_down_3.png" title="Go down" alt="Down!" /></a>';
 			}
 		}
-		
-		//End title
-		text += '</h1>';
-		
-// 		/*
-// 		 * General information
-// 		 */
-// 		text += '<div class="popup-content">';
-// 		generalTxt = '';
-// 		generalTxt += this._addFormatedTag("access", "Access");
-// 		generalTxt += this._addFormatedTag("artist", "Creator");
-// 		generalTxt += this._addFormatedTag("artist_name", "Creator");
-// 		generalTxt += this._addFormatedTag("architect", "Architect");
-// 		generalTxt += this._addFormatedTag("opening_hours", "Opening hours");
-// 		generalTxt += this._addFormatedTag("start_date", "Created in");
-// 		generalTxt += this._addFormatedTag("historic:era", "Era", removeUscore);
-// 		generalTxt += this._addFormatedTag("historic:period", "Period", removeUscore);
-// 		generalTxt += this._addFormatedTag("historic:civilization", "Civilization", removeUscore);
-// 		generalTxt += this._addFormatedTag("website", "Website", asWebLink);
-// 		generalTxt += this._addFormatedTag("contact:website", "Website", asWebLink);
-// 		generalTxt += this._addFormatedTag("phone", "Phone");
-// 		generalTxt += this._addFormatedTag("contact:phone", "Phone");
-// 		generalTxt += this._addFormatedTag("email", "E-mail");
-// 		generalTxt += this._addFormatedTag("contact:email", "E-mail");
-// 		generalTxt += this._addFormatedTag("fee", "Fee");
-// 		generalTxt += this._addFormatedTag("atm", "With ATM");
-// 		generalTxt += this._addFormatedTag("female", "For women");
-// 		generalTxt += this._addFormatedTag("male", "For men");
-// 		generalTxt += this._addFormatedTag("bicycle", "For bicycle");
-// 		generalTxt += this._addFormatedTag("foot", "On foot");
-// 		generalTxt += this._addFormatedTag("wheelchair", "For wheelchair");
-// 		generalTxt += this._addFormatedTag("waste", "Waste",removeUscore);
-// 		generalTxt += this._addFormatedTag("cuisine", "Cuisine", removeUscore);
-// 		
-// 		generalTxt += this._addFormatedTag("description", "Details");
-// 		text += generalTxt;
-
-		
-// 		/*
-// 		 * Technical information
-// 		 */
-// 		if(!isMobile) {
-// 			text += '<div class="popup-tab hidden" id="popup-tab-technical">';
-// 			
-// 			technicalTxt = '';
-// 			technicalTxt += this._addFormatedTag("width", "Width", addDimensionUnit);
-// 			technicalTxt += this._addFormatedTag("height", "Height", addDimensionUnit);
-// 			technicalTxt += this._addFormatedTag("length", "Length", addDimensionUnit);
-// 			technicalTxt += this._addFormatedTag("direction", "Direction", orientationValue);
-// 			technicalTxt += this._addFormatedTag("camera:direction", "Direction (camera)", orientationValue);
-// 			technicalTxt += this._addFormatedTag("operator", "Operator");
-// 			technicalTxt += this._addFormatedTag("ref", "Reference");
-// 			technicalTxt += this._addFormatedTag("material", "Made of");
-// 			
-// 			if(technicalTxt == '') { technicalTxt = "No technical information (look at tags)"; }
-// 			text += technicalTxt;
-// 			
-// 			text += '</div>';
-// 		}
 
 		/*
-		 * Footer
+		 * Links
 		 */
-		//Link to osm.org object
-		text += '<div class="popup-footer">';
+		text += '</h1><div class="popup-footer">';
 		
 		//Picture link
 		if(this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && !this._mainView.isMobile() && this._feature.getImages().hasValidSpherical())) {
 			text += '<a href="#" id="images-open" title="Related pictures" onclick="controller.getView().getImagesView().open(\''+this._feature.getId()+'\')"><img src="img/icon_picture_2.svg" alt="Pictures" /></a> ';
 		}
 		
-		text += '<a href="#" id="tags-open" title="Tags" onclick="controller.getView().getTagsView().open(\''+this._feature.getId()+'\')"><img src="img/icon_tags.svg" alt="Tags" /></a>';
-		text += '<a href="http://www.openstreetmap.org/'+this._feature.getId()+'" title="See this on OSM.org" target="_blank"><img src="img/icon_osm.svg" alt="OSM.org" /></a></div>';
+		//Tags and OSM links
+		text += '<a href="#" id="tags-open" title="Tags" onclick="controller.getView().getTagsView().open(\''+this._feature.getId()+'\')"><img src="img/icon_tags.svg" alt="Tags" /></a><a href="http://www.openstreetmap.org/'+this._feature.getId()+'" title="See this on OSM.org" target="_blank"><img src="img/icon_osm.svg" alt="OSM.org" /></a></div>';
 		
 		var options = (isMobile) ? { autoPan: false } : { };
 		
 		return L.popup(options).setContent(text);
-	}
-	
-	/**
-	 * Creates a formated tag display
-	 * @param key The OSM key to display
-	 * @param cleanName The clean name to display
-	 * @param tagCleaner The function that will clean the tag value (for example, add proper unit for dimensions), optional
-	 * @return The formated tag, or empty string if not found
-	 */
-	FeatureView.prototype._addFormatedTag = function(key, cleanName, tagCleaner) {
-		var text = '';
-		
-		if(this._feature.hasTag(key)) {
-			text = (tagCleaner == undefined) ?
-				'<b>'+cleanName+':</b> '+this._feature.getTag(key)+'<br />'
-				: '<b>'+cleanName+':</b> '+tagCleaner(this._feature.getTag(key))+'<br />';
-		}
-		
-		return text;
 	}
 	
 	/**
@@ -1325,13 +1246,84 @@ var TagsView = function(main) {
 		
 		$("#op-tags-list").html(tagList);
 		
+		var text = '';
+		/*
+		 * General information
+		 */
+		text += this._addFormatedTag(ftId, "access", "Access");
+		text += this._addFormatedTag(ftId, "artist", "Creator");
+		text += this._addFormatedTag(ftId, "artist_name", "Creator");
+		text += this._addFormatedTag(ftId, "architect", "Architect");
+		text += this._addFormatedTag(ftId, "opening_hours", "Opening hours");
+		text += this._addFormatedTag(ftId, "start_date", "Created in");
+		text += this._addFormatedTag(ftId, "historic:era", "Era", removeUscore);
+		text += this._addFormatedTag(ftId, "historic:period", "Period", removeUscore);
+		text += this._addFormatedTag(ftId, "historic:civilization", "Civilization", removeUscore);
+		text += this._addFormatedTag(ftId, "website", "Website", asWebLink);
+		text += this._addFormatedTag(ftId, "contact:website", "Website", asWebLink);
+		text += this._addFormatedTag(ftId, "phone", "Phone");
+		text += this._addFormatedTag(ftId, "contact:phone", "Phone");
+		text += this._addFormatedTag(ftId, "email", "E-mail");
+		text += this._addFormatedTag(ftId, "contact:email", "E-mail");
+		text += this._addFormatedTag(ftId, "fee", "Fee");
+		text += this._addFormatedTag(ftId, "atm", "With ATM");
+		text += this._addFormatedTag(ftId, "female", "For women");
+		text += this._addFormatedTag(ftId, "male", "For men");
+		text += this._addFormatedTag(ftId, "bicycle", "For bicycle");
+		text += this._addFormatedTag(ftId, "foot", "On foot");
+		text += this._addFormatedTag(ftId, "wheelchair", "For wheelchair");
+		text += this._addFormatedTag(ftId, "waste", "Waste",removeUscore);
+		text += this._addFormatedTag(ftId, "cuisine", "Cuisine", removeUscore);
+		text += this._addFormatedTag(ftId, "description", "Details");
+
+		
+		/*
+		 * Technical information
+		 */
+		text += this._addFormatedTag(ftId, "width", "Width", addDimensionUnit);
+		text += this._addFormatedTag(ftId, "height", "Height", addDimensionUnit);
+		text += this._addFormatedTag(ftId, "length", "Length", addDimensionUnit);
+		text += this._addFormatedTag(ftId, "direction", "Direction", orientationValue);
+		text += this._addFormatedTag(ftId, "camera:direction", "Direction (camera)", orientationValue);
+		text += this._addFormatedTag(ftId, "operator", "Operator");
+		text += this._addFormatedTag(ftId, "ref", "Reference");
+		text += this._addFormatedTag(ftId, "material", "Made of");
+		
+		if(text != '') {
+			$("#op-tags-details").show();
+			$("#op-tags-details").html(text);
+		}
+		else {
+			$("#op-tags-details").hide();
+		}
+
 		//Show panel
 		$("#op-tags").removeClass("hide");
 		$("#op-tags").addClass("show");
 	};
 
+	/**
+	 * Creates a formated tag display
+	 * @param ftId the feature ID
+	 * @param key The OSM key to display
+	 * @param cleanName The clean name to display
+	 * @param tagCleaner The function that will clean the tag value (for example, add proper unit for dimensions), optional
+	 * @return The formated tag, or empty string if not found
+	 */
+	TagsView.prototype._addFormatedTag = function(ftId, key, cleanName, tagCleaner) {
+		var text = '';
+
+		if(this._mainView.getData().getFeature(ftId).hasTag(key)) {
+			text = (tagCleaner == undefined) ?
+				'<span class="detail"><span class="label">'+cleanName+'</span><span class="value">'+this._mainView.getData().getFeature(ftId).getTag(key)+'</span></span>'
+				: '<span class="detail"><span class="label">'+cleanName+'</span><span class="value">'+tagCleaner(this._mainView.getData().getFeature(ftId).getTag(key))+'</span></span>';
+		}
+		
+		return text;
+	};
 
 
+	
 /**
  * The levels component
  */
