@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+4 august 2015
+-------------
+* Spherical images rotation depending of mapillary tag (mapillary:N/W/S/E/NW...)
+
 31 july 2015
 ------------
 * FeatureStyle class optimization

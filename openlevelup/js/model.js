@@ -148,15 +148,16 @@ var OSMData = function(bbox, data) {
 	 */
 	OSMData.prototype.getMapillaryKeys = function() {
 		var keys = [];
-		var ftId, feature, i;
-		var mapillaryTags = [ "mapillary", "mapillary:front", "mapillary:back", "mapillary:right", "mapillary:left", "mapillary:large", "mapillary:detail" ];
+		var ftId, feature, i, k, ftTags;
+		var mapillaryRegex = /^mapillary.*$/;
 		
 		for(ftId in this._features) {
 			feature = this._features[ftId];
-
-			for(i=0; i < mapillaryTags.length; i++) {
-				if(feature.hasTag(mapillaryTags[i])) {
-					keys.push(feature.getTag(mapillaryTags[i]));
+			ftTags = feature.getTags();
+			
+			for(k in ftTags) {
+				if(k.match(mapillaryRegex)) {
+					keys.push(ftTags[k]);
 				}
 			}
 		}
@@ -905,27 +906,20 @@ var FeatureImages = function(feature) {
 	/*
 	 * Read mapillary images
 	 */
-	var mapillaryImgs = [
-		{ key: "mapillary", val: feature.getTag("mapillary") },
-		{ key: "mapillary:front", val: feature.getTag("mapillary:front") },
-		{ key: "mapillary:back", val: feature.getTag("mapillary:back") },
-		{ key: "mapillary:right", val: feature.getTag("mapillary:right") },
-		{ key: "mapillary:left", val: feature.getTag("mapillary:left") },
-		{ key: "mapillary:large", val: feature.getTag("mapillary:large") },
-		{ key: "mapillary:detail", val: feature.getTag("mapillary:detail") }
-	];
-	
-	var mapillaryImg = null;
-	for(var i=0; i < mapillaryImgs.length; i++) {
-		mapillaryImg = mapillaryImgs[i];
-		if(mapillaryImg.val != undefined) {
-			this._mapillary.push(mapillaryImg);
+	var ftTags = feature.getTags();
+	var mapillaryRegex = /^mapillary.*$/;
+	var k;
+
+	for(k in ftTags) {
+		if(k.match(mapillaryRegex)) {
+			this._mapillary.push({ key: k, val: ftTags[k] });
 		}
 	}
 	
 	//Clean tmp objects
-	mapillaryImgs = null;
-	mapillaryImg = null;
+	ftTags = null;
+	k = null;
+	mapillaryRegex = null;
 };
 
 //ACCESSORS
@@ -978,11 +972,22 @@ var FeatureImages = function(feature) {
 		var result = [];
 		
 		var mapillaryData = controller.getMapillaryData();
-		var mapillaryImg = null;
+		var mapillaryImg, mapillaryMetadata, initDir, dir;
+		var directions = { "N": 0, "NE": 45, "E": 90, "SE": 135, "S": 180, "SW": 225, "W": 270, "NW": 315 };
+		
 		for(var i=0; i < this._mapillary.length; i++) {
 			mapillaryImg = this._mapillary[i];
 			
 			if(mapillaryData.has(mapillaryImg.val) && mapillaryData.isSpherical(mapillaryImg.val)) {
+				mapillaryMetadata = mapillaryImg.key.split(':');
+				initDir = undefined;
+				if(mapillaryMetadata.length >= 2) {
+					dir = directions[mapillaryMetadata[1]];
+					if(dir != undefined) {
+						initDir = dir;
+					}
+				}
+				
 				result.push({
 					url: 'https://d1cuyjsrcm0gby.cloudfront.net/'+mapillaryImg.val+'/thumb-2048.jpg',
 					source: "Mapillary",
@@ -990,7 +995,8 @@ var FeatureImages = function(feature) {
 					author: mapillaryData.getAuthor(mapillaryImg.val),
 					page: 'http://www.mapillary.com/map/im/'+mapillaryImg.val,
 					date: mapillaryData.getDate(mapillaryImg.val),
-					angle: mapillaryData.getAngle(mapillaryImg.val)
+					angle: mapillaryData.getAngle(mapillaryImg.val),
+					initialDirection: initDir
 				});
 			}
 		}

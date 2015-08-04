@@ -2401,13 +2401,15 @@ var ImagesView = function(main) {
 		this._isUserInteracting = false;
 		this._onMouseDownMouseX = 0;
 		this._onMouseDownMouseY = 0;
-		this._lon = 0;
 		this._onMouseDownLon = 0;
 		this._lat = 0;
 		this._onMouseDownLat = 0;
 		this._phi = 0;
 		this._theta = 0;
 		this._firstClick = true;
+		
+		//Set initial direction
+		this._lon = (sphericalImg.initialDirection != undefined) ? sphericalImg.initialDirection : sphericalImg.angle;
 		
 		//Camera
 		this._camera = new THREE.PerspectiveCamera(75, this._getSphereWidth() / this._getSphereHeight(), 1, 1000);
@@ -2429,7 +2431,7 @@ var ImagesView = function(main) {
 			side: THREE.FrontSide
 		});
 		this._mesh = new THREE.Mesh( geometry, material );
-		this._mesh.rotation.y = 2*Math.PI/3; //-Math.PI/2 - THREE.Math.degToRad(sphericalImg.angle); //Pointing to north
+		this._mesh.rotation.y = Math.PI - THREE.Math.degToRad(sphericalImg.angle); //Pointing to north
 		this._scene.add( this._mesh );
 		
 		//Events
@@ -2515,7 +2517,10 @@ var ImagesView = function(main) {
 		this._camera.target.y = 500 * Math.cos( this._phi );
 		this._camera.target.z = 500 * Math.sin( this._phi ) * Math.sin( this._theta );
 		this._camera.lookAt( this._camera.target );
-		$("#spherical-direction").html((THREE.Math.radToDeg(this._phi) % 360)+"° "+(THREE.Math.radToDeg(this._theta) % 360)+"°");
+		
+		var angle = Math.round(THREE.Math.radToDeg(this._theta) % 360);
+		if(angle < 0) { angle += 360; }
+		$("#spherical-direction").html(angle+"°");
 		this._renderer.render( this._scene, this._camera );
 	};
 
