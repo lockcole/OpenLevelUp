@@ -38,13 +38,13 @@
 			{
 				"name": "Vertical passage",
 				"description": "Elevetor, stairs (as polygons)",
-				"onTags": [ { "buildingpart": "verticalpassage" }, { "room": "stairs|escalator" } ],
+				"onTags": [ { "buildingpart": "verticalpassage" }, { "room": "stairs|escalator" }, { "indoor": "elevator" } ],
 				"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "level": -1 }
 			},
 			{
 				"name": "Elevator",
 				"description": "Elevator",
-				"onTags": [ { "buildingpart:verticalpassage": "elevator" } ],
+				"onTags": [ { "buildingpart:verticalpassage": "elevator" }, { "indoor": "elevator" } ],
 				"style": { "icon": "passage_elevator.png" }
 			},
 			{
@@ -391,6 +391,15 @@
 				"onTags": [ { "pole": "landmark_sign" } ],
 				"style": { "icon": "pole_landmark_sign.png", "label": "ref" }
 			}
+		],
+		
+		"power": [
+			{
+				"name": "Charging bike",
+				"description": "Charging bike icon",
+				"onTags": [ { "generator:type": "bicycle" } ],
+				"style": { "icon": "generator_type_bicycle.png" }
+			}
 		]
 	},
 	
@@ -552,6 +561,7 @@
 		"amenity_hospital.png",
 		"amenity_ice_cream.png",
 		"amenity_library.png",
+		"amenity_luggage_locker.png",
 		"amenity_marketplace.png",
 		"amenity_nursery.png",
 		"amenity_parking.png",
@@ -613,6 +623,7 @@
 		"emergency_phone.png",
 		"emergency_siren.png",
 		"emergency_stairs.png",
+		"generator_type_bicycle.png",
 		"guide_strips.png",
 		"highway_bus_stop.png",
 		"historic_tomb.png",

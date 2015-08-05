@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+5 august 2015
+-------------
+* Icon for charging bike and luggage locker added
+* emergency=* icon harmonization
+
 4 august 2015
 -------------
 * Spherical images rotation depending of mapillary tag (mapillary:N/W/S/E/NW...)
