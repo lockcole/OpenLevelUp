@@ -5,6 +5,7 @@ Changes history
 -------------
 * Icon for charging bike and luggage locker added
 * emergency=* icon harmonization
+* Fix missing advertising=* icons under Firefox (caused by Adblock)
 
 4 august 2015
 -------------

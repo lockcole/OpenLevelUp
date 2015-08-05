@@ -347,7 +347,10 @@
 				"name": "${advertising}",
 				"description": "Advertising icons",
 				"onTags": [ { "advertising": "*" } ],
-				"style": { "icon": "advertising.png" }
+				"style": {
+					"icon": "pub_${advertising}.png",
+					"iconAlias": { "sign": "poster_box", "wall_painting": "poster_box" }
+				}
 			}
 		],
 		
@@ -530,7 +533,6 @@
 		"access_customers.png",
 		"access_no.png",
 		"access_yes.png",
-		"advertising.png",
 		"aeroway_aerodrome.png",
 		"aeroway_airport.png",
 		"aeroway_gate.png",
@@ -650,6 +652,10 @@
 		"passage_escalator.png",
 		"passage_stairs.png",
 		"pole_landmark_sign.png",
+		"pub_billboard.png",
+		"pub_flag.png",
+		"pub_poster_box.png",
+		"pub_screen.png",
 		"railway_buffer_stop.png",
 		"railway_platform.png",
 		"railway_subway_entrance.png",
