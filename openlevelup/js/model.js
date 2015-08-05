@@ -418,7 +418,7 @@ var Feature = function(f) {
 	 * @return True if the feature is present in the given level
 	 */
 	Feature.prototype.isOnLevel = function(lvl) {
-		return this._onLevels.indexOf(lvl) != -1;
+		return contains(this._onLevels, lvl);
 	};
 	
 	/**
@@ -707,70 +707,74 @@ var FeatureStyle = function(feature) {
 
 	/** The feature **/
 	this._feature = feature;
+	
+	this._init();
+};
 
 //CONSTRUCTOR
-	var applyable, tagList, val, featureVal, style, key, param;
-	//Find potential styles depending on tags
-	for(var mainKey in STYLE.styles) {
-		if(this._hasKey(mainKey)) {
-			for(var i=0, until=STYLE.styles[mainKey].length; i < until; i++) {
-				style = STYLE.styles[mainKey][i];
-				
-				/*
-				 * Check if style is applyable
-				 */
-				applyable = false;
-				
-				for(var j=0, until2 = style.onTags.length; j < until2; j++) {
-					tagList = style.onTags[j];
-					applyable = true;
+	FeatureStyle.prototype._init = function() {
+		var applyable, tagList, val, featureVal, style, key, param;
+		//Find potential styles depending on tags
+		for(var mainKey in STYLE.styles) {
+			if(this._hasKey(mainKey)) {
+				for(var i=0, until=STYLE.styles[mainKey].length; i < until; i++) {
+					style = STYLE.styles[mainKey][i];
 					
-					for(key in tagList) {
-						val = tagList[key];
+					/*
+					 * Check if style is applyable
+					 */
+					applyable = false;
+					
+					for(var j=0, until2 = style.onTags.length; j < until2; j++) {
+						tagList = style.onTags[j];
+						applyable = true;
 						
-						//If this rule is not applyable, stop
-						if(!this._feature.hasTag(key)) {
-							applyable = false;
-							break;
-						}
-						else {
-							featureVal = this._feature.getTag(key);
-							if(val != featureVal && val != "*" && !contains(val.split("|"), featureVal)) {
+						for(key in tagList) {
+							val = tagList[key];
+							
+							//If this rule is not applyable, stop
+							if(!this._feature.hasTag(key)) {
 								applyable = false;
 								break;
 							}
+							else {
+								featureVal = this._feature.getTag(key);
+								if(val != featureVal && val != "*" && !contains(val.split("|"), featureVal)) {
+									applyable = false;
+									break;
+								}
+							}
 						}
-					}
-					//If style still applyable after looking for all tags in a taglist, then it's applyable
-					if(applyable) { break; }
-				}
-				
-				//If applyable, we update the result style
-				if(applyable) {
-					if(style.name != undefined) {
-						this._name = style.name;
+						//If style still applyable after looking for all tags in a taglist, then it's applyable
+						if(applyable) { break; }
 					}
 					
-					for(param in style.style) {
-						if(style.style[param] != undefined && (param != "icon" || this._createIconUrl(style.style) != null)) {
-							this._style[param] = style.style[param];
+					//If applyable, we update the result style
+					if(applyable) {
+						if(style.name != undefined) {
+							this._name = style.name;
+						}
+						
+						for(param in style.style) {
+							if(style.style[param] != undefined && (param != "icon" || this._createIconUrl(style.style) != null)) {
+								this._style[param] = style.style[param];
+							}
 						}
 					}
 				}
 			}
 		}
-	}
-	
-	//Change icon=no into undefined
-	if(this._style.icon == "none") { this._style.icon = undefined; }
-	
-	//Clean tmp objects
-	applyable = null;
-	tagList = null;
-	val = null;
-	featureVal = null;
-	style = null;
-};
+		
+		//Change icon=no into undefined
+		if(this._style.icon == "none") { this._style.icon = undefined; }
+		
+		//Clean tmp objects
+		applyable = null;
+		tagList = null;
+		val = null;
+		featureVal = null;
+		style = null;
+	};
 
 //ACCESSORS
 	/**
