@@ -124,6 +124,12 @@ HoursInputView: function(main) {
 
 	/** The input field **/
 	var _field = $("#oh");
+	
+	/** The delay to wait before trying to parse input **/
+	var _delay = 700;
+	
+	/** The timer **/
+	var _timer;
 
 //MODIFIERS
 	/**
@@ -148,7 +154,13 @@ HoursInputView: function(main) {
 	};
 	
 	this.changed = function() {
-		_mainView.getController().showHours(_field.val());
+		window.clearTimeout(_timer);
+		_timer = window.setTimeout(
+			function() {
+				_mainView.getController().showHours(_field.val());
+			},
+			_delay
+		);
 	};
 
 //CONSTRUCTOR

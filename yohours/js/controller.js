@@ -117,7 +117,6 @@ MainController: function() {
 		//Clear intervals
 		_week = new YoHours.model.Week();
 		$('#calendar').fullCalendar('removeEvents');
-		_view.getHoursInputView().setValue(str);
 		
 		//Parse given string
 		try {
@@ -154,6 +153,8 @@ MainController: function() {
 			console.error(e);
 			_view.getHoursInputView().setValid(false);
 		}
+		
+		_view.getHoursInputView().setValue(str);
 	};
 }
 
