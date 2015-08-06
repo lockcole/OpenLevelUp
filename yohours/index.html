@@ -28,9 +28,6 @@
 		TODO (by priority)
 		* Extend intervals to left/right
 		* Make calendar fit in window
-		* Add clear button
-		* Parse input value and display on calendar
-		* Merge off days when possible
 		* Range display for 1 slot interval
 		* Add parameters, such as slot duration
 		* Common values
@@ -64,6 +61,9 @@
 	<script src='lib/fullcalendar/fullcalendar.js'></script>
 	<!--link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/fullcalendar.min.css"-->
 	<!--script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/fullcalendar.min.js"></script-->
+	
+	<!-- opening_hours.js includes -->
+	<script src="lib/opening_hours.js"></script>
 	
 	<!-- YoHours includes -->
 	<script type="text/javascript">
@@ -100,9 +100,19 @@
 			Just drag time intervals on the calendar, and we will do the job.</p>
 		</div>
 		
-		<div id="opening_hours">
-			<p><span class="osm-tag"><span class="osm-key">opening_hours</span>=<input type="text" id="oh" readonly /></span></p>
-		</div>
+		<form class="form-horizontal row-line" id="opening_hours">
+			<div id="oh-form" class="form-group">
+				<div class="col-sm-3 text-center">
+					<span class="osm-tag"><span class="osm-key">opening_hours</span>=</span>
+				</div>
+				<div class="col-sm-8">
+					<input type="text" id="oh" class="form-control" />
+				</div>
+				<div class="col-sm-1">
+					<button type="button" id="oh-clear" class="btn btn-default">Clear</button>
+				</div>
+			</div>
+		</form>
 		
 		<div id='calendar'></div>
 	</div>

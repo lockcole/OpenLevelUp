@@ -113,6 +113,49 @@ WeekView: function(mainView) {
 	};
 },
 
+
+/**
+ * The opening hours text input field
+ */
+HoursInputView: function(main) {
+//ATTRIBUTES
+	/** The main view **/
+	var _mainView = main;
+
+	/** The input field **/
+	var _field = $("#oh");
+
+//MODIFIERS
+	/**
+	 * Changes the input value
+	 */
+	this.setValue = function(val) {
+		if(val != _field.val()) {
+			_field.val(val);
+		}
+	};
+	
+	/**
+	 * Sets if the contained value is correct or not
+	 */
+	this.setValid = function(valid) {
+		if(valid) {
+			$("#oh-form").removeClass("has-error");
+		}
+		else {
+			$("#oh-form").addClass("has-error");
+		}
+	};
+	
+	this.changed = function() {
+		_mainView.getController().showHours(_field.val());
+	};
+
+//CONSTRUCTOR
+	_field.bind("input propertychange", this.changed.bind(this));
+},
+
+
 /**
  * MainView, view class for the main page
  * @param ctrl The MainController
@@ -125,18 +168,33 @@ MainView: function(ctrl) {
 	/** The week view **/
 	var _weekView = new YoHours.view.WeekView(this);
 	
+	/** The hours input view **/
+	var _hoursInputView = new YoHours.view.HoursInputView(this);
+	
 	/** The help dialog **/
 	var _helpView;
 	
 	/** This object **/
 	var _self = this;
 
+//ACCESSORS
+	/**
+	 * @return The hours input view
+	 */
+	this.getHoursInputView = function() {
+		return _hoursInputView;
+	};
+	
+	this.getController = function() {
+		return _ctrl;
+	};
+
 //OTHER METHODS
 	/**
 	 * Initializes the view
 	 */
 	this.init = function() {
-		$("#oh").val("");
+		_hoursInputView.setValue("");
 		_weekView.init();
 		
 		//Init help dialog
@@ -147,13 +205,15 @@ MainView: function(ctrl) {
 			height: 200
 		});
 		$("#help-link").click(function() { _helpView.dialog("open"); });
+		
+		$("#oh-clear").click(function() { _ctrl.clearIntervals(); });
 	};
 	
 	/**
 	 * Refreshes the view
 	 */
 	this.refresh = function() {
-		$("#oh").val(_ctrl.getOpeningHours());
+		_hoursInputView.setValue(_ctrl.getOpeningHours());
 	};
 }
 

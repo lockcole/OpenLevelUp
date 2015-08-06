@@ -107,8 +107,8 @@ Interval: function(dayStart, dayEnd, minStart, minEnd) {
 
 //CONSTRUCTOR
 	//Handle special cases, like sunday midnight
-	if(_dayEnd == 0 && _end == 0) {
-		_dayEnd = 6;
+	if(_end == 0) {
+		_dayEnd = (_dayEnd == 0) ? 6 : _dayEnd-1;
 		_end = 24 * 60;
 	}
 },
@@ -119,7 +119,7 @@ Interval: function(dayStart, dayEnd, minStart, minEnd) {
 Week: function() {
 //ATTRIBUTES
 	/** The intervals defining this week **/
-	var _intervals = new Object();
+	var _intervals = [];
 	
 	/** The next interval ID **/
 	var _nextInterval = 0;
@@ -144,8 +144,8 @@ Week: function() {
 		}
 		
 		//Set to true values where an interval is defined
-		for(var id in _intervals) {
-			if(_intervals.hasOwnProperty(id) && _intervals[id] != undefined) {
+		for(var id=0, length=_intervals.length; id < length; id++) {
+			if(_intervals[id] != undefined) {
 				for(var day = _intervals[id].getStartDay(); day <= _intervals[id].getEndDay(); day++) {
 					//Define start and end minute regarding the current day
 					var startMinute = (day == _intervals[id].getStartDay()) ? _intervals[id].getFrom() : 0;
@@ -214,72 +214,195 @@ OpeningHoursParser: function() {
 	 * @return The opening_hours string
 	 */
 	this.parse = function(week) {
-		var minuteArray = week.getAsMinutesArray();
-		var ret = "";
-		var days = new Array(7); // an array representing the status of the days
-		for(var i=0; i < days.length; i++) {
-			days[i] = 0;
-		}
+		var intervals = week.getIntervals();
+		var days = [];
+		var daysStr = [];
 		
 		// 0 means nothing done with this day yet
 		// 8 means the day is off
 		// 0<x<8 means the day have the openinghours of day x
 		// -8<x<0 means nothing done with this day yet, but it intersects a
 		// range of days with same opening_hours
-		for(var i = 0; i < 7; i++) {
+		var daysStatus = [];
+		
+		for(var i=0; i < YoHours.model.OSM_DAYS.length; i++) {
+			days[i] = [];
+			daysStatus[i] = 0;
+			daysStr[i] = '';
+		}
+		
+		/*
+		 * Create time intervals per day
+		 */
+		var interval;
+		for(var i=0, l=intervals.length; i < l; i++) {
+			interval = intervals[i];
+			
+			if(interval != undefined) {
+				//Interval in a single day
+				if(interval.getStartDay() == interval.getEndDay()) {
+					days[interval.getStartDay()].push(_timeString(interval.getFrom())+"-"+_timeString(interval.getTo()));
+				}
+				//Interval on two days
+				else if(interval.getEndDay() - interval.getStartDay() == 1) {
+					//Continuous night
+					if(interval.getFrom() > interval.getTo()) {
+						days[interval.getStartDay()].push(_timeString(interval.getFrom())+"-"+_timeString(interval.getTo()));
+					}
+					//Separated days
+					else {
+						days[interval.getStartDay()].push(_timeString(interval.getFrom())+"-24:00");
+						days[interval.getEndDay()].push("00:00-"+_timeString(interval.getTo()));
+					}
+				}
+				//Interval on more than two days
+				else {
+					for(var j=interval.getStartDay(), end=interval.getEndDay(); j <= end; j++) {
+						if(j == interval.getStartDay()) {
+							days[j].push(_timeString(interval.getFrom())+"-24:00");
+						}
+						else if(j == interval.getEndDay()) {
+							days[j].push("00:00-"+_timeString(interval.getTo()));
+						}
+						else {
+							days[j].push("00:00-24:00");
+						}
+					}
+				}
+			}
+		}
+		
+		/*
+		 * Create interval strings per day
+		 */
+		for(var i=0; i < days.length; i++) {
+			var intervalsStr = '';
+			if(days[i].length > 0) {
+				days[i].sort();
+				for(var j=0; j < days[i].length; j++) {
+					if(j > 0) {
+						intervalsStr += ',';
+					}
+					intervalsStr += days[i][j];
+				}
+			}
+			else {
+				intervalsStr = 'off';
+			}
+
+			daysStr[i] = intervalsStr;
+		}
+		
+		/*
+		 * Create string result
+		 */
+		var result = "";
+		for(var i=0; i < days.length; i++) {
 			var add = "";
 			
-			if (_isArrayEmpty(minuteArray[i]) && days[i] == 0) {
-				days[i] = 8;
-			} else if (_isArrayEmpty(minuteArray[i]) && days[i] < 0) {
-				add = YoHours.model.OSM_DAYS[i] + " off";
-				days[i] = -8;
-			} else if (days[i] <= 0) {
-				days[i] = i + 1;
+			if (daysStr[i] == 'off' && daysStatus[i] == 0) {
+				daysStatus[i] = 8;
+			} else if (daysStr[i] == 'off' && daysStatus[i] < 0 && daysStatus[i] > -8) {
+				//add = YoHours.model.OSM_DAYS[i] + " off";
+				daysStatus[i] = -8;
+			} else if (daysStatus[i] <= 0 && daysStatus[i] > -8) {
+				daysStatus[i] = i + 1;
 				var lastSameDay = i;
 				var sameDayCount = 1;
 				
 				for(var j = i + 1; j < 7; j++) {
-					if (_arraysEqual(minuteArray[i], minuteArray[j])) {
-						days[j] = i + 1;
+					if (daysStr[i] == daysStr[j]) {
+						daysStatus[j] = i + 1;
 						lastSameDay = j;
 						sameDayCount++;
 					}
 				}
 				if (sameDayCount == 1) {
 					// a single Day with this special opening_hours
-					add = YoHours.model.OSM_DAYS[i] + " " + _makeStringFromMinuteArray(minuteArray[i]);
+					add = YoHours.model.OSM_DAYS[i] + " " + daysStr[i];
 				} else if (sameDayCount == 2) {
 					// exactly two Days with this special opening_hours
 					add = YoHours.model.OSM_DAYS[i] + "," + YoHours.model.OSM_DAYS[lastSameDay] + " "
-					+ _makeStringFromMinuteArray(minuteArray[i]);
+					+ daysStr[i];
 				} else if (sameDayCount > 2) {
 					// more than two Days with this special opening_hours
 					add = YoHours.model.OSM_DAYS[i] + "-" + YoHours.model.OSM_DAYS[lastSameDay] + " "
-					+ _makeStringFromMinuteArray(minuteArray[i]);
+					+ daysStr[i];
 					for (var j = i + 1; j < lastSameDay; j++) {
-						if (days[j] == 0) {
-							days[j] = -i - 1;
+						if (daysStatus[j] == 0) {
+							daysStatus[j] = -i - 1;
 						}
 					}
 				}
 			}
 			
 			if (add.length > 0) {
-				if (ret.length > 0) {
-					ret += "; ";
+				if (result.length > 0) {
+					result += "; ";
 				}
-				ret += add;
+				result += add;
 			}
 		}
 		
-		//Special cases
-		// 24/7
-		if(ret == "Mo-Su 00:00-24:00") {
-			ret = "24/7";
+		/*
+		 * Add days off
+		 */
+		var resOff = "";
+		for(var i=0; i < days.length; i++) {
+			var add = "";
+			
+			if(daysStatus[i] == -8) {
+				var lastSameDay = i;
+				var sameDayCount = 1;
+				
+				for(var j = i + 1; j < 7; j++) {
+					if (daysStr[i] == daysStr[j]) {
+						daysStatus[j] = -9;
+						lastSameDay = j;
+						sameDayCount++;
+					}
+					else {
+						break;
+					}
+				}
+				if (sameDayCount == 1) {
+					// a single Day with this special opening_hours
+					add = YoHours.model.OSM_DAYS[i];
+				} else if (sameDayCount == 2) {
+					// exactly two Days with this special opening_hours
+					add = YoHours.model.OSM_DAYS[i] + "," + YoHours.model.OSM_DAYS[lastSameDay];
+				} else if (sameDayCount > 2) {
+					// more than two Days with this special opening_hours
+					add = YoHours.model.OSM_DAYS[i] + "-" + YoHours.model.OSM_DAYS[lastSameDay];
+					for (var j = i + 1; j < lastSameDay; j++) {
+						if (daysStatus[j] == 0) {
+							daysStatus[j] = -i - 1;
+						}
+					}
+				}
+			}
+			
+			if (add.length > 0) {
+				if (resOff.length > 0) {
+					resOff += ",";
+				}
+				resOff += add;
+			}
 		}
 		
-		return ret;
+		if(resOff.length > 0) {
+			result += "; "+resOff+" off";
+		}
+		
+		/*
+		 * Special cases
+		 */
+		// 24/7
+		if(result == "Mo-Su 00:00-24:00") {
+			result = "24/7";
+		}
+		
+		return result;
 	};
 	
 	/**
