@@ -129,42 +129,6 @@ Week: function() {
 
 //ACCESSORS
 	/**
-	 * @return This week, as a two-dimensional boolean array. First dimension is for days (see DAYS), second dimension for minutes since midnight. True if open, false else.
-	 */
-	this.getAsMinutesArray = function() {
-		//Create array with all values set to false
-		//For each day
-		var minuteArray = new Array(7);
-		for(var day = 0; day < 7; day++) {
-			//For each minute
-			minuteArray[day] = new Array(24*60 + 2);
-			for (var minute = 0; minute < 24 * 60 + 2; minute++) {
-				minuteArray[day][minute] = false;
-			}
-		}
-		
-		//Set to true values where an interval is defined
-		for(var id=0, length=_intervals.length; id < length; id++) {
-			if(_intervals[id] != undefined) {
-				for(var day = _intervals[id].getStartDay(); day <= _intervals[id].getEndDay(); day++) {
-					//Define start and end minute regarding the current day
-					var startMinute = (day == _intervals[id].getStartDay()) ? _intervals[id].getFrom() : 0;
-					var endMinute = (day == _intervals[id].getEndDay()) ? _intervals[id].getTo() : 24 * 60;
-					
-					//Set to true the minutes for this day
-					if(startMinute != endMinute) {
-						for(var minute = startMinute; minute <= endMinute; minute++) {
-							minuteArray[day][minute] = true;
-						}
-					}
-				}
-			}
-		}
-		
-		return minuteArray;
-	};
-	
-	/**
 	 * @return The intervals in this week
 	 */
 	this.getIntervals = function() {
@@ -235,10 +199,20 @@ OpeningHoursParser: function() {
 		 * Create time intervals per day
 		 */
 		var interval;
+		var monday0 = -1;
+		var sunday24 = -1;
 		for(var i=0, l=intervals.length; i < l; i++) {
 			interval = intervals[i];
 			
 			if(interval != undefined) {
+				//Handle sunday 24:00 with monday 00:00
+				if(interval.getStartDay() == 6 && interval.getEndDay() == 6 && interval.getTo() == 24*60) {
+					sunday24 = interval.getFrom();
+				}
+				if(interval.getStartDay() == 0 && interval.getEndDay() == 0 && interval.getFrom() == 0) {
+					monday0 = interval.getTo();
+				}
+				
 				//Interval in a single day
 				if(interval.getStartDay() == interval.getEndDay()) {
 					days[interval.getStartDay()].push(_timeString(interval.getFrom())+"-"+_timeString(interval.getTo()));
@@ -270,6 +244,20 @@ OpeningHoursParser: function() {
 					}
 				}
 			}
+		}
+		
+		/*
+		 * Create continuous night for monday-sunday
+		 */
+		if(monday0 >= 0 && sunday24 >= 0 && monday0 < sunday24) {
+			days[0].sort();
+			days[6].sort();
+			
+			//Change sunday interval
+			days[6][days[6].length-1] = _timeString(sunday24)+"-"+_timeString(monday0);
+			
+			//Remove monday interval
+			days[0].shift();
 		}
 		
 		/*
@@ -404,35 +392,7 @@ OpeningHoursParser: function() {
 		
 		return result;
 	};
-	
-	/**
-	 * Returns a String representing the openinghours on one special day (e.g. "10:00-20:00")
-	 * @param minutes The minutes array for only one day
-	 * @return The opening hours in this day
-	 */
-	function _makeStringFromMinuteArray(minutes) {
-		var ret = "";
-		for (var i = 0; i < minutes.length; i++) {
-			if (minutes[i]) {
-				var start = i;
-				while (i < minutes.length && minutes[i]) {
-					i++;
-				}
-				var addString = _timeString(start);
-				if (i - 1 == 24 * 60 + 1) {
-					addString += "+";
-				} else if (start != i - 1) {
-					addString += "-" + _timeString(i - 1);
-				}
-				if (ret.length > 0) {
-					ret += ",";
-				}
-				ret += addString;
-			}
-		}
-		return ret;
-	};
-	
+
 	/**
 	 * @param minutes integer in range from 0 and 24*60 inclusive
 	 * @return a formatted string of the time (for example "13:45")
@@ -442,34 +402,6 @@ OpeningHoursParser: function() {
 		var period = "";
 		var m = minutes % 60;
 		return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + period;
-	};
-	
-	/**
-	 * Is the given array empty (ie only containing false values)
-	 * @param bs The array to test
-	 * @return True if empty
-	 */
-	function _isArrayEmpty(bs) {
-		for(var i = 0; i < bs.length; i++) {
-			if (bs[i]) {
-				return false;
-			}
-		}
-		return true;
-	};
-	
-	/**
-	 * Are the two arrays equal ?
-	 * @param bs The first array
-	 * @param bs2 The second array
-	 * @return True if they are equal
-	 */
-	function _arraysEqual(bs, bs2) {
-		var ret = true;
-		for(var i = 0; i < bs.length; i++) {
-			ret &= bs[i] == bs2[i];
-		}
-		return ret;
 	};
 }
 
