@@ -109,7 +109,7 @@ Interval: function(dayStart, dayEnd, minStart, minEnd) {
 	//Handle special cases, like sunday midnight
 	if(_end == 0) {
 		_dayEnd = (_dayEnd == 0) ? 6 : _dayEnd-1;
-		_end = 24 * 60;
+		_end = 24 * 60 -1;
 	}
 },
 
@@ -129,10 +129,111 @@ Week: function() {
 
 //ACCESSORS
 	/**
+	 * @return This week, as a two-dimensional boolean array. First dimension is for days (see DAYS), second dimension for minutes since midnight. True if open, false else.
+	 */
+	this.getAsMinutesArray = function() {
+		//Create array with all values set to false
+		//For each day
+		var minuteArray = [];
+		for(var day = 0; day < 7; day++) {
+			//For each minute
+			minuteArray[day] = [];
+			for (var minute = 0; minute < 24 * 60; minute++) {
+				minuteArray[day][minute] = false;
+			}
+		}
+		
+		//Set to true values where an interval is defined
+		for(var id=0, l=_intervals.length; id < l; id++) {
+			if(_intervals[id] != undefined) {
+				for(var day = _intervals[id].getStartDay(); day <= _intervals[id].getEndDay(); day++) {
+					//Define start and end minute regarding the current day
+					var startMinute = (day == _intervals[id].getStartDay()) ? _intervals[id].getFrom() : 0;
+					var endMinute = (day == _intervals[id].getEndDay()) ? _intervals[id].getTo() : 24*60 -1;
+
+					//Set to true the minutes for this day
+					if(startMinute != endMinute) {
+						for(var minute = startMinute; minute <= endMinute; minute++) {
+							minuteArray[day][minute] = true;
+						}
+					}
+				}
+			}
+		}
+		
+		return minuteArray;
+	};
+	
+	/**
+	 * @param clean Clean intervals ? (default: false)
 	 * @return The intervals in this week
 	 */
-	this.getIntervals = function() {
-		return _intervals;
+	this.getIntervals = function(clean) {
+		clean = clean || false;
+		
+		if(clean) {
+			//Create continuous intervals over days
+			var minuteArray = this.getAsMinutesArray();
+			var intervals = [];
+			var dayStart = -1, minStart = -1, minEnd;
+			
+			for(var day=0, l=minuteArray.length; day < l; day++) {
+				for(var min=0, lm=minuteArray[day].length; min < lm; min++) {
+					//First minute of monday
+					if(day == 0 && min == 0) {
+						if(minuteArray[day][min]) {
+							dayStart = day;
+							minStart = min;
+						}
+					}
+					//Last minute of sunday
+					else if(day == 6 && min == lm-1) {
+						if(dayStart >= 0 && minuteArray[day][min]) {
+							intervals.push(new YoHours.model.Interval(
+								dayStart,
+								day,
+								minStart,
+								min
+							));
+						}
+					}
+					//Other days or minutes
+					else {
+						//New interval
+						if(minuteArray[day][min] && dayStart < 0) {
+							dayStart = day;
+							minStart = min;
+						}
+						//Ending interval
+						else if(!minuteArray[day][min] && dayStart >= 0) {
+							if(min == 0) {
+								intervals.push(new YoHours.model.Interval(
+									dayStart,
+									day-1,
+									minStart,
+									24*60
+								));
+							}
+							else {
+								intervals.push(new YoHours.model.Interval(
+									dayStart,
+									day,
+									minStart,
+									min-1
+								));
+							}
+							dayStart = -1;
+							minStart = -1;
+						}
+					}
+				}
+			}
+			
+			return intervals;
+		}
+		else {
+			return _intervals;
+		}
 	};
 
 //MODIFIERS
@@ -178,7 +279,7 @@ OpeningHoursParser: function() {
 	 * @return The opening_hours string
 	 */
 	this.parse = function(week) {
-		var intervals = week.getIntervals();
+		var intervals = week.getIntervals(true);
 		var days = [];
 		var daysStr = [];
 		
@@ -206,7 +307,7 @@ OpeningHoursParser: function() {
 			
 			if(interval != undefined) {
 				//Handle sunday 24:00 with monday 00:00
-				if(interval.getStartDay() == 6 && interval.getEndDay() == 6 && interval.getTo() == 24*60) {
+				if(interval.getStartDay() == 6 && interval.getEndDay() == 6 && interval.getTo() == 24*60 -1) {
 					sunday24 = interval.getFrom();
 				}
 				if(interval.getStartDay() == 0 && interval.getEndDay() == 0 && interval.getFrom() == 0) {

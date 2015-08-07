@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+7 august 2015
+-------------
+* Following intervals are now merged
+
 6 august 2015
 -------------
 * Continuous time for night intervals (for example "Mo 23:00-03:00")
