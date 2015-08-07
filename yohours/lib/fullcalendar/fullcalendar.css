@@ -45,9 +45,9 @@ body .fc { /* extra precedence to overcome jqui */
 	color: #666;
 }
 
-.fc-unthemed .fc-today {
+/*.fc-unthemed .fc-today {
 	background: #fcf8e3;
-}
+}*/
 
 .fc-highlight { /* when user is selecting cells */
 	background: #bce8f1;
@@ -390,9 +390,9 @@ hr.fc-divider {
 	vertical-align: top;
 }
 
-.fc td.fc-today {
-	border-style: double; /* overcome neighboring borders */
-}
+/*.fc td.fc-today {
+	border-style: double;
+}*/
 
 
 /* Fake Table Rows
