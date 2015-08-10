@@ -63,3 +63,14 @@ footer {
 	display: table-cell;
 	vertical-align: middle;
 }
+
+.nav-tabs li.add a {
+	color: green;
+	background-color: #9CCF99;
+	font-weight: bold;
+}
+
+.nav-tabs li.add a:hover {
+	background-color: #C3E1C2;
+	border-color: #C3E1C2;
+}
