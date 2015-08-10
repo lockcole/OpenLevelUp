@@ -113,6 +113,146 @@ Interval: function(dayStart, dayEnd, minStart, minEnd) {
 	}
 },
 
+
+
+/**
+ * Class Day, represents a typical day
+ */
+Day: function() {
+//ATTRIBUTES
+	/** The intervals defining this week **/
+	var _intervals = [];
+	
+	/** The next interval ID **/
+	var _nextInterval = 0;
+
+//ACCESSORS
+	/**
+	 * @return This day, as a boolean array (minutes since midnight). True if open, false else.
+	 */
+	this.getAsMinutesArray = function() {
+		//Create array with all values set to false
+		//For each minute
+		var minuteArray = [];
+		for (var minute = 0; minute < 24 * 60; minute++) {
+			minuteArray[minute] = false;
+		}
+		
+		//Set to true values where an interval is defined
+		for(var id=0, l=_intervals.length; id < l; id++) {
+			if(_intervals[id] != undefined) {
+				if(_interval[id].getStartDay() == _interval[id].getEndDay() == 0) {
+					//Define start and end minute regarding the current day
+					var startMinute = _intervals[id].getFrom();
+					var endMinute = _intervals[id].getTo();
+
+					//Set to true the minutes for this day
+					if(startMinute != endMinute) {
+						for(var minute = startMinute; minute <= endMinute; minute++) {
+							minuteArray[minute] = true;
+						}
+					}
+				}
+				else {
+					throw new Error("Invalid interval");
+				}
+			}
+		}
+		
+		return minuteArray;
+	};
+	
+	/**
+	 * @param clean Clean intervals ? (default: false)
+	 * @return The intervals in this week
+	 */
+	this.getIntervals = function(clean) {
+		clean = clean || false;
+		
+		if(clean) {
+			//Create continuous intervals over days
+			var minuteArray = this.getAsMinutesArray();
+			var intervals = [];
+			var minStart = -1, minEnd;
+			
+			for(var min=0, lm=minuteArray[day].length; min < lm; min++) {
+				//First minute
+				if(min == 0) {
+					if(minuteArray[min]) {
+						minStart = min;
+					}
+				}
+				//Last minute
+				else if(min == lm-1) {
+					if(minuteArray[min]) {
+						intervals.push(new YoHours.model.Interval(
+							0,
+							0,
+							minStart,
+							min
+						));
+					}
+				}
+				//Other minutes
+				else {
+					//New interval
+					if(minuteArray[min] && minStart < 0) {
+						minStart = min;
+					}
+					//Ending interval
+					else if(!minuteArray[min] && minStart >= 0) {
+						intervals.push(new YoHours.model.Interval(
+							0,
+							0,
+							minStart,
+							min-1
+						));
+
+						minStart = -1;
+					}
+				}
+			}
+			
+			return intervals;
+		}
+		else {
+			return _intervals;
+		}
+	};
+
+//MODIFIERS
+	/**
+	 * Add a new interval to this week
+	 * @param interval The new interval
+	 * @return The ID of the added interval
+	 */
+	this.addInterval = function(interval) {
+		_intervals[_nextInterval] = interval;
+		_nextInterval++;
+		
+		return _nextInterval-1;
+	};
+	
+	/**
+	 * Edits the given interval
+	 * @param id The interval ID
+	 * @param interval The new interval
+	 */
+	this.editInterval = function(id, interval) {
+		_intervals[id] = interval;
+	};
+	
+	/**
+	 * Remove the given interval
+	 * @param id the interval ID
+	 */
+	this.removeInterval = function(id) {
+		_intervals[id] = undefined;
+	};
+},
+
+
+
 /**
  * Class Week, represents a typical week of opening hours.
  */
@@ -123,9 +263,6 @@ Week: function() {
 	
 	/** The next interval ID **/
 	var _nextInterval = 0;
-	
-	/** This object **/
-	var _self = this;
 
 //ACCESSORS
 	/**
@@ -266,6 +403,81 @@ Week: function() {
 		_intervals[id] = undefined;
 	};
 },
+
+
+
+/**
+ * Class DateRange, defines a range of months, weeks or days.
+ * A typical week or day will be associated.
+ */
+DateRange: function(start, end) {
+//ATTRIBUTES
+	/** The moment when this interval starts **/
+	var _start = start;
+	
+	/** The moment when this interval ends (null if only concerning start day) **/
+	var _end = end || null;
+
+	/** The kind of interval: month, week, day, holiday **/
+	var _type;
+	
+	/** The typical week or day associated **/
+	var _typical;
+
+//CONSTRUCTOR
+	function _init() {
+		//Find the kind of interval
+		if(_start.day != undefined) {
+			_type = "day";
+			if(_end != null) {
+				_typical = new YoHours.model.Week();
+			}
+			else {
+				_typical = new YoHours.model.Day();
+			}
+		}
+		else if(_start.week != undefined) {
+			_type = "week";
+			_typical = new YoHours.model.Week();
+		}
+		else if(_start.month != undefined) {
+			_type = "month";
+			_typical = new YoHours.model.Week();
+		}
+		else if(_start.holiday != undefined) {
+			_type = "holiday";
+			if(_start.holiday == "PH") {
+				_typical = new YoHours.model.Day();
+			}
+			else {
+				_typical = new YoHours.model.Week();
+			}
+		}
+		else {
+			throw new Error("Invalid date given");
+		}
+	}
+
+//ACCESSORS
+	/**
+	 * Is this interval defining a typical day ?
+	 */
+	this.definesTypicalDay = function() {
+		return _typical instanceof YoHours.model.Day;
+	};
+	
+	/**
+	 * Is this interval defining a typical week ?
+	 */
+	this.definesTypicalWeek = function() {
+		return _typical instanceof YoHours.model.Week;
+	};
+	
+//INIT
+	_init();
+},
+
+
 
 /**
  * Class OpeningHoursParser, creates opening_hours value from week object

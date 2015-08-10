@@ -22,15 +22,54 @@
  *
  * CSS Style
  */
+
+/**********
+ * Global *
+ **********/
+
 body {
 	margin-top: 60px;
 	height: 100%;
 }
 
+footer {
+	border-top: 1px solid #ddd;
+	margin-top: 20px;
+	padding: 10px;
+	text-align: center;
+}
+
+/** Full width row line **/
+.row-line {
+	display: table;
+	width: 100%;
+}
+
+.row-line [class*="col-"] {
+	float: none;
+	display: table-cell;
+	vertical-align: middle;
+}
+
+
+/**********
+ * Header *
+ **********/
+
 img.logo {
 	height: 80px;
 }
 
+
+/***********************
+ * Opening hours input *
+ ***********************/
+
+#oh {
+	font-family: monospace,Courier;
+}
+
+/** OSM tag **/
 .osm-tag {
 	font-size: 115%;
 	background: #DDE none repeat scroll 0% 0%;
@@ -42,26 +81,14 @@ img.logo {
 	font-weight: bold;
 }
 
-#oh {
-	font-family: monospace,Courier;
-}
 
-footer {
-	border-top: 1px solid #ddd;
-	margin-top: 20px;
-	padding: 10px;
-	text-align: center;
-}
+/************
+ * Calendar *
+ ************/
 
-.row-line {
-	display: table;
-	width: 100%;
-}
-
-[class*="col-"] {
-	float: none;
-	display: table-cell;
-	vertical-align: middle;
+/* Date range navigation bar */
+#range-nav {
+	margin-bottom: 10px;
 }
 
 .nav-tabs li.add a {
@@ -73,4 +100,14 @@ footer {
 .nav-tabs li.add a:hover {
 	background-color: #C3E1C2;
 	border-color: #C3E1C2;
+}
+
+
+/********************
+ * Date range modal *
+ ********************/
+
+.input-inline input, .input-inline select {
+	display: inline;
+	width: auto;
 }

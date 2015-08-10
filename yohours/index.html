@@ -93,9 +93,9 @@
 	</nav>
 
 	<div class="container main">
-		<div class="jumbotron" id="about">
-			<h1><img class="logo" src="img/logo.svg" alt="YoHours" /></h1>
-			<p>OpenStreetMap <a href="https://wiki.openstreetmap.org/wiki/Key:opening_hours">opening hours</a> made easy !<br />
+		<div class="jumbotron row-line" id="about">
+			<h1 class="col-sm-4"><img class="logo" src="img/logo.svg" alt="YoHours" /></h1>
+			<p class="col-sm-8">OpenStreetMap <a href="https://wiki.openstreetmap.org/wiki/Key:opening_hours">opening hours</a> made easy !<br />
 			Just drag time intervals on the calendar, and we will do the job.</p>
 		</div>
 		
@@ -113,20 +113,36 @@
 			</div>
 		</form>
 		
-		<ul class="nav nav-tabs">
+		<ul id="range-nav" class="nav nav-tabs">
 			<li role="presentation" class="active"><a href="#">#1</a></li>
 			<li role="presentation"><a href="#">#2</a></li>
 			<li role="presentation"><a href="#">#3</a></li>
-			<li role="presentation" class="add"><a href="#">+</a></li>
+			<li role="presentation" class="add"><a title="Add new date range" href="#">+</a></li>
 		</ul>
+		
+		<div id="range-txt" class="well well-sm">
+			Calendar defining <span id="label">every week of year</span>.
+		</div>
+		
 		<div id='calendar'></div>
 	</div>
 	
-	<div id="help" title="Help!">
-		<p>To add an interval, drag the cursor on the wanted interval on the calendar.
-		<br />You can move an interval with drag and drop.
-		<br />You can resize one by extending its borders.
-		<br />You can delete one by clicking on it.</p>
+	<!-- Help modal -->
+	<div id="modal-help" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title">Help</h4>
+				</div>
+				<div class="modal-body">
+					<p>To add an interval, drag the cursor on the wanted interval on the calendar. You can move an interval with drag and drop. You can resize one by extending its borders. You can delete one by clicking on it.</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+				</div>
+			</div>
+		</div>
 	</div>
 	
 	<footer class="container">
@@ -139,35 +155,138 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h4 class="modal-title">Select time range</h4>
+					<h4 class="modal-title">Select date range</h4>
 				</div>
 				<div class="modal-body">
-					<ul class="nav nav-pills">
-						<li role="presentation" class="active"><a href="#">Month</a></li>
-						<li role="presentation"><a href="#">Week</a></li>
-						<li role="presentation"><a href="#">Day</a></li>
-						<li role="presentation"><a href="#">Holiday</a></li>
+					<ul id="modal-range-nav" class="nav nav-pills">
+						<li role="presentation" id="modal-range-nav-always" class="active">
+							<a href="#" onClick="controller.getView().getDateRangeView().tab('always')">Always</a>
+						</li>
+						<li role="presentation" id="modal-range-nav-month">
+							<a href="#" onClick="controller.getView().getDateRangeView().tab('month')">Month</a>
+						</li>
+						<li role="presentation" id="modal-range-nav-week">
+							<a href="#" onClick="controller.getView().getDateRangeView().tab('week')">Week</a>
+						</li>
+						<li role="presentation" id="modal-range-nav-day">
+							<a href="#" onClick="controller.getView().getDateRangeView().tab('day')">Day</a>
+						</li>
+						<li role="presentation" id="modal-range-nav-holiday">
+							<a href="#" onClick="controller.getView().getDateRangeView().tab('holiday')">Holiday</a>
+						</li>
 					</ul>
-					<div class="container">
+					<form id="modal-range-form" class="form-horizontal">
+						<div id="range-always">
+							<p class="text-info">This calendar will define all weeks of the year</p>
+						</div>
 						<div id="range-month">
-							From
-							<select>
-							</select>
-							To
-							<select>
-							</select>
+							<p class="text-info">The end month is optional</p>
+							<div class="form-group">
+								<label for="range-month-start" class="col-sm-2 control-label">Start</label>
+								<div class="col-sm-10">
+									<select class="form-control input-sm" id="range-month-start">
+										<option value="1">January</option>
+										<option value="2">February</option>
+										<option value="3">March</option>
+										<option value="4">April</option>
+										<option value="5">May</option>
+										<option value="6">June</option>
+										<option value="7">July</option>
+										<option value="8">August</option>
+										<option value="9">September</option>
+										<option value="10">October</option>
+										<option value="11">November</option>
+										<option value="12">December</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="range-month-end" class="col-sm-2 control-label">End</label>
+								<div class="col-sm-10">
+									<select class="form-control input-sm" id="range-month-end">
+										<option value="0" selected></option>
+										<option value="1">January</option>
+										<option value="2">February</option>
+										<option value="3">March</option>
+										<option value="4">April</option>
+										<option value="5">May</option>
+										<option value="6">June</option>
+										<option value="7">July</option>
+										<option value="8">August</option>
+										<option value="9">September</option>
+										<option value="10">October</option>
+										<option value="11">November</option>
+										<option value="12">December</option>
+									</select>
+								</div>
+							</div>
 						</div>
 						<div id="range-week">
-							From
-							<input type="integer" />
-							To
-							<input type="integer" />
+							<p class="text-info">The end week is optional</p>
+							<div class="form-group">
+								<label for="range-week-start" class="col-sm-2 control-label">Start</label>
+								<div class="col-sm-10">
+									<input type="number" class="form-control input-sm" id="range-week-start" min="1" max="52" step="1" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="range-week-end" class="col-sm-2 control-label">End</label>
+								<div class="col-sm-10">
+									<input type="number" class="form-control input-sm" id="range-week-end" min="1" max="52" step="1" />
+								</div>
+							</div>
 						</div>
 						<div id="range-day">
+							<p class="text-info">The end day is optional</p>
+							<div class="form-group">
+								<label for="range-day-startday" class="col-sm-2 control-label">Start</label>
+								<div class="col-sm-10 input-inline">
+									<input type="number" class="form-control input-sm" id="range-day-startday" min="1" max="31" step="1" />
+									<select class="form-control input-sm" id="range-day-startmonth">
+										<option value="1">January</option>
+										<option value="2">February</option>
+										<option value="3">March</option>
+										<option value="4">April</option>
+										<option value="5">May</option>
+										<option value="6">June</option>
+										<option value="7">July</option>
+										<option value="8">August</option>
+										<option value="9">September</option>
+										<option value="10">October</option>
+										<option value="11">November</option>
+										<option value="12">December</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="range-day-endday" class="col-sm-2 control-label">End</label>
+								<div class="col-sm-10  input-inline">
+									<input type="number" class="form-control input-sm" id="range-day-endday" min="1" max="31" step="1" />
+									<select class="form-control input-sm" id="range-day-endmonth">
+										<option value="0" selected></option>
+										<option value="1">January</option>
+										<option value="2">February</option>
+										<option value="3">March</option>
+										<option value="4">April</option>
+										<option value="5">May</option>
+										<option value="6">June</option>
+										<option value="7">July</option>
+										<option value="8">August</option>
+										<option value="9">September</option>
+										<option value="10">October</option>
+										<option value="11">November</option>
+										<option value="12">December</option>
+									</select>
+								</div>
+							</div>
 						</div>
 						<div id="range-holiday">
+							<div class="radio">
+								<label><input type="radio" name="range-holiday-type" value="SH" checked /> School holidays</label>
+								<label><input type="radio" name="range-holiday-type" value="PH" /> Public holidays</label>
+							</div>
 						</div>
-					</div>
+					</form>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-success" data-dismiss="modal">Add</button>
@@ -181,7 +300,6 @@
 	<script type="text/javascript">
 		var controller = new YoHours.ctrl.MainController();
 		controller.init();
-		$("#modal-range").modal("show");
 	</script>
 </body>
 </html>

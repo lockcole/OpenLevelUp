@@ -114,6 +114,53 @@ WeekView: function(mainView) {
 },
 
 
+
+/**
+ * The date range modal component
+ */
+DateRangeView: function(main) {
+//CONSTRUCTOR
+	function _init() {
+		$("#modal-range-nav li").removeClass("active");
+		$("#modal-range-nav li:first").addClass("active");
+		$("#modal-range-form > div").hide();
+		$("#modal-range-form > div:first").show();
+	};
+
+//MODIFIERS
+	/**
+	 * Shows the modal
+	 */
+	this.show = function() {
+		$("#modal-range").modal("show");
+	};
+	
+	/**
+	 * Changes the currently shown tab
+	 */
+	this.tab = function(type) {
+		$("#modal-range-nav li.active").removeClass("active");
+		$("#modal-range-nav-"+type).addClass("active");
+		$("#modal-range-form > div:visible").hide();
+		$("#range-"+type).show();
+	};
+	
+//INIT
+	_init();
+},
+
+
+
+/**
+ * The calendar view, with its navigation bar
+ */
+CalendarView: function(main) {
+//MODIFIERS
+	//this.show()
+},
+
+
+
 /**
  * The opening hours text input field
  */
@@ -183,6 +230,9 @@ MainView: function(ctrl) {
 	/** The hours input view **/
 	var _hoursInputView = new YoHours.view.HoursInputView(this);
 	
+	/** The date range modal **/
+	var _dateRangeView = new YoHours.view.DateRangeView(this);
+	
 	/** The help dialog **/
 	var _helpView;
 	
@@ -197,6 +247,16 @@ MainView: function(ctrl) {
 		return _hoursInputView;
 	};
 	
+	/**
+	 * @return The date range view
+	 */
+	this.getDateRangeView = function() {
+		return _dateRangeView;
+	};
+	
+	/**
+	 * @return The controller
+	 */
 	this.getController = function() {
 		return _ctrl;
 	};
@@ -210,13 +270,8 @@ MainView: function(ctrl) {
 		_weekView.init();
 		
 		//Init help dialog
-		_helpView = $("#help").dialog({
-			autoOpen: false,
-			resizable: false,
-			width: 400,
-			height: 200
-		});
-		$("#help-link").click(function() { _helpView.dialog("open"); });
+		_helpView = $("#modal-help");
+		$("#help-link").click(function() { _helpView.modal("show"); });
 		
 		$("#oh-clear").click(function() { _ctrl.clearIntervals(); });
 	};
