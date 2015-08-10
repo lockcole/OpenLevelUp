@@ -31,14 +31,6 @@ img.logo {
 	height: 80px;
 }
 
-#opening_hours {
-	text-align: center;
-}
-
-#oh {
-	width: 50%;
-}
-
 .osm-tag {
 	font-size: 115%;
 	background: #DDE none repeat scroll 0% 0%;
@@ -50,9 +42,35 @@ img.logo {
 	font-weight: bold;
 }
 
+#oh {
+	font-family: monospace,Courier;
+}
+
 footer {
 	border-top: 1px solid #ddd;
 	margin-top: 20px;
 	padding: 10px;
 	text-align: center;
+}
+
+.row-line {
+	display: table;
+	width: 100%;
+}
+
+[class*="col-"] {
+	float: none;
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.nav-tabs li.add a {
+	color: green;
+	background-color: #9CCF99;
+	font-weight: bold;
+}
+
+.nav-tabs li.add a:hover {
+	background-color: #C3E1C2;
+	border-color: #C3E1C2;
 }

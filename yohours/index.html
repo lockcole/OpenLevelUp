@@ -28,9 +28,7 @@
 		TODO (by priority)
 		* Extend intervals to left/right
 		* Make calendar fit in window
-		* Add clear button
-		* Parse input value and display on calendar
-		* Merge off days when possible
+		* Bug fix for 24:00 becoming 23:59
 		* Range display for 1 slot interval
 		* Add parameters, such as slot duration
 		* Common values
@@ -62,8 +60,9 @@
 	<script src="lib/moment.js"></script>
 	<link rel='stylesheet' href='lib/fullcalendar/fullcalendar.css' />
 	<script src='lib/fullcalendar/fullcalendar.js'></script>
-	<!--link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/fullcalendar.min.css"-->
-	<!--script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/fullcalendar.min.js"></script-->
+	
+	<!-- opening_hours.js includes -->
+	<script src="lib/opening_hours.js"></script>
 	
 	<!-- YoHours includes -->
 	<script type="text/javascript">
@@ -100,10 +99,26 @@
 			Just drag time intervals on the calendar, and we will do the job.</p>
 		</div>
 		
-		<div id="opening_hours">
-			<p><span class="osm-tag"><span class="osm-key">opening_hours</span>=<input type="text" id="oh" readonly /></span></p>
-		</div>
+		<form class="form-horizontal row-line" id="opening_hours">
+			<div id="oh-form" class="form-group">
+				<div class="col-xs-3 text-center">
+					<span class="osm-tag"><span class="osm-key">opening_hours</span>=</span>
+				</div>
+				<div class="col-xs-8">
+					<input type="text" id="oh" class="form-control" />
+				</div>
+				<div class="col-xs-1">
+					<button type="button" id="oh-clear" class="btn btn-default">Clear</button>
+				</div>
+			</div>
+		</form>
 		
+		<ul class="nav nav-tabs">
+			<li role="presentation" class="active"><a href="#">#1</a></li>
+			<li role="presentation"><a href="#">#2</a></li>
+			<li role="presentation"><a href="#">#3</a></li>
+			<li role="presentation" class="add"><a href="#">+</a></li>
+		</ul>
 		<div id='calendar'></div>
 	</div>
 	
@@ -117,11 +132,56 @@
 	<footer class="container">
 		<p>&copy; <a href="http://adrien.pavie.info/">Adrien PAVIE</a> 2015, under <a href="https://www.gnu.org/licenses/gpl.html">GPL v3 license</a>.</p>
 	</div>
+	
+	<!-- Range selector modal -->
+	<div id="modal-range" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title">Select time range</h4>
+				</div>
+				<div class="modal-body">
+					<ul class="nav nav-pills">
+						<li role="presentation" class="active"><a href="#">Month</a></li>
+						<li role="presentation"><a href="#">Week</a></li>
+						<li role="presentation"><a href="#">Day</a></li>
+						<li role="presentation"><a href="#">Holiday</a></li>
+					</ul>
+					<div class="container">
+						<div id="range-month">
+							From
+							<select>
+							</select>
+							To
+							<select>
+							</select>
+						</div>
+						<div id="range-week">
+							From
+							<input type="integer" />
+							To
+							<input type="integer" />
+						</div>
+						<div id="range-day">
+						</div>
+						<div id="range-holiday">
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-success" data-dismiss="modal">Add</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 	<!-- Main code -->
 	<script type="text/javascript">
 		var controller = new YoHours.ctrl.MainController();
 		controller.init();
+		$("#modal-range").modal("show");
 	</script>
 </body>
 </html>
