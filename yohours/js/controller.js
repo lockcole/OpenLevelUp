@@ -31,8 +31,8 @@ MainController: function() {
 	/** Main view object **/
 	var _view = new YoHours.view.MainView(this);
 
-	/** The typical week **/
-	var _week = new YoHours.model.Week();
+	/** All the wide intervals defined **/
+	var _dateRanges = [ new YoHours.model.DateRange() ];
 	
 	/** The opening hours parser **/
 	var _parser = new YoHours.model.OpeningHoursParser();
@@ -42,17 +42,10 @@ MainController: function() {
 
 //ACCESSORS
 	/**
-	 * @return The current week
-	 */
-	this.getWeek = function() {
-		return _week;
-	}
-	
-	/**
 	 * @return The opening_hours value
 	 */
 	this.getOpeningHours = function() {
-		return _parser.parse(_week);
+		return _parser.parse(_dateRanges);
 	};
 	
 	/**
@@ -60,6 +53,23 @@ MainController: function() {
 	 */
 	this.getView = function() {
 		return _view;
+	};
+	
+	/**
+	 * @return The first defined date range, or null if no range defined
+	 */
+	this.getFirstDateRange = function() {
+		var i = 0, found = false;
+		while(i < _dateRanges.length && !found) {
+			if(_dateRanges[i] != undefined) {
+				found = true;
+			}
+			else {
+				i++;
+			}
+		}
+		
+		return (found) ? _dateRanges[i] : null;
 	};
 
 //OTHER METHODS
@@ -70,44 +80,44 @@ MainController: function() {
 		_view.init();
 	}
 
-	/**
-	 * Event handler, to add the current interval in week
-	 * @param interval The new interval
-	 * @return The interval ID
-	 */
-	this.newInterval = function(interval) {
-		var intervalId = _week.addInterval(interval);
-		_view.refresh();
-		return intervalId;
-	};
+	// /**
+	 // * Event handler, to add the current interval in week
+	 // * @param interval The new interval
+	 // * @return The interval ID
+	 // */
+	// this.newInterval = function(interval) {
+		// var intervalId = _week.addInterval(interval);
+		// _view.refresh();
+		// return intervalId;
+	// };
 	
-	/**
-	 * Edits the given interval
-	 * @param id The interval ID
-	 * @param interval The new interval
-	 */
-	this.editInterval = function(id, interval) {
-		_week.editInterval(id, interval);
-		_view.refresh();
-	};
+	// /**
+	 // * Edits the given interval
+	 // * @param id The interval ID
+	 // * @param interval The new interval
+	 // */
+	// this.editInterval = function(id, interval) {
+		// _week.editInterval(id, interval);
+		// _view.refresh();
+	// };
 	
-	/**
-	 * Event handler, to remove the given interval from week
-	 * @param intervalId The interval ID
-	 */
-	this.removeInterval = function(intervalId) {
-		_week.removeInterval(intervalId);
-		_view.refresh();
-	};
+	// /**
+	 // * Event handler, to remove the given interval from week
+	 // * @param intervalId The interval ID
+	 // */
+	// this.removeInterval = function(intervalId) {
+		// _week.removeInterval(intervalId);
+		// _view.refresh();
+	// };
 	
-	/**
-	 * Removes all the shown intervals
-	 */
-	this.clearIntervals = function() {
-		_week = new YoHours.model.Week();
-		$('#calendar').fullCalendar('removeEvents');
-		_view.refresh();
-	};
+	// /**
+	 // * Removes all the shown intervals
+	 // */
+	// this.clearIntervals = function() {
+		// _week = new YoHours.model.Week();
+		// $('#calendar').fullCalendar('removeEvents');
+		// _view.refresh();
+	// };
 	
 	/**
 	 * Displays the given opening hours

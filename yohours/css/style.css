@@ -102,7 +102,6 @@ img.logo {
 	border-color: #C3E1C2;
 }
 
-
 /********************
  * Date range modal *
  ********************/
@@ -110,4 +109,12 @@ img.logo {
 .input-inline input, .input-inline select {
 	display: inline;
 	width: auto;
+}
+
+.nav-pills a {
+	cursor: pointer;
+}
+
+#modal-range-alert {
+	margin: 10px 0;
 }

@@ -49,6 +49,11 @@ OSM_DAYS: [ "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su" ],
  */
 IRL_DAYS: [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
 
+/**
+ * The month in OSM
+ */
+OSM_MONTHS: [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ],
+
 /*
  * ========== CLASSES ==========
  */
@@ -410,53 +415,26 @@ Week: function() {
  * Class DateRange, defines a range of months, weeks or days.
  * A typical week or day will be associated.
  */
-DateRange: function(start, end) {
+DateRange: function(s, e) {
 //ATTRIBUTES
 	/** The moment when this interval starts **/
-	var _start = start;
+	var _start;
 	
 	/** The moment when this interval ends (null if only concerning start day) **/
-	var _end = end || null;
+	var _end;
 
 	/** The kind of interval: month, week, day, holiday **/
 	var _type;
 	
 	/** The typical week or day associated **/
-	var _typical;
+	var _typical = undefined;
+	
+	var _self = this;
 
 //CONSTRUCTOR
 	function _init() {
-		//Find the kind of interval
-		if(_start.day != undefined) {
-			_type = "day";
-			if(_end != null) {
-				_typical = new YoHours.model.Week();
-			}
-			else {
-				_typical = new YoHours.model.Day();
-			}
-		}
-		else if(_start.week != undefined) {
-			_type = "week";
-			_typical = new YoHours.model.Week();
-		}
-		else if(_start.month != undefined) {
-			_type = "month";
-			_typical = new YoHours.model.Week();
-		}
-		else if(_start.holiday != undefined) {
-			_type = "holiday";
-			if(_start.holiday == "PH") {
-				_typical = new YoHours.model.Day();
-			}
-			else {
-				_typical = new YoHours.model.Week();
-			}
-		}
-		else {
-			throw new Error("Invalid date given");
-		}
-	}
+		_self.updateRange(s, e);
+	};
 
 //ACCESSORS
 	/**
@@ -473,6 +451,135 @@ DateRange: function(start, end) {
 		return _typical instanceof YoHours.model.Week;
 	};
 	
+	/**
+	 * @return The typical day or week
+	 */
+	this.getTypical = function() {
+		return _typical;
+	};
+	
+	/**
+	 * @return When this interval starts
+	 */
+	this.getStart = function() {
+		return _start;
+	};
+	
+	/**
+	 * @return When this interval ends
+	 */
+	this.getEnd = function() {
+		return _end;
+	};
+	
+	/**
+	 * @return The time selector for OSM opening_hours
+	 */
+	this.getTimeSelector = function() {
+		var result;
+		
+		switch(_type) {
+			case "day":
+				result = YoHours.model.OSM_MONTHS[_start.month-1]+" "+_start.day;
+				if(_end != null) {
+					//Same month as start ?
+					if(_start.month == _end.month) {
+						result += "-"+_end.day;
+					}
+					else {
+						result += "-"+YoHours.model.OSM_MONTHS[_end.month-1]+" "+_end.day;
+					}
+				}
+				break;
+
+			case "week":
+				result = "week "+_start.week;
+				if(_end != null) {
+					result += "-"+_end.week;
+				}
+				break;
+
+			case "month":
+				result = YoHours.model.OSM_MONTHS[_start.month-1];
+				if(_end != null) {
+					result += "-"+YoHours.model.OSM_MONTHS[_end.month-1];
+				}
+				break;
+
+			case "holiday":
+				result = _start.holiday;
+				break;
+
+			case "always":
+			default:
+				result = "";
+		}
+		
+		return result;
+	};
+
+//MODIFIERS
+	/**
+	 * Changes the date range
+	 */
+	this.updateRange = function(start, end) {
+		_start = start || {};
+		_end = end || null;
+		
+		//Find the kind of interval
+		if(_start.day != undefined) {
+			_type = "day";
+			if(_typical == undefined) {
+				if(_end != null && (_end.month > _start.month || _end.day > _start.day)) {
+					_typical = new YoHours.model.Week();
+				}
+				else {
+					_typical = new YoHours.model.Day();
+					_end = null;
+				}
+			}
+		}
+		else if(_start.week != undefined) {
+			_type = "week";
+			if(_typical == undefined) {
+				_typical = new YoHours.model.Week();
+			}
+			
+			//Clean end if same as start
+			if(_end != null && _end.week == _start.week) {
+				_end = null;
+			}
+		}
+		else if(_start.month != undefined) {
+			_type = "month";
+			if(_typical == undefined) {
+				_typical = new YoHours.model.Week();
+			}
+			
+			//Clean end if same as start
+			if(_end != null && _end.month == _start.month) {
+				_end = null;
+			}
+		}
+		else if(_start.holiday != undefined) {
+			_type = "holiday";
+			if(_typical == undefined) {
+				if(_start.holiday == "PH") {
+					_typical = new YoHours.model.Day();
+				}
+				else {
+					_typical = new YoHours.model.Week();
+				}
+			}
+		}
+		else {
+			_type = "always";
+			if(_typical == undefined) {
+				_typical = new YoHours.model.Week();
+			}
+		}
+	};
+
 //INIT
 	_init();
 },
@@ -485,15 +592,43 @@ DateRange: function(start, end) {
 OpeningHoursParser: function() {
 //OTHER METHODS
 	/**
+	 * Parses several date ranges to create an opening_hours string
+	 * @param dateRanges The date ranges to parse
+	 * @return The opening_hours string
+	 */
+	this.parse = function(dateRanges) {
+		var dateRange;
+		var result = "";
+		
+		//Read each date range
+		for(var rangeId=0, l=dateRanges.length; rangeId < l; rangeId++) {
+			dateRange = dateRanges[rangeId];
+			if(dateRange != undefined) {
+				if(dateRange.definesTypicalWeek()) {
+					if(result.length > 0) { result += "; "; }
+					result += _parseWeek(dateRange.getTypical(), dateRange.getTimeSelector());
+				}
+				else if(dateRange.definesTypicalDay()) {
+					
+				}
+			}
+		}
+		
+		return result;
+	};
+	
+	/**
 	 * Parses a week to create an opening_hours string
 	 * Algorithm inspired by OpeningHoursEdit plugin for JOSM
 	 * @param week The week object to parse
+	 * @param wideSelector A wide time selector to add (for example Jan-Mar)
 	 * @return The opening_hours string
 	 */
-	this.parse = function(week) {
+	function _parseWeek(week, wideSelector) {
 		var intervals = week.getIntervals(true);
 		var days = [];
 		var daysStr = [];
+		wideSelector = (wideSelector.length > 0) ? wideSelector+": " : "";
 		
 		// 0 means nothing done with this day yet
 		// 8 means the day is off
@@ -641,7 +776,7 @@ OpeningHoursParser: function() {
 				if (result.length > 0) {
 					result += "; ";
 				}
-				result += add;
+				result += wideSelector+add;
 			}
 		}
 		
@@ -699,8 +834,8 @@ OpeningHoursParser: function() {
 		 * Special cases
 		 */
 		// 24/7
-		if(result == "Mo-Su 00:00-24:00") {
-			result = "24/7";
+		if(result == wideSelector+"Mo-Su 00:00-24:00") {
+			result = wideSelector+"24/7";
 		}
 		
 		return result;
