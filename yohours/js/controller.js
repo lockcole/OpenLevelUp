@@ -56,7 +56,14 @@ MainController: function() {
 	};
 	
 	/**
-	 * @return The first defined date range, or null if no range defined
+	 * @return The date ranges array, some may be undefined
+	 */
+	this.getDateRanges = function() {
+		return _dateRanges;
+	};
+	
+	/**
+	 * @return The first defined date range
 	 */
 	this.getFirstDateRange = function() {
 		var i = 0, found = false;
@@ -69,7 +76,13 @@ MainController: function() {
 			}
 		}
 		
-		return (found) ? _dateRanges[i] : null;
+		//If no date range found, create a new one
+		if(!found) {
+			_dateRanges = [ new YoHours.model.DateRange() ];
+			i = 0;
+		}
+		
+		return _dateRanges[i];
 	};
 
 //OTHER METHODS
@@ -78,8 +91,52 @@ MainController: function() {
 	 */
 	this.init = function() {
 		_view.init();
-	}
+	};
 
+	/**
+	 * Clear all defined data
+	 */
+	this.clear = function() {
+		_dateRanges = [ new YoHours.model.DateRange() ];
+		_view.getCalendarView().show(_dateRanges[0]);
+		_view.refresh();
+	};
+	
+	/**
+	 * Adds a new date range
+	 * @param start The start time of this range
+	 * @param end The end time
+	 * @return The created range
+	 */
+	this.newRange = function(start, end) {
+		var range = new YoHours.model.DateRange(start, end);
+		_dateRanges.push(range);
+		_view.refresh();
+		return range;
+	};
+	
+	/**
+	 * Deletes the currently shown date range
+	 */
+	this.deleteCurrentRange = function() {
+		var range = _view.getCalendarView().getDateRange();
+		var found = false, l = _dateRanges.length, i=0;
+		
+		while(i < l && !found) {
+			if(_dateRanges[i] === range) {
+				found = true;
+				_dateRanges[i] = undefined;
+			}
+			else {
+				i++;
+			}
+		}
+		
+		//Refresh calendar
+		_view.getCalendarView().show(this.getFirstDateRange());
+		_view.refresh();
+	};
+	
 	// /**
 	 // * Event handler, to add the current interval in week
 	 // * @param interval The new interval

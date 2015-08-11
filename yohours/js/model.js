@@ -54,6 +54,11 @@ IRL_DAYS: [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
  */
 OSM_MONTHS: [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ],
 
+/**
+ * The months IRL
+ */
+IRL_MONTHS: [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
+
 /*
  * ========== CLASSES ==========
  */
@@ -146,7 +151,7 @@ Day: function() {
 		//Set to true values where an interval is defined
 		for(var id=0, l=_intervals.length; id < l; id++) {
 			if(_intervals[id] != undefined) {
-				if(_interval[id].getStartDay() == _interval[id].getEndDay() == 0) {
+				if(_intervals[id].getStartDay() == _intervals[id].getEndDay()) {
 					//Define start and end minute regarding the current day
 					var startMinute = _intervals[id].getFrom();
 					var endMinute = _intervals[id].getTo();
@@ -180,7 +185,7 @@ Day: function() {
 			var intervals = [];
 			var minStart = -1, minEnd;
 			
-			for(var min=0, lm=minuteArray[day].length; min < lm; min++) {
+			for(var min=0, lm=minuteArray.length; min < lm; min++) {
 				//First minute
 				if(min == 0) {
 					if(minuteArray[min]) {
@@ -473,6 +478,64 @@ DateRange: function(s, e) {
 	};
 	
 	/**
+	 * @return The kind of date range (day, week, month, holiday, always)
+	 */
+	this.getType = function() {
+		return _type;
+	};
+	
+	/**
+	 * @return The human readable date range
+	 */
+	this.getTimeForHumans = function() {
+		var result;
+		
+		switch(_type) {
+			case "day":
+				if(_end != null) {
+					result = "every week from "+YoHours.model.IRL_MONTHS[_start.month-1]+" "+_start.day+" to "+YoHours.model.IRL_MONTHS[_end.month-1]+" "+_end.day;
+				}
+				else {
+					result = "day "+YoHours.model.IRL_MONTHS[_start.month-1]+" "+_start.day;
+				}
+				break;
+
+			case "week":
+				if(_end != null) {
+					result = "every week from week "+_start.week+" to "+_end.week;
+				}
+				else {
+					result = "week "+_start.week;
+				}
+				break;
+
+			case "month":
+				if(_end != null) {
+					result = "every week from "+YoHours.model.IRL_MONTHS[_start.month-1]+" to "+YoHours.model.IRL_MONTHS[_end.month-1];
+				}
+				else {
+					result = "every week in "+YoHours.model.IRL_MONTHS[_start.month-1];
+				}
+				break;
+
+			case "holiday":
+				if(_start.holiday == "SH") {
+					result = "every week during school holidays";
+				}
+				else {
+					result = "every public holidays";
+				}
+				break;
+
+			case "always":
+			default:
+				result = "every week of year";
+		}
+		
+		return result;
+	};
+	
+	/**
 	 * @return The time selector for OSM opening_hours
 	 */
 	this.getTimeSelector = function() {
@@ -604,17 +667,41 @@ OpeningHoursParser: function() {
 		for(var rangeId=0, l=dateRanges.length; rangeId < l; rangeId++) {
 			dateRange = dateRanges[rangeId];
 			if(dateRange != undefined) {
+				if(result.length > 0) { result += "; "; }
 				if(dateRange.definesTypicalWeek()) {
-					if(result.length > 0) { result += "; "; }
 					result += _parseWeek(dateRange.getTypical(), dateRange.getTimeSelector());
 				}
 				else if(dateRange.definesTypicalDay()) {
-					
+					result += _parseDay(dateRange.getTypical(), dateRange.getTimeSelector());
 				}
 			}
 		}
 		
 		return result;
+	};
+	
+	/**
+	 * Parses a day to create an opening_hours string
+	 * @param day The day object to parse
+	 * @param wideSelector A wide time selector to add (for example Jan-Mar)
+	 * @return The opening_hours string
+	 */
+	function _parseDay(day, wideSelector) {
+		var intervals = day.getIntervals(true);
+		var interval;
+		var result = "";
+		wideSelector = (wideSelector.length > 0) ? wideSelector+": " : "";
+		
+		for(var i=0, l=intervals.length; i < l; i++) {
+			interval = intervals[i];
+			
+			if(interval != undefined) {
+				if(result.length > 0) { result += ", "; }
+				result += _timeString(interval.getFrom())+"-"+_timeString(interval.getTo());
+			}
+		}
+		
+		return (result.length == 0) ? wideSelector+"off" : wideSelector+result;
 	};
 	
 	/**
@@ -827,7 +914,7 @@ OpeningHoursParser: function() {
 		}
 		
 		if(resOff.length > 0) {
-			result += "; "+resOff+" off";
+			result += "; "+wideSelector+resOff+" off";
 		}
 		
 		/*

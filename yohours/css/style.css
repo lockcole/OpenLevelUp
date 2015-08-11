@@ -106,15 +106,19 @@ img.logo {
  * Date range modal *
  ********************/
 
+#modal-range-nav {
+	margin-bottom: 10px;
+}
+
 .input-inline input, .input-inline select {
 	display: inline;
 	width: auto;
 }
 
-.nav-pills a {
+.nav-pills a, .nav-tabs a {
 	cursor: pointer;
 }
 
 #modal-range-alert {
-	margin: 10px 0;
+	margin-bottom: 10px;
 }

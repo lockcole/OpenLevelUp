@@ -26,94 +26,6 @@ YoHours.view = {
 /*
  * ========== CLASSES ==========
  */
-/**
- * WeekView, view class for week display
- * @param mainView The main view
- */
-// WeekView: function(mainView) {
-// //ATTRIBUTES
-	// /** The mainview object **/
-	// var _mainView = mainView;
-	
-	// /** This object **/
-	// var _self = this;
-
-// //OTHER METHODS
-	// this.init = function() {
-		// $("#calendar").fullCalendar({
-			// header: {
-				// left: '',
-				// center: '',
-				// right: ''
-			// },
-			// defaultView: 'agendaWeek',
-			// editable: true,
-			// columnFormat: 'dddd',
-			// timeFormat: 'HH:mm',
-			// axisFormat: 'HH:mm',
-			// allDayText: '24/24',
-			// slotDuration: '00:15:00',
-			// firstDay: 1,
-			// eventOverlap: false,
-			// selectable: true,
-			// selectHelper: true,
-			// selectOverlap: false,
-			// select: function(start, end) {
-				// //Add event to week intervals
-				// var minStart = parseInt(start.format("H")) * 60 + parseInt(start.format("m"));
-				// var minEnd = parseInt(end.format("H")) * 60 + parseInt(end.format("m"));
-				// var weekId = controller.newInterval(
-					// new YoHours.model.Interval(
-						// swDayToMwDay(start.format("d")),
-						// swDayToMwDay(end.format("d")),
-						// minStart,
-						// minEnd
-					// )
-				// );
-				
-				// //Add event on calendar
-				// eventData = {
-					// id: weekId,
-					// start: start,
-					// end: end
-				// };
-				// $('#calendar').fullCalendar('renderEvent', eventData, true);
-			// },
-			// eventClick: function(calEvent, jsEvent, view) {
-				// controller.removeInterval(calEvent._id);
-				// $('#calendar').fullCalendar('removeEvents', calEvent._id);
-			// },
-			// eventResize: function(event, delta, revertFunc, jsEvent, ui, view) {
-				// var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
-				// var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
-				// controller.editInterval(
-					// event.id,
-					// new YoHours.model.Interval(
-						// swDayToMwDay(event.start.format("d")),
-						// swDayToMwDay(event.end.format("d")),
-						// minStart,
-						// minEnd
-					// )
-				// );
-			// },
-			// eventDrop: function(event, delta, revertFunc, jsEvent, ui, view) {
-				// var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
-				// var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
-				// controller.editInterval(
-					// event.id,
-					// new YoHours.model.Interval(
-						// swDayToMwDay(event.start.format("d")),
-						// swDayToMwDay(event.end.format("d")),
-						// minStart,
-						// minEnd
-					// )
-				// );
-			// }
-		// });
-	// };
-// },
-
-
 
 /**
  * The date range modal component
@@ -144,19 +56,112 @@ DateRangeView: function(main) {
 	this.show = function(edit) {
 		_editMode = edit || false;
 		
-		//Reset
+		//Reset navigation
 		$("#modal-range-nav li").removeClass("active");
 		$("#modal-range-form > div").hide();
 		$("#modal-range-alert").hide();
 		
+		//Reset inputs
+		$("#range-day-startday").val("");
+		$("#range-day-startmonth").val(1);
+		$("#range-day-endday").val("");
+		$("#range-day-endmonth").val(0);
+		$("#range-week-start").val(1);
+		$("#range-week-end").val("");
+		$("#range-month-start").val(1);
+		$("#range-month-end").val(0);
+		$("input[name=range-holiday-type][value=SH]").prop("checked", false);
+		$("input[name=range-holiday-type][value=PH]").prop("checked", false);
+		
 		//Edit interval
 		if(_editMode) {
+			//Show modes that defines week or day only, depending of previous typical
+			if(_mainView.getCalendarView().getDateRange().definesTypicalWeek()) {
+				$("#modal-range-nav-always").show();
+				$("#modal-range-nav-month").show();
+				$("#modal-range-nav-week").show();
+				$("#range-day-end").show();
+				$("#range-day .text-info").hide();
+				$("#range-holiday-sh").show();
+				$("#range-holiday-ph").hide();
+			}
+			else {
+				$("#modal-range-nav-always").hide();
+				$("#modal-range-nav-month").hide();
+				$("#modal-range-nav-week").hide();
+				$("#range-day-end").hide();
+				$("#range-day .text-info").show();
+				$("#range-holiday-sh").hide();
+				$("#range-holiday-ph").show();
+			}
+			
 			var start = _mainView.getCalendarView().getDateRange().getStart();
 			var end = _mainView.getCalendarView().getDateRange().getEnd();
-			//TODO
+			var type = _mainView.getCalendarView().getDateRange().getType();
+			
+			switch(type) {
+				case "day":
+					$("#range-day-startday").val(start.day);
+					$("#range-day-startmonth").val(start.month);
+					if(end != null) {
+						$("#range-day-endday").val(end.day);
+						$("#range-day-endmonth").val(end.month);
+					}
+					else {
+						$("#range-day-endday").val("");
+						$("#range-day-endmonth").val(0);
+					}
+					break;
+
+				case "week":
+					$("#range-week-start").val(start.week);
+					if(end != null) {
+						$("#range-week-end").val(end.week);
+					}
+					else {
+						$("#range-week-end").val("");
+					}
+					break;
+
+				case "month":
+					$("#range-month-start").val(start.month);
+					if(end != null) {
+						$("#range-month-end").val(end.month);
+					}
+					else {
+						$("#range-month-end").val(0);
+					}
+					break;
+
+				case "holiday":
+					if(start.holiday == "SH") {
+						$("input[name=range-holiday-type][value=SH]").prop("checked", true);
+						$("input[name=range-holiday-type][value=PH]").prop("checked", false);
+					}
+					else {
+						$("input[name=range-holiday-type][value=PH]").prop("checked", true);
+						$("input[name=range-holiday-type][value=SH]").prop("checked", false);
+					}
+					break;
+
+				case "always":
+					break;
+			}
+			
+			$("#modal-range-nav-"+type).addClass("active");
+			$("#range-"+type).show();
 		}
 		//New wide interval
 		else {
+			//Show all inputs
+			$("#modal-range-nav-always").show();
+			$("#modal-range-nav-month").show();
+			$("#modal-range-nav-week").show();
+			$("#range-day-end").show();
+			$("#range-day .text-info").show();
+			$("#range-holiday-sh").show();
+			$("#range-holiday-ph").show();
+			
 			//Set first tab as active
 			$("#modal-range-nav li:first").addClass("active");
 			_rangeType = $("#modal-range-nav li:first").attr("id").substr("modal-range-nav-".length);
@@ -229,11 +234,15 @@ DateRangeView: function(main) {
 					if(!isNaN(endVal) && endVal > 0 && !isNaN(endVal2) && endVal2 > 0) {
 						end = { day: endVal, month: endVal2 };
 					}
+					else if(_editMode && _mainView.getCalendarView().getDateRange().definesTypicalWeek()) {
+						throw new Error("Missing end day");
+					}
 					
 					break;
 				case "holiday":
 					startVal = $("input[name=range-holiday-type]:checked").val();
 					if(startVal != "PH" && startVal != "SH") { throw new Error("Invalid holiday type"); }
+					start = { holiday: startVal };
 					
 					break;
 
@@ -245,16 +254,19 @@ DateRangeView: function(main) {
 			//Edit currently shown calendar
 			if(_editMode) {
 				_mainView.getCalendarView().getDateRange().updateRange(start, end);
+				_mainView.getCalendarView().updateDateRangeLabel();
+				_mainView.refresh();
 			}
 			//Create new calendar
 			else {
-				
+				_mainView.getCalendarView().show(_mainView.getController().newRange(start, end));
 			}
 			$("#modal-range").modal("hide");
 		}
 		catch(e) {
 			$("#modal-range-alert").show();
 			$("#modal-range-alert-label").html(e);
+			console.error(e);
 		}
 	};
 	
@@ -277,7 +289,12 @@ CalendarView: function(main) {
 
 //CONSTRUCTOR
 	function _init() {
-		$("#range-edit").click(function() { _mainView.getController().getView().getDateRangeView().show(true); });
+		$("#range-edit").click(function() { _mainView.getDateRangeView().show(true); });
+		$("#range-delete").click(function() {
+			_mainView.getController().deleteCurrentRange();
+			_mainView.getCalendarView().show(_mainView.getController().getFirstDateRange());
+		});
+		$("#range-nav-new").click(function() { _mainView.getDateRangeView().show(false); })
 	};
 
 //ACCESSORS
@@ -290,14 +307,76 @@ CalendarView: function(main) {
 
 //MODIFIERS
 	/**
+	 * Updates the date range navigation bar
+	 */
+	this.updateRangeNavigationBar = function() {
+		//Remove previous tabs
+		$("#range-nav li.rnav").remove();
+		
+		//Create tabs
+		var dateRanges = _mainView.getController().getDateRanges();
+		var dateRange;
+		var navHtml = '';
+		for(var i=0, l=dateRanges.length; i < l; i++) {
+			dateRange = dateRanges[i];
+			if(dateRange != undefined) {
+				navHtml += '<li role="presentation" id="range-nav-'+i+'" class="rnav';
+				if(dateRange === _dateRange) { navHtml += ' active'; }
+				navHtml += '"><a onClick="controller.getView().getCalendarView().tab(\''+i+'\')">#'+(i+1)+'</a></li>';
+			}
+		}
+		
+		//Add to DOM
+		$("#range-nav").prepend(navHtml);
+	};
+	
+	/**
+	 * Updates the label showing the human readable date range
+	 */
+	this.updateDateRangeLabel = function() {
+		$("#range-txt-label").html(_dateRange.getTimeForHumans());
+	};
+	
+	/**
+	 * Click handler for navigation tabs
+	 * @param id The date range id to show
+	 */
+	this.tab = function(id) {
+		this.show(_mainView.getController().getDateRanges()[id]);
+		$("#range-nav li.active").removeClass("active");
+		$("#range-nav-"+id).addClass("active");
+	};
+	
+	/**
 	 * Displays the given typical week or day
 	 * @param dateRange The date range to display
 	 */
 	this.show = function(dateRange) {
 		_dateRange = dateRange;
+		$("#calendar").fullCalendar('destroy');
 		
 		//Week
 		if(_dateRange.definesTypicalWeek()) {
+			var intervals = _dateRange.getTypical().getIntervals();
+			var events = [];
+			var interval, weekId, eventData;
+			
+			//Create intervals array
+			for(var i = 0; i < intervals.length; i++) {
+				interval = intervals[i];
+				
+				if(interval != undefined) {
+					//Add event on calendar
+					eventData = {
+						id: i,
+						start: moment().day("Monday").hour(0).minute(0).second(0).add(interval.getStartDay(), 'days').add(interval.getFrom(), 'minutes'),
+						end: moment().day("Monday").hour(0).minute(0).second(0).add(interval.getEndDay(), 'days').add(interval.getTo(), 'minutes'),
+					};
+					events.push(eventData);
+				}
+			}
+			
+			//Create calendar
 			$("#calendar").fullCalendar({
 				header: {
 					left: '',
@@ -313,6 +392,7 @@ CalendarView: function(main) {
 				slotDuration: '00:15:00',
 				firstDay: 1,
 				eventOverlap: false,
+				events: events,
 				selectable: true,
 				selectHelper: true,
 				selectOverlap: false,
@@ -376,11 +456,109 @@ CalendarView: function(main) {
 		}
 		//Day
 		else if(_dateRange.definesTypicalDay()) {
+			var intervals = _dateRange.getTypical().getIntervals();
+			var events = [];
+			var interval, weekId, eventData;
 			
+			//Create intervals array
+			for(var i = 0; i < intervals.length; i++) {
+				interval = intervals[i];
+				
+				if(interval != undefined) {
+					//Add event on calendar
+					eventData = {
+						id: i,
+						start: moment().hour(0).minute(0).second(0).add(interval.getFrom(), 'minutes'),
+						end: moment().hour(0).minute(0).second(0).add(interval.getTo(), 'minutes'),
+					};
+					events.push(eventData);
+				}
+			}
+			
+			//Create calendar
+			$("#calendar").fullCalendar({
+				header: {
+					left: '',
+					center: '',
+					right: ''
+				},
+				defaultView: 'agendaDay',
+				editable: true,
+				columnFormat: 'dddd',
+				timeFormat: 'HH:mm',
+				axisFormat: 'HH:mm',
+				allDayText: '24/24',
+				slotDuration: '00:15:00',
+				firstDay: 1,
+				eventOverlap: false,
+				events: events,
+				selectable: true,
+				selectHelper: true,
+				selectOverlap: false,
+				select: function(start, end) {
+					//Add event to week intervals
+					var minStart = parseInt(start.format("H")) * 60 + parseInt(start.format("m"));
+					var minEnd = parseInt(end.format("H")) * 60 + parseInt(end.format("m"));
+					var weekId = _dateRange.getTypical().addInterval(
+						new YoHours.model.Interval(
+							0,
+							0,
+							minStart,
+							minEnd
+						)
+					);
+					
+					//Add event on calendar
+					eventData = {
+						id: weekId,
+						start: start,
+						end: end
+					};
+					$('#calendar').fullCalendar('renderEvent', eventData, true);
+					
+					_mainView.refresh();
+				},
+				eventClick: function(calEvent, jsEvent, view) {
+					_dateRange.getTypical().removeInterval(calEvent._id);
+					$('#calendar').fullCalendar('removeEvents', calEvent._id);
+					_mainView.refresh();
+				},
+				eventResize: function(event, delta, revertFunc, jsEvent, ui, view) {
+					var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
+					var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
+					_dateRange.getTypical().editInterval(
+						event.id,
+						new YoHours.model.Interval(
+							0,
+							0,
+							minStart,
+							minEnd
+						)
+					);
+					_mainView.refresh();
+				},
+				eventDrop: function(event, delta, revertFunc, jsEvent, ui, view) {
+					var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
+					var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
+					_dateRange.getTypical().editInterval(
+						event.id,
+						new YoHours.model.Interval(
+							0,
+							0,
+							minStart,
+							minEnd
+						)
+					);
+					_mainView.refresh();
+				}
+			});
 		}
 		else {
 			throw new Error("Invalid typical object");
 		}
+		
+		this.updateDateRangeLabel();
+		this.updateRangeNavigationBar();
 	};
 
 //INIT
@@ -508,7 +686,7 @@ MainView: function(ctrl) {
 		_helpView = $("#modal-help");
 		$("#help-link").click(function() { _helpView.modal("show"); });
 		
-		$("#oh-clear").click(function() { _ctrl.clearIntervals(); });
+		$("#oh-clear").click(function() { _ctrl.clear(); });
 	};
 	
 	/**
