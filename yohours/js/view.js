@@ -484,7 +484,7 @@ CalendarView: function(main) {
 				},
 				defaultView: 'agendaDay',
 				editable: true,
-				columnFormat: 'dddd',
+				columnFormat: '[]',
 				timeFormat: 'HH:mm',
 				axisFormat: 'HH:mm',
 				allDayText: '24/24',

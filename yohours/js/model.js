@@ -151,19 +151,27 @@ Day: function() {
 		//Set to true values where an interval is defined
 		for(var id=0, l=_intervals.length; id < l; id++) {
 			if(_intervals[id] != undefined) {
+				var startMinute = null;
+				var endMinute = null;
+				
 				if(_intervals[id].getStartDay() == _intervals[id].getEndDay()) {
 					//Define start and end minute regarding the current day
-					var startMinute = _intervals[id].getFrom();
-					var endMinute = _intervals[id].getTo();
-
-					//Set to true the minutes for this day
-					if(startMinute != endMinute) {
-						for(var minute = startMinute; minute <= endMinute; minute++) {
-							minuteArray[minute] = true;
-						}
+					startMinute = _intervals[id].getFrom();
+					endMinute = _intervals[id].getTo();
+				}
+				else if(_intervals[id].getEndDay() - _intervals[id].getStartDay() == 1 && _intervals[id].getTo() == 0) {
+					startMinute = _intervals[id].getFrom();
+					endMinute = 24*60 - 1;
+				}
+				
+				//Set to true the minutes for this day
+				if(startMinute != null && endMinute != null && startMinute != endMinute) {
+					for(var minute = startMinute; minute <= endMinute; minute++) {
+						minuteArray[minute] = true;
 					}
 				}
 				else {
+					console.log(_intervals[id].getFrom()+" "+_intervals[id].getTo()+" "+_intervals[id].getStartDay()+" "+_intervals[id].getEndDay());
 					throw new Error("Invalid interval");
 				}
 			}
