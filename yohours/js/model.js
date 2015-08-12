@@ -684,16 +684,16 @@ DateRange: function(s, e) {
 
 
 /**
- * Class OpeningHoursParser, creates opening_hours value from week object
+ * Class OpeningHoursBuilder, creates opening_hours value from date range object
  */
-OpeningHoursParser: function() {
+OpeningHoursBuilder: function() {
 //OTHER METHODS
 	/**
 	 * Parses several date ranges to create an opening_hours string
 	 * @param dateRanges The date ranges to parse
 	 * @return The opening_hours string
 	 */
-	this.parse = function(dateRanges) {
+	this.build = function(dateRanges) {
 		var dateRange;
 		var result = "", resIntv;
 		
@@ -703,10 +703,10 @@ OpeningHoursParser: function() {
 			if(dateRange != undefined) {
 				resIntv = "";
 				if(dateRange.definesTypicalWeek()) {
-					resIntv += _parseWeek(dateRange.getTypical(), dateRange.getTimeSelector());
+					resIntv += _buildWeek(dateRange.getTypical(), dateRange.getTimeSelector());
 				}
 				else if(dateRange.definesTypicalDay()) {
-					resIntv += _parseDay(dateRange.getTypical(), dateRange.getTimeSelector());
+					resIntv += _buildDay(dateRange.getTypical(), dateRange.getTimeSelector());
 				}
 				
 				//Add to result if something was returned by subparsers
@@ -721,12 +721,12 @@ OpeningHoursParser: function() {
 	};
 	
 	/**
-	 * Parses a day to create an opening_hours string
-	 * @param day The day object to parse
+	 * Reads a day to create an opening_hours string
+	 * @param day The day object to read
 	 * @param wideSelector A wide time selector to add (for example Jan-Mar)
 	 * @return The opening_hours string
 	 */
-	function _parseDay(day, wideSelector) {
+	function _buildDay(day, wideSelector) {
 		var intervals = day.getIntervals(true);
 		var interval;
 		var result = "";
@@ -745,13 +745,13 @@ OpeningHoursParser: function() {
 	};
 	
 	/**
-	 * Parses a week to create an opening_hours string
+	 * Reads a week to create an opening_hours string
 	 * Algorithm inspired by OpeningHoursEdit plugin for JOSM
-	 * @param week The week object to parse
+	 * @param week The week object to read
 	 * @param wideSelector A wide time selector to add (for example Jan-Mar)
 	 * @return The opening_hours string
 	 */
-	function _parseWeek(week, wideSelector) {
+	function _buildWeek(week, wideSelector) {
 		var intervals = week.getIntervals(true);
 		var days = [];
 		var daysStr = [];
@@ -982,6 +982,85 @@ OpeningHoursParser: function() {
 		var period = "";
 		var m = minutes % 60;
 		return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + period;
+	};
+},
+
+
+
+/**
+ * Class OpeningHoursParser, creates DateRange/Week/Day objects from opening_hours string
+ * Based on a subpart of grammar defined at http://wiki.openstreetmap.org/wiki/Key:opening_hours/specification
+ */
+OpeningHoursParser: function() {
+//CONSTANTS
+	var RGX_RULE_MODIFIER = /^(open|closed|off|unknown|"[^"]+")?$/;
+
+//OTHER METHODS
+	/**
+	 * Parses the given opening_hours string
+	 * @param oh The opening_hours string
+	 * @return An array of date ranges
+	 */
+	this.parse = function(oh) {
+		var result = [];
+		
+		//Separate each block
+		var blocks = oh.split(';');
+		
+		//Read each block
+		var block, tokens, currentToken;
+		for(var i=0, li=blocks.length; i < li; i++) {
+			block = blocks[i];
+			tokens = _tokenize(block);
+			currentToken = 0;
+			
+			console.log(tokens);
+			
+			//Try to find wide range selector (month, monthday, week)
+			if(currentToken < tokens.length && _isWideRange(tokens[currentToken])) {
+				currentToken++;
+			}
+			
+			//Try to find small range selectors (weekday, time)
+			if(currentToken < tokens.length && _isSmallRange(tokens[currentToken])) {
+				currentToken++;
+			}
+			
+			//Try to read rule modifier (void, open, closed/off, unknown, comment)
+			if(currentToken < tokens.length && _isRuleModifier(tokens[currentToken])) {
+				currentToken++;
+			}
+		}
+		
+		return result;
+	};
+	
+	/**
+	 * Is the given token a wide range selector ?
+	 */
+	function _isWideRange(token) {
+
+	};
+	
+	/**
+	 * Is the given token a small range selector ?
+	 */
+	function _isSmallRange(token) {
+
+	};
+	
+	/**
+	 * Is the given token a rule modifier ?
+	 */
+	function _isRuleModifier(token) {
+		return RGX_RULE_MODIFIER.test(token);
+	};
+	
+	/**
+	 * Create tokens for a given block
+	 */
+	function _tokenize(block) {
+		return block.trim().split(' ');
 	};
 }
 
