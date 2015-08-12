@@ -1,6 +1,12 @@
 Changes history
 ===============
 
+12 august 2015
+--------------
+* Season system added
+* Page style changed
+* Bug fix for sunday 23:59
+
 7 august 2015
 -------------
 * Following intervals are now merged

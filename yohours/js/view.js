@@ -70,8 +70,7 @@ DateRangeView: function(main) {
 		$("#range-week-end").val("");
 		$("#range-month-start").val(1);
 		$("#range-month-end").val(0);
-		$("input[name=range-holiday-type][value=SH]").prop("checked", false);
-		$("input[name=range-holiday-type][value=PH]").prop("checked", false);
+		$("input[name=range-holiday-type]").prop("checked", false);
 		
 		//Edit interval
 		if(_editMode) {
@@ -84,15 +83,17 @@ DateRangeView: function(main) {
 				$("#range-day .text-info").hide();
 				$("#range-holiday-sh").show();
 				$("#range-holiday-ph").hide();
+				$("#range-holiday-easter").hide();
 			}
 			else {
 				$("#modal-range-nav-always").hide();
 				$("#modal-range-nav-month").hide();
 				$("#modal-range-nav-week").hide();
 				$("#range-day-end").hide();
-				$("#range-day .text-info").show();
+				$("#range-day .text-info").hide();
 				$("#range-holiday-sh").hide();
 				$("#range-holiday-ph").show();
+				$("#range-holiday-easter").show();
 			}
 			
 			var start = _mainView.getCalendarView().getDateRange().getStart();
@@ -134,14 +135,8 @@ DateRangeView: function(main) {
 					break;
 
 				case "holiday":
-					if(start.holiday == "SH") {
-						$("input[name=range-holiday-type][value=SH]").prop("checked", true);
-						$("input[name=range-holiday-type][value=PH]").prop("checked", false);
-					}
-					else {
-						$("input[name=range-holiday-type][value=PH]").prop("checked", true);
-						$("input[name=range-holiday-type][value=SH]").prop("checked", false);
-					}
+					$("input[name=range-holiday-type]").prop("checked", false);
+					$("input[name=range-holiday-type][value="+start.holiday+"]").prop("checked", true);
 					break;
 
 				case "always":
@@ -159,8 +154,7 @@ DateRangeView: function(main) {
 			$("#modal-range-nav-week").show();
 			$("#range-day-end").show();
 			$("#range-day .text-info").show();
-			$("#range-holiday-sh").show();
-			$("#range-holiday-ph").show();
+			$("#range-holiday > div > label").show();
 			
 			//Set first tab as active
 			$("#modal-range-nav li:first").addClass("active");
@@ -241,7 +235,7 @@ DateRangeView: function(main) {
 					break;
 				case "holiday":
 					startVal = $("input[name=range-holiday-type]:checked").val();
-					if(startVal != "PH" && startVal != "SH") { throw new Error("Invalid holiday type"); }
+					if(startVal != "PH" && startVal != "SH" && startVal != "easter") { throw new Error("Invalid holiday type"); }
 					start = { holiday: startVal };
 					
 					break;
@@ -251,10 +245,25 @@ DateRangeView: function(main) {
 					start = {};
 			}
 			
+			//Check if not overlapping another date range
+			var newRange = new YoHours.model.DateRange(start, end);
+			var overlap = false;
+			var ranges = _mainView.getController().getDateRanges();
+			var l = ranges.length, i=0;
+			
+			while(i < l) {
+				if(ranges[i] != undefined && ranges[i].isSameRange(newRange)) {
+					throw new Error("This time range is identical to another one");
+				}
+				else {
+					i++;
+				}
+			}
+			
 			//Edit currently shown calendar
 			if(_editMode) {
 				_mainView.getCalendarView().getDateRange().updateRange(start, end);
-				_mainView.getCalendarView().updateDateRangeLabel();
+				_mainView.getCalendarView().show(_mainView.getCalendarView().getDateRange());
 				_mainView.refresh();
 			}
 			//Create new calendar
@@ -320,9 +329,11 @@ CalendarView: function(main) {
 		for(var i=0, l=dateRanges.length; i < l; i++) {
 			dateRange = dateRanges[i];
 			if(dateRange != undefined) {
+				timeName = dateRange.getTimeSelector();
+				if(timeName.length == 0) { timeName = "All year"; }
 				navHtml += '<li role="presentation" id="range-nav-'+i+'" class="rnav';
 				if(dateRange === _dateRange) { navHtml += ' active'; }
-				navHtml += '"><a onClick="controller.getView().getCalendarView().tab(\''+i+'\')">#'+(i+1)+'</a></li>';
+				navHtml += '"><a onClick="controller.getView().getCalendarView().tab(\''+i+'\')">'+timeName+'</a></li>';
 			}
 		}
 		
@@ -385,6 +396,7 @@ CalendarView: function(main) {
 				},
 				defaultView: 'agendaWeek',
 				editable: true,
+				height: "auto",
 				columnFormat: 'dddd',
 				timeFormat: 'HH:mm',
 				axisFormat: 'HH:mm',
@@ -393,6 +405,7 @@ CalendarView: function(main) {
 				firstDay: 1,
 				eventOverlap: false,
 				events: events,
+				eventConstraint: { start: moment().day("Monday").format("YYYY-MM-DD[T00:00:00]"), end: moment().day("Monday").add(7, "days").format("YYYY-MM-DD[T00:00:00]") },
 				selectable: true,
 				selectHelper: true,
 				selectOverlap: false,
@@ -484,7 +497,8 @@ CalendarView: function(main) {
 				},
 				defaultView: 'agendaDay',
 				editable: true,
-				columnFormat: '[]',
+				height: "auto",
+				columnFormat: '[Day]',
 				timeFormat: 'HH:mm',
 				axisFormat: 'HH:mm',
 				allDayText: '24/24',
@@ -492,6 +506,7 @@ CalendarView: function(main) {
 				firstDay: 1,
 				eventOverlap: false,
 				events: events,
+				eventConstraint: { start: moment().format("YYYY-MM-DD[T00:00:00]"), end: moment().add(1, "days").format("YYYY-MM-DD[T00:00:00]") },
 				selectable: true,
 				selectHelper: true,
 				selectOverlap: false,

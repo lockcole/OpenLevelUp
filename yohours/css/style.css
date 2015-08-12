@@ -28,7 +28,7 @@
  **********/
 
 body {
-	margin-top: 60px;
+	margin-top: 80px;
 	height: 100%;
 }
 
@@ -56,8 +56,17 @@ footer {
  * Header *
  **********/
 
-img.logo {
-	height: 80px;
+.navbar-default.navbar-yo {
+	background-color: #fcfce6;
+	background-image: linear-gradient(to bottom, #ffffed 0px, #fffdea 100%);
+}
+
+.navbar-brand {
+	padding-top: 5px;
+}
+
+.navbar-brand img {
+	height: 40px;
 }
 
 
@@ -115,10 +124,14 @@ img.logo {
 	width: auto;
 }
 
-.nav-pills a, .nav-tabs a {
+.nav a {
 	cursor: pointer;
 }
 
 #modal-range-alert {
 	margin-bottom: 10px;
+}
+
+#range-holiday label {
+	margin-right: 15px;
 }

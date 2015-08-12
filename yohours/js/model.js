@@ -59,6 +59,17 @@ OSM_MONTHS: [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oc
  */
 IRL_MONTHS: [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
 
+/**
+ * The maximal minute that an interval can have
+ */
+MINUTES_MAX: 1440,
+
+/**
+ * The maximal value of days
+ */
+DAYS_MAX: 6,
+
+
 /*
  * ========== CLASSES ==========
  */
@@ -116,11 +127,11 @@ Interval: function(dayStart, dayEnd, minStart, minEnd) {
 	};
 
 //CONSTRUCTOR
-	//Handle special cases, like sunday midnight
-	if(_end == 0) {
-		_dayEnd = (_dayEnd == 0) ? 6 : _dayEnd-1;
-		_end = 24 * 60 -1;
+	if(_dayEnd == 0 && _end == 0) {
+		_dayEnd = YoHours.model.DAYS_MAX;
+		_end = YoHours.model.MINUTES_MAX;
 	}
+	//console.log("Interval", _dayStart, _dayEnd, _start, _end);
 },
 
 
@@ -144,7 +155,7 @@ Day: function() {
 		//Create array with all values set to false
 		//For each minute
 		var minuteArray = [];
-		for (var minute = 0; minute < 24 * 60; minute++) {
+		for (var minute = 0; minute <= YoHours.model.MINUTES_MAX; minute++) {
 			minuteArray[minute] = false;
 		}
 		
@@ -154,14 +165,13 @@ Day: function() {
 				var startMinute = null;
 				var endMinute = null;
 				
-				if(_intervals[id].getStartDay() == _intervals[id].getEndDay()) {
+				if(
+					_intervals[id].getStartDay() == _intervals[id].getEndDay()
+					|| (_intervals[id].getEndDay() == YoHours.model.DAYS_MAX && _intervals[id].getTo() == YoHours.model.MINUTES_MAX)
+				) {
 					//Define start and end minute regarding the current day
 					startMinute = _intervals[id].getFrom();
 					endMinute = _intervals[id].getTo();
-				}
-				else if(_intervals[id].getEndDay() - _intervals[id].getStartDay() == 1 && _intervals[id].getTo() == 0) {
-					startMinute = _intervals[id].getFrom();
-					endMinute = 24*60 - 1;
 				}
 				
 				//Set to true the minutes for this day
@@ -290,10 +300,10 @@ Week: function() {
 		//Create array with all values set to false
 		//For each day
 		var minuteArray = [];
-		for(var day = 0; day < 7; day++) {
+		for(var day = 0; day <= YoHours.model.DAYS_MAX; day++) {
 			//For each minute
 			minuteArray[day] = [];
-			for (var minute = 0; minute < 24 * 60; minute++) {
+			for (var minute = 0; minute <= YoHours.model.MINUTES_MAX; minute++) {
 				minuteArray[day][minute] = false;
 			}
 		}
@@ -304,7 +314,7 @@ Week: function() {
 				for(var day = _intervals[id].getStartDay(); day <= _intervals[id].getEndDay(); day++) {
 					//Define start and end minute regarding the current day
 					var startMinute = (day == _intervals[id].getStartDay()) ? _intervals[id].getFrom() : 0;
-					var endMinute = (day == _intervals[id].getEndDay()) ? _intervals[id].getTo() : 24*60 -1;
+					var endMinute = (day == _intervals[id].getEndDay()) ? _intervals[id].getTo() : YoHours.model.MINUTES_MAX;
 
 					//Set to true the minutes for this day
 					if(startMinute != endMinute) {
@@ -342,7 +352,7 @@ Week: function() {
 						}
 					}
 					//Last minute of sunday
-					else if(day == 6 && min == lm-1) {
+					else if(day == YoHours.model.DAYS_MAX && min == lm-1) {
 						if(dayStart >= 0 && minuteArray[day][min]) {
 							intervals.push(new YoHours.model.Interval(
 								dayStart,
@@ -366,7 +376,7 @@ Week: function() {
 									dayStart,
 									day-1,
 									minStart,
-									24*60
+									YoHours.model.MINUTES_MAX
 								));
 							}
 							else {
@@ -530,8 +540,14 @@ DateRange: function(s, e) {
 				if(_start.holiday == "SH") {
 					result = "every week during school holidays";
 				}
-				else {
+				else if(_start.holiday == "PH") {
 					result = "every public holidays";
+				}
+				else if(_start.holiday == "easter") {
+					result = "each easter day";
+				}
+				else {
+					throw new Error("Invalid holiday type: "+_start.holiday);
 				}
 				break;
 
@@ -635,7 +651,7 @@ DateRange: function(s, e) {
 		else if(_start.holiday != undefined) {
 			_type = "holiday";
 			if(_typical == undefined) {
-				if(_start.holiday == "PH") {
+				if(_start.holiday == "PH" || _start.holiday == "easter") {
 					_typical = new YoHours.model.Day();
 				}
 				else {
@@ -651,6 +667,16 @@ DateRange: function(s, e) {
 		}
 	};
 
+//OTHER METHODS
+	/**
+	 * Is the given date range concerning the same time interval ?
+	 * @param dateRange another date range
+	 * @return True if same time selector
+	 */
+	this.isSameRange = function(dateRange) {
+		return this.getTimeSelector() == dateRange.getTimeSelector();
+	};
+	
 //INIT
 	_init();
 },
@@ -669,18 +695,24 @@ OpeningHoursParser: function() {
 	 */
 	this.parse = function(dateRanges) {
 		var dateRange;
-		var result = "";
+		var result = "", resIntv;
 		
 		//Read each date range
 		for(var rangeId=0, l=dateRanges.length; rangeId < l; rangeId++) {
 			dateRange = dateRanges[rangeId];
 			if(dateRange != undefined) {
-				if(result.length > 0) { result += "; "; }
+				resIntv = "";
 				if(dateRange.definesTypicalWeek()) {
-					result += _parseWeek(dateRange.getTypical(), dateRange.getTimeSelector());
+					resIntv += _parseWeek(dateRange.getTypical(), dateRange.getTimeSelector());
 				}
 				else if(dateRange.definesTypicalDay()) {
-					result += _parseDay(dateRange.getTypical(), dateRange.getTimeSelector());
+					resIntv += _parseDay(dateRange.getTypical(), dateRange.getTimeSelector());
+				}
+				
+				//Add to result if something was returned by subparsers
+				if(resIntv.length > 0) {
+					if(result.length > 0) { result += "; "; }
+					result += resIntv;
 				}
 			}
 		}
@@ -749,7 +781,7 @@ OpeningHoursParser: function() {
 			
 			if(interval != undefined) {
 				//Handle sunday 24:00 with monday 00:00
-				if(interval.getStartDay() == 6 && interval.getEndDay() == 6 && interval.getTo() == 24*60 -1) {
+				if(interval.getStartDay() == YoHours.model.DAYS_MAX && interval.getEndDay() == YoHours.model.DAYS_MAX && interval.getTo() == YoHours.model.MINUTES_MAX) {
 					sunday24 = interval.getFrom();
 				}
 				if(interval.getStartDay() == 0 && interval.getEndDay() == 0 && interval.getFrom() == 0) {
@@ -841,7 +873,7 @@ OpeningHoursParser: function() {
 				var lastSameDay = i;
 				var sameDayCount = 1;
 				
-				for(var j = i + 1; j < 7; j++) {
+				for(var j = i + 1; j < days.length; j++) {
 					if (daysStr[i] == daysStr[j]) {
 						daysStatus[j] = i + 1;
 						lastSameDay = j;
@@ -931,6 +963,11 @@ OpeningHoursParser: function() {
 		// 24/7
 		if(result == wideSelector+"Mo-Su 00:00-24:00") {
 			result = wideSelector+"24/7";
+		}
+		
+		//Never opened and not full year
+		if(result == "" && wideSelector != "") {
+			result = wideSelector+"off";
 		}
 		
 		return result;
