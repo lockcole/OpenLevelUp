@@ -993,7 +993,13 @@ OpeningHoursBuilder: function() {
  */
 OpeningHoursParser: function() {
 //CONSTANTS
-	var RGX_RULE_MODIFIER = /^(open|closed|off|unknown|"[^"]+")?$/;
+	var RGX_RULE_MODIFIER = /^(open|closed|off)$/;
+	var RGX_WEEK_KEY = /^week$/;
+	var RGX_WEEK_VAL = /^([01234]?[0-9]|5[0123])(\-([01234]?[0-9]|5[0123]))?(,([01234]?[0-9]|5[0123])(\-([01234]?[0-9]|5[0123]))?)*\:?$/;
+	var RGX_MONTH = /^((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))?(,(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))?)*)\:?$/;
+	var RGX_MONTHDAY = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([012]?[0-9]|3[01])(\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) )?([012]?[0-9]|3[01]))?(,(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([012]?[0-9]|3[01])(\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) )?([012]?[0-9]|3[01]))?)*\:?$/;
+	var RGX_TIME = /^([01][0-9]|2[01234])\:[012345][0-9](\-([01][0-9]|2[01234])\:[012345][0-9])?(,([01][0-9]|2[01234])\:[012345][0-9](\-([01][0-9]|2[01234])\:[012345][0-9])?)*$/;
+	var RGX_WEEKDAY = /^(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|SH|easter))(,(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|SH|easter)))*$/;
 
 //OTHER METHODS
 	/**
@@ -1008,28 +1014,103 @@ OpeningHoursParser: function() {
 		var blocks = oh.split(';');
 		
 		//Read each block
-		var block, tokens, currentToken;
+		var block, tokens, currentToken, isWeekday, dateRange, start, end, timeRanges, subTokens, sub2Tokens;
 		for(var i=0, li=blocks.length; i < li; i++) {
 			block = blocks[i];
 			tokens = _tokenize(block);
 			currentToken = 0;
+			timeRanges = [];
 			
-			console.log(tokens);
+			//console.log(tokens);
 			
 			//Try to find wide range selector (month, monthday, week)
 			if(currentToken < tokens.length && _isWideRange(tokens[currentToken])) {
+				console.log("wide range",tokens[currentToken]);
+				
+				//Find the kind of range
+				//Week
+				if(RGX_WEEK_KEY.test(tokens[currentToken]) && currentToken < tokens.length -1 && RGX_WEEK_VAL.test(tokens[currentToken+1])) {
+					subTokens = tokens[currentToken+1].split(',');
+					
+					//For each week interval
+					for(var wtId=0, lwt=subTokens.length; wtId < lwt; wtId++) {
+						//Read start and end
+						sub2Tokens = subTokens[wtId].split('-');
+						start = { week: sub2Tokens[0] };
+						end = (sub2Tokens.length > 1) ? { week: sub2Tokens[1] } : null;
+						
+						//Add range
+						timeRanges.push({ start: start, end: end });
+					}
+					
+					currentToken++;
+				}
+				//Month
+				else if(RGX_MONTH.test(tokens[currentToken])) {
+					subTokens = tokens[currentToken].split(',');
+					
+					//For each week interval
+					for(var mtId=0, lmt=subTokens.length; mtId < lmt; mtId++) {
+						//Read start and end
+						sub2Tokens = subTokens[mtId].split('-');
+						
+						//Check start month
+						var monthnum = YoHours.model.OSM_MONTHS.indexOf(sub2Tokens[0]);
+						if(monthnum < 0) {
+							throw new Error("Invalid month name: "+sub2Tokens[0]);
+						}
+						
+						start = { month: monthnum+1 };
+						
+						//Check end month
+						if(sub2Tokens.length > 1) {
+							monthnum = YoHours.model.OSM_MONTHS.indexOf(sub2Tokens[1]);
+							if(monthnum < 0) {
+								throw new Error("Invalid month name: "+sub2Tokens[1]);
+							}
+							
+							end = { month: monthnum+1 };
+						}
+						else {
+							end = null;
+						}
+						
+						//Add range
+						timeRanges.push({ start: start, end: end });
+					}
+				}
+				//Monthday
+				else {
+				}
+				
 				currentToken++;
 			}
 			
-			//Try to find small range selectors (weekday, time)
-			if(currentToken < tokens.length && _isSmallRange(tokens[currentToken])) {
+			//Try to find weekday selectors
+			isWeekday = currentToken < tokens.length && _isWeekday(tokens[currentToken]);
+
+			while(isWeekday) {
+				//console.log("weekday",tokens[currentToken]);
+				currentToken++;
+				isWeekday = currentToken < tokens.length && _isWeekday(tokens[currentToken]);
+			}
+			
+			//Try to find time selectors
+			if(currentToken < tokens.length && _isTime(tokens[currentToken])) {
+				//console.log("time selector",tokens[currentToken]);
 				currentToken++;
 			}
 			
 			//Try to read rule modifier (void, open, closed/off, unknown, comment)
 			if(currentToken < tokens.length && _isRuleModifier(tokens[currentToken])) {
+				//console.log("rule modifier",tokens[currentToken]);
 				currentToken++;
 			}
+			
+			console.log(timeRanges);
+			/*if() {
+				result.push(new YoHours.model.DateRange(start, end));
+			}*/
 		}
 		
 		return result;
@@ -1039,14 +1120,21 @@ OpeningHoursParser: function() {
 	 * Is the given token a wide range selector ?
 	 */
 	function _isWideRange(token) {
-
+		return RGX_WEEK_KEY.test(token) || RGX_MONTH.test(token) || RGX_MONTHDAY.test(token);
 	};
 	
 	/**
-	 * Is the given token a small range selector ?
+	 * Is the given token a weekday selector ?
 	 */
-	function _isSmallRange(token) {
-
+	function _isWeekday(token) {
+		return RGX_WEEKDAY.test(token);
+	};
+	
+	/**
+	 * Is the given token a time selector ?
+	 */
+	function _isTime(token) {
+		return RGX_TIME.test(token);
 	};
 	
 	/**
