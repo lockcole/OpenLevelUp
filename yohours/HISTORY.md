@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+13 august 2015
+--------------
+* User input for opening_hours supports seasons
+
 12 august 2015
 --------------
 * Season system added
