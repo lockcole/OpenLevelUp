@@ -151,7 +151,8 @@ MainController: function() {
 		
 		//Parse given string
 		try {
-			_parser.parse(str);
+			_dateRanges = _parser.parse(str);
+			_view.getCalendarView().show(_dateRanges[0]);
 			// var oh = new opening_hours(str, {"place_id":"24581148","licence":"Data © OpenStreetMap contributors, ODbL 1.0. http:\/\/www.openstreetmap.org\/copyright","osm_type":"node","osm_id":"2399693457","lat":"48.0144107","lon":"-2.0364455","display_name":"Le Closel, Plélan-le-Grand, Rennes, Ille-et-Vilaine, Bretagne, France métropolitaine, 35380, France","address":{"suburb":"Le Closel","village":"Plélan-le-Grand","county":"Rennes","state":"Bretagne","country":"France","postcode":"35380","country_code":"fr"}});
 			// var intervals = oh.getOpenIntervals(getMonday(), getSunday());
 			

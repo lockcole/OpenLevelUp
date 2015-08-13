@@ -996,10 +996,12 @@ OpeningHoursParser: function() {
 	var RGX_RULE_MODIFIER = /^(open|closed|off)$/;
 	var RGX_WEEK_KEY = /^week$/;
 	var RGX_WEEK_VAL = /^([01234]?[0-9]|5[0123])(\-([01234]?[0-9]|5[0123]))?(,([01234]?[0-9]|5[0123])(\-([01234]?[0-9]|5[0123]))?)*\:?$/;
-	var RGX_MONTH = /^((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))?(,(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))?)*)\:?$/;
-	var RGX_MONTHDAY = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([012]?[0-9]|3[01])(\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) )?([012]?[0-9]|3[01]))?(,(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([012]?[0-9]|3[01])(\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) )?([012]?[0-9]|3[01]))?)*\:?$/;
+	var RGX_MONTH = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))?\:?$/;
+	var RGX_MONTHDAY = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([012]?[0-9]|3[01])(\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) )?([012]?[0-9]|3[01]))?\:?$/;
 	var RGX_TIME = /^([01][0-9]|2[01234])\:[012345][0-9](\-([01][0-9]|2[01234])\:[012345][0-9])?(,([01][0-9]|2[01234])\:[012345][0-9](\-([01][0-9]|2[01234])\:[012345][0-9])?)*$/;
 	var RGX_WEEKDAY = /^(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|SH|easter))(,(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|SH|easter)))*$/;
+	var RGX_HOLIDAY = /^(PH|SH|easter)$/;
+	var RGX_WD = /^(Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?$/;
 
 //OTHER METHODS
 	/**
@@ -1013,114 +1015,314 @@ OpeningHoursParser: function() {
 		//Separate each block
 		var blocks = oh.split(';');
 		
+		/*
+		 * Blocks parsing
+		 * Each block can be divided in three parts: wide range selector, small range selector, rule modifier.
+		 * The last two are simpler to parse, so we start to read rule modifier, then small range selector.
+		 * All the lasting tokens are part of wide range selector.
+		 */
+		
+		var block, tokens, currentToken, ruleModifier, timeSelector, weekdaySelector, wideRangeSelector;
+		var singleTime, from, to, times;
+		var singleWeekday, wdStart, wdEnd, holidays, weekdays;
+		var monthSelector, weekSelector, weeks, singleWeek, weekFrom, weekTo, singleMonth, months, monthFrom, monthTo;
+		var dateRanges, dateRange, drObj;
+		
 		//Read each block
-		var block, tokens, currentToken, isWeekday, dateRange, start, end, timeRanges, subTokens, sub2Tokens;
 		for(var i=0, li=blocks.length; i < li; i++) {
 			block = blocks[i];
 			tokens = _tokenize(block);
-			currentToken = 0;
-			timeRanges = [];
+			currentToken = tokens.length - 1;
+			ruleModifier = null;
+			timeSelector = null;
+			weekdaySelector = null;
+			wideRangeSelector = null;
 			
-			//console.log(tokens);
+			console.log(tokens);
 			
-			//Try to find wide range selector (month, monthday, week)
-			if(currentToken < tokens.length && _isWideRange(tokens[currentToken])) {
-				console.log("wide range",tokens[currentToken]);
+			/*
+			 * Rule modifier (open, closed, off)
+			 */
+			if(currentToken >= 0 && _isRuleModifier(tokens[currentToken])) {
+				//console.log("rule modifier",tokens[currentToken]);
+				ruleModifier = tokens[currentToken];
+				currentToken--;
+			}
+			
+			/*
+			 * Small range selectors
+			 */
+			from = null;
+			to = null;
+			times = []; //Time intervals in minutes
+			
+			//Time selector
+			if(currentToken >= 0 && _isTime(tokens[currentToken])) {
+				timeSelector = tokens[currentToken];
 				
-				//Find the kind of range
-				//Week
-				if(RGX_WEEK_KEY.test(tokens[currentToken]) && currentToken < tokens.length -1 && RGX_WEEK_VAL.test(tokens[currentToken+1])) {
-					subTokens = tokens[currentToken+1].split(',');
-					
-					//For each week interval
-					for(var wtId=0, lwt=subTokens.length; wtId < lwt; wtId++) {
-						//Read start and end
-						sub2Tokens = subTokens[wtId].split('-');
-						start = { week: sub2Tokens[0] };
-						end = (sub2Tokens.length > 1) ? { week: sub2Tokens[1] } : null;
-						
-						//Add range
-						timeRanges.push({ start: start, end: end });
+				//Divide each time interval
+				timeSelector = timeSelector.split(',');
+				for(var ts=0, tsl = timeSelector.length; ts < tsl; ts++) {
+					//Separate start and end values
+					singleTime = timeSelector[ts].split('-');
+					from = _asMinutes(singleTime[0]);
+					if(singleTime.length > 1) {
+						to = _asMinutes(singleTime[1]);
 					}
-					
-					currentToken++;
+					else {
+						to = from;
+					}
+					times.push({from: from, to: to});
 				}
-				//Month
-				else if(RGX_MONTH.test(tokens[currentToken])) {
-					subTokens = tokens[currentToken].split(',');
+				
+				currentToken--;
+			}
+			
+			holidays = [];
+			weekdays = [];
+			
+			//Weekday selector
+			if(currentToken >= 0 && _isWeekday(tokens[currentToken])) {
+				weekdaySelector = tokens[currentToken];
+				
+				//Divide each weekday
+				weekdaySelector = weekdaySelector.split(',');
+				
+				for(var wds=0, wdsl = weekdaySelector.length; wds < wdsl; wds++) {
+					singleWeekday = weekdaySelector[wds];
 					
-					//For each week interval
-					for(var mtId=0, lmt=subTokens.length; mtId < lmt; mtId++) {
-						//Read start and end
-						sub2Tokens = subTokens[mtId].split('-');
-						
-						//Check start month
-						var monthnum = YoHours.model.OSM_MONTHS.indexOf(sub2Tokens[0]);
-						if(monthnum < 0) {
-							throw new Error("Invalid month name: "+sub2Tokens[0]);
-						}
-						
-						start = { month: monthnum+1 };
-						
-						//Check end month
-						if(sub2Tokens.length > 1) {
-							monthnum = YoHours.model.OSM_MONTHS.indexOf(sub2Tokens[1]);
-							if(monthnum < 0) {
-								throw new Error("Invalid month name: "+sub2Tokens[1]);
-							}
-							
-							end = { month: monthnum+1 };
+					//Holiday
+					if(RGX_HOLIDAY.test(singleWeekday)) {
+						holidays.push(singleWeekday);
+					}
+					//Weekday interval
+					else if(RGX_WD.test(singleWeekday)) {
+						singleWeekday = singleWeekday.split('-');
+						wdFrom = YoHours.model.OSM_DAYS.indexOf(singleWeekday[0]);
+						if(singleWeekday.length > 1) {
+							wdTo = YoHours.model.OSM_DAYS.indexOf(singleWeekday[1]);
 						}
 						else {
-							end = null;
+							wdTo = wdFrom;
 						}
-						
-						//Add range
-						timeRanges.push({ start: start, end: end });
+						weekdays.push({from: wdFrom, to: wdTo});
+					}
+					else {
+						throw new Error("Invalid weekday interval: "+singleWeekday);
 					}
 				}
-				//Monthday
-				else {
+				
+				currentToken--;
+			}
+			
+			/*
+			 * Wide range selector
+			 */
+			weeks = [];
+			months = [];
+			
+			if(currentToken >= 0) {
+				wideRangeSelector = tokens[0];
+				for(var ct=1; ct <= currentToken; ct++) {
+					wideRangeSelector += " "+tokens[ct];
 				}
 				
-				currentToken++;
+				if(wideRangeSelector.length > 0) {
+					wideRangeSelector = wideRangeSelector.split('week'); //0 = Month or SH, 1 = weeks
+					
+					//Month or SH
+					monthSelector = wideRangeSelector[0].trim();
+					if(monthSelector.length == 0) { monthSelector = null; }
+					
+					//Weeks
+					if(wideRangeSelector.length > 1) {
+						weekSelector = wideRangeSelector[1].trim();
+						if(weekSelector.length == 0) { weekSelector = null; }
+					}
+					else { weekSelector = null; }
+					
+					if(monthSelector != null && weekSelector != null) {
+						throw new Error("Unsupported simultaneous month and week selector");
+					}
+					else if(monthSelector != null) {
+						monthSelector = monthSelector.split(',');
+						
+						for(var ms=0, msl = monthSelector.length; ms < msl; ms++) {
+							singleMonth = monthSelector[ms];
+							
+							//School holidays
+							if(singleMonth == "SH") {
+								months.push({holiday: "SH"});
+							}
+							//Month intervals
+							else if(RGX_MONTH.test(singleMonth)) {
+								singleMonth = singleMonth.split('-');
+								monthFrom = YoHours.model.OSM_MONTHS.indexOf(singleMonth[0])+1;
+								if(singleMonth.length > 1) {
+									monthTo = YoHours.model.OSM_MONTHS.indexOf(singleMonth[1])+1;
+								}
+								else {
+									monthTo = null;
+								}
+								months.push({from: monthFrom, to: monthTo});
+							}
+							//Monthday intervals
+							else if(RGX_MONTHDAY.test(singleMonth)) {
+								singleMonth = singleMonth.split('-');
+								
+								//Read monthday start
+								monthFrom = singleMonth[0].split(' ');
+								monthFrom = { day: parseInt(monthFrom[1]), month: YoHours.model.OSM_MONTHS.indexOf(monthFrom[0])+1 };
+								
+								if(singleMonth.length > 1) {
+									monthTo = singleMonth[1].split(' ');
+									
+									//Same month as start
+									if(monthTo.length == 1) {
+										monthTo = { day: parseInt(monthTo[0]), month: monthFrom.month };
+									}
+									//Another month
+									else {
+										monthTo = { day: parseInt(monthTo[1]), month: YoHours.model.OSM_MONTHS.indexOf(monthTo[0])+1 };
+									}
+								}
+								else {
+									monthTo = null;
+								}
+								months.push({fromDay: monthFrom, toDay: monthTo});
+							}
+							//Unsupported
+							else {
+								throw new Error("Unsupported month selector: "+singleMonth);
+							}
+						}
+					}
+					else if(weekSelector != null) {
+						//Divide each week interval
+						weekSelector = weekSelector.split(',');
+						
+						for(var ws=0, wsl = weekSelector.length; ws < wsl; ws++) {
+							singleWeek = weekSelector[ws].split('-');
+							weekFrom = parseInt(singleWeek[0]);
+							if(singleWeek.length > 1) {
+								weekTo = parseInt(singleWeek[1]);
+							}
+							else {
+								weekTo = null;
+							}
+							weeks.push({from: weekFrom, to: weekTo});
+						}
+					}
+				}
 			}
 			
-			//Try to find weekday selectors
-			isWeekday = currentToken < tokens.length && _isWeekday(tokens[currentToken]);
-
-			while(isWeekday) {
-				//console.log("weekday",tokens[currentToken]);
-				currentToken++;
-				isWeekday = currentToken < tokens.length && _isWeekday(tokens[currentToken]);
+			console.log("months",months);
+			console.log("weeks",weeks);
+			console.log("holidays",holidays);
+			console.log("weekdays",weekdays);
+			console.log("times",times);
+			console.log("rule",ruleModifier);
+			
+			/*
+			 * Create date ranges
+			 */
+			dateRanges = [];
+			
+			//Month range
+			if(months.length > 0) {
+				for(var mId=0, ml = months.length; mId < ml; mId++) {
+					singleMonth = months[mId];
+					
+					if(singleMonth.holiday != undefined) {
+						dateRanges.push({ start: { holiday: singleMonth.holiday }});
+					}
+					else if(singleMonth.fromDay != undefined) {
+						dateRange = { start: singleMonth.fromDay };
+						if(singleMonth.toDay != null) {
+							dateRange.end = singleMonth.toDay;
+						}
+						dateRanges.push(dateRange);
+					}
+					else {
+						dateRange = { start: { month: singleMonth.from }};
+						if(singleMonth.to != null) {
+							dateRange.end = { month: singleMonth.to };
+						}
+						dateRanges.push(dateRange);
+					}
+				}
+			}
+			//Week range
+			else if(weeks.length > 0) {
+				for(var wId=0, wl = weeks.length; wId < wl; wId++) {
+					dateRange = { start: { week: weeks[wId].from } };
+					if(weeks[wId].to != null) {
+						dateRange.end = { week: weeks[wId].to };
+					}
+					dateRanges.push(dateRange);
+				}
+			}
+			//Holiday range
+			else if(holidays.length > 0) {
+				for(var hId=0, hl = holidays.length; hId < hl; hId++) {
+					dateRanges.push({ start: { holiday: holidays[hId] } });
+				}
+			}
+			//Full year range
+			else {
+				dateRanges.push({});
 			}
 			
-			//Try to find time selectors
-			if(currentToken < tokens.length && _isTime(tokens[currentToken])) {
-				//console.log("time selector",tokens[currentToken]);
-				currentToken++;
+			//Case of no weekday defined = all week
+			if(weekdays.length == 0) {
+				weekdays.push({from: 0, to: YoHours.model.OSM_DAYS.length -1 });
 			}
 			
-			//Try to read rule modifier (void, open, closed/off, unknown, comment)
-			if(currentToken < tokens.length && _isRuleModifier(tokens[currentToken])) {
-				//console.log("rule modifier",tokens[currentToken]);
-				currentToken++;
+			//Case of no time defined = all day
+			if(times.length == 0) {
+				times.push({from: 0, to: 24*60});
 			}
 			
-			console.log(timeRanges);
-			/*if() {
-				result.push(new YoHours.model.DateRange(start, end));
-			}*/
+			/*
+			 * Create date range objects
+			 */
+			for(var drId = 0, drl=dateRanges.length; drId < drl; drId++) {
+				drObj = new YoHours.model.DateRange(dateRanges[drId].start, dateRanges[drId].end);
+				result.push(drObj);
+				
+				/*
+				 * Add time intervals
+				 */
+				//For each weekday
+				for(var wdId=0, wdl=weekdays.length; wdId < wdl; wdId++) {
+					//For each time interval
+					for(var tId=0, tl=times.length; tId < tl; tId++) {
+						if(ruleModifier == "closed" || ruleModifier == "off") {
+							drObj.getTypical().removeInterval(
+								new YoHours.model.Interval(weekdays[wdId].from, weekdays[wdId].to, times[tId].from, times[tId].to)
+							);
+						}
+						else {
+							drObj.getTypical().addInterval(
+								new YoHours.model.Interval(weekdays[wdId].from, weekdays[wdId].to, times[tId].from, times[tId].to)
+							);
+						}
+					}
+				}
+			}
 		}
 		
 		return result;
 	};
-	
+
 	/**
-	 * Is the given token a wide range selector ?
+	 * Converts a time string "12:45" into minutes integer
+	 * @param time The time string
+	 * @return The amount of minutes since midnight
 	 */
-	function _isWideRange(token) {
-		return RGX_WEEK_KEY.test(token) || RGX_MONTH.test(token) || RGX_MONTHDAY.test(token);
+	function _asMinutes(time) {
+		var values = time.split(':');
+		return parseInt(values[0]) * 60 + parseInt(values[1]);
 	};
 	
 	/**
@@ -1148,7 +1350,13 @@ OpeningHoursParser: function() {
 	 * Create tokens for a given block
 	 */
 	function _tokenize(block) {
-		return block.trim().split(' ');
+		var result = block.trim().split(' ');
+		var position = $.inArray("", result);
+		while( ~position ) {
+			result.splice(position, 1);
+			position = $.inArray("", result);
+		}
+		return result;
 	};
 }
 
