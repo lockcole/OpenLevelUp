@@ -935,7 +935,9 @@ OpeningHoursBuilder: function() {
 		var intervals = day.getIntervals(true);
 		var interval;
 		var result = "";
-		wideSelector = (wideSelector.length > 0) ? wideSelector+": " : "";
+		
+		if(wideSelector == "PH" || wideSelector == "SH" || wideSelector == "easter") { wideSelector += " "; }
+		else { if(wideSelector.length > 0) { wideSelector += ": "; } }
 		
 		for(var i=0, l=intervals.length; i < l; i++) {
 			interval = intervals[i];
@@ -960,7 +962,9 @@ OpeningHoursBuilder: function() {
 		var intervals = week.getIntervals(true);
 		var days = [];
 		var daysStr = [];
-		wideSelector = (wideSelector.length > 0) ? wideSelector+": " : "";
+		
+		if(wideSelector == "PH" || wideSelector == "SH" || wideSelector == "easter") { wideSelector += " "; }
+		else { if(wideSelector.length > 0) { wideSelector += ": "; } }
 		
 		// 0 means nothing done with this day yet
 		// 8 means the day is off
@@ -1165,8 +1169,13 @@ OpeningHoursBuilder: function() {
 		/*
 		 * Special cases
 		 */
+		//All week with same hours
+		if(/^Mo\-Su \d{2}/.test(result.substr(wideSelector.length))) {
+			result = wideSelector+result.substr(wideSelector.length+6);
+		}
+		
 		// 24/7
-		if(result == wideSelector+"Mo-Su 00:00-24:00") {
+		if(result == wideSelector+"00:00-24:00") {
 			result = wideSelector+"24/7";
 		}
 		
@@ -1429,12 +1438,12 @@ OpeningHoursParser: function() {
 				}
 			}
 			
-			// console.log("months",months);
-			// console.log("weeks",weeks);
-			// console.log("holidays",holidays);
-			// console.log("weekdays",weekdays);
-			// console.log("times",times);
-			// console.log("rule",ruleModifier);
+// 			console.log("months",months);
+// 			console.log("weeks",weeks);
+// 			console.log("holidays",holidays);
+// 			console.log("weekdays",weekdays);
+// 			console.log("times",times);
+// 			console.log("rule",ruleModifier);
 			
 			/*
 			 * Create date ranges
@@ -1488,7 +1497,12 @@ OpeningHoursParser: function() {
 			
 			//Case of no weekday defined = all week
 			if(weekdays.length == 0) {
-				weekdays.push({from: 0, to: YoHours.model.OSM_DAYS.length -1 });
+				if(holidays.length == 0) {
+					weekdays.push({from: 0, to: YoHours.model.OSM_DAYS.length -1 });
+				}
+				else {
+					weekdays.push({from: 0, to: 0 });
+				}
 			}
 			
 			//Case of no time defined = all day

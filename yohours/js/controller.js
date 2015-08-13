@@ -145,22 +145,26 @@ MainController: function() {
 	 * @param str The opening hours to show
 	 */
 	this.showHours = function(str) {
-		//Clear intervals
-		_week = new YoHours.model.Week();
-		$('#calendar').fullCalendar('removeEvents');
+		str = str.trim();
 		
-		//Parse given string
-		try {
-			_dateRanges = _parser.parse(str);
-			_view.getCalendarView().show(_dateRanges[0]);
-			_view.getHoursInputView().setValid(true);
+		if(str.length > 0) {
+			//Clear intervals
+			_week = new YoHours.model.Week();
+			$('#calendar').fullCalendar('removeEvents');
+			
+			//Parse given string
+			try {
+				_dateRanges = _parser.parse(str);
+				_view.getCalendarView().show(_dateRanges[0]);
+				_view.getHoursInputView().setValid(true);
+			}
+			catch(e) {
+				console.error(e);
+				_view.getHoursInputView().setValid(false);
+			}
+			
+			_view.getHoursInputView().setValue(str);
 		}
-		catch(e) {
-			console.error(e);
-			_view.getHoursInputView().setValid(false);
-		}
-		
-		_view.getHoursInputView().setValue(str);
 	};
 }
 
