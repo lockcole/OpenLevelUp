@@ -151,6 +151,9 @@ Day: function() {
 	
 	/** The next interval ID **/
 	var _nextInterval = 0;
+	
+	/** This object **/
+	var _self = this;
 
 //ACCESSORS
 	/**
@@ -301,6 +304,14 @@ Day: function() {
 	this.clearIntervals = function() {
 		_intervals = [];
 	};
+
+//OTHER METHODS
+	/**
+	 * Is this day defining the same intervals as the given one ?
+	 */
+	this.sameAs = function(d) {
+		return d.getAsMinutesArray().equals(_self.getAsMinutesArray());
+	};
 },
 
 
@@ -315,6 +326,9 @@ Week: function() {
 	
 	/** The next interval ID **/
 	var _nextInterval = 0;
+	
+	/** This object **/
+	var _self = this;
 
 //ACCESSORS
 	/**
@@ -490,6 +504,14 @@ Week: function() {
 				_intervals.push($.extend(true, {}, intervals[i]));
 			}
 		}
+	};
+
+//OTHER METHODS
+	/**
+	 * Is this week defining the same intervals as the given one ?
+	 */
+	this.sameAs = function(w) {
+		return w.getAsMinutesArray().equals(_self.getAsMinutesArray());
 	};
 },
 
@@ -730,6 +752,15 @@ DateRange: function(s, e) {
 
 //OTHER METHODS
 	/**
+	 * Check if the typical day/week of this date range is the same as in the given date range
+	 * @param dr The other DateRange
+	 * @return True if same typical day/week
+	 */
+	this.hasSameTypical = function(dr) {
+		return _self.definesTypicalDay() == dr.definesTypicalDay() && _typical.sameAs(dr.getTypical());
+	};
+	
+	/**
 	 * Is the given date range concerning the same time interval ?
 	 * @param start The start time
 	 * @param end The end time
@@ -783,7 +814,7 @@ DateRange: function(s, e) {
 						&& start.month == _start.month
 						&& (
 							(_end == null && this.isFullMonth(start, end))
-							|| (_end != null && end != null && end.month == _end.month && end.day == YoHours.model.MONTH_END_DAY[end.month-1])
+							|| (_end != null && end != null && end.month == _end.month && start.day == 1 && end.day == YoHours.model.MONTH_END_DAY[end.month-1])
 						)
 					)
 					||
@@ -875,12 +906,11 @@ DateRange: function(s, e) {
 		/*
 		 * Check if it is contained in this one
 		 */
-		if(_type == "always") {
-			result = true;
-		}
-		else if(this.isSameRange(start, end)) {
-			console.log(_type, _start, _end, type, start, end);
+		if(this.isSameRange(start, end)) {
 			result = false;
+		}
+		else if(_type == "always") {
+			result = true;
 		}
 		else if(_type == "day" && this.definesTypicalWeek()) {
 			if(type == "day") {
@@ -978,24 +1008,44 @@ OpeningHoursBuilder: function() {
 	 */
 	this.build = function(dateRanges) {
 		var dateRange;
-		var result = "", resIntv;
+		var result = "", resIntv, rangeGeneral;
 		
 		//Read each date range
 		for(var rangeId=0, l=dateRanges.length; rangeId < l; rangeId++) {
 			dateRange = dateRanges[rangeId];
 			if(dateRange != undefined) {
 				resIntv = "";
-				if(dateRange.definesTypicalWeek()) {
-					resIntv += _buildWeek(dateRange.getTypical(), dateRange.getTimeSelector());
-				}
-				else if(dateRange.definesTypicalDay()) {
-					resIntv += _buildDay(dateRange.getTypical(), dateRange.getTimeSelector());
+				
+				//Check if the defined typical week/day is not strictly equal to a previous wider rule
+				rangeGeneral = null;
+				var rangeGenId=rangeId-1;
+				while(rangeGenId >= 0 && rangeGeneral == null) {
+					if(
+						dateRanges[rangeGenId] != undefined
+						&& dateRanges[rangeGenId].hasSameTypical(dateRange)
+						&& (
+							dateRanges[rangeGenId].isSameRange(dateRange.getStart(), dateRange.getEnd())
+							|| dateRanges[rangeGenId].isGeneralFor(dateRange.getStart(), dateRange.getEnd())
+						)
+					) {
+						rangeGeneral = rangeGenId;
+					}
+					rangeGenId--;
 				}
 				
-				//Add to result if something was returned by subparsers
-				if(resIntv.length > 0) {
-					if(result.length > 0) { result += "; "; }
-					result += resIntv;
+				if(rangeId == 0 || rangeGeneral == null) {
+					if(dateRange.definesTypicalWeek()) {
+						resIntv += _buildWeek(dateRange.getTypical(), dateRange.getTimeSelector(), rangeId == 0);
+					}
+					else if(dateRange.definesTypicalDay()) {
+						resIntv += _buildDay(dateRange.getTypical(), dateRange.getTimeSelector());
+					}
+					
+					//Add to result if something was returned by subparsers
+					if(resIntv.length > 0) {
+						if(result.length > 0) { result += "; "; }
+						result += resIntv;
+					}
 				}
 			}
 		}
@@ -1034,18 +1084,24 @@ OpeningHoursBuilder: function() {
 	 * Algorithm inspired by OpeningHoursEdit plugin for JOSM
 	 * @param week The week object to read
 	 * @param wideSelector A wide time selector to add (for example Jan-Mar)
+	 * @param hideDaysOff True if you want to hide unnecessary off days
 	 * @return The opening_hours string
 	 */
-	function _buildWeek(week, wideSelector) {
+	function _buildWeek(week, wideSelector, hideDaysOff) {
 		var intervals = week.getIntervals(true);
 		var days = [];
 		var daysStr = [];
+		var allYear = false;
 		
 		if(wideSelector == "PH" || wideSelector == "SH" || wideSelector == "easter") { wideSelector += " "; }
-		else { if(wideSelector.length > 0) { wideSelector += ": "; } }
+		else {
+			if(wideSelector.length > 0) { wideSelector += ": "; }
+			else { allYear = true; }
+		}
 		
 		// 0 means nothing done with this day yet
 		// 8 means the day is off
+		// -8 means the day is off and should be shown
 		// 0<x<8 means the day have the openinghours of day x
 		// -8<x<0 means nothing done with this day yet, but it intersects a
 		// range of days with same opening_hours
@@ -1151,7 +1207,7 @@ OpeningHoursBuilder: function() {
 			var add = "";
 			
 			if (daysStr[i] == 'off' && daysStatus[i] == 0) {
-				daysStatus[i] = 8;
+				daysStatus[i] = (hideDaysOff) ? 8 : -8;
 			} else if (daysStr[i] == 'off' && daysStatus[i] < 0 && daysStatus[i] > -8) {
 				//add = YoHours.model.OSM_DAYS[i] + " off";
 				daysStatus[i] = -8;
@@ -1258,7 +1314,7 @@ OpeningHoursBuilder: function() {
 		}
 		
 		//Never opened and not full year
-		if(result == "" && wideSelector != "") {
+		if(result == "" && !allYear) {
 			result = wideSelector+"off";
 		}
 		

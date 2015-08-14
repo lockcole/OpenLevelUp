@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+14 august 2015
+--------------
+* Test suite for model classes
+
 13 august 2015
 --------------
 * User input for opening_hours supports seasons

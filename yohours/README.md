@@ -1,10 +1,11 @@
 YoHours
-============
+=======
 
 Read-me
 -------
 
-YoHours is a web tool to create opening hours for the [OpenStreetMap](http://openstreetmap.org) project, in the famous [opening_hours](https://wiki.openstreetmap.org/wiki/Key:opening_hours) syntax.
+YoHours is a web tool to create opening hours for the [OpenStreetMap](http://openstreetmap.org) project,
+in the famous [opening_hours](https://wiki.openstreetmap.org/wiki/Key:opening_hours) syntax.
 You can define when a point of interest is open in a week, and YoHours will give you the opening_hours value to set in OpenStreetMap.
 This tool is written in JavaScript.
 
@@ -16,6 +17,12 @@ Installation
 
 If you want to install your own YoHours instance, just download the content of this repository,
 and upload the **yohours/** folder in your own FTP or web server. That's all.
+
+
+Tests
+-----
+
+QUnit-based tests are available in **test.html** page. For live, see [github.pavie.info/yohours/test.html](http://github.pavie.info/yohours/test.html).
 
 
 License
