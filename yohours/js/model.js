@@ -628,22 +628,22 @@ DateRange: function(s, e) {
 		
 		switch(_type) {
 			case "day":
-				result = YoHours.model.OSM_MONTHS[_start.month-1]+" "+_start.day;
+				result = YoHours.model.OSM_MONTHS[_start.month-1]+" "+((_start.day < 10) ? "0" : "")+_start.day;
 				if(_end != null) {
 					//Same month as start ?
 					if(_start.month == _end.month) {
-						result += "-"+_end.day;
+						result += "-"+((_end.day < 10) ? "0" : "")+_end.day;
 					}
 					else {
-						result += "-"+YoHours.model.OSM_MONTHS[_end.month-1]+" "+_end.day;
+						result += "-"+YoHours.model.OSM_MONTHS[_end.month-1]+" "+((_end.day < 10) ? "0" : "")+_end.day;
 					}
 				}
 				break;
 
 			case "week":
-				result = "week "+_start.week;
+				result = "week "+((_start.week < 10) ? "0" : "")+_start.week;
 				if(_end != null) {
-					result += "-"+_end.week;
+					result += "-"+((_end.week < 10) ? "0" : "")+_end.week;
 				}
 				break;
 
@@ -731,40 +731,68 @@ DateRange: function(s, e) {
 //OTHER METHODS
 	/**
 	 * Is the given date range concerning the same time interval ?
-	 * @param dateRange another date range
-	 * @return True if same time selector
-	 */
-	this.isSameRange = function(dateRange) {
-		return this.getTimeSelector() == dateRange.getTimeSelector();
-	};
-	
-	/**
-	 * Is the given date range concerning the same time interval ?
 	 * @param start The start time
 	 * @param end The end time
 	 * @return True if same time selector
 	 */
-	this.isSameRangeRaw = function(start, end) {
+	this.isSameRange = function(start, end) {
 		var result = false;
+		
+		//Clean start and end value
+		if(start == null) {
+			start = {};
+		}
+		if(end != null) {
+			if(
+				(start.day != undefined && end.day == start.day && end.month == start.month)
+				|| (start.week != undefined && end.week == start.week)
+				|| (start.month != undefined && start.day == undefined && end.month == start.month)
+				|| (start.holiday != undefined && end.holiday == start.holiday)
+				|| end == {}
+			) {
+				end = null;
+			}
+		}
 		
 		switch(_type) {
 			case "day":
 				result =
+					(
 					start.day == _start.day
 					&& start.month == _start.month
-					&& (end == _end || (end.day == _end.day && end.month == _end.month));
+					&& (end == _end || (_end != null && end != null && end.day == _end.day && end.month == _end.month))
+					)
+					||
+					(
+					start.day == undefined
+					&& start.month == _start.month
+					&& this.isFullMonth(_start, _end)
+					);
 				break;
 
 			case "week":
 				result =
 					start.week == _start.week
-					&& (end == _end || end.week == _end.week);
+					&& (end == _end || (_end != null && end != null && end.week == _end.week));
 				break;
 
 			case "month":
-				result =
-					start.month == _start.month
-					&& (end == _end || end.month == _end.month);
+				console.log(_start, _end, start, end, this.isFullMonth(start, end));
+				result = 
+					(
+						start.day != undefined
+						&& start.month == _start.month
+						&& (
+							(_end == null && this.isFullMonth(start, end))
+							|| (_end != null && end != null && end.month == _end.month && end.day == YoHours.model.MONTH_END_DAY[end.month-1])
+						)
+					)
+					||
+					(
+						start.day == undefined
+						&& start.month == _start.month
+						&& ((_end != null && end != null && end.month == _end.month) || (_end == null && end == null))
+					);
 				break;
 
 			case "holiday":
@@ -784,10 +812,25 @@ DateRange: function(s, e) {
 	};
 	
 	/**
+	 * Does the given range corresponds to a full month ?
+	 */
+	this.isFullMonth = function(start, end) {
+		if(start.month != undefined && start.day == undefined && (end == null || start.month == end.month)) {
+			return true;
+		}
+		else if(start.month != undefined) {
+			return (start.day == 1 && end != null && end.month == start.month && end.day != undefined && end.day == YoHours.model.MONTH_END_DAY[end.month-1]);
+		}
+		else {
+			return false;
+		}
+	};
+	
+	/**
 	 * Does this date range contains the given date range (ie the second is a refinement of the first)
 	 * @param start The start of the date range
 	 * @param end The end of the date range
-	 * @return True if this date contains the given one
+	 * @return True if this date contains the given one (and is not strictly equal to)
 	 */
 	this.isGeneralFor = function(start, end) {
 		/*
@@ -830,6 +873,9 @@ DateRange: function(s, e) {
 		 */
 		if(_type == "always") {
 			result = true;
+		}
+		else if(this.isSameRange(start, end)) {
+			result = false;
 		}
 		else if(_type == "day" && this.definesTypicalWeek()) {
 			if(type == "day") {
@@ -1520,7 +1566,7 @@ OpeningHoursParser: function() {
 				foundDateRange = false;
 				resDrId=0;
 				while(resDrId < result.length && !foundDateRange) {
-					if(result[resDrId].isSameRangeRaw(dateRanges[drId].start, dateRanges[drId].end)) {
+					if(result[resDrId].isSameRange(dateRanges[drId].start, dateRanges[drId].end)) {
 						foundDateRange = true;
 					}
 					else {

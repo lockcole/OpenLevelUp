@@ -246,13 +246,12 @@ DateRangeView: function(main) {
 			}
 			
 			//Check if not overlapping another date range
-			var newRange = new YoHours.model.DateRange(start, end);
 			var overlap = false;
 			var ranges = _mainView.getController().getDateRanges();
 			var l = ranges.length, i=0;
 			
 			while(i < l) {
-				if(ranges[i] != undefined && ranges[i].isSameRange(newRange)) {
+				if(ranges[i] != undefined && ranges[i].isSameRange(start, end)) {
 					throw new Error("This time range is identical to another one");
 				}
 				else {
