@@ -840,35 +840,70 @@
 			
 			//Single week
 			var dr4 = new YoHours.model.DateRange({ week: 10 }, null);
-			assert.equal(dr4.getTimeSelector(), "week 10");
+			assert.notOk(dr4.isGeneralFor({ week: 10 }, null));
+			assert.notOk(dr4.isGeneralFor({ week: 10 }, { week: 15}));
+			assert.notOk(dr4.isGeneralFor({ day: 10, month: 4 }, null));
+			assert.notOk(dr4.isGeneralFor({ day: 10, month: 4 }, { day: 15, month: 5}));
+			assert.notOk(dr4.isGeneralFor({ month: 11 }, null));
+			assert.notOk(dr4.isGeneralFor({ holiday: "PH" }, null));
+			assert.notOk(dr4.isGeneralFor({}, null));
+			assert.notOk(dr4.isGeneralFor(null, null));
 			
 			//Several weeks
 			var dr5 = new YoHours.model.DateRange({ week: 5 }, { week: 15 });
-			assert.equal(dr5.getTimeSelector(), "week 05-15");
+			assert.notOk(dr5.isGeneralFor({ week: 5 }, { week: 15 }));
+			assert.ok(dr5.isGeneralFor({ week: 5 }, { week: 14 }));
+			assert.ok(dr5.isGeneralFor({ week: 6 }, { week: 15 }));
+			assert.ok(dr5.isGeneralFor({ week: 6 }, { week: 14 }));
+			assert.ok(dr5.isGeneralFor({ week: 6 }, null));
+			assert.ok(dr5.isGeneralFor({ week: 6 }, { week: 6 }));
+			assert.notOk(dr5.isGeneralFor({ day: 10, month: 4 }, null));
+			assert.notOk(dr5.isGeneralFor({ day: 10, month: 4 }, { day: 15, month: 5}));
+			assert.notOk(dr5.isGeneralFor({ month: 11 }, null));
+			assert.notOk(dr5.isGeneralFor({ holiday: "PH" }, null));
+			assert.notOk(dr5.isGeneralFor({}, null));
+			assert.notOk(dr5.isGeneralFor(null, null));
 			
 			//Single month
 			var dr7 = new YoHours.model.DateRange({ month: 11 }, null);
-			assert.equal(dr7.getTimeSelector(), "Nov");
+			assert.notOk(dr7.isGeneralFor({ month: 11 }, null));
+			assert.notOk(dr7.isGeneralFor({ month: 11 }, { month: 11 }));
+			assert.notOk(dr7.isGeneralFor({ month: 10 }, { month: 12 }));
+			assert.ok(dr7.isGeneralFor({ month: 11, day: 2 }, { month: 11, day: 8 }));
+			assert.notOk(dr7.isGeneralFor({ month: 11, day: 1 }, { month: 11, day: 30 }));
+			assert.notOk(dr7.isGeneralFor({ month: 11, day: 5 }, { month: 12, day: 15 }));
+			assert.notOk(dr7.isGeneralFor({ month: 11, day: 5 }, null));
+			assert.notOk(dr7.isGeneralFor({ holiday: "PH" }, null));
+			assert.notOk(dr7.isGeneralFor({}, null));
+			assert.notOk(dr7.isGeneralFor(null, null));
 			
 			//Several months
 			var dr8 = new YoHours.model.DateRange({ month: 11 }, { month: 12 });
-			assert.equal(dr8.getTimeSelector(), "Nov-Dec");
+			assert.notOk(dr8.isGeneralFor({ month: 11 }, { month: 12 }));
+			assert.ok(dr8.isGeneralFor({ month: 11 }, null));
+			assert.ok(dr8.isGeneralFor({ month: 11 }, { month: 11 }));
+			assert.ok(dr8.isGeneralFor({ month: 11, day: 2 }, { month: 12, day: 30 }));
+			assert.notOk(dr8.isGeneralFor({ month: 11, day: 1 }, { month: 12, day: 31 }));
+			assert.notOk(dr8.isGeneralFor({ month: 11, day: 5 }, null));
+			assert.ok(dr8.isGeneralFor({ month: 11, day: 1 }, { month: 12, day: 30 }));
+			assert.ok(dr8.isGeneralFor({ month: 11, day: 2 }, { month: 12, day: 31 }));
+			assert.notOk(dr8.isGeneralFor({ week: 10 }, { week: 12 }));
+			assert.notOk(dr8.isGeneralFor({ month: 10 }, { month: 12 }));
+			assert.notOk(dr8.isGeneralFor({ holiday: "PH" }, null));
+			assert.notOk(dr8.isGeneralFor({}, null));
+			assert.notOk(dr8.isGeneralFor(null, null));
 			
 			//School holidays
 			var dr10 = new YoHours.model.DateRange({ holiday: "SH" }, null);
-			assert.equal(dr10.getTimeSelector(), "SH");
 			
 			//Public holidays
 			var dr11 = new YoHours.model.DateRange({ holiday: "PH" }, null);
-			assert.equal(dr11.getTimeSelector(), "PH");
 			
 			//Easter
 			var dr12 = new YoHours.model.DateRange({ holiday: "easter" }, null);
-			assert.equal(dr12.getTimeSelector(), "easter");
 			
 			//All year
 			var dr13 = new YoHours.model.DateRange({}, null);
-			assert.equal(dr13.getTimeSelector(), "");
 		});
 	</script>
 </head>

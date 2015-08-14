@@ -777,7 +777,6 @@ DateRange: function(s, e) {
 				break;
 
 			case "month":
-				console.log(_start, _end, start, end, this.isFullMonth(start, end));
 				result = 
 					(
 						start.day != undefined
@@ -844,6 +843,11 @@ DateRange: function(s, e) {
 		//Find the kind of interval
 		if(start.day != undefined) {
 			type = "day";
+			
+			//Clean end if same as start
+			if(end != null && end.month == start.month && end.day == start.day) {
+				end = null;
+			}
 		}
 		else if(start.week != undefined) {
 			type = "week";
@@ -875,6 +879,7 @@ DateRange: function(s, e) {
 			result = true;
 		}
 		else if(this.isSameRange(start, end)) {
+			console.log(_type, _start, _end, type, start, end);
 			result = false;
 		}
 		else if(_type == "day" && this.definesTypicalWeek()) {
@@ -920,6 +925,33 @@ DateRange: function(s, e) {
 					}
 					else if(end == null && ((_end != null && start.month <= _end.month) || start.month == _start.month)) {
 						result = true;
+					}
+				}
+			}
+			else if(type == "day") {
+				if(end != null) {
+					if(_end == null) {
+						if(
+							start.month == _start.month
+							&& end.month == _start.month
+							&& ((start.day >= 1 && end.day < YoHours.model.MONTH_END_DAY[start.month-1])
+							|| (start.day > 1 && end.day <= YoHours.model.MONTH_END_DAY[start.month-1]))
+						) {
+							result = true;
+						}
+					}
+					else {
+						if(start.month >= _start.month && end.month <= _end.month) {
+							if(
+								(start.month > _start.month && end.month < _end.month)
+								|| (start.month == _start.month && end.month < _end.month && start.day > 1)
+								|| (start.month > _start.month && end.month == _end.month && end.day < YoHours.model.MONTH_END_DAY[end.month-1])
+								|| (start.day >= 1 && end.day < YoHours.model.MONTH_END_DAY[end.month-1])
+								|| (start.day > 1 && end.day <= YoHours.model.MONTH_END_DAY[end.month-1])
+							) {
+								result = true;
+							}
+						}
 					}
 				}
 			}
