@@ -522,6 +522,30 @@
 			assert.equal(intervals2[itId6], it6);
 			assert.equal(intervals2[itId7], it7);
 		});
+		QUnit.test("Remove intervals during day 3 (over night)", function(assert) {
+			var week = new YoHours.model.Week();
+			
+			var it1 = new YoHours.model.Interval(0, 1, 23*60, 3*60);
+			var it2 = new YoHours.model.Interval(1, 2, 23*60, 3*60);
+			var it3 = new YoHours.model.Interval(2, 3, 23*60, 3*60);
+			
+			var itId1 = week.addInterval(it1);
+			var itId2 = week.addInterval(it2);
+			var itId3 = week.addInterval(it3);
+
+			//Check before
+			var intervals = week.getIntervals(false);
+			assert.equal(intervals.length, 3);
+			
+			week.removeIntervalsDuringDay(1);
+			
+			//Check after
+			var intervals2 = week.getIntervals(false);
+			assert.equal(intervals2.length, 3);
+			assert.equal(intervals2[itId1], it1);
+			assert.equal(intervals2[itId2], undefined);
+			assert.equal(intervals2[itId3], it3);
+		});
 		QUnit.test("Same as", function(assert) {
 			var week1 = new YoHours.model.Week();
 			var week2 = new YoHours.model.Week();
@@ -1563,7 +1587,7 @@
 			assert.equal(result[0].getStart().week, undefined);
 			assert.equal(result[0].getStart().holiday, undefined);
 			assert.equal(result[0].getTypical().getIntervals().length, 2);
-			console.log(result[0].getTypical().getIntervals());
+			
 			assert.equal(result[0].getTypical().getIntervals()[0].getStartDay(), 0);
 			assert.equal(result[0].getTypical().getIntervals()[0].getEndDay(), 1);
 			assert.equal(result[0].getTypical().getIntervals()[0].getFrom(), 23*60);
@@ -1643,19 +1667,44 @@
 			
 			var dr4 = result[3];
 			assert.equal(dr4.getTimeSelector(), "SH");
-			assert.equal(dr4.getTypical().getIntervals().length, 7);
-			console.log(dr4.getTypical().getIntervals());
-			console.log(dr4.getTypical().getIntervals()[0].getStartDay(),dr4.getTypical().getIntervals()[0].getEndDay());
-			//console.log(dr4.getTypical().getIntervals()[1].getStartDay(),dr4.getTypical().getIntervals()[1].getEndDay());
-			console.log(dr4.getTypical().getIntervals()[2].getStartDay(),dr4.getTypical().getIntervals()[2].getEndDay(),dr4.getTypical().getIntervals()[2].getFrom(),dr4.getTypical().getIntervals()[2].getTo());
-			console.log(dr4.getTypical().getIntervals()[3].getStartDay(),dr4.getTypical().getIntervals()[3].getEndDay());
-			console.log(dr4.getTypical().getIntervals()[4].getStartDay(),dr4.getTypical().getIntervals()[4].getEndDay());
-			console.log(dr4.getTypical().getIntervals()[5].getStartDay(),dr4.getTypical().getIntervals()[5].getEndDay());
-			console.log(dr4.getTypical().getIntervals()[6].getStartDay(),dr4.getTypical().getIntervals()[6].getEndDay());
-			assert.equal(dr4.getTypical().getIntervals()[0].getStartDay(), 1);
-			assert.equal(dr4.getTypical().getIntervals()[0].getEndDay(), 1);
-			assert.equal(dr4.getTypical().getIntervals()[0].getFrom(), 9*60);
-			assert.equal(dr4.getTypical().getIntervals()[0].getTo(), 17*60);
+			assert.equal(dr4.getTypical().getIntervals().length, 8);
+			
+			assert.equal(dr4.getTypical().getIntervals()[0].getStartDay(), 0);
+			assert.equal(dr4.getTypical().getIntervals()[0].getEndDay(), 0);
+			assert.equal(dr4.getTypical().getIntervals()[0].getFrom(), 0*60);
+			assert.equal(dr4.getTypical().getIntervals()[0].getTo(), 24*60);
+			
+			assert.equal(dr4.getTypical().getIntervals()[1], undefined);
+			
+			assert.equal(dr4.getTypical().getIntervals()[2].getStartDay(), 2);
+			assert.equal(dr4.getTypical().getIntervals()[2].getEndDay(), 2);
+			assert.equal(dr4.getTypical().getIntervals()[2].getFrom(), 0*60);
+			assert.equal(dr4.getTypical().getIntervals()[2].getTo(), 24*60);
+			
+			assert.equal(dr4.getTypical().getIntervals()[3].getStartDay(), 3);
+			assert.equal(dr4.getTypical().getIntervals()[3].getEndDay(), 3);
+			assert.equal(dr4.getTypical().getIntervals()[3].getFrom(), 0*60);
+			assert.equal(dr4.getTypical().getIntervals()[3].getTo(), 24*60);
+			
+			assert.equal(dr4.getTypical().getIntervals()[4].getStartDay(), 4);
+			assert.equal(dr4.getTypical().getIntervals()[4].getEndDay(), 4);
+			assert.equal(dr4.getTypical().getIntervals()[4].getFrom(), 0*60);
+			assert.equal(dr4.getTypical().getIntervals()[4].getTo(), 24*60);
+			
+			assert.equal(dr4.getTypical().getIntervals()[5].getStartDay(), 5);
+			assert.equal(dr4.getTypical().getIntervals()[5].getEndDay(), 5);
+			assert.equal(dr4.getTypical().getIntervals()[5].getFrom(), 0*60);
+			assert.equal(dr4.getTypical().getIntervals()[5].getTo(), 24*60);
+			
+			assert.equal(dr4.getTypical().getIntervals()[6].getStartDay(), 6);
+			assert.equal(dr4.getTypical().getIntervals()[6].getEndDay(), 6);
+			assert.equal(dr4.getTypical().getIntervals()[6].getFrom(), 0*60);
+			assert.equal(dr4.getTypical().getIntervals()[6].getTo(), 24*60);
+			
+			assert.equal(dr4.getTypical().getIntervals()[7].getStartDay(), 1);
+			assert.equal(dr4.getTypical().getIntervals()[7].getEndDay(), 1);
+			assert.equal(dr4.getTypical().getIntervals()[7].getFrom(), 9*60);
+			assert.equal(dr4.getTypical().getIntervals()[7].getTo(), 17*60);
 			
 			assert.equal(builder.build(result), "24/7; Jun: Mo 08:00-18:00; PH off; SH Tu 09:00-17:00");
 		});

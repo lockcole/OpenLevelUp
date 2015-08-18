@@ -135,3 +135,20 @@ footer {
 #range-holiday label {
 	margin-right: 15px;
 }
+
+/**************
+ * Help modal *
+ **************/
+
+@media (min-width: 768px) {
+
+	#modal-help .modal-dialog {
+		width: 90%;
+		max-width: 1000px;
+	}
+
+}
+
+.modal-help-title {
+	font-weight: bold;
+}

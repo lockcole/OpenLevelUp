@@ -586,22 +586,29 @@ Week: function() {
 	 * Removes all intervals during a given day
 	 */
 	this.removeIntervalsDuringDay = function(day) {
-		var interval, itLength = _intervals.length;
+		var interval, itLength = _intervals.length, dayDiff;
 		for(var i=0; i < itLength; i++) {
 			interval = _intervals[i];
 			if(interval != undefined) {
 				//If interval over given day
 				if(interval.getStartDay() <= day && interval.getEndDay() >= day) {
-					//Create new interval if several day
-					if(interval.getEndDay() - interval.getStartDay() > 1) {
-						if(interval.getStartDay() < day) {
-							this.addInterval(new YoHours.model.Interval(interval.getStartDay(), day-1, interval.getFrom(), 24*60));
+					dayDiff = interval.getEndDay() - interval.getStartDay();
+					
+					//Avoid deletion if over night interval
+					if(dayDiff > 1 || dayDiff == 0 || interval.getStartDay() == day || interval.getFrom() <= interval.getTo()) {
+						//Create new interval if several day
+						if(interval.getEndDay() - interval.getStartDay() >= 1 && interval.getFrom() <= interval.getTo()) {
+							if(interval.getStartDay() < day) {
+								_self.addInterval(new YoHours.model.Interval(interval.getStartDay(), day-1, interval.getFrom(), 24*60));
+							}
+							if(interval.getEndDay() > day) {
+								_self.addInterval(new YoHours.model.Interval(day+1, interval.getEndDay(), 0, interval.getTo()));
+							}
 						}
-						if(interval.getEndDay() > day) {
-							this.addInterval(new YoHours.model.Interval(day+1, interval.getEndDay(), 0, interval.getTo()));
-						}
+						
+						//Delete
+						_self.removeInterval(i);
 					}
-					this.removeInterval(i);
 				}
 			}
 		}
