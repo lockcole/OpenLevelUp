@@ -438,6 +438,124 @@ Week: function() {
 			return _intervals;
 		}
 	};
+	
+	/**
+	 * Returns the intervals which are different from those defined in the given week
+	 * @param w The general week
+	 * @return The intervals which are different, as object { open: [ Intervals ], closed: [ Intervals ] }
+	 */
+	this.getIntervalsDiff = function(w) {
+		//Get minutes arrays
+		var myMinArray = _self.getAsMinutesArray();
+		var wMinArray = w.getAsMinutesArray();
+		
+		//Create diff array
+		var intervals = { open: [], closed: [] };
+		var dayStart = -1, minStart = -1, minEnd;
+		var diffDay, m, intervalsLength;
+		
+		for(var d=0; d <= YoHours.model.DAYS_MAX; d++) {
+			diffDay = false;
+			m = 0;
+			intervalsLength = intervals.open.length;
+			while(m <= YoHours.model.MINUTES_MAX) {
+				//Copy entire day
+				if(diffDay) {
+					//First minute of monday
+					if(d == 0 && m == 0) {
+						if(myMinArray[d][m]) {
+							dayStart = d;
+							minStart = m;
+						}
+					}
+					//Last minute of sunday
+					else if(d == YoHours.model.DAYS_MAX && m == YoHours.model.MINUTES_MAX) {
+						if(dayStart >= 0 && myMinArray[d][m]) {
+							intervals.open.push(new YoHours.model.Interval(
+								dayStart,
+								d,
+								minStart,
+								m
+							));
+						}
+					}
+					//Other days or minutes
+					else {
+						//New interval
+						if(myMinArray[d][m] && dayStart < 0) {
+							dayStart = d;
+							minStart = m;
+						}
+						//Ending interval
+						else if(!myMinArray[d][m] && dayStart >= 0) {
+							if(m == 0) {
+								intervals.open.push(new YoHours.model.Interval(
+									dayStart,
+									d-1,
+									minStart,
+									YoHours.model.MINUTES_MAX
+								));
+							}
+							else {
+								intervals.open.push(new YoHours.model.Interval(
+									dayStart,
+									d,
+									minStart,
+									m-1
+								));
+							}
+							dayStart = -1;
+							minStart = -1;
+						}
+					}
+					m++;
+				}
+				//Check for diff
+				else {
+					diffDay = myMinArray[d][m] ? !wMinArray[d][m] : wMinArray[d][m];
+					
+					//If there is a difference, start to copy full day
+					if(diffDay) {
+						m = 0;
+					}
+					//Else, continue checking
+					else {
+						m++;
+					}
+				}
+			}
+			
+			//Close intervals if day is identical
+			if(!diffDay && dayStart > -1) {
+				intervals.open.push(new YoHours.model.Interval(
+					dayStart,
+					d-1,
+					minStart,
+					YoHours.model.MINUTES_MAX
+				));
+				dayStart = -1;
+				minStart = -1;
+			}
+			
+			//Create closed intervals if closed all day
+			if(diffDay && intervalsLength == intervals.open.length) {
+				//Merge with previous interval if possible
+				if(intervals.closed.length > 0 && intervals.closed[intervals.closed.length-1].getEndDay() == d - 1) {
+					intervals.closed[intervals.closed.length-1] = new YoHours.model.Interval(
+																intervals.closed[intervals.closed.length-1].getStartDay(),
+																d,
+																0,
+																YoHours.model.MINUTES_MAX
+															);
+				}
+				else {
+					intervals.closed.push(new YoHours.model.Interval(d, d, 0, YoHours.model.MINUTES_MAX));
+				}
+			}
+		}
+		
+		return intervals;
+	};
 
 //MODIFIERS
 	/**
@@ -1008,7 +1126,8 @@ OpeningHoursBuilder: function() {
 	 */
 	this.build = function(dateRanges) {
 		var dateRange;
-		var result = "", resIntv, rangeGeneral;
+		var result = "", resIntv, rangeGeneral, rangeGeneralFor;
+		var generalFor;
 		
 		//Read each date range
 		for(var rangeId=0, l=dateRanges.length; rangeId < l; rangeId++) {
@@ -1018,24 +1137,42 @@ OpeningHoursBuilder: function() {
 				
 				//Check if the defined typical week/day is not strictly equal to a previous wider rule
 				rangeGeneral = null;
+				rangeGeneralFor = null;
 				var rangeGenId=rangeId-1;
 				while(rangeGenId >= 0 && rangeGeneral == null) {
+					generalFor = dateRanges[rangeGenId].isGeneralFor(dateRange.getStart(), dateRange.getEnd());
 					if(
 						dateRanges[rangeGenId] != undefined
 						&& dateRanges[rangeGenId].hasSameTypical(dateRange)
 						&& (
 							dateRanges[rangeGenId].isSameRange(dateRange.getStart(), dateRange.getEnd())
-							|| dateRanges[rangeGenId].isGeneralFor(dateRange.getStart(), dateRange.getEnd())
+							|| generalFor
 						)
 					) {
 						rangeGeneral = rangeGenId;
+					}
+					else if(generalFor && dateRanges[rangeGenId].definesTypicalWeek() && dateRange.definesTypicalWeek()) {
+						rangeGeneralFor = rangeGenId; //Keep this ID to make differences in order to simplify result
 					}
 					rangeGenId--;
 				}
 				
 				if(rangeId == 0 || rangeGeneral == null) {
 					if(dateRange.definesTypicalWeek()) {
-						resIntv += _buildWeek(dateRange.getTypical(), dateRange.getTimeSelector(), rangeId == 0);
+						if(rangeGeneralFor != null) {
+							resIntv += _buildWeekDiff(
+								dateRange.getTypical(),
+								dateRange.getTimeSelector(),
+								dateRanges[rangeGeneralFor]
+							);
+						}
+						else {
+							resIntv += _buildWeek(
+								dateRange.getTypical(),
+								dateRange.getTimeSelector(),
+								rangeId == 0
+							);
+						}
 					}
 					else if(dateRange.definesTypicalDay()) {
 						resIntv += _buildDay(dateRange.getTypical(), dateRange.getTimeSelector());
@@ -1077,6 +1214,259 @@ OpeningHoursBuilder: function() {
 		}
 		
 		return (result.length == 0) ? wideSelector+"off" : wideSelector+result;
+	};
+	
+	/**
+	 * Reads a week to create an opening_hours string for weeks which are overwriting a previous one
+	 * @param week The week object to read
+	 * @param wideSelector A wide time selector to add (for example Jan-Mar)
+	 * @param generalDateRange A general date range containing this one, or null if no one available
+	 * @return The opening_hours string
+	 */
+	function _buildWeekDiff(week, wideSelector, generalDateRange) {
+		var intervals = week.getIntervalsDiff(generalDateRange.getTypical());
+		var days = [];
+		var daysStr = [];
+		var allYear = false;
+		
+		if(wideSelector == "PH" || wideSelector == "SH" || wideSelector == "easter") { wideSelector += " "; }
+		else {
+			if(wideSelector.length > 0) { wideSelector += ": "; }
+			else { allYear = true; }
+		}
+		
+		// 0 means nothing done with this day yet
+		// 8 means the day is off
+		// -8 means the day is off and should be shown
+		// 0<x<8 means the day have the openinghours of day x
+		// -8<x<0 means nothing done with this day yet, but it intersects a
+		// range of days with same opening_hours
+		var daysStatus = [];
+		
+		for(var i=0; i < YoHours.model.OSM_DAYS.length; i++) {
+			days[i] = [];
+			daysStatus[i] = 0;
+			daysStr[i] = '';
+		}
+		
+		/*
+		 * Create time intervals per day
+		 */
+		var interval;
+		var monday0 = -1;
+		var sunday24 = -1;
+		
+		//Open
+		for(var i=0, l=intervals.open.length; i < l; i++) {
+			interval = intervals.open[i];
+			
+			if(interval != undefined) {
+				//Handle sunday 24:00 with monday 00:00
+				if(interval.getStartDay() == YoHours.model.DAYS_MAX && interval.getEndDay() == YoHours.model.DAYS_MAX && interval.getTo() == YoHours.model.MINUTES_MAX) {
+					sunday24 = interval.getFrom();
+				}
+				if(interval.getStartDay() == 0 && interval.getEndDay() == 0 && interval.getFrom() == 0) {
+					monday0 = interval.getTo();
+				}
+				
+				//Interval in a single day
+				if(interval.getStartDay() == interval.getEndDay()) {
+					days[interval.getStartDay()].push(_timeString(interval.getFrom())+"-"+_timeString(interval.getTo()));
+				}
+				//Interval on two days
+				else if(interval.getEndDay() - interval.getStartDay() == 1) {
+					//Continuous night
+					if(interval.getFrom() > interval.getTo()) {
+						days[interval.getStartDay()].push(_timeString(interval.getFrom())+"-"+_timeString(interval.getTo()));
+					}
+					//Separated days
+					else {
+						days[interval.getStartDay()].push(_timeString(interval.getFrom())+"-24:00");
+						days[interval.getEndDay()].push("00:00-"+_timeString(interval.getTo()));
+					}
+				}
+				//Interval on more than two days
+				else {
+					for(var j=interval.getStartDay(), end=interval.getEndDay(); j <= end; j++) {
+						if(j == interval.getStartDay()) {
+							days[j].push(_timeString(interval.getFrom())+"-24:00");
+						}
+						else if(j == interval.getEndDay()) {
+							days[j].push("00:00-"+_timeString(interval.getTo()));
+						}
+						else {
+							days[j].push("00:00-24:00");
+						}
+					}
+				}
+			}
+		}
+		
+		//Closed
+		for(var i=0, l=intervals.closed.length; i < l; i++) {
+			interval = intervals.closed[i];
+			
+			for(var j=interval.getStartDay(); j <= interval.getEndDay(); j++) {
+				days[j] = [ "off" ];
+			}
+		}
+		
+		/*
+		 * Create continuous night for monday-sunday
+		 */
+		if(monday0 >= 0 && sunday24 >= 0 && monday0 < sunday24) {
+			days[0].sort();
+			days[6].sort();
+			
+			//Change sunday interval
+			days[6][days[6].length-1] = _timeString(sunday24)+"-"+_timeString(monday0);
+			
+			//Remove monday interval
+			days[0].shift();
+		}
+		
+		/*
+		 * Create interval strings per day
+		 */
+		for(var i=0; i < days.length; i++) {
+			var intervalsStr = '';
+			if(days[i].length > 0) {
+				days[i].sort();
+				for(var j=0; j < days[i].length; j++) {
+					if(j > 0) {
+						intervalsStr += ',';
+					}
+					intervalsStr += days[i][j];
+				}
+			}
+
+			daysStr[i] = intervalsStr;
+		}
+		
+		/*
+		 * Create string result
+		 */
+		var result = "";
+		for(var i=0; i < days.length; i++) {
+			var add = "";
+			
+			if (daysStr[i] == 'off' && daysStatus[i] == 0) {
+				daysStatus[i] = -8;
+			} else if (daysStr[i] == 'off' && daysStatus[i] < 0 && daysStatus[i] > -8) {
+				//add = YoHours.model.OSM_DAYS[i] + " off";
+				daysStatus[i] = -8;
+			} else if (daysStatus[i] <= 0 && daysStatus[i] > -8) {
+				daysStatus[i] = i + 1;
+				var lastSameDay = i;
+				var sameDayCount = 1;
+				
+				for(var j = i + 1; j < days.length; j++) {
+					if (daysStr[i] == daysStr[j]) {
+						daysStatus[j] = i + 1;
+						lastSameDay = j;
+						sameDayCount++;
+					}
+				}
+				if (sameDayCount == 1) {
+					// a single Day with this special opening_hours
+					if(daysStr[i].length > 0) {
+						add = YoHours.model.OSM_DAYS[i] + " " + daysStr[i];
+					}
+				} else if (sameDayCount == 2) {
+					// exactly two Days with this special opening_hours
+					if(daysStr[i].length > 0) {
+						add = YoHours.model.OSM_DAYS[i] + "," + YoHours.model.OSM_DAYS[lastSameDay] + " " + daysStr[i];
+					}
+				} else if (sameDayCount > 2) {
+					// more than two Days with this special opening_hours
+					if(daysStr[i].length > 0) {
+						add = YoHours.model.OSM_DAYS[i] + "-" + YoHours.model.OSM_DAYS[lastSameDay] + " " + daysStr[i];
+					}
+					for (var j = i + 1; j < lastSameDay; j++) {
+						if (daysStatus[j] == 0) {
+							daysStatus[j] = -i - 1;
+						}
+					}
+				}
+			}
+			
+			if (add.length > 0) {
+				if (result.length > 0) {
+					result += "; ";
+				}
+				result += wideSelector+add;
+			}
+		}
+		
+		/*
+		 * Add days off
+		 */
+		var resOff = "";
+		for(var i=0; i < days.length; i++) {
+			var add = "";
+			
+			if(daysStatus[i] == -8) {
+				var lastSameDay = i;
+				var sameDayCount = 1;
+				
+				for(var j = i + 1; j < 7; j++) {
+					if (daysStr[i] == daysStr[j]) {
+						daysStatus[j] = -9;
+						lastSameDay = j;
+						sameDayCount++;
+					}
+					else {
+						break;
+					}
+				}
+				if (sameDayCount == 1) {
+					// a single Day with this special opening_hours
+					add = YoHours.model.OSM_DAYS[i];
+				} else if (sameDayCount == 2) {
+					// exactly two Days with this special opening_hours
+					add = YoHours.model.OSM_DAYS[i] + "," + YoHours.model.OSM_DAYS[lastSameDay];
+				} else if (sameDayCount > 2) {
+					// more than two Days with this special opening_hours
+					add = YoHours.model.OSM_DAYS[i] + "-" + YoHours.model.OSM_DAYS[lastSameDay];
+					for (var j = i + 1; j < lastSameDay; j++) {
+						if (daysStatus[j] == 0) {
+							daysStatus[j] = -i - 1;
+						}
+					}
+				}
+			}
+			
+			if (add.length > 0) {
+				if (resOff.length > 0) {
+					resOff += ",";
+				}
+				resOff += add;
+			}
+		}
+		
+		if(resOff.length > 0) {
+			result += "; "+wideSelector+resOff+" off";
+		}
+		
+		/*
+		 * Special cases
+		 */
+		//All week with same hours
+		if(/^Mo\-Su \d{2}/.test(result.substr(wideSelector.length))) {
+			result = wideSelector+result.substr(wideSelector.length+6);
+		}
+		
+		// 24/7
+		if(result == wideSelector+"00:00-24:00") {
+			result = wideSelector+"24/7";
+		}
+		
+		//Never opened and not full year
+		if(result == "" && !allYear) {
+			result = wideSelector+"off";
+		}
+		
+		return result;
 	};
 	
 	/**
