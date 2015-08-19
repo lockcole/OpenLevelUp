@@ -152,8 +152,6 @@ MainController: function() {
 	 * @param str The opening hours to show
 	 */
 	this.showHours = function(str) {
-		str = str.trim();
-		
 		if(str.length > 0) {
 			//Clear intervals
 			_week = new YoHours.model.Week();
@@ -161,7 +159,7 @@ MainController: function() {
 			
 			//Parse given string
 			try {
-				_dateRanges = _parser.parse(str);
+				_dateRanges = _parser.parse(str.trim());
 				_view.getCalendarView().show(_dateRanges[0]);
 				_view.getHoursInputView().setValid(true);
 			}
