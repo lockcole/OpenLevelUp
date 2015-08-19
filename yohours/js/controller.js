@@ -109,10 +109,17 @@ MainController: function() {
 	 * Adds a new date range
 	 * @param start The start time of this range
 	 * @param end The end time
+	 * @param copyIntervals The intervals to copy (or null if create new void range)
 	 * @return The created range
 	 */
-	this.newRange = function(start, end) {
+	this.newRange = function(start, end, copyIntervals) {
+		copyIntervals = copyIntervals || null;
 		var range = new YoHours.model.DateRange(start, end);
+		
+		if(copyIntervals != null) {
+			range.getTypical().copyIntervals(copyIntervals);
+		}
+		
 		_dateRanges.push(range);
 		_view.refresh();
 		return range;

@@ -30,7 +30,7 @@ YoHours is now able to handle opening hours which depends of seasons. You can de
 
 YoHours supports only a subset of the opening_hours syntax. Here are some examples of supported values.
 
-* Basic hours: `08:00-18:00` or `08:00-12:00,14:00-18:00`
+* Basic hours: `08:00-18:00` or `08:00-12:00,14:00-18:00` or `10:00`
 * Weekday selectors: `Mo-Fr,Su 09:00-17:00; Sa 10:00-19:00`
 * Week selectors: `week 01-05: Mo,Tu 08:00-10:00; week 06-10: Mo,Tu 10:00-12:00`
 * Month selectors: `Jan-Apr: We 10:00-15:00`

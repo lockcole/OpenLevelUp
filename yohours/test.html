@@ -1551,6 +1551,88 @@
 			
 			assert.equal(builder.build(dateranges), "01:00-02:00; Jun: Th 02:00-03:00");
 		});
+		QUnit.test("Build 24/7; week 01: Su 01:00-08:00", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [
+				new YoHours.model.DateRange({}),
+				new YoHours.model.DateRange({ week: 1 })
+			];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(0, 6, 0*60, 24*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(0, 5, 0*60, 24*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(6, 6, 1*60, 8*60));
+			
+			assert.equal(builder.build(dateranges), "24/7; week 01: Su 01:00-08:00");
+		});
+		QUnit.test("Build 24/7; week 01: Su 01:00-08:00", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [
+				new YoHours.model.DateRange({}),
+				new YoHours.model.DateRange({ week: 1 })
+			];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(0, 6, 0*60, 24*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(0, 5, 0*60, 24*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(6, 6, 1*60, 8*60));
+			
+			assert.equal(builder.build(dateranges), "24/7; week 01: Su 01:00-08:00");
+		});
+		QUnit.test("Build Tu,Su 23:00-01:00", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [
+				new YoHours.model.DateRange({})
+			];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(1, 2, 23*60, 1*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(6, 6, 23*60, 24*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(0, 0, 0*60, 1*60));
+			
+			assert.equal(builder.build(dateranges), "Tu,Su 23:00-01:00");
+		});
+		QUnit.test("Build Tu,Su 23:00-01:00; week 01: Tu,We off", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [
+				new YoHours.model.DateRange({}),
+				new YoHours.model.DateRange({ week: 1 })
+			];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(1, 2, 23*60, 1*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(6, 6, 23*60, 24*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(0, 0, 0*60, 1*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(6, 6, 23*60, 24*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(0, 0, 0*60, 1*60));
+			
+			assert.equal(builder.build(dateranges), "Tu,Su 23:00-01:00; week 01: Tu,We off");
+		});
+		QUnit.test("Build 08:00-18:00; Aug: off", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [
+				new YoHours.model.DateRange({}),
+				new YoHours.model.DateRange({ month: 8 })
+			];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(0, 0, 8*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(1, 1, 8*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(2, 2, 8*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(3, 3, 8*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(4, 4, 8*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(5, 5, 8*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(6, 6, 8*60, 18*60));
+			
+			assert.equal(builder.build(dateranges), "08:00-18:00; Aug: off");
+		});
+		QUnit.test("Build Mo 10:00; PH 11:00", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [
+				new YoHours.model.DateRange({}),
+				new YoHours.model.DateRange({ holiday: "PH" })
+			];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(0, 0, 10*60, 10*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(0, 0, 11*60, 11*60));
+			
+			assert.equal(builder.build(dateranges), "Mo 10:00; PH 11:00");
+		});
 		
 		/*
 		 * OpeningHoursParser
@@ -1727,6 +1809,34 @@
 			var parser = new YoHours.model.OpeningHoursParser();
 			var builder = new YoHours.model.OpeningHoursBuilder();
 			assert.equal(builder.build(parser.parse("01:00-02:00; Jun: Th 02:00-03:00")), "01:00-02:00; Jun: Th 02:00-03:00");
+		});
+		QUnit.test("Parse Tu 00:00-24:00", function(assert) {
+			var parser = new YoHours.model.OpeningHoursParser();
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			
+			var result = parser.parse("Tu 00:00-24:00");
+			assert.equal(result.length, 1);
+			
+			var dr1 = result[0];
+			assert.equal(dr1.getTimeSelector(), "");
+			assert.equal(dr1.getTypical().getIntervals().length, 1);
+			
+			assert.equal(dr1.getTypical().getIntervals()[0].getStartDay(), 1);
+			assert.equal(dr1.getTypical().getIntervals()[0].getEndDay(), 1);
+			assert.equal(dr1.getTypical().getIntervals()[0].getFrom(), 0*60);
+			assert.equal(dr1.getTypical().getIntervals()[0].getTo(), 24*60);
+			
+			assert.equal(builder.build(result), "Tu 00:00-24:00");
+		});
+		QUnit.test("Parse 24/7; week 01: Su 01:00-08:00", function(assert) {
+			var parser = new YoHours.model.OpeningHoursParser();
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			assert.equal(builder.build(parser.parse("24/7; week 01: Su 01:00-08:00")), "24/7; week 01: Su 01:00-08:00");
+		});
+		QUnit.test("Parse Mo 10:00; PH 11:00", function(assert) {
+			var parser = new YoHours.model.OpeningHoursParser();
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			assert.equal(builder.build(parser.parse("Mo 10:00; PH 11:00")), "Mo 10:00; PH 11:00");
 		});
 	</script>
 </head>

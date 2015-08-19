@@ -71,6 +71,8 @@ DateRangeView: function(main) {
 		$("#range-month-start").val(1);
 		$("#range-month-end").val(0);
 		$("input[name=range-holiday-type]").prop("checked", false);
+		$("#range-copy").hide();
+		$("#range-copy-box").attr("checked", true);
 		
 		//Edit interval
 		if(_editMode) {
@@ -160,6 +162,10 @@ DateRangeView: function(main) {
 			$("#modal-range-nav li:first").addClass("active");
 			_rangeType = $("#modal-range-nav li:first").attr("id").substr("modal-range-nav-".length);
 			
+			if(_rangeType != "always") {
+				$("#range-copy").show();
+			}
+			
 			//Show associated div
 			$("#modal-range-form > div:first").show();
 		}
@@ -177,6 +183,13 @@ DateRangeView: function(main) {
 		$("#range-"+type).show();
 		$("#modal-range-alert").hide();
 		_rangeType = type;
+		
+		if(_rangeType != "always" && !_editMode) {
+			$("#range-copy").show();
+		}
+		else {
+			$("#range-copy").hide();
+		}
 	};
 	
 	/**
@@ -249,12 +262,16 @@ DateRangeView: function(main) {
 			var overlap = false;
 			var ranges = _mainView.getController().getDateRanges();
 			var l = ranges.length, i=0;
+			var generalRange = -1; //Wider date range which can be copied if needed
 			
 			while(i < l) {
 				if(ranges[i] != undefined && ranges[i].isSameRange(start, end)) {
 					throw new Error("This time range is identical to another one");
 				}
 				else {
+					if(ranges[i] != undefined && ranges[i].isGeneralFor(start, end)) {
+						generalRange = i;
+					}
 					i++;
 				}
 			}
@@ -267,7 +284,13 @@ DateRangeView: function(main) {
 			}
 			//Create new calendar
 			else {
-				_mainView.getCalendarView().show(_mainView.getController().newRange(start, end));
+				//Copy wider date range intervals
+				if($("#range-copy-box").is(":checked") && generalRange >= 0) {
+					_mainView.getCalendarView().show(_mainView.getController().newRange(start, end, ranges[generalRange].getTypical().getIntervals()));
+				}
+				else {
+					_mainView.getCalendarView().show(_mainView.getController().newRange(start, end));
+				}
 			}
 			$("#modal-range").modal("hide");
 		}
@@ -369,18 +392,26 @@ CalendarView: function(main) {
 		if(_dateRange.definesTypicalWeek()) {
 			var intervals = _dateRange.getTypical().getIntervals();
 			var events = [];
-			var interval, weekId, eventData;
+			var interval, weekId, eventData, to;
 			
 			//Create intervals array
 			for(var i = 0; i < intervals.length; i++) {
 				interval = intervals[i];
 				
 				if(interval != undefined) {
+					//Single minute event
+					if(interval.getStartDay() == interval.getEndDay() && interval.getFrom() == interval.getTo()) {
+						to = moment().day("Monday").hour(0).minute(0).second(0).milliseconds(0).add(interval.getEndDay(), 'days').add(interval.getTo()+1, 'minutes');
+					}
+					else {
+						to = moment().day("Monday").hour(0).minute(0).second(59).milliseconds(0).add(interval.getEndDay(), 'days').add(interval.getTo(), 'minutes');
+					}
+					
 					//Add event on calendar
 					eventData = {
 						id: i,
-						start: moment().day("Monday").hour(0).minute(0).second(0).add(interval.getStartDay(), 'days').add(interval.getFrom(), 'minutes'),
-						end: moment().day("Monday").hour(0).minute(0).second(0).add(interval.getEndDay(), 'days').add(interval.getTo(), 'minutes'),
+						start: moment().day("Monday").hour(0).minute(0).second(0).milliseconds(0).add(interval.getStartDay(), 'days').add(interval.getFrom(), 'minutes'),
+						end: to,
 					};
 					events.push(eventData);
 				}
@@ -470,18 +501,26 @@ CalendarView: function(main) {
 		else if(_dateRange.definesTypicalDay()) {
 			var intervals = _dateRange.getTypical().getIntervals();
 			var events = [];
-			var interval, weekId, eventData;
+			var interval, weekId, eventData, to;
 			
 			//Create intervals array
 			for(var i = 0; i < intervals.length; i++) {
 				interval = intervals[i];
 				
 				if(interval != undefined) {
+					//Single minute event
+					if(interval.getFrom() == interval.getTo()) {
+						to = moment().hour(0).minute(0).second(0).milliseconds(0).add(interval.getTo()+1, 'minutes');
+					}
+					else {
+						to = moment().hour(0).minute(0).second(0).milliseconds(0).add(interval.getTo(), 'minutes');
+					}
+					
 					//Add event on calendar
 					eventData = {
 						id: i,
-						start: moment().hour(0).minute(0).second(0).add(interval.getFrom(), 'minutes'),
-						end: moment().hour(0).minute(0).second(0).add(interval.getTo(), 'minutes'),
+						start: moment().hour(0).minute(0).second(0).milliseconds(0).add(interval.getFrom(), 'minutes'),
+						end: to
 					};
 					events.push(eventData);
 				}
@@ -582,6 +621,75 @@ CalendarView: function(main) {
 
 
 /**
+ * The URL manager
+ */
+URLView: function(main) {
+//ATTRIBUTES
+	/** The main view **/
+	var _mainView = main;
+
+	/** This object **/
+	var _self = this;
+	
+//ACCESSORS
+	/**
+	 * @return The opening_hours value in URL, or undefined
+	 */
+	this.getOpeningHours = function() {
+		return (_getParameters().oh != undefined) ? decodeURIComponent(_getParameters().oh) : "";
+	};
+
+//MODIFIERS
+	/**
+	 * Updates the URL with the given opening_hours value
+	 * @param oh The new value
+	 */
+	this.update = function(oh) {
+		var params = (oh != undefined && oh.trim().length > 0) ? "oh="+oh.trim() : "";
+		var hash = this._getUrlHash();
+		
+		var allOptions = params + ((hash != "") ? '#' + hash : "");
+		var link = this._getUrl() + ((allOptions.length > 0) ? "?" + allOptions : "" );
+		
+		window.history.replaceState({}, "YoHours", link);
+	};
+
+//OTHER METHODS
+	/**
+	 * @return The URL parameters as an object
+	 */
+	function _getParameters() {
+		var sPageURL = window.location.search.substring(1);
+		var sURLVariables = sPageURL.split('&');
+		var params = new Object();
+		
+		for (var i = 0; i < sURLVariables.length; i++) {
+			var sParameterName = sURLVariables[i].split('=');
+			params[sParameterName[0]] = sParameterName[1];
+		}
+		
+		return params;
+	};
+	
+	/**
+	 * @return The page base URL
+	 */
+	this._getUrl = function() {
+		return $(location).attr('href').split('?')[0];
+	};
+	
+	/**
+	 * @return The URL hash
+	 */
+	this._getUrlHash = function() {
+		var hash = $(location).attr('href').split('#')[1];
+		return (hash != undefined) ? hash : "";
+	};
+},
+
+
+
+/**
  * The opening hours text input field
  */
 HoursInputView: function(main) {
@@ -597,7 +705,36 @@ HoursInputView: function(main) {
 	
 	/** The timer **/
 	var _timer;
+	
+	/** The URL view **/
+	var _vUrl = new YoHours.view.URLView(main);
+	
+	/** This object **/
+	var _self = this;
 
+//CONSTRUCTOR
+	function _init() {
+		//Get opening_hours from URL
+		var urlOh = _vUrl.getOpeningHours();
+		if(urlOh != undefined) {
+			_self.setValue(urlOh);
+		}
+		else {
+			_self.setValue("");
+		}
+		
+		//Add triggers
+		_field.bind("input propertychange", _self.changed.bind(_self));
+	};
+
+//ACCESSORS
+	/**
+	 * @return The opening_hours value
+	 */
+	this.getValue = function() {
+		return _field.val();
+	};
+	
 //MODIFIERS
 	/**
 	 * Changes the input value
@@ -605,6 +742,7 @@ HoursInputView: function(main) {
 	this.setValue = function(val) {
 		if(val != _field.val()) {
 			_field.val(val);
+			_vUrl.update(val);
 		}
 	};
 	
@@ -624,6 +762,7 @@ HoursInputView: function(main) {
 		window.clearTimeout(_timer);
 		_timer = window.setTimeout(
 			function() {
+				_vUrl.update(_field.val());
 				_mainView.getController().showHours(_field.val());
 			},
 			_delay
@@ -631,7 +770,7 @@ HoursInputView: function(main) {
 	};
 
 //CONSTRUCTOR
-	_field.bind("input propertychange", this.changed.bind(this));
+	_init();
 },
 
 
@@ -693,8 +832,13 @@ MainView: function(ctrl) {
 	 * Initializes the view
 	 */
 	this.init = function() {
-		_hoursInputView.setValue("");
-		_calendarView.show(_ctrl.getFirstDateRange());
+		var ohInputVal = _hoursInputView.getValue();
+		if(ohInputVal != undefined && ohInputVal.trim() != "") {
+			_ctrl.showHours(ohInputVal);
+		}
+		else {
+			_calendarView.show(_ctrl.getFirstDateRange());
+		}
 		
 		//Init help dialog
 		_helpView = $("#modal-help");

@@ -26,7 +26,6 @@
 <head>
 	<!--
 		TODO (by priority)
-		* Add option in new time range modal to copy superior typical week
 		* Extend intervals to left/right
 		* Zoom-in/out on calendar (extend slot duration)
 	-->
@@ -88,7 +87,7 @@
 			<div id="navbar-content" class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
 					<li><a id="help-link"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Help</a></li>
-					<li><a href="mailto:panieravide@riseup.net"><span class="glyphicon glyphicon-phone-alt" aria-hidden="true"></span> Contact</a></li>
+					<li><a href="mailto:panieravide@riseup.net"><span class="glyphicon glyphicon-earphone" aria-hidden="true"></span> Contact</a></li>
 				</ul>
 				<p class="navbar-text navbar-right hidden-xs">
 					<em>OpenStreetMap <a href="https://wiki.openstreetmap.org/wiki/Key:opening_hours">opening hours</a> made easy !</em>
@@ -315,6 +314,9 @@
 							</div>
 						</div>
 					</form>
+					<div class="checkbox" id="range-copy">
+						<label><input type="checkbox" id="range-copy-box" /> Copy opening hours from previous calendar (if possible)</label>
+					</div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" id="modal-range-valid" class="btn btn-success">OK</button>
