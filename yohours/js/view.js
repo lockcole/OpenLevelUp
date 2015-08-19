@@ -754,6 +754,7 @@ HoursInputView: function(main) {
 		window.clearTimeout(_timer);
 		_timer = window.setTimeout(
 			function() {
+				_field.val(_field.val().replace(/␣/gi, ' ')); //Allow to paste directly from Taginfo
 				_vUrl.update(_field.val());
 				_mainView.getController().showHours(_field.val());
 			},
