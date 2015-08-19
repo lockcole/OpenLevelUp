@@ -1173,7 +1173,7 @@ OpeningHoursBuilder: function() {
 							resIntv = _buildWeek(
 								dateRange.getTypical(),
 								dateRange.getTimeSelector(),
-								rangeId == 0
+								true
 							);
 						}
 					}

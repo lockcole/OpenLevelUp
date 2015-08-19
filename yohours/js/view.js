@@ -388,12 +388,16 @@ CalendarView: function(main) {
 		_dateRange = dateRange;
 		$("#calendar").fullCalendar('destroy');
 		
+		var intervals = _dateRange.getTypical().getIntervals();
+		var events = [];
+		var interval, weekId, eventData, to, eventConstraint, defaultView, colFormat;
+		var fctSelect, fctResize, fctDrop;
+		
+		/*
+		 * Variables depending of the kind of typical day/week
+		 */
 		//Week
 		if(_dateRange.definesTypicalWeek()) {
-			var intervals = _dateRange.getTypical().getIntervals();
-			var events = [];
-			var interval, weekId, eventData, to;
-			
 			//Create intervals array
 			for(var i = 0; i < intervals.length; i++) {
 				interval = intervals[i];
@@ -404,7 +408,7 @@ CalendarView: function(main) {
 						to = moment().day("Monday").hour(0).minute(0).second(0).milliseconds(0).add(interval.getEndDay(), 'days').add(interval.getTo()+1, 'minutes');
 					}
 					else {
-						to = moment().day("Monday").hour(0).minute(0).second(59).milliseconds(0).add(interval.getEndDay(), 'days').add(interval.getTo(), 'minutes');
+						to = moment().day("Monday").hour(0).minute(0).second(0).milliseconds(0).add(interval.getEndDay(), 'days').add(interval.getTo(), 'minutes');
 					}
 					
 					//Add event on calendar
@@ -417,92 +421,74 @@ CalendarView: function(main) {
 				}
 			}
 			
-			//Create calendar
-			$("#calendar").fullCalendar({
-				header: {
-					left: '',
-					center: '',
-					right: ''
-				},
-				defaultView: 'agendaWeek',
-				editable: true,
-				height: "auto",
-				columnFormat: 'dddd',
-				timeFormat: 'HH:mm',
-				axisFormat: 'HH:mm',
-				allDayText: '24/24',
-				slotDuration: '00:15:00',
-				firstDay: 1,
-				eventOverlap: false,
-				events: events,
-				eventConstraint: { start: moment().day("Monday").format("YYYY-MM-DD[T00:00:00]"), end: moment().day("Monday").add(7, "days").format("YYYY-MM-DD[T00:00:00]") },
-				selectable: true,
-				selectHelper: true,
-				selectOverlap: false,
-				select: function(start, end) {
-					//Add event to week intervals
-					var minStart = parseInt(start.format("H")) * 60 + parseInt(start.format("m"));
-					var minEnd = parseInt(end.format("H")) * 60 + parseInt(end.format("m"));
-					var weekId = _dateRange.getTypical().addInterval(
-						new YoHours.model.Interval(
-							swDayToMwDay(start.format("d")),
-							swDayToMwDay(end.format("d")),
-							minStart,
-							minEnd
-						)
-					);
-					
-					//Add event on calendar
-					eventData = {
-						id: weekId,
-						start: start,
-						end: end
-					};
-					$('#calendar').fullCalendar('renderEvent', eventData, true);
-					
-					_mainView.refresh();
-				},
-				eventClick: function(calEvent, jsEvent, view) {
-					_dateRange.getTypical().removeInterval(calEvent._id);
-					$('#calendar').fullCalendar('removeEvents', calEvent._id);
-					_mainView.refresh();
-				},
-				eventResize: function(event, delta, revertFunc, jsEvent, ui, view) {
-					var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
-					var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
-					_dateRange.getTypical().editInterval(
-						event.id,
-						new YoHours.model.Interval(
-							swDayToMwDay(event.start.format("d")),
-							swDayToMwDay(event.end.format("d")),
-							minStart,
-							minEnd
-						)
-					);
-					_mainView.refresh();
-				},
-				eventDrop: function(event, delta, revertFunc, jsEvent, ui, view) {
-					var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
-					var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
-					_dateRange.getTypical().editInterval(
-						event.id,
-						new YoHours.model.Interval(
-							swDayToMwDay(event.start.format("d")),
-							swDayToMwDay(event.end.format("d")),
-							minStart,
-							minEnd
-						)
-					);
-					_mainView.refresh();
+			eventConstraint = { start: moment().day("Monday").format("YYYY-MM-DD[T00:00:00]"), end: moment().day("Monday").add(7, "days").format("YYYY-MM-DD[T00:00:00]") };
+			defaultView = "agendaWeek";
+			colFormat = "dddd";
+			fctSelect = function(start, end) {
+				//Add event to week intervals
+				var minStart = parseInt(start.format("H")) * 60 + parseInt(start.format("m"));
+				var minEnd = parseInt(end.format("H")) * 60 + parseInt(end.format("m"));
+				var dayStart = swDayToMwDay(start.format("d"));
+				var dayEnd = swDayToMwDay(end.format("d"));
+				
+				//All day interval
+				if(minStart == 0 && minEnd == 0 && dayEnd - dayStart >= 1) {
+					minEnd = YoHours.model.MINUTES_MAX;
+					dayEnd--;
 				}
-			});
+				
+				var weekId = _dateRange.getTypical().addInterval(
+					new YoHours.model.Interval(
+						dayStart,
+						dayEnd,
+						minStart,
+						minEnd
+					)
+				);
+				
+				//Add event on calendar
+				eventData = {
+					id: weekId,
+					start: start,
+					end: end
+				};
+				$('#calendar').fullCalendar('renderEvent', eventData, true);
+				
+				_mainView.refresh();
+			};
+			
+			fctResize = function(event, delta, revertFunc, jsEvent, ui, view) {
+				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
+				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
+				_dateRange.getTypical().editInterval(
+					event.id,
+					new YoHours.model.Interval(
+						swDayToMwDay(event.start.format("d")),
+						swDayToMwDay(event.end.format("d")),
+						minStart,
+						minEnd
+					)
+				);
+				_mainView.refresh();
+			};
+			
+			fctDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
+				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
+				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
+				_dateRange.getTypical().editInterval(
+					event.id,
+					new YoHours.model.Interval(
+						swDayToMwDay(event.start.format("d")),
+						swDayToMwDay(event.end.format("d")),
+						minStart,
+						minEnd
+					)
+				);
+				_mainView.refresh();
+			};
 		}
 		//Day
-		else if(_dateRange.definesTypicalDay()) {
-			var intervals = _dateRange.getTypical().getIntervals();
-			var events = [];
-			var interval, weekId, eventData, to;
-			
+		else {
 			//Create intervals array
 			for(var i = 0; i < intervals.length; i++) {
 				interval = intervals[i];
@@ -526,89 +512,95 @@ CalendarView: function(main) {
 				}
 			}
 			
-			//Create calendar
-			$("#calendar").fullCalendar({
-				header: {
-					left: '',
-					center: '',
-					right: ''
-				},
-				defaultView: 'agendaDay',
-				editable: true,
-				height: "auto",
-				columnFormat: '[Day]',
-				timeFormat: 'HH:mm',
-				axisFormat: 'HH:mm',
-				allDayText: '24/24',
-				slotDuration: '00:15:00',
-				firstDay: 1,
-				eventOverlap: false,
-				events: events,
-				eventConstraint: { start: moment().format("YYYY-MM-DD[T00:00:00]"), end: moment().add(1, "days").format("YYYY-MM-DD[T00:00:00]") },
-				selectable: true,
-				selectHelper: true,
-				selectOverlap: false,
-				select: function(start, end) {
-					//Add event to week intervals
-					var minStart = parseInt(start.format("H")) * 60 + parseInt(start.format("m"));
-					var minEnd = parseInt(end.format("H")) * 60 + parseInt(end.format("m"));
-					var weekId = _dateRange.getTypical().addInterval(
-						new YoHours.model.Interval(
-							0,
-							0,
-							minStart,
-							minEnd
-						)
-					);
-					
-					//Add event on calendar
-					eventData = {
-						id: weekId,
-						start: start,
-						end: end
-					};
-					$('#calendar').fullCalendar('renderEvent', eventData, true);
-					
-					_mainView.refresh();
-				},
-				eventClick: function(calEvent, jsEvent, view) {
-					_dateRange.getTypical().removeInterval(calEvent._id);
-					$('#calendar').fullCalendar('removeEvents', calEvent._id);
-					_mainView.refresh();
-				},
-				eventResize: function(event, delta, revertFunc, jsEvent, ui, view) {
-					var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
-					var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
-					_dateRange.getTypical().editInterval(
-						event.id,
-						new YoHours.model.Interval(
-							0,
-							0,
-							minStart,
-							minEnd
-						)
-					);
-					_mainView.refresh();
-				},
-				eventDrop: function(event, delta, revertFunc, jsEvent, ui, view) {
-					var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
-					var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
-					_dateRange.getTypical().editInterval(
-						event.id,
-						new YoHours.model.Interval(
-							0,
-							0,
-							minStart,
-							minEnd
-						)
-					);
-					_mainView.refresh();
-				}
-			});
+			eventConstraint = { start: moment().format("YYYY-MM-DD[T00:00:00]"), end: moment().add(1, "days").format("YYYY-MM-DD[T00:00:00]") };
+			defaultView = "agendaDay";
+			colFormat = "[Day]";
+			fctSelect = function(start, end) {
+				//Add event to week intervals
+				var minStart = parseInt(start.format("H")) * 60 + parseInt(start.format("m"));
+				var minEnd = parseInt(end.format("H")) * 60 + parseInt(end.format("m"));
+				var weekId = _dateRange.getTypical().addInterval(
+					new YoHours.model.Interval(
+						0,
+						0,
+						minStart,
+						minEnd
+					)
+				);
+				
+				//Add event on calendar
+				eventData = {
+					id: weekId,
+					start: start,
+					end: end
+				};
+				$('#calendar').fullCalendar('renderEvent', eventData, true);
+				
+				_mainView.refresh();
+			};
+			
+			fctResize = function(event, delta, revertFunc, jsEvent, ui, view) {
+				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
+				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
+				_dateRange.getTypical().editInterval(
+					event.id,
+					new YoHours.model.Interval(
+						0,
+						0,
+						minStart,
+						minEnd
+					)
+				);
+				_mainView.refresh();
+			};
+			
+			fctDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
+				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
+				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
+				_dateRange.getTypical().editInterval(
+					event.id,
+					new YoHours.model.Interval(
+						0,
+						0,
+						minStart,
+						minEnd
+					)
+				);
+				_mainView.refresh();
+			};
 		}
-		else {
-			throw new Error("Invalid typical object");
-		}
+		
+		//Create calendar
+		$("#calendar").fullCalendar({
+			header: {
+				left: '',
+				center: '',
+				right: ''
+			},
+			defaultView: defaultView,
+			editable: true,
+			height: "auto",
+			columnFormat: colFormat,
+			timeFormat: 'HH:mm',
+			axisFormat: 'HH:mm',
+			allDayText: '24/24',
+			slotDuration: '00:15:00',
+			firstDay: 1,
+			eventOverlap: false,
+			events: events,
+			eventConstraint: eventConstraint,
+			selectable: true,
+			selectHelper: true,
+			selectOverlap: false,
+			select: fctSelect,
+			eventClick: function(calEvent, jsEvent, view) {
+				_dateRange.getTypical().removeInterval(calEvent._id);
+				$('#calendar').fullCalendar('removeEvents', calEvent._id);
+				_mainView.refresh();
+			},
+			eventResize: fctResize,
+			eventDrop: fctDrop
+		});
 		
 		this.updateDateRangeLabel();
 		this.updateRangeNavigationBar();
