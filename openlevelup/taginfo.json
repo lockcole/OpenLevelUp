@@ -1,0 +1,37 @@
+{
+	"data_format": 1,
+	"data_url": "http://github.pavie.info/openlevelup/taginfo.json",
+	"project": {
+		"name": "OpenLevelUp!",
+		"description": "Indoor map with level selector",
+		"project_url": "http://openlevelup.pavie.info/",
+		"doc_url": "https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup",
+		"icon_url": "http://github.pavie.info/openlevelup/img/favicon.jpg",
+		"contact_name": "Adrien Pavie",
+		"contact_email": "panieravide@riseup.net"
+	},
+	"tags": [
+		{ "key": "indoor" },
+		{ "key": "buildingpart" },
+		{ "key": "level" },
+		{ "key": "buildingpart:verticalpassage" },
+		{ "key": "room" },
+		{ "key": "laboratory" },
+		{ "key": "door" },
+		{ "key": "entrance" },
+		{ "key": "highway" },
+		{ "key": "amenity" },
+		{ "key": "vending" },
+		{ "key": "barrier" },
+		{ "key": "emergency" },
+		{ "key": "railway" },
+		{ "key": "shop" },
+		{ "key": "tourism" },
+		{ "key": "information" },
+		{ "key": "map_type" },
+		{ "key": "advertising" },
+		{ "key": "material" },
+		{ "key": "mapillary" },
+		{ "key": "image" }
+	]
+}
