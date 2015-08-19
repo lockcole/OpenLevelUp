@@ -693,156 +693,120 @@ var FeatureView = function(main, feature) {
 	
 	/** The feature **/
 	this._feature = feature;
+	
+	this._init();
+};
 
 //CONSTRUCTOR
-	if(this._isDisplayable(this._feature)) {
-		var style = this._feature.getStyle().get();
-		var geom = this._feature.getGeometry();
-		var geomType = geom.getType();
-		var hasIcon = style.icon != undefined;
-		var geomLatLng = geom.getLatLng();
-		this._layer = L.featureGroup();
-		
-		//Init layer object, depending of geometry type
-		switch(geomType) {
-			case "Point":
-				var marker = this._createMarker(geomLatLng);
-				if(marker != null) {
-					this._layer.addLayer(marker);
-					hasIcon = true;
-					
-					marker = null;
-				}
-				break;
-				
-			case "LineString":
-				this._layer.addLayer(L.polyline(geomLatLng, style));
-				break;
-				
-			case "Polygon":
-				this._layer.addLayer(L.polygon(geomLatLng, style));
-				break;
-				
-			case "MultiPolygon":
-				this._layer.addLayer(L.multiPolygon(geomLatLng, style));
-				break;
-				
-			default:
-				console.log("Unknown geometry type: "+geomType);
-		}
-		
-		//Look for an icon or a label
-		var labelizable = this._labelizable();
-		var hasPhoto = this._mainView.getOptionsView().showPhotos() && (this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && !this._mainView.isMobile() && this._feature.getImages().hasValidSpherical()));
-		
-		if(hasIcon || labelizable || hasPhoto) {
+	FeatureView.prototype._init = function() {
+		if(this._isDisplayable(this._feature)) {
+			var style = this._feature.getStyle().get();
+			var geom = this._feature.getGeometry();
+			var geomType = geom.getType();
+			var hasIcon = style.icon != undefined;
+			var geomLatLng = geom.getLatLng();
+			this._layer = L.featureGroup();
+			
+			//Init layer object, depending of geometry type
 			switch(geomType) {
 				case "Point":
-					//Labels
-					if(labelizable) {
-						this._layer.addLayer(this._createLabel(geomLatLng, hasIcon));
-					}
-					
-					if(hasPhoto) {
-						this._layer.addLayer(this._createPhotoIcon(geomLatLng));
+					var marker = this._createMarker(geomLatLng);
+					if(marker != null) {
+						this._layer.addLayer(marker);
+						hasIcon = true;
+						
+						marker = null;
 					}
 					break;
 					
 				case "LineString":
-					var ftGeomJSON = geom.get();
-					var nbSegments = ftGeomJSON.coordinates.length - 1;
-					
-					//For each segment, add an icon
-					var coord1, coord2, coordMid, angle, coord, marker;
-					for(var i=0; i < nbSegments; i++) {
-						coord1 = ftGeomJSON.coordinates[i];
-						coord2 = ftGeomJSON.coordinates[i+1];
-						coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
-						angle = azimuth({lat: coord1[1], lng: coord1[0], elv: 0}, {lat: coord2[1], lng: coord2[0], elv: 0}).azimuth;
-						coord = L.latLng(coordMid[1], coordMid[0]);
-						
-						if(hasIcon) {
-							if(style.rotateIcon) {
-								marker = this._createMarker(coord, angle);
-								if(marker != null) {
-									this._layer.addLayer(marker);
-								}
-							}
-							else {
-								marker = this._createMarker(coord);
-								if(marker != null) {
-									this._layer.addLayer(marker);
-								}
-							}
-						}
-						
-						//Labels
-						if(labelizable) {
-							this._layer.addLayer(this._createLabel(coord, hasIcon, angle));
-						}
-						
-						if(hasPhoto) {
-							this._layer.addLayer(this._createPhotoIcon(coord));
-						}
-					}
-					
-					//Clear tmp objects
-					coord1 = null;
-					coord2 = null;
-					coordMid = null;
-					angle = null;
-					coord = null;
-					marker = null;
-					
+					this._layer.addLayer(L.polyline(geomLatLng, style));
 					break;
 					
 				case "Polygon":
-					var coord = geom.getCentroid();
-					
-					if(hasIcon) {
-						var marker = this._createMarker(coord);
-						if(marker != null) {
-							this._layer.addLayer(marker);
-						}
-					}
-					
-					//Labels
-					if(labelizable) {
-						this._layer.addLayer(this._createLabel(coord, hasIcon));
-					}
-					
-					if(hasPhoto) {
-						this._layer.addLayer(this._createPhotoIcon(coord));
-					}
-					
-					//Clear tmp objects
-					coord = null;
-					
+					this._layer.addLayer(L.polygon(geomLatLng, style));
 					break;
-				
-				case "MultiPolygon":
-					var ftGeomJSON = geom.get();
-					var nbPolygons = ftGeomJSON.coordinates.length;
 					
-					//For each polygon, add an icon
-					var coordMid, coordsPolygon, length, coord, marker;
-					for(var i=0; i < nbPolygons; i++) {
-						coordMid = [0, 0];
-						coordsPolygon = ftGeomJSON.coordinates[i];
-						length = coordsPolygon[0].length;
-						for(var j=0; j < length; j++) {
-							if(j < length - 1) {
-								coordMid[0] += coordsPolygon[0][j][0];
-								coordMid[1] += coordsPolygon[0][j][1];
+				case "MultiPolygon":
+					this._layer.addLayer(L.multiPolygon(geomLatLng, style));
+					break;
+					
+				default:
+					console.log("Unknown geometry type: "+geomType);
+			}
+			
+			//Look for an icon or a label
+			var labelizable = this._labelizable();
+			var hasPhoto = this._mainView.getOptionsView().showPhotos() && (this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && !this._mainView.isMobile() && this._feature.getImages().hasValidSpherical()));
+			
+			if(hasIcon || labelizable || hasPhoto) {
+				switch(geomType) {
+					case "Point":
+						//Labels
+						if(labelizable) {
+							this._layer.addLayer(this._createLabel(geomLatLng, hasIcon));
+						}
+						
+						if(hasPhoto) {
+							this._layer.addLayer(this._createPhotoIcon(geomLatLng));
+						}
+						break;
+						
+					case "LineString":
+						var ftGeomJSON = geom.get();
+						var nbSegments = ftGeomJSON.coordinates.length - 1;
+						
+						//For each segment, add an icon
+						var coord1, coord2, coordMid, angle, coord, marker;
+						for(var i=0; i < nbSegments; i++) {
+							coord1 = ftGeomJSON.coordinates[i];
+							coord2 = ftGeomJSON.coordinates[i+1];
+							coordMid = [ (coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2 ];
+							angle = azimuth({lat: coord1[1], lng: coord1[0], elv: 0}, {lat: coord2[1], lng: coord2[0], elv: 0}).azimuth;
+							coord = L.latLng(coordMid[1], coordMid[0]);
+							
+							if(hasIcon) {
+								if(style.rotateIcon) {
+									marker = this._createMarker(coord, angle);
+									if(marker != null) {
+										this._layer.addLayer(marker);
+									}
+								}
+								else {
+									marker = this._createMarker(coord);
+									if(marker != null) {
+										this._layer.addLayer(marker);
+									}
+								}
+							}
+							
+							//Labels
+							if(labelizable) {
+								this._layer.addLayer(this._createLabel(coord, hasIcon, angle));
+							}
+							
+							if(hasPhoto) {
+								this._layer.addLayer(this._createPhotoIcon(coord));
 							}
 						}
 						
-						coordMid[0] = coordMid[0] / (length -1);
-						coordMid[1] = coordMid[1] / (length -1);
-						coord = L.latLng(coordMid[1], coordMid[0]);
+						//Clear tmp objects
+						coord1 = null;
+						coord2 = null;
+						coordMid = null;
+						angle = null;
+						coord = null;
+						marker = null;
+						ftGeomJSON = null;
+						nbSegments = null;
+						
+						break;
+						
+					case "Polygon":
+						var coord = geom.getCentroid();
 						
 						if(hasIcon) {
-							marker = this._createMarker(coord);
+							var marker = this._createMarker(coord);
 							if(marker != null) {
 								this._layer.addLayer(marker);
 							}
@@ -850,46 +814,88 @@ var FeatureView = function(main, feature) {
 						
 						//Labels
 						if(labelizable) {
-							this._layer.addLayer(this._createLabel(coord, hasIcon, angle));
+							this._layer.addLayer(this._createLabel(coord, hasIcon));
 						}
 						
 						if(hasPhoto) {
 							this._layer.addLayer(this._createPhotoIcon(coord));
 						}
-					}
+						
+						//Clear tmp objects
+						coord = null;
+						
+						break;
 					
-					//Clear tmp objects
-					ftGeomJSON = null;
-					nbPolygons = null;
-					coordMid = null;
-					coordsPolygon = null;
-					length = null;
-					coord = null;
-					marker = null;
-					
-					break;
-					
-				default:
-					console.log("Unknown geometry type: "+geomType);
+					case "MultiPolygon":
+						var ftGeomJSON = geom.get();
+						var nbPolygons = ftGeomJSON.coordinates.length;
+						
+						//For each polygon, add an icon
+						var coordMid, coordsPolygon, length, coord, marker;
+						for(var i=0; i < nbPolygons; i++) {
+							coordMid = [0, 0];
+							coordsPolygon = ftGeomJSON.coordinates[i];
+							length = coordsPolygon[0].length;
+							for(var j=0; j < length; j++) {
+								if(j < length - 1) {
+									coordMid[0] += coordsPolygon[0][j][0];
+									coordMid[1] += coordsPolygon[0][j][1];
+								}
+							}
+							
+							coordMid[0] = coordMid[0] / (length -1);
+							coordMid[1] = coordMid[1] / (length -1);
+							coord = L.latLng(coordMid[1], coordMid[0]);
+							
+							if(hasIcon) {
+								marker = this._createMarker(coord);
+								if(marker != null) {
+									this._layer.addLayer(marker);
+								}
+							}
+							
+							//Labels
+							if(labelizable) {
+								this._layer.addLayer(this._createLabel(coord, hasIcon, angle));
+							}
+							
+							if(hasPhoto) {
+								this._layer.addLayer(this._createPhotoIcon(coord));
+							}
+						}
+						
+						//Clear tmp objects
+						ftGeomJSON = null;
+						nbPolygons = null;
+						coordMid = null;
+						coordsPolygon = null;
+						length = null;
+						coord = null;
+						marker = null;
+						
+						break;
+						
+					default:
+						console.log("Unknown geometry type: "+geomType);
+				}
 			}
+			
+			//Add popup if needed
+			if(style.popup == undefined || style.popup == "yes") {
+				this._layer.bindPopup(this.createPopup());
+				this._hasPopup = true;
+			}
+			
+			//Clear tmp objects
+			style = null;
+			geom = null;
+			geomType = null;
+			hasIcon = null;
+			geomLatLng = null;
+			labelizable = null;
+			hasPhoto = null;
 		}
-		
-		//Add popup if needed
-		if(style.popup == undefined || style.popup == "yes") {
-			this._layer.bindPopup(this.createPopup());
-			this._hasPopup = true;
-		}
-		
-		//Clear tmp objects
-		style = null;
-		geom = null;
-		geomType = null;
-		hasIcon = null;
-		geomLatLng = null;
-		labelizable = null;
-		hasPhoto = null;
-	}
-};
+	};
 
 //ACCESSORS
 	/**
@@ -1374,7 +1380,7 @@ var LevelView = function(main) {
 		var lvlOk = (lvl != null) ? parseFloat(lvl) : parseFloat($("#level").val());
 		
 		if(data != null && data.getLevels() != null) {
-			if(data.getLevels().indexOf(lvlOk) >= 0) {
+			if(contains(data.getLevels(), lvlOk)) {
 				//Change level
 				this._level = lvlOk;
 				if(lvl != null) { $("#level").val(lvlOk); }
@@ -1395,10 +1401,10 @@ var LevelView = function(main) {
 		this._levels = this._mainView.getData().getLevels();
 		
 		//Change current level if not available anymore
-		if(this._level == null || this._levels.indexOf(this._level) < 0) {
+		if(this._level == null || !contains(this._levels, this._level)) {
 			//Check if 
 			//Set to 0 if available
-			this._level = (this._levels.indexOf(0) >= 0) ? 0 : this._levels[0];
+			this._level = (contains(this._levels, 0)) ? 0 : this._levels[0];
 			this._mainView.getUrlView().levelChanged();
 		}
 		
@@ -2029,7 +2035,7 @@ var NamesView = function(main) {
 					for(var room in roomNames[lvl]) {
 						var ftGeomRoom = roomNames[lvl][room].getGeometry();
 						
-						if((filter == null || room.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
+						if((filter == null || contains(room.toLowerCase(), filter.toLowerCase()))
 							&& (roomNames[lvl][room].getStyle().get().popup == undefined
 							|| roomNames[lvl][room].getStyle().get().popup == "yes")
 							&& this._mainView.getData().getBBox().intersects(ftGeomRoom.getBounds())) {
@@ -2064,7 +2070,7 @@ var NamesView = function(main) {
 						roomHtml += '<li class="ref"><a href="#" onclick="controller.getView().getMapView().goTo(\''+roomNamesFiltered[lvl][room].getId()+'\',\''+lvl+'\')">';
 						
 						if(STYLE != undefined) {
-							roomHtml += '<img src="'+CONFIG.view.icons.folder+'/'+((STYLE.images.indexOf(roomNamesFiltered[lvl][room].getStyle().getIconUrl()) >= 0) ? roomNamesFiltered[lvl][room].getStyle().getIconUrl() : 'icon_default.png')+'" width="'+CONFIG.view.icons.size+'px"> '+room;
+							roomHtml += '<img src="'+CONFIG.view.icons.folder+'/'+((contains(STYLE.images, roomNamesFiltered[lvl][room].getStyle().getIconUrl())) ? roomNamesFiltered[lvl][room].getStyle().getIconUrl() : 'icon_default.png')+'" width="'+CONFIG.view.icons.size+'px"> '+room;
 						}
 						
 						roomHtml += '</a></li>';

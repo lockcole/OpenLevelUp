@@ -31,28 +31,24 @@ MainController: function() {
 	/** Main view object **/
 	var _view = new YoHours.view.MainView(this);
 
-	/** The typical week **/
-	var _week = new YoHours.model.Week();
+	/** All the wide intervals defined **/
+	var _dateRanges = [ new YoHours.model.DateRange() ];
 	
+	/** The opening hours builder **/
+	var _builder = new YoHours.model.OpeningHoursBuilder();
+
 	/** The opening hours parser **/
 	var _parser = new YoHours.model.OpeningHoursParser();
-
+	
 	/** This object **/
 	var _self = this;
 
 //ACCESSORS
 	/**
-	 * @return The current week
-	 */
-	this.getWeek = function() {
-		return _week;
-	}
-	
-	/**
 	 * @return The opening_hours value
 	 */
 	this.getOpeningHours = function() {
-		return _parser.parse(_week);
+		return _builder.build(_dateRanges);
 	};
 	
 	/**
@@ -61,6 +57,36 @@ MainController: function() {
 	this.getView = function() {
 		return _view;
 	};
+	
+	/**
+	 * @return The date ranges array, some may be undefined
+	 */
+	this.getDateRanges = function() {
+		return _dateRanges;
+	};
+	
+	/**
+	 * @return The first defined date range
+	 */
+	this.getFirstDateRange = function() {
+		var i = 0, found = false;
+		while(i < _dateRanges.length && !found) {
+			if(_dateRanges[i] != undefined) {
+				found = true;
+			}
+			else {
+				i++;
+			}
+		}
+		
+		//If no date range found, create a new one
+		if(!found) {
+			_dateRanges = [ new YoHours.model.DateRange() ];
+			i = 0;
+		}
+		
+		return _dateRanges[i];
+	};
 
 //OTHER METHODS
 	/**
@@ -68,44 +94,56 @@ MainController: function() {
 	 */
 	this.init = function() {
 		_view.init();
-	}
+	};
 
 	/**
-	 * Event handler, to add the current interval in week
-	 * @param interval The new interval
-	 * @return The interval ID
+	 * Clear all defined data
 	 */
-	this.newInterval = function(interval) {
-		var intervalId = _week.addInterval(interval);
-		_view.refresh();
-		return intervalId;
-	};
-	
-	/**
-	 * Edits the given interval
-	 * @param id The interval ID
-	 * @param interval The new interval
-	 */
-	this.editInterval = function(id, interval) {
-		_week.editInterval(id, interval);
+	this.clear = function() {
+		_dateRanges = [ new YoHours.model.DateRange() ];
+		_view.getCalendarView().show(_dateRanges[0]);
 		_view.refresh();
 	};
 	
 	/**
-	 * Event handler, to remove the given interval from week
-	 * @param intervalId The interval ID
+	 * Adds a new date range
+	 * @param start The start time of this range
+	 * @param end The end time
+	 * @param copyIntervals The intervals to copy (or null if create new void range)
+	 * @return The created range
 	 */
-	this.removeInterval = function(intervalId) {
-		_week.removeInterval(intervalId);
+	this.newRange = function(start, end, copyIntervals) {
+		copyIntervals = copyIntervals || null;
+		var range = new YoHours.model.DateRange(start, end);
+		
+		if(copyIntervals != null) {
+			range.getTypical().copyIntervals(copyIntervals);
+		}
+		
+		_dateRanges.push(range);
 		_view.refresh();
+		return range;
 	};
 	
 	/**
-	 * Removes all the shown intervals
+	 * Deletes the currently shown date range
 	 */
-	this.clearIntervals = function() {
-		_week = new YoHours.model.Week();
-		$('#calendar').fullCalendar('removeEvents');
+	this.deleteCurrentRange = function() {
+		var range = _view.getCalendarView().getDateRange();
+		var found = false, l = _dateRanges.length, i=0;
+		
+		while(i < l && !found) {
+			if(_dateRanges[i] === range) {
+				found = true;
+				_dateRanges[i] = undefined;
+			}
+			else {
+				i++;
+			}
+		}
+		
+		//Refresh calendar
+		_view.getCalendarView().show(this.getFirstDateRange());
 		_view.refresh();
 	};
 	
@@ -114,47 +152,24 @@ MainController: function() {
 	 * @param str The opening hours to show
 	 */
 	this.showHours = function(str) {
-		//Clear intervals
-		_week = new YoHours.model.Week();
-		$('#calendar').fullCalendar('removeEvents');
-		
-		//Parse given string
-		try {
-			var oh = new opening_hours(str);
-			var intervals = oh.getOpenIntervals(getMonday(), getSunday());
+		if(str.length > 0) {
+			//Clear intervals
+			_week = new YoHours.model.Week();
+			$('#calendar').fullCalendar('removeEvents');
 			
-			//Add read intervals to week
-			var interval;
-			for(var i =0; i < intervals.length; i++) {
-				interval = intervals[i];
-				
-				//Add event to week intervals
-				var weekId = this.newInterval(
-					new YoHours.model.Interval(
-						swDayToMwDay(interval[0].getDay()),
-						swDayToMwDay(interval[1].getDay()),
-						interval[0].getHours() * 60 + interval[0].getMinutes(),
-						interval[1].getHours() * 60 + interval[1].getMinutes()
-					)
-				);
-				
-				//Add event on calendar
-				var eventData = {
-					id: weekId,
-					start: moment(interval[0]),
-					end: moment(interval[1])
-				};
-				$('#calendar').fullCalendar('renderEvent', eventData, true);
+			//Parse given string
+			try {
+				_dateRanges = _parser.parse(str.trim());
+				_view.getCalendarView().show(_dateRanges[0]);
+				_view.getHoursInputView().setValid(true);
+			}
+			catch(e) {
+				console.error(e);
+				_view.getHoursInputView().setValid(false);
 			}
 			
-			_view.getHoursInputView().setValid(true);
+			_view.getHoursInputView().setValue(str);
 		}
-		catch(e) {
-			console.error(e);
-			_view.getHoursInputView().setValid(false);
-		}
-		
-		_view.getHoursInputView().setValue(str);
 	};
 }
 
