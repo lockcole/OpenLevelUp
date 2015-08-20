@@ -197,6 +197,15 @@ footer {
 	position: relative;
 }
 
+/* New note */
+#note-add {
+	padding: 0 10px;
+}
+
+#note-txt {
+	width: 100%;
+}
+
 /* Close central icon */
 #central-close {
 	position: absolute;

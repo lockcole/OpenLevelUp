@@ -506,3 +506,56 @@ span.osm-key, span.osm-val {
 	text-decoration: none;
 	font-weight: bold;
 }
+
+/***********************
+ * Notes overlay panel *
+ ***********************/
+
+#op-notes > div {
+	position: relative;
+}
+
+/* Comments */
+#op-notes-comments {
+	text-align: left;
+	margin: 10px;
+}
+
+.overlay-panel > div .op-notes-comment {
+	margin-bottom: 15px;
+}
+
+#op-notes .desc {
+	font-size: 90%;
+	color: #eee;
+}
+
+#op-notes .txt {
+	margin-left: 20px;
+}
+
+/* Links */
+#op-notes a {
+	color: #D2E2FF;
+}
+
+#op-notes a:hover {
+	color: #B3CEFF;
+}
+
+/* Footer */
+#op-notes-footer {
+	text-align: right;
+}
+
+/* Leaflet control */
+.leaflet-control-note {
+	cursor: pointer;
+	text-align: center;
+}
+
+.leaflet-control-note img {
+	width: 20px;
+	height: 20px;
+	padding: 3px;
+}

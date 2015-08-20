@@ -71,6 +71,9 @@ var MainView = function(ctrl, mobile) {
 	/** The tags component **/
 	this._cTags = null;
 
+	/** The notes component **/
+	this._cNotes = null;
+	
 	/** The map component **/
 	this._cMap = null;
 
@@ -82,6 +85,7 @@ var MainView = function(ctrl, mobile) {
 	this._cLevel = new LevelView(this);
 	this._cExport = new ExportView(this);
 	this._cTags = new TagsView(this);
+	this._cNotes = new NotesView(this);
 	
 	this._cExport.hideButton();
 	this._cNames.hideButton();
@@ -162,6 +166,13 @@ var MainView = function(ctrl, mobile) {
 	 */
 	MainView.prototype.getTagsView = function() {
 		return this._cTags;
+	};
+	
+	/**
+	 * @return The notes component
+	 */
+	MainView.prototype.getNotesView = function() {
+		return this._cNotes;
 	};
 	
 	/**
@@ -379,6 +390,11 @@ var MapView = function(main) {
 	
 	if(isMobile) {
 		L.control.zoom({ position: "topright" }).addTo(this._map);
+	}
+	
+	//New note button
+	if(!isMobile) {
+		var newNoteBtn = new NoteButton().addTo(this._map);
 	}
 	
 	//Create tile layers
@@ -615,15 +631,29 @@ var MapView = function(main) {
 		var result = null;
 		var notes = this._mainView.getNotesData();
 		
+		//Create icons
+		var iconOpen = L.icon({
+			iconUrl: 'img/icon_note_open.png'
+		});
+		var iconClosed = L.icon({
+			iconUrl: 'img/icon_note_closed.png'
+		});
+		
 		if(notes.length > 0) {
 			result = L.layerGroup();
-			var note;
+			var note, marker;
 			
 			for(var i=0, l=notes.length; i < l; i++) {
 				note = notes[i];
-				
-				//TODO
-				result.addLayer(L.marker([note.lat, note.lon]));
+				marker = L.marker(
+							[note.lat, note.lon],
+							{
+								id: i,
+								icon: (note.status == "closed") ? iconClosed : iconOpen
+							}
+						);
+				marker.on("click", controller.getView().getNotesView().show.bind(controller.getView().getNotesView()));
+				result.addLayer(marker);
 			}
 		}
 		
@@ -2752,3 +2782,91 @@ var MessagesView = function() {
 		$("#infobox-list li").remove();
 		this._nbMessages = 0;
 	};
+
+
+
+/**
+ * The notes overlay panel
+ */
+var NotesView = function(main) {
+//ATTRIBUTES
+	this._mainView = main;
+
+//CONSTRUCTOR
+	$("#notes-close").click(function() {
+		$("#op-notes").removeClass("show");
+		$("#op-notes").addClass("hide");
+	});
+};
+
+//MODIFIERS
+	/**
+	 * Shows a given note in panel
+	 * @param e The leaflet event
+	 */
+	NotesView.prototype.show = function(e) {
+		var note = this._mainView.getNotesData()[e.target.options.id];
+		
+		if(note != undefined) {
+			//Change title
+			$("#op-notes h2").html("Note #"+note.id);
+			$("#notes-status-txt").html(note.status);
+			$("#notes-status-icon").removeClass("ok bad").addClass((note.status == "closed") ? "ok" : "bad");
+			$("#notes-link").attr("href", "http://www.openstreetmap.org/note/"+note.id);
+			
+			//Add comments
+			var commentsHtml = "", comment;
+			for(var i=0, l=note.comments.length; i < l; i++) {
+				comment = note.comments[i];
+				commentsHtml += '<div class="op-notes-comment">'
+								+'<p class="desc">User '+comment.user+', '+comment.date+'</p>'
+								+'<p class="txt">'+comment.text+'</p>'
+								+'</div>';
+			}
+			
+			$("#op-notes-comments").html(commentsHtml);
+			$("#op-notes").addClass("show");
+		}
+		else {
+			console.error("[Notes] Invalid ID: "+e.target.options.id);
+		}
+	};
+
+//OTHER METHODS
+	/**
+	 * Starts or stops to edit a new note
+	 */
+	NotesView.prototype.editNote = function() {
+		this._mainView.showCentralPanel("note-add");
+	};
+
+
+
+/**
+ * New note button for leaflet
+ * @see https://gist.github.com/ns-1m/2935530
+ */
+var NoteButton = L.Control.extend({
+	options: {
+		position: 'topright'
+	},
+
+	onAdd: function (map) {
+		//Button
+		var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-note');
+		container.style.backgroundColor = 'white';
+		container.style.width = '26px';
+		container.style.height = '26px';
+		
+		//Image
+		var image = L.DomUtil.create('img', '', container);
+		image.src = 'img/icon_note_add.png';
+		image.title = 'Add a comment on map';
+
+		container.onclick = function(){
+			controller.getView().getNotesView().editNote();
+		}
+
+		return container;
+	}
+});

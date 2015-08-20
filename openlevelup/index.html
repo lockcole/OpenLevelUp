@@ -165,6 +165,14 @@
 					<p>Coming back soon !</p>
 					<!--p><a id="export-link" href="#">As GeoJSON</a> | <a id="export-link-img" href="#">As an image</a></p-->
 				</div>
+				
+				<!-- New note -->
+				<div class="part" id="note-add">
+					<h2><img src="img/icon_note.svg" /> New note</h2>
+					<p>Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here.</p>
+					<textarea id="note-txt" rows="5"></textarea>
+					<button id="note-send">Add a new note</button>
+				</div>
 			</div>
 		</div>
 
@@ -198,7 +206,7 @@
 
 
 	<!--
-	Overlay optional panels
+	Overlay panels
 	-->
 	<div class="overlay-panels">
 		<!-- Loading panel -->
@@ -264,6 +272,22 @@
 						<img src="img/icon_flickr.svg" alt="Flickr" title="Flickr" /> <a id="status-flickr"><span class="status">&#x25CF;</span></a>
 					</p>
 					<p class="overlay-close"><a id="images-close" href="#">Close</a></p>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Notes panel -->
+		<div class="overlay-panel hide" id="op-notes">
+			<div class="centered">
+				<h2>Note</h2>
+				<div id="op-notes-comments">
+					<div class="op-notes-comment">
+						<p class="desc">User x, 2015-08-15 16h00</p>
+						<p class="txt">Here is the real location of 52 rue belle épine</p>
+					</div>
+				</div>
+				<div id="op-notes-footer">
+					Status: <span id="notes-status-txt"></span> | <a id="notes-link" href="">See on OSM.org</a> | <a id="notes-close" href="#">Close</a>
 				</div>
 			</div>
 		</div>
