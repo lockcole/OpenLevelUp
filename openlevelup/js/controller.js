@@ -120,6 +120,13 @@ var Ctrl = function() {
 	Ctrl.prototype.getMapillaryData = function() {
 		return this._mapillaryData;
 	};
+	
+	/**
+	 * @return The OSM notes data
+	 */
+	Ctrl.prototype.getNotesData = function() {
+		return this._notesData;
+	};
 
 //OTHER METHODS
 	/**

@@ -288,11 +288,39 @@ var NotesData = function(d) {
 
 //CONSTRUCTOR
 	//Parse XML
+	var _self = this;
 	$(d).find('note').each(function() {
+		//Create note
+		var id = _self.add(
+			$(this).find('id').text(),
+			$(this).attr('lat'),
+			$(this).attr('lon'),
+			$(this).find('date_created').text(),
+			$(this).find('status').text()
+		);
 		
+		//Add comments
+		$(this).find('comment').each(function() {
+			_self.addComment(
+				id,
+				$(this).find('date').text(),
+				$(this).find('uid').text(),
+				$(this).find('user').text(),
+				$(this).find('action').text(),
+				$(this).find('text').text()
+			);
+		});
 	});
 };
 
+//ACCESSORS
+	/**
+	 * @return All the notes, as an array of objects
+	 */
+	NotesData.prototype.get = function() {
+		return this._notes;
+	};
+	
 //MODIFIERS
 	/**
 	 * Adds a new note in data
@@ -304,7 +332,20 @@ var NotesData = function(d) {
 	 * @return The note ID in OpenLevelUp
 	 */
 	NotesData.prototype.add = function(id, lat, lon, dateCreated, status) {
-		return this._notes.push({ id: id, lat: lat, lon: lon, date: dateCreated, status: status }) - 1;
+		return this._notes.push({ id: id, lat: lat, lon: lon, date: dateCreated, status: status, comments: [] }) - 1;
+	};
+	
+	/**
+	 * Adds a new comment in a note
+	 * @param id The note ID in OpenLevelUp
+	 * @param date The comment date
+	 * @param uid The user ID
+	 * @param user The user name
+	 * @param action The action done with this comment
+	 * @param text The text of the comment
+	 */
+	NotesData.prototype.addComment = function(id, date, uid, user, action, text) {
+		this._notes[id].comments.push({ date: date, uid: uid, user: user, action: action, text: text });
 	};
 
 

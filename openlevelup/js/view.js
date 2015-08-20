@@ -177,6 +177,13 @@ var MainView = function(ctrl, mobile) {
 	MainView.prototype.getClusterData = function() {
 		return this._ctrl.getClusterData();
 	};
+	
+	/**
+	 * @return The notes data from the controller
+	 */
+	MainView.prototype.getNotesData = function() {
+		return this._ctrl.getNotesData().get();
+	};
 
 //OTHER METHODS
 	/**
@@ -476,7 +483,6 @@ var MapView = function(main) {
 			if(fullData != null) {
 				//Create data layer
 				this._dataLayer = L.layerGroup();
-				this._dataLayer.addTo(this._map);
 				
 				//Order layers
 				var featureLayersKeys = Object.keys(fullData).sort(function(a,b) { return parseInt(a) - parseInt(b); });
@@ -484,6 +490,16 @@ var MapView = function(main) {
 					var featureLayerGroup = fullData[featureLayersKeys[i]];
 					this._dataLayer.addLayer(featureLayerGroup);
 				}
+				
+				//Show OSM notes if needed
+				if(this._mainView.getOptionsView().showNotes()) {
+					var notesLayer = this._createNotesLayer();
+					if(notesLayer != null) {
+						this._dataLayer.addLayer(notesLayer);
+					}
+				}
+				
+				this._dataLayer.addTo(this._map);
 			}
 			else {
 				this._mainView.getMessagesView().displayMessage("There is no available data in this area", "alert");
@@ -587,6 +603,28 @@ var MapView = function(main) {
 				maxClusterRadius: 30
 			});
 			result.addLayer(L.geoJson(data));
+		}
+		
+		return result;
+	};
+	
+	/**
+	 * @return The notes layer, or null if no notes available
+	 */
+	MapView.prototype._createNotesLayer = function() {
+		var result = null;
+		var notes = this._mainView.getNotesData();
+		
+		if(notes.length > 0) {
+			result = L.layerGroup();
+			var note;
+			
+			for(var i=0, l=notes.length; i < l; i++) {
+				note = notes[i];
+				
+				//TODO
+				result.addLayer(L.marker([note.lat, note.lon]));
+			}
 		}
 		
 		return result;
@@ -1528,6 +1566,9 @@ var OptionsView = function() {
 	
 	/** Show photos markers **/
 	this._photos = false;
+	
+	/** Show OSM notes **/
+	this._notes = false;
 
 //CONSTRUCTOR
 	//Init checkboxes
@@ -1535,6 +1576,7 @@ var OptionsView = function() {
 	$("#show-unrendered").prop("checked", this._unrendered);
 	$("#show-buildings-only").prop("checked", this._buildings);
 	$("#show-photos").prop("checked", this._photos);
+	$("#show-notes").prop("checked", this._notes);
 	
 	//Add triggers
 	$("#button-settings").click(function() {
@@ -1554,6 +1596,10 @@ var OptionsView = function() {
 	}.bind(this));
 	$("#show-photos").change(function() {
 		this.changePhotos();
+		controller.getView().updateOptionChanged();
+	}.bind(this));
+	$("#show-notes").change(function() {
+		this.changeNotes();
 		controller.getView().updateOptionChanged();
 	}.bind(this));
 	
@@ -1588,6 +1634,13 @@ var OptionsView = function() {
 	OptionsView.prototype.showPhotos = function() {
 		return this._photos;
 	};
+	
+	/**
+	 * @return Must we show notes markers ?
+	 */
+	OptionsView.prototype.showNotes = function() {
+		return this._notes;
+	};
 
 //MODIFIERS
 	/**
@@ -1616,6 +1669,13 @@ var OptionsView = function() {
 	 */
 	OptionsView.prototype.changePhotos = function() {
 		this._photos = !this._photos;
+	};
+	
+	/**
+	 * Must we show OSM notes ?
+	 */
+	OptionsView.prototype.changeNotes = function() {
+		this._notes = !this._notes;
 	};
 	
 	/**
@@ -1651,6 +1711,14 @@ var OptionsView = function() {
 	};
 	
 	/**
+	 * Must we show notes markers ?
+	 */
+	OptionsView.prototype.setNotes = function(p) {
+		this._notes = p;
+		$("#show-notes").prop("checked", this._notes);
+	};
+	
+	/**
 	 * Disable options buttons
 	 */
 	OptionsView.prototype.disable = function() {
@@ -1658,6 +1726,7 @@ var OptionsView = function() {
 		$("#show-unrendered").prop("disabled", true);
 		$("#show-transcendent").prop("disabled", true);
 		$("#show-photos").prop("disabled", true);
+		$("#show-notes").prop("disabled", true);
 	};
 	
 	/**
@@ -1668,6 +1737,7 @@ var OptionsView = function() {
 		$("#show-unrendered").prop("disabled", false);
 		$("#show-transcendent").prop("disabled", false);
 		$("#show-photos").prop("disabled", false);
+		$("#show-notes").prop("disabled", false);
 	};
 
 
@@ -1857,12 +1927,13 @@ var URLView = function(main) {
 				this._zoom = letterToInt(shortRes[7]);
 				
 				var options = intToBitArray(base62toDec(shortRes[8]));
-				while(options.length < 5) { options = "0" + options; }
+				while(options.length < 6) { options = "0" + options; }
 				optionsView.setUnrendered(options[options.length - 1] == 1);
 				//optionsView.setLegacy(options[options.length - 2] == 1); //Deprecated option
 				optionsView.setTranscendent(options[options.length - 3] == 1);
 				optionsView.setBuildingsOnly(options[options.length - 4] == 1);
 				optionsView.setPhotos(options[options.length - 5] == 1);
+				optionsView.setNotes(options[options.length - 6] == 1);
 				
 				//Get level if available
 				if(shortRes[10] != undefined && shortRes[11] != undefined) {
@@ -1889,6 +1960,7 @@ var URLView = function(main) {
 			if(parameters.unrendered != undefined) { optionsView.setUnrendered(parameters.unrendered == "1"); }
 			if(parameters.buildings != undefined) { optionsView.setBuildingsOnly(parameters.buildings == "1"); }
 			if(parameters.photos != undefined) { optionsView.setPhotos(parameters.photos == "1"); }
+			if(parameters.notes != undefined) { optionsView.setNotes(parameters.notes == "1"); }
 			this._level = parameters.level;
 			this._tiles = parameters.tiles;
 		}
@@ -1907,6 +1979,7 @@ var URLView = function(main) {
 			params += "&unrendered="+((optionsView.showUnrendered()) ? "1" : "0");
 			params += "&buildings="+((optionsView.showBuildingsOnly()) ? "1" : "0");
 			params += "&photos="+((optionsView.showPhotos()) ? "1" : "0");
+			params += "&notes="+((optionsView.showNotes()) ? "1" : "0");
 		}
 		
 		var hash = this._getUrlHash();
@@ -1949,6 +2022,7 @@ var URLView = function(main) {
 		}
 		
 		var shortOptions = bitArrayToBase62([
+					((optionsView.showNotes()) ? "1" : "0"),
 					((optionsView.showPhotos()) ? "1" : "0"),
 					((optionsView.showBuildingsOnly()) ? "1" : "0"),
 					((optionsView.showTranscendent()) ? "1" : "0"),
