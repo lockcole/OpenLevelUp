@@ -88,9 +88,10 @@
 		"room": [
 			{
 				"name": "${room}",
-				"description": "Room icons",
+				"description": "Rooms",
 				"onTags": [ { "room": "*" } ],
 				"style": {
+					"color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes",
 					"icon": "room_${room}.png",
 					"iconAlias": { "amphitheatre": "auditorium", "reception": "administration", "refectory": "restaurant", "checkroom": "locker" },
 					"showMissingIcon": false
@@ -106,7 +107,7 @@
 				"name": "Area",
 				"description": "Indoor areas",
 				"onTags": [ { "room": "corridor|entrance|hall|entry|gallery|collection" } ],
-				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6, "label": "name", "labelStyle": "area" }
+				"style": { "fillColor": "#EEEEEE", "layer": -6, "label": "name", "labelStyle": "area" }
 			},
 			{
 				"name": "${laboratory} lab",
@@ -288,7 +289,7 @@
 				"name": "Platform",
 				"description": "Railway platform",
 				"onTags": [ { "railway": "platform" }, { "public_transport": "platform" } ],
-				"style": { "color": "#B4ADB3", "opacity": 1, "weight": 1, "fillColor": "#BABABA", "fillOpacity": 1, "layer": -1 }
+				"style": { "color": "#B4ADB3", "opacity": 1, "weight": 1, "fillColor": "#BABABA", "fillOpacity": 1, "layer": -8 }
 			},
 			{
 				"name": "${railway}",

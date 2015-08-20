@@ -99,6 +99,63 @@ MainController: function() {
 		_week.removeInterval(intervalId);
 		_view.refresh();
 	};
+	
+	/**
+	 * Removes all the shown intervals
+	 */
+	this.clearIntervals = function() {
+		_week = new YoHours.model.Week();
+		$('#calendar').fullCalendar('removeEvents');
+		_view.refresh();
+	};
+	
+	/**
+	 * Displays the given opening hours
+	 * @param str The opening hours to show
+	 */
+	this.showHours = function(str) {
+		//Clear intervals
+		_week = new YoHours.model.Week();
+		$('#calendar').fullCalendar('removeEvents');
+		
+		//Parse given string
+		try {
+			var oh = new opening_hours(str);
+			var intervals = oh.getOpenIntervals(getMonday(), getSunday());
+			
+			//Add read intervals to week
+			var interval;
+			for(var i =0; i < intervals.length; i++) {
+				interval = intervals[i];
+				
+				//Add event to week intervals
+				var weekId = this.newInterval(
+					new YoHours.model.Interval(
+						swDayToMwDay(interval[0].getDay()),
+						swDayToMwDay(interval[1].getDay()),
+						interval[0].getHours() * 60 + interval[0].getMinutes(),
+						interval[1].getHours() * 60 + interval[1].getMinutes()
+					)
+				);
+				
+				//Add event on calendar
+				var eventData = {
+					id: weekId,
+					start: moment(interval[0]),
+					end: moment(interval[1])
+				};
+				$('#calendar').fullCalendar('renderEvent', eventData, true);
+			}
+			
+			_view.getHoursInputView().setValid(true);
+		}
+		catch(e) {
+			console.error(e);
+			_view.getHoursInputView().setValid(false);
+		}
+		
+		_view.getHoursInputView().setValue(str);
+	};
 }
 
 };

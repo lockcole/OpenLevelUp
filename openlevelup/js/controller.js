@@ -409,7 +409,7 @@ var Ctrl = function() {
 			async: true,
 			dataType: 'json',
 			success: this.setFlickrData.bind(this)
-		}).fail(this.onFlickrDownloadFail);
+		}).fail(this.onFlickrDownloadFail.bind(this));
 	};
 	
 	/**
@@ -479,6 +479,7 @@ var Ctrl = function() {
 	 * This function is called when data download fails
 	 */
 	Ctrl.prototype.onFlickrDownloadFail = function() {
+		this._nbPhotoRequests--;
 		console.error("[Flickr] An error occured");
 	};
 
@@ -508,7 +509,7 @@ var Ctrl = function() {
 				}
 			}.bind(this),
 			'json'
-		).fail(controller.onMapillaryDownloadFail);
+		).fail(controller.onMapillaryDownloadFail.bind(this));
 	};
 	
 	/**
@@ -541,5 +542,6 @@ var Ctrl = function() {
 	 * This function is called when data download fails
 	 */
 	Ctrl.prototype.onMapillaryDownloadFail = function() {
+		this._nbPhotoRequests--;
 		console.error("[Mapillary] An error occured");
 	};

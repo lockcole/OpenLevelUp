@@ -1,6 +1,17 @@
 Changes history
 ===============
 
+7 august 2015
+-------------
+* Following intervals are now merged
+
+6 august 2015
+-------------
+* Continuous time for night intervals (for example "Mo 23:00-03:00")
+* Off days merged when possible (for example "Mo-Su 07:00-08:00; Tu,Th-Sa off")
+* Clear button added
+* Parse opening_hours when inserted in text field
+
 18 june 2015
 ------------
 * FullCalendary lib retrieved

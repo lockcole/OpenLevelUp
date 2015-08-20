@@ -44,3 +44,19 @@ function swDayToMwDay(d) {
 	var day = parseInt(d);
 	return (day == 0) ? 6 : day - 1;
 };
+
+function getMonday() {
+	var d = new Date();
+	var day = d.getDay(),
+	diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+	d.setDate(diff);
+	return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+};
+
+function getSunday() {
+	var d = new Date();
+	var day = d.getDay(),
+	diff = d.getDate() + 7 - day + (day == 0 ? -6:1); // adjust when day is sunday
+	d.setDate(diff);
+	return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+};

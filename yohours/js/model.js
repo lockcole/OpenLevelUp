@@ -107,9 +107,9 @@ Interval: function(dayStart, dayEnd, minStart, minEnd) {
 
 //CONSTRUCTOR
 	//Handle special cases, like sunday midnight
-	if(_dayEnd == 0 && _end == 0) {
-		_dayEnd = 6;
-		_end = 24 * 60;
+	if(_end == 0) {
+		_dayEnd = (_dayEnd == 0) ? 6 : _dayEnd-1;
+		_end = 24 * 60 -1;
 	}
 },
 
@@ -119,7 +119,7 @@ Interval: function(dayStart, dayEnd, minStart, minEnd) {
 Week: function() {
 //ATTRIBUTES
 	/** The intervals defining this week **/
-	var _intervals = new Object();
+	var _intervals = [];
 	
 	/** The next interval ID **/
 	var _nextInterval = 0;
@@ -134,23 +134,23 @@ Week: function() {
 	this.getAsMinutesArray = function() {
 		//Create array with all values set to false
 		//For each day
-		var minuteArray = new Array(7);
+		var minuteArray = [];
 		for(var day = 0; day < 7; day++) {
 			//For each minute
-			minuteArray[day] = new Array(24*60 + 2);
-			for (var minute = 0; minute < 24 * 60 + 2; minute++) {
+			minuteArray[day] = [];
+			for (var minute = 0; minute < 24 * 60; minute++) {
 				minuteArray[day][minute] = false;
 			}
 		}
 		
 		//Set to true values where an interval is defined
-		for(var id in _intervals) {
-			if(_intervals.hasOwnProperty(id) && _intervals[id] != undefined) {
+		for(var id=0, l=_intervals.length; id < l; id++) {
+			if(_intervals[id] != undefined) {
 				for(var day = _intervals[id].getStartDay(); day <= _intervals[id].getEndDay(); day++) {
 					//Define start and end minute regarding the current day
 					var startMinute = (day == _intervals[id].getStartDay()) ? _intervals[id].getFrom() : 0;
-					var endMinute = (day == _intervals[id].getEndDay()) ? _intervals[id].getTo() : 24 * 60;
-					
+					var endMinute = (day == _intervals[id].getEndDay()) ? _intervals[id].getTo() : 24*60 -1;
+
 					//Set to true the minutes for this day
 					if(startMinute != endMinute) {
 						for(var minute = startMinute; minute <= endMinute; minute++) {
@@ -165,10 +165,75 @@ Week: function() {
 	};
 	
 	/**
+	 * @param clean Clean intervals ? (default: false)
 	 * @return The intervals in this week
 	 */
-	this.getIntervals = function() {
-		return _intervals;
+	this.getIntervals = function(clean) {
+		clean = clean || false;
+		
+		if(clean) {
+			//Create continuous intervals over days
+			var minuteArray = this.getAsMinutesArray();
+			var intervals = [];
+			var dayStart = -1, minStart = -1, minEnd;
+			
+			for(var day=0, l=minuteArray.length; day < l; day++) {
+				for(var min=0, lm=minuteArray[day].length; min < lm; min++) {
+					//First minute of monday
+					if(day == 0 && min == 0) {
+						if(minuteArray[day][min]) {
+							dayStart = day;
+							minStart = min;
+						}
+					}
+					//Last minute of sunday
+					else if(day == 6 && min == lm-1) {
+						if(dayStart >= 0 && minuteArray[day][min]) {
+							intervals.push(new YoHours.model.Interval(
+								dayStart,
+								day,
+								minStart,
+								min
+							));
+						}
+					}
+					//Other days or minutes
+					else {
+						//New interval
+						if(minuteArray[day][min] && dayStart < 0) {
+							dayStart = day;
+							minStart = min;
+						}
+						//Ending interval
+						else if(!minuteArray[day][min] && dayStart >= 0) {
+							if(min == 0) {
+								intervals.push(new YoHours.model.Interval(
+									dayStart,
+									day-1,
+									minStart,
+									24*60
+								));
+							}
+							else {
+								intervals.push(new YoHours.model.Interval(
+									dayStart,
+									day,
+									minStart,
+									min-1
+								));
+							}
+							dayStart = -1;
+							minStart = -1;
+						}
+					}
+				}
+			}
+			
+			return intervals;
+		}
+		else {
+			return _intervals;
+		}
 	};
 
 //MODIFIERS
@@ -214,102 +279,221 @@ OpeningHoursParser: function() {
 	 * @return The opening_hours string
 	 */
 	this.parse = function(week) {
-		var minuteArray = week.getAsMinutesArray();
-		var ret = "";
-		var days = new Array(7); // an array representing the status of the days
-		for(var i=0; i < days.length; i++) {
-			days[i] = 0;
-		}
+		var intervals = week.getIntervals(true);
+		var days = [];
+		var daysStr = [];
 		
 		// 0 means nothing done with this day yet
 		// 8 means the day is off
 		// 0<x<8 means the day have the openinghours of day x
 		// -8<x<0 means nothing done with this day yet, but it intersects a
 		// range of days with same opening_hours
-		for(var i = 0; i < 7; i++) {
+		var daysStatus = [];
+		
+		for(var i=0; i < YoHours.model.OSM_DAYS.length; i++) {
+			days[i] = [];
+			daysStatus[i] = 0;
+			daysStr[i] = '';
+		}
+		
+		/*
+		 * Create time intervals per day
+		 */
+		var interval;
+		var monday0 = -1;
+		var sunday24 = -1;
+		for(var i=0, l=intervals.length; i < l; i++) {
+			interval = intervals[i];
+			
+			if(interval != undefined) {
+				//Handle sunday 24:00 with monday 00:00
+				if(interval.getStartDay() == 6 && interval.getEndDay() == 6 && interval.getTo() == 24*60 -1) {
+					sunday24 = interval.getFrom();
+				}
+				if(interval.getStartDay() == 0 && interval.getEndDay() == 0 && interval.getFrom() == 0) {
+					monday0 = interval.getTo();
+				}
+				
+				//Interval in a single day
+				if(interval.getStartDay() == interval.getEndDay()) {
+					days[interval.getStartDay()].push(_timeString(interval.getFrom())+"-"+_timeString(interval.getTo()));
+				}
+				//Interval on two days
+				else if(interval.getEndDay() - interval.getStartDay() == 1) {
+					//Continuous night
+					if(interval.getFrom() > interval.getTo()) {
+						days[interval.getStartDay()].push(_timeString(interval.getFrom())+"-"+_timeString(interval.getTo()));
+					}
+					//Separated days
+					else {
+						days[interval.getStartDay()].push(_timeString(interval.getFrom())+"-24:00");
+						days[interval.getEndDay()].push("00:00-"+_timeString(interval.getTo()));
+					}
+				}
+				//Interval on more than two days
+				else {
+					for(var j=interval.getStartDay(), end=interval.getEndDay(); j <= end; j++) {
+						if(j == interval.getStartDay()) {
+							days[j].push(_timeString(interval.getFrom())+"-24:00");
+						}
+						else if(j == interval.getEndDay()) {
+							days[j].push("00:00-"+_timeString(interval.getTo()));
+						}
+						else {
+							days[j].push("00:00-24:00");
+						}
+					}
+				}
+			}
+		}
+		
+		/*
+		 * Create continuous night for monday-sunday
+		 */
+		if(monday0 >= 0 && sunday24 >= 0 && monday0 < sunday24) {
+			days[0].sort();
+			days[6].sort();
+			
+			//Change sunday interval
+			days[6][days[6].length-1] = _timeString(sunday24)+"-"+_timeString(monday0);
+			
+			//Remove monday interval
+			days[0].shift();
+		}
+		
+		/*
+		 * Create interval strings per day
+		 */
+		for(var i=0; i < days.length; i++) {
+			var intervalsStr = '';
+			if(days[i].length > 0) {
+				days[i].sort();
+				for(var j=0; j < days[i].length; j++) {
+					if(j > 0) {
+						intervalsStr += ',';
+					}
+					intervalsStr += days[i][j];
+				}
+			}
+			else {
+				intervalsStr = 'off';
+			}
+
+			daysStr[i] = intervalsStr;
+		}
+		
+		/*
+		 * Create string result
+		 */
+		var result = "";
+		for(var i=0; i < days.length; i++) {
 			var add = "";
 			
-			if (_isArrayEmpty(minuteArray[i]) && days[i] == 0) {
-				days[i] = 8;
-			} else if (_isArrayEmpty(minuteArray[i]) && days[i] < 0) {
-				add = YoHours.model.OSM_DAYS[i] + " off";
-				days[i] = -8;
-			} else if (days[i] <= 0) {
-				days[i] = i + 1;
+			if (daysStr[i] == 'off' && daysStatus[i] == 0) {
+				daysStatus[i] = 8;
+			} else if (daysStr[i] == 'off' && daysStatus[i] < 0 && daysStatus[i] > -8) {
+				//add = YoHours.model.OSM_DAYS[i] + " off";
+				daysStatus[i] = -8;
+			} else if (daysStatus[i] <= 0 && daysStatus[i] > -8) {
+				daysStatus[i] = i + 1;
 				var lastSameDay = i;
 				var sameDayCount = 1;
 				
 				for(var j = i + 1; j < 7; j++) {
-					if (_arraysEqual(minuteArray[i], minuteArray[j])) {
-						days[j] = i + 1;
+					if (daysStr[i] == daysStr[j]) {
+						daysStatus[j] = i + 1;
 						lastSameDay = j;
 						sameDayCount++;
 					}
 				}
 				if (sameDayCount == 1) {
 					// a single Day with this special opening_hours
-					add = YoHours.model.OSM_DAYS[i] + " " + _makeStringFromMinuteArray(minuteArray[i]);
+					add = YoHours.model.OSM_DAYS[i] + " " + daysStr[i];
 				} else if (sameDayCount == 2) {
 					// exactly two Days with this special opening_hours
 					add = YoHours.model.OSM_DAYS[i] + "," + YoHours.model.OSM_DAYS[lastSameDay] + " "
-					+ _makeStringFromMinuteArray(minuteArray[i]);
+					+ daysStr[i];
 				} else if (sameDayCount > 2) {
 					// more than two Days with this special opening_hours
 					add = YoHours.model.OSM_DAYS[i] + "-" + YoHours.model.OSM_DAYS[lastSameDay] + " "
-					+ _makeStringFromMinuteArray(minuteArray[i]);
+					+ daysStr[i];
 					for (var j = i + 1; j < lastSameDay; j++) {
-						if (days[j] == 0) {
-							days[j] = -i - 1;
+						if (daysStatus[j] == 0) {
+							daysStatus[j] = -i - 1;
 						}
 					}
 				}
 			}
 			
 			if (add.length > 0) {
-				if (ret.length > 0) {
-					ret += "; ";
+				if (result.length > 0) {
+					result += "; ";
 				}
-				ret += add;
+				result += add;
 			}
 		}
 		
-		//Special cases
+		/*
+		 * Add days off
+		 */
+		var resOff = "";
+		for(var i=0; i < days.length; i++) {
+			var add = "";
+			
+			if(daysStatus[i] == -8) {
+				var lastSameDay = i;
+				var sameDayCount = 1;
+				
+				for(var j = i + 1; j < 7; j++) {
+					if (daysStr[i] == daysStr[j]) {
+						daysStatus[j] = -9;
+						lastSameDay = j;
+						sameDayCount++;
+					}
+					else {
+						break;
+					}
+				}
+				if (sameDayCount == 1) {
+					// a single Day with this special opening_hours
+					add = YoHours.model.OSM_DAYS[i];
+				} else if (sameDayCount == 2) {
+					// exactly two Days with this special opening_hours
+					add = YoHours.model.OSM_DAYS[i] + "," + YoHours.model.OSM_DAYS[lastSameDay];
+				} else if (sameDayCount > 2) {
+					// more than two Days with this special opening_hours
+					add = YoHours.model.OSM_DAYS[i] + "-" + YoHours.model.OSM_DAYS[lastSameDay];
+					for (var j = i + 1; j < lastSameDay; j++) {
+						if (daysStatus[j] == 0) {
+							daysStatus[j] = -i - 1;
+						}
+					}
+				}
+			}
+			
+			if (add.length > 0) {
+				if (resOff.length > 0) {
+					resOff += ",";
+				}
+				resOff += add;
+			}
+		}
+		
+		if(resOff.length > 0) {
+			result += "; "+resOff+" off";
+		}
+		
+		/*
+		 * Special cases
+		 */
 		// 24/7
-		if(ret == "Mo-Su 00:00-24:00") {
-			ret = "24/7";
+		if(result == "Mo-Su 00:00-24:00") {
+			result = "24/7";
 		}
 		
-		return ret;
+		return result;
 	};
-	
-	/**
-	 * Returns a String representing the openinghours on one special day (e.g. "10:00-20:00")
-	 * @param minutes The minutes array for only one day
-	 * @return The opening hours in this day
-	 */
-	function _makeStringFromMinuteArray(minutes) {
-		var ret = "";
-		for (var i = 0; i < minutes.length; i++) {
-			if (minutes[i]) {
-				var start = i;
-				while (i < minutes.length && minutes[i]) {
-					i++;
-				}
-				var addString = _timeString(start);
-				if (i - 1 == 24 * 60 + 1) {
-					addString += "+";
-				} else if (start != i - 1) {
-					addString += "-" + _timeString(i - 1);
-				}
-				if (ret.length > 0) {
-					ret += ",";
-				}
-				ret += addString;
-			}
-		}
-		return ret;
-	};
-	
+
 	/**
 	 * @param minutes integer in range from 0 and 24*60 inclusive
 	 * @return a formatted string of the time (for example "13:45")
@@ -319,34 +503,6 @@ OpeningHoursParser: function() {
 		var period = "";
 		var m = minutes % 60;
 		return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + period;
-	};
-	
-	/**
-	 * Is the given array empty (ie only containing false values)
-	 * @param bs The array to test
-	 * @return True if empty
-	 */
-	function _isArrayEmpty(bs) {
-		for(var i = 0; i < bs.length; i++) {
-			if (bs[i]) {
-				return false;
-			}
-		}
-		return true;
-	};
-	
-	/**
-	 * Are the two arrays equal ?
-	 * @param bs The first array
-	 * @param bs2 The second array
-	 * @return True if they are equal
-	 */
-	function _arraysEqual(bs, bs2) {
-		var ret = true;
-		for(var i = 0; i < bs.length; i++) {
-			ret &= bs[i] == bs2[i];
-		}
-		return ret;
 	};
 }
 

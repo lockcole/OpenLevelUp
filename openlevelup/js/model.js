@@ -148,8 +148,9 @@ var OSMData = function(bbox, data) {
 	 */
 	OSMData.prototype.getMapillaryKeys = function() {
 		var keys = [];
-		var ftId, feature, i, k, ftTags;
+		var ftId, feature, i, k, ftTags, mapillaryVal;
 		var mapillaryRegex = /^mapillary.*$/;
+		var mapillaryValRegex = /^[\w\-]+$/;
 		
 		for(ftId in this._features) {
 			feature = this._features[ftId];
@@ -157,7 +158,13 @@ var OSMData = function(bbox, data) {
 			
 			for(k in ftTags) {
 				if(k.match(mapillaryRegex)) {
-					keys.push(ftTags[k]);
+					mapillaryVal = ftTags[k];
+					if(mapillaryVal.match(mapillaryValRegex)) {
+						keys.push(mapillaryVal);
+					}
+					else {
+						console.warn("[Mapillary] Invalid key: "+mapillaryVal+" for "+ftId);
+					}
 				}
 			}
 		}
