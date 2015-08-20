@@ -5745,7 +5745,7 @@ var TimeGrid = Grid.extend({
 			slotDate = this.start.clone().time(slotTime); // will be in UTC but that's good. to avoid DST issues
 			minutes = slotDate.minutes();
 
-			axisHtml =
+			/*axisHtml =
 				'<td class="fc-axis fc-time ' + view.widgetContentClass + '" ' + view.axisStyleAttr() + '>' +
 					((!slotNormal || !minutes) ? // if irregular slot duration, or on the hour, then display the time
 						'<span>' + // for matchCellWidths
@@ -5753,7 +5753,10 @@ var TimeGrid = Grid.extend({
 						'</span>' :
 						''
 						) +
-				'</td>';
+				'</td>';*/
+			axisHtml = (!slotNormal || !minutes) ?
+				'<td class="fc-axis fc-time ' + view.widgetContentClass + '" ' + view.axisStyleAttr() + ' rowspan="4"><span>' + htmlEscape(slotDate.format(this.axisFormat)) + '</span></td>'
+				: '';
 
 			html +=
 				'<tr ' + (!minutes ? '' : 'class="fc-minor"') + '>' +
