@@ -280,6 +280,36 @@ var MapillaryData = function() {
 
 
 /**
+ * The container for OSM notes
+ */
+var NotesData = function(d) {
+//ATTRIBUTES
+	this._notes = [];
+
+//CONSTRUCTOR
+	//Parse XML
+	$(d).find('note').each(function() {
+		
+	});
+};
+
+//MODIFIERS
+	/**
+	 * Adds a new note in data
+	 * @param id The note ID in OSM
+	 * @param lat The latitude in WGS84
+	 * @param lon The longitude in WGS84
+	 * @param dateCreated The note creation date
+	 * @param status The status in OSM
+	 * @return The note ID in OpenLevelUp
+	 */
+	NotesData.prototype.add = function(id, lat, lon, dateCreated, status) {
+		return this._notes.push({ id: id, lat: lat, lon: lon, date: dateCreated, status: status }) - 1;
+	};
+
+
+
+/**
  * A feature is a geolocated object with properties, style, geometry, ...
  */
 var Feature = function(f) {

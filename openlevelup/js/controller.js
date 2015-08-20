@@ -79,11 +79,14 @@ var Ctrl = function() {
 	/** The mapillary data **/
 	this._mapillaryData = new MapillaryData();
 	
+	/** The OSM notes data **/
+	this._notesData = null;
+	
 	/** The download start time **/
 	this._downloadStart = null;
 	
-	/** The amount of requested pictures metadata via Ajax **/
-	this._nbPhotoRequests = null;
+	/** The amount of requested external metadata via Ajax **/
+	this._nbExternalApiRequests = null;
 	
 	/** The current HTML view **/
 	this._view = null;
@@ -320,7 +323,7 @@ var Ctrl = function() {
 		//Download data
 		$(document).ajaxError(function( event, jqxhr, settings, thrownError ) { console.log("Error: "+thrownError+"\nURL: "+settings.url); });
 		$.get(
-			CONFIG.osm.api+encodeURIComponent(oapiRequest),
+			CONFIG.osm.oapi+encodeURIComponent(oapiRequest),
 			function(data) {
 				console.log("[Time] Overpass download: "+((new Date()).getTime() - this._downloadStart));
 				this.getView().getLoadingView().addLoadingInfo("Process received data");
@@ -335,7 +338,10 @@ var Ctrl = function() {
 					this.getView().getMapView().resetVars();
 
 					this.getView().getLoadingView().addLoadingInfo("Download photos metadata");
-					this._nbPhotoRequests = 0;
+					this._nbExternalApiRequests = 0;
+					
+					//Download OSM notes
+					this.downloadNotes(bbox);
 					
 					//Download Flickr data
 					this.downloadFlickr(bbox);
@@ -351,7 +357,7 @@ var Ctrl = function() {
 						}
 					}
 
-					this.checkPhotosRequestsDone();
+					this.checkExternalRequestsDone();
 				}
 			}.bind(this),
 			"json")
@@ -367,25 +373,25 @@ var Ctrl = function() {
 	};
 	
 	/**
-	 * Checks if all metadata for pictures have been retrieved, and if so ends map update.
+	 * Checks if all metadata for external data have been retrieved, and if so ends map update.
 	 */
-	Ctrl.prototype.checkPhotosRequestsDone = function(almost) {
+	Ctrl.prototype.checkExternalRequestsDone = function(almost) {
 		almost = almost || false;
 		
-		if(this._nbPhotoRequests == 0) {
+		if(this._nbExternalApiRequests == 0) {
 			if(almost) {
 				this.endMapUpdate();
 			}
 			else {
 				setTimeout(
-					function() { this.checkPhotosRequestsDone(true); }.bind(this),
+					function() { this.checkExternalRequestsDone(true); }.bind(this),
 					1000
 				);
 			}
 		}
 		else {
 			setTimeout(
-				this.checkPhotosRequestsDone.bind(this),
+				this.checkExternalRequestsDone.bind(this),
 				1000
 			);
 		}
@@ -403,7 +409,7 @@ var Ctrl = function() {
 		var url = CONFIG.images.flickr.api+params;
 		
 		//Download
-		this._nbPhotoRequests++;
+		this._nbExternalApiRequests++;
 		$.ajax({
 			url: url,
 			async: true,
@@ -472,14 +478,14 @@ var Ctrl = function() {
 		catch(e) {
 			console.error("[Flickr] Error during data process: "+e);
 		}
-		this._nbPhotoRequests--;
+		this._nbExternalApiRequests--;
 	};
 	
 	/**
 	 * This function is called when data download fails
 	 */
 	Ctrl.prototype.onFlickrDownloadFail = function() {
-		this._nbPhotoRequests--;
+		this._nbExternalApiRequests--;
 		console.error("[Flickr] An error occured");
 	};
 
@@ -497,7 +503,7 @@ var Ctrl = function() {
 		var url = CONFIG.images.mapillary.api+params;
 		
 		//Download
-		this._nbPhotoRequests++;
+		this._nbExternalApiRequests++;
 		$.get(
 			url,
 			function(data) {
@@ -535,13 +541,56 @@ var Ctrl = function() {
 		catch(e) {
 			console.error("[Mapillary] Error during data process: "+e);
 		}
-		this._nbPhotoRequests--;
+		this._nbExternalApiRequests--;
 	};
 	
 	/**
 	 * This function is called when data download fails
 	 */
 	Ctrl.prototype.onMapillaryDownloadFail = function() {
-		this._nbPhotoRequests--;
+		this._nbExternalApiRequests--;
 		console.error("[Mapillary] An error occured");
+	};
+
+/************************
+ * OSM Notes management *
+ ************************/
+	/**
+	 * Retrieve OSM notes
+	 * @param bbox The bounding box
+	 */
+	Ctrl.prototype.downloadNotes = function(bbox) {
+		var params = 'notes?bbox='+bbox.toBBoxString();
+		var url = CONFIG.osm.api+params;
+		
+		//Download
+		this._nbExternalApiRequests++;
+		$.ajax({
+			url: url,
+			async: true,
+			dataType: 'xml',
+			success: this.setNotesData.bind(this)
+		}).fail(this.onNotesDownloadFail.bind(this));
+	};
+	
+	/**
+	 * Processes the received Notes data
+	 * @param data The OSM notes data, as JSON
+	 */
+	Ctrl.prototype.setNotesData = function(data) {
+		try {
+			this._notesData = new NotesData(data);
+		}
+		catch(e) {
+			console.error("[Notes] Error during data process: "+e);
+		}
+		this._nbExternalApiRequests--;
+	};
+	
+	/**
+	 * This function is called when notes data download fails
+	 */
+	Ctrl.prototype.onNotesDownloadFail = function() {
+		this._nbExternalApiRequests--;
+		console.error("[Notes] An error occured");
 	};
