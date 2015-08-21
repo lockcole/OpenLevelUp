@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+21 august 2015
+--------------
+* OSM Notes are visible and new notes can be created
+
 5 august 2015
 -------------
 * Icon for charging bike and luggage locker added

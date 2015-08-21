@@ -332,7 +332,7 @@ var Ctrl = function() {
 		$.get(
 			CONFIG.osm.oapi+encodeURIComponent(oapiRequest),
 			function(data) {
-				console.log("[Time] Overpass download: "+((new Date()).getTime() - this._downloadStart));
+				//console.log("[Time] Overpass download: "+((new Date()).getTime() - this._downloadStart));
 				this.getView().getLoadingView().addLoadingInfo("Process received data");
 				
 				if(type == "cluster") {
@@ -513,14 +513,7 @@ var Ctrl = function() {
 		this._nbExternalApiRequests++;
 		$.get(
 			url,
-			function(data) {
-				this.setMapillaryData(data);
-				this._nbMapillaryRequests--;
-				if(this._nbMapillaryRequests == 0) {
-					console.log("[Mapillary] Done processing images");
-					this.endMapUpdate();
-				}
-			}.bind(this),
+			this.setMapillaryData.bind(this),
 			'json'
 		).fail(controller.onMapillaryDownloadFail.bind(this));
 	};
@@ -600,4 +593,60 @@ var Ctrl = function() {
 	Ctrl.prototype.onNotesDownloadFail = function() {
 		this._nbExternalApiRequests--;
 		console.error("[Notes] An error occured");
+	};
+
+	/**
+	 * Send new note to OSM
+	 */
+	Ctrl.prototype.newNote = function() {
+		//Retrieve note data
+		var text = this._view.getNotesView().getNewNoteText().trim();
+		
+		//Check if not empty
+		var textCheck = text.split(':');
+		if(text.length > 0 && (textCheck.length == 1 || textCheck[1].trim().length > 0)) {
+			//Check coordinates
+			var coords = this._view.getMapView().getDraggableMarkerCoords();
+			
+			if(coords != null) {
+				//Create URL
+				var url = CONFIG.osm.api+"notes?lat="+coords.lat+"&lon="+coords.lng+"&text="+text;
+				
+				//Send note to OSM
+				$.post(
+					url,
+					null,
+					this.newNoteSent.bind(this),
+					"xml"
+				).fail(this.newNoteFailed.bind(this));
+			}
+			else {
+				this._view.getMessagesView().displayMessage("Invalid coordinates for your note", "error");
+			}
+		}
+		else {
+			this._view.getMessagesView().displayMessage("Your note is empty", "alert");
+		}
+	};
+	
+	/**
+	 * Success function for note sending
+	 */
+	Ctrl.prototype.newNoteSent = function(data) {
+		this._view.getMessagesView().displayMessage("Your note was successfully sent", "info");
+		this._view.hideCentralPanel();
+		
+		//Add given data to NotesData
+		this._notesData.parse(data);
+		
+		//Refresh map
+		this._view.updateNoteAdded();
+	};
+	
+	/**
+	 * Fail function for note sending
+	 */
+	Ctrl.prototype.newNoteFailed = function() {
+		this._view.getMessagesView().displayMessage("An error occurred during note sending", "error");
+		this._view.hideCentralPanel();
 	};

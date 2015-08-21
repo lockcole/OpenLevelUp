@@ -26,6 +26,7 @@
 	"osm": {
 		"oapi": "http://www.overpass-api.de/api/interpreter?data=",
 		"api": "http://api.openstreetmap.org/api/0.6/",
+		"api_dev": "http://api06.dev.openstreetmap.org/api/0.6/",
 		"attribution": "Map data © <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors"
 	},
 	

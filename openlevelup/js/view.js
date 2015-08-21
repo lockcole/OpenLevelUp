@@ -276,16 +276,28 @@ var MainView = function(ctrl, mobile) {
 	};
 	
 	/**
+	 * Updates the view when new note is added
+	 */
+	MainView.prototype.updateNoteAdded = function() {
+		this._cMap.update();
+	};
+	
+	/**
 	 * Displays the given central panel
 	 * @param id The panel ID
 	 */
 	MainView.prototype.showCentralPanel = function(id) {
 		if(!$("#"+id).is(":visible")) {
+			//Remove draggable marker if new note panel
+			if($("#note-add").is(":visible")) {
+				this._cMap.hideDraggableMarker();
+			}
+			
 			$("#central .part").hide();
 			$("#"+id).show();
 			$("#main-buttons").addClass("opened");
 			$("#central-close").show();
-			$("#central-close").click(controller.getView().hideCentralPanel);
+			$("#central-close").click(controller.getView().hideCentralPanel.bind(this));
 		}
 		else {
 			this.hideCentralPanel();
@@ -300,6 +312,8 @@ var MainView = function(ctrl, mobile) {
 		$("#central-close").hide();
 		$("#central-close").off("click");
 		$("#main-buttons").removeClass("opened");
+		
+		this._cMap.hideDraggableMarker();
 	};
 
 
@@ -329,6 +343,9 @@ var MapView = function(main) {
 	
 	/** The feature popups **/
 	this._dataPopups = {};
+	
+	/** The draggable marker **/
+	this._draggableMarker = null;
 	
 	/** The previous zoom value **/
 	this._oldZoom = null;
@@ -538,7 +555,7 @@ var MapView = function(main) {
 		
 		this.changeTilesOpacity();
 		
-		console.log("[Time] View update: "+((new Date().getTime()) - timeStart));
+		//console.log("[Time] View update: "+((new Date().getTime()) - timeStart));
 	};
 	
 	/**
@@ -649,7 +666,8 @@ var MapView = function(main) {
 							[note.lat, note.lon],
 							{
 								id: i,
-								icon: (note.status == "closed") ? iconClosed : iconOpen
+								icon: (note.status == "closed") ? iconClosed : iconOpen,
+								zIndexOffset: (note.status == "closed") ? 999 : 1000,
 							}
 						);
 				marker.on("click", controller.getView().getNotesView().show.bind(controller.getView().getNotesView()));
@@ -741,6 +759,39 @@ var MapView = function(main) {
 		$(".popup-tab:visible").hide();
 		$(".leaflet-popup:visible #popup-tab-"+id).show();
 		$("#item-"+id).addClass("selected");
+	};
+	
+	/**
+	 * Shows a draggable marker on map (mainly for notes)
+	 */
+	MapView.prototype.showDraggableMarker = function() {
+		if(this._draggableMarker == null) {
+			var iconAdd = L.icon({
+				iconUrl: 'img/icon_note_new.png',
+				className: 'note-new-icon'
+			});
+			this._draggableMarker = new L.marker(this._map.getCenter(), { draggable: true, icon: iconAdd, zIndexOffset: 10000 }).addTo(this._map);
+		}
+		else {
+			this._draggableMarker.setLatLng(this._map.getCenter()).addTo(this._map);
+		}
+	};
+	
+	/**
+	 * Hides the draggable marker
+	 */
+	MapView.prototype.hideDraggableMarker = function() {
+		if(this._draggableMarker != null) {
+			this._map.removeLayer(this._draggableMarker);
+		}
+	};
+	
+	/**
+	 * Get the draggable marker coordinates
+	 * @return The LatLng, or null if draggable isn't visible
+	 */
+	MapView.prototype.getDraggableMarkerCoords = function() {
+		return (this._draggableMarker != null) ? this._draggableMarker.getLatLng() : null;
 	};
 
 
@@ -2797,8 +2848,17 @@ var NotesView = function(main) {
 		$("#op-notes").removeClass("show");
 		$("#op-notes").addClass("hide");
 	});
+	$("#note-send").click(controller.newNote.bind(controller));
 };
 
+//ACCESSORS
+	/**
+	 * @return The notes textarea content
+	 */
+	NotesView.prototype.getNewNoteText = function() {
+		return $("#note-txt").val();
+	};
+	
 //MODIFIERS
 	/**
 	 * Shows a given note in panel
@@ -2815,11 +2875,12 @@ var NotesView = function(main) {
 			$("#notes-link").attr("href", "http://www.openstreetmap.org/note/"+note.id);
 			
 			//Add comments
-			var commentsHtml = "", comment;
+			var commentsHtml = "", comment, user;
 			for(var i=0, l=note.comments.length; i < l; i++) {
 				comment = note.comments[i];
+				user = (comment.user != "") ? "User "+comment.user : "Anonymous";
 				commentsHtml += '<div class="op-notes-comment">'
-								+'<p class="desc">User '+comment.user+', '+comment.date+'</p>'
+								+'<p class="desc">'+user+', '+comment.date+'</p>'
 								+'<p class="txt">'+comment.text+'</p>'
 								+'</div>';
 			}
@@ -2837,7 +2898,21 @@ var NotesView = function(main) {
 	 * Starts or stops to edit a new note
 	 */
 	NotesView.prototype.editNote = function() {
-		this._mainView.showCentralPanel("note-add");
+		if(!$("#note-add").is(":visible")) {
+			var dataZoom = this._mainView.getMapView().get().getZoom() >= CONFIG.view.map.data_min_zoom;
+			if(dataZoom) {
+				this._mainView.showCentralPanel("note-add");
+				this._mainView.getMapView().showDraggableMarker();
+				$("#note-txt").val("Level "+this._mainView.getLevelView().get()+": ");
+			}
+			else {
+				this._mainView.getMessagesView().displayMessage("You have to zoom in to add a note", "alert");
+			}
+		}
+		else {
+			this._mainView.hideCentralPanel();
+			this._mainView.getMapView().hideDraggableMarker();
+		}
 	};
 
 

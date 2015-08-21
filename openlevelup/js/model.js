@@ -96,7 +96,7 @@ var OSMData = function(bbox, data) {
 	lvlId = null;
 	lvl = null;
 	
-	console.log("[Time] Model parsing: "+((new Date().getTime()) - timeStart));
+	//console.log("[Time] Model parsing: "+((new Date().getTime()) - timeStart));
 };
 
 //ACCESSORS
@@ -288,29 +288,7 @@ var NotesData = function(d) {
 
 //CONSTRUCTOR
 	//Parse XML
-	var _self = this;
-	$(d).find('note').each(function() {
-		//Create note
-		var id = _self.add(
-			$(this).find('id').text(),
-			$(this).attr('lat'),
-			$(this).attr('lon'),
-			$(this).find('date_created').text(),
-			$(this).find('status').text()
-		);
-		
-		//Add comments
-		$(this).find('comment').each(function() {
-			_self.addComment(
-				id,
-				$(this).find('date').text(),
-				$(this).find('uid').text(),
-				$(this).find('user').text(),
-				$(this).find('action').text(),
-				$(this).find('text').text()
-			);
-		});
-	});
+	this.parse(d);
 };
 
 //ACCESSORS
@@ -322,6 +300,36 @@ var NotesData = function(d) {
 	};
 	
 //MODIFIERS
+	/**
+	 * Parses the given XML and adds extracted data
+	 * @param xml The XML data
+	 */
+	NotesData.prototype.parse = function(xml) {
+		var _self = this;
+		$(xml).find('note').each(function() {
+			//Create note
+			var id = _self.add(
+				$(this).find('id').text(),
+				$(this).attr('lat'),
+				$(this).attr('lon'),
+				$(this).find('date_created').text(),
+				$(this).find('status').text()
+			);
+			
+			//Add comments
+			$(this).find('comment').each(function() {
+				_self.addComment(
+					id,
+					$(this).find('date').text(),
+					$(this).find('uid').text(),
+					$(this).find('user').text(),
+					$(this).find('action').text(),
+					$(this).find('text').text()
+				);
+			});
+		});
+	};
+	
 	/**
 	 * Adds a new note in data
 	 * @param id The note ID in OSM

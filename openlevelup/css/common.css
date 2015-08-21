@@ -559,3 +559,7 @@ span.osm-key, span.osm-val {
 	height: 20px;
 	padding: 3px;
 }
+
+.note-new-icon {
+	cursor: move;
+}
