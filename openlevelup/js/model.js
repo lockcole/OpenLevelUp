@@ -584,44 +584,58 @@ var FeatureGeometry = function(fGeometry) {
 			result = this._geom.coordinates;
 		}
 		else if(type == "LineString") {
-			result = [0, 0];
+			var minlon = this._geom.coordinates[0][0];
+			var minlat = this._geom.coordinates[0][1];
+			var maxlon = minlon;
+			var maxlat = minlat;
 			var length = this._geom.coordinates.length;
+			var coord;
 			
-			for(var i=0; i < length; i++) {
-				result[0] += this._geom.coordinates[i][0];
-				result[1] += this._geom.coordinates[i][1];
+			for(var i=1; i < length; i++) {
+				coord = this._geom.coordinates[i];
+				if(minlon > coord[0]) { minlon = coord[0]; }
+				else if(maxlon < coord[0]) { maxlon = coord[0]; }
+				if(minlat > coord[1]) { minlat = coord[1]; }
+				else if(maxlat < coord[1]) { maxlat = coord[1]; }
 			}
 			
-			result[0] = result[0] / length;
-			result[1] = result[1] / length;
+			result = [ minlon + (maxlon-minlon)/2, minlat + (maxlat-minlat)/2 ];
 		}
 		else if(type == "Polygon") {
-			result = [0, 0];
+			var minlon = this._geom.coordinates[0][0][0];
+			var minlat = this._geom.coordinates[0][0][1];
+			var maxlon = minlon;
+			var maxlat = minlat;
 			var length = this._geom.coordinates[0].length;
+			var coord;
 			
-			for(var i=0; i < length; i++) {
-				if(i < length - 1) {
-					result[0] += this._geom.coordinates[0][i][0];
-					result[1] += this._geom.coordinates[0][i][1];
-				}
+			for(var i=1; i < length-1; i++) {
+				coord = this._geom.coordinates[0][i];
+				if(minlon > coord[0]) { minlon = coord[0]; }
+				else if(maxlon < coord[0]) { maxlon = coord[0]; }
+				if(minlat > coord[1]) { minlat = coord[1]; }
+				else if(maxlat < coord[1]) { maxlat = coord[1]; }
 			}
 			
-			result[0] = result[0] / (length -1);
-			result[1] = result[1] / (length -1);
+			result = [ minlon + (maxlon-minlon)/2, minlat + (maxlat-minlat)/2 ];
 		}
 		else if(type == "MultiPolygon") {
-			result = [0, 0];
+			var minlon = this._geom.coordinates[0][0][0][0];
+			var minlat = this._geom.coordinates[0][0][0][1];
+			var maxlon = minlon;
+			var maxlat = minlat;
 			var length = this._geom.coordinates[0][0].length;
+			var coord;
 			
-			for(var i = 0; i < length; i++) {
-				if(i < length - 1) {
-					result[0] += this._geom.coordinates[0][0][i][0];
-					result[1] += this._geom.coordinates[0][0][i][1];
-				}
+			for(var i=1; i < length-1; i++) {
+				coord = this._geom.coordinates[0][0][i];
+				if(minlon > coord[0]) { minlon = coord[0]; }
+				else if(maxlon < coord[0]) { maxlon = coord[0]; }
+				if(minlat > coord[1]) { minlat = coord[1]; }
+				else if(maxlat < coord[1]) { maxlat = coord[1]; }
 			}
 			
-			result[0] = result[0] / (length -1);
-			result[1] = result[1] / (length -1);
+			result = [ minlon + (maxlon-minlon)/2, minlat + (maxlat-minlat)/2 ];
 		}
 		else {
 			console.log("Unknown type: "+this._geom.type);
