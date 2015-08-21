@@ -1478,10 +1478,7 @@ OpeningHoursBuilder: function() {
 	 * Adds the good separator for wide selector
 	 */
 	function _wideSelectorSeparator(wideSelector) {
-		if(wideSelector == "PH" || wideSelector == "SH" || wideSelector == "easter") { wideSelector += " "; }
-		else {
-			if(wideSelector.length > 0) { wideSelector += ": "; }
-		}
+		if(wideSelector.length > 0) { wideSelector += " "; }
 		return wideSelector;
 	};
 	

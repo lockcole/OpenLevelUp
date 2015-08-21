@@ -1,6 +1,14 @@
 Changes history
 ===============
 
+21 august 2015
+-------------
+* Optional colon separator for wide range selector removed
+
+19 august 2015
+--------------
+* Version 2.0 published
+
 14 august 2015
 --------------
 * Test suite for model classes
