@@ -95,6 +95,13 @@ MainController: function() {
 	this.init = function() {
 		_view.init();
 	};
+	
+	/**
+	 * Initializes the controller in minimal mode (iframe)
+	 */
+	this.initMinimal = function() {
+		_view.init(true);
+	};
 
 	/**
 	 * Clear all defined data

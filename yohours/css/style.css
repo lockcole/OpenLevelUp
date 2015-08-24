@@ -32,6 +32,10 @@ body {
 	height: 100%;
 }
 
+body.minimal {
+	margin: 10px;
+}
+
 footer {
 	border-top: 1px solid #ddd;
 	margin-top: 20px;
@@ -151,4 +155,12 @@ footer {
 
 .modal-help-title {
 	font-weight: bold;
+}
+
+/**************************
+ * Minimal navigation bar *
+ **************************/
+
+.nav.nav-sm > li > a {
+	padding: 5px 10px;
 }

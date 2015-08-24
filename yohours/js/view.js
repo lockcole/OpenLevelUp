@@ -423,7 +423,7 @@ CalendarView: function(main) {
 			
 			eventConstraint = { start: moment().day("Monday").format("YYYY-MM-DD[T00:00:00]"), end: moment().day("Monday").add(7, "days").format("YYYY-MM-DD[T00:00:00]") };
 			defaultView = "agendaWeek";
-			colFormat = "dddd";
+			colFormat = (_mainView.isMinimal()) ? "dd" : "dddd";
 			fctSelect = function(start, end) {
 				//Add event to week intervals
 				var minStart = parseInt(start.format("H")) * 60 + parseInt(start.format("m"));
@@ -798,6 +798,9 @@ MainView: function(ctrl) {
 	/** The help dialog **/
 	var _helpView;
 	
+	/** Is the view in minimal mode ? **/
+	var _minimal = false;
+	
 	/** This object **/
 	var _self = this;
 
@@ -829,13 +832,22 @@ MainView: function(ctrl) {
 	this.getController = function() {
 		return _ctrl;
 	};
+	
+	/**
+	 * Minimal mode ?
+	 */
+	this.isMinimal = function() {
+		return _minimal;
+	};
 
 //OTHER METHODS
 	/**
 	 * Initializes the view
+	 * @param minimal Is the view in minimal mode (iframe) ?
 	 */
-	this.init = function() {
+	this.init = function(minimal) {
 		var ohInputVal = _hoursInputView.getValue();
+		_minimal = minimal || false;
 		if(ohInputVal != undefined && ohInputVal.trim() != "") {
 			_ctrl.showHours(ohInputVal);
 		}
