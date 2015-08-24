@@ -740,13 +740,23 @@ HoursInputView: function(main) {
 	
 	/**
 	 * Sets if the contained value is correct or not
+	 * @param valid Is the value valid
+	 * @param ohValid Is the value valid according to opening_hours.js
 	 */
-	this.setValid = function(valid) {
+	this.setValid = function(valid, ohValid) {
+		ohValid = ohValid || null;
+		
+		$("#oh-valid-alert").addClass("hide");
+		
 		if(valid) {
 			$("#oh-form").removeClass("has-error");
 		}
 		else {
 			$("#oh-form").addClass("has-error");
+			if(ohValid) {
+				$("#oh-valid-alert").removeClass("hide");
+				$("#oh-valid-alert a").attr("href", "http://openingh.openstreetmap.de/evaluation_tool/?EXP="+_field.val());
+			}
 		}
 	};
 	

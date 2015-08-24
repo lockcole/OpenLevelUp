@@ -57,6 +57,16 @@ If you want to install your own YoHours instance, just download the content of t
 
 QUnit-based tests are available in **test.html** page. For live, see [github.pavie.info/yohours/test.html](http://github.pavie.info/yohours/test.html).
 
+### Integration
+
+If you want to integrate parts of YoHours in another piece of software, you can use the following code to check if an `opening_hours` value will be properly shown. Only `model.js` file is needed to run this.
+```
+var checker = new YoHoursChecker();
+checker.canRead("24/7; week 01: Su 01:00-08:00"); // returns true
+checker.canRead("24/7; week 01: Su 01:00-08:00 || \"on appointment\""); // returns false
+checker.canRead("completely invalid value"); // returns false
+```
+
 
 License
 -------

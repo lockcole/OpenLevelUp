@@ -1,13 +1,13 @@
 /*
  * For information see https://github.com/ypid/opening_hours.js
- * and the doc directory which contains internal documentation and design.
+ * and the docs directory which contains internal documentation and design.
  */
 /* jshint laxbreak: true */
 /* jshint boss: true */
 /* jshint loopfunc: true */
 
 (function (root, factory) {
-	/* constants (holidays, error correction) {{{ */
+	/* constants (holidays, error correction, lang) {{{ */
 	/* holidays {{{ */
 	/*
 	 * The country code keys and the PH, SH keys are surrounded by '':
@@ -19,7 +19,7 @@
 	 */
 	var holidays = {
 		'fr': { // {{{
-			'PH': { // http://fr.wikipedia.org/wiki/F%C3%AAtes_et_jours_f%C3%A9ri%C3%A9s_en_France
+			'PH': { // https://fr.wikipedia.org/wiki/F%C3%AAtes_et_jours_f%C3%A9ri%C3%A9s_en_France
 				"Jour de l'an"                          : [  1,  1 ],
 				"Vendredi saint"                        : [  'easter', -2, [ 'Moselle', 'Bas-Rhin', 'Haut-Rhin', 'Guadeloupe', 'Martinique', 'Polynésie française' ] ],
 				"Lundi de Pâques"                       : [  'easter', 1 ],
@@ -45,7 +45,7 @@
 			}
 		}, // }}}
 		'de': { // {{{
-			'PH': { // http://de.wikipedia.org/wiki/Feiertage_in_Deutschland
+			'PH': { // https://de.wikipedia.org/wiki/Feiertage_in_Deutschland
 				'Neujahrstag'               : [  1,  1 ], // month 1, day 1, whole Germany
 				'Heilige Drei Könige'       : [  1,  6, [ 'Baden-Württemberg', 'Bayern', 'Sachsen-Anhalt'] ], // only in the specified states
 				'Tag der Arbeit'            : [  5,  1 ], // whole Germany
@@ -1093,7 +1093,7 @@
 			},
 		}, // }}}
 		'at': { // {{{
-			'PH': { // http://de.wikipedia.org/wiki/Feiertage_in_%C3%96sterreich
+			'PH': { // https://de.wikipedia.org/wiki/Feiertage_in_%C3%96sterreich
 				'Neujahrstag'                : [  1,  1 ],
 				'Heilige Drei Könige'        : [  1,  6 ],
 				// 'Josef'                   : [  3, 19, [ 'Kärnten', 'Steiermark', 'Tirol', 'Vorarlberg' ] ],
@@ -1745,7 +1745,7 @@
 			},
 		}, // }}}
 		'ua': { // {{{
-			'PH': { // http://uk.wikipedia.org/wiki/%D0%A1%D0%B2%D1%8F%D1%82%D0%B0_%D1%82%D0%B0_%D0%BF%D0%B0%D0%BC%27%D1%8F%D1%82%D0%BD%D1%96_%D0%B4%D0%BD%D1%96_%D0%B2_%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D1%96
+			'PH': { // https://uk.wikipedia.org/wiki/%D0%A1%D0%B2%D1%8F%D1%82%D0%B0_%D1%82%D0%B0_%D0%BF%D0%B0%D0%BC%27%D1%8F%D1%82%D0%BD%D1%96_%D0%B4%D0%BD%D1%96_%D0%B2_%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D1%96
 				"Новий рік"                 : [  1,  1 ],
 				"Різдво"                    : [  1,  7 ],
 				"Міжнародний жіночий день"  : [  3,  8 ],
@@ -1767,7 +1767,7 @@
 				"Thanksgiving"     : [ "firstNovemberThursday", 21 ],
 				"Christmas Day"    : [ 12, 25 ]
 			},
-			'Alabama': {
+			'Alabama': { /* {{{ */
 				'PH': { // http://www.archives.alabama.gov/intro/holidays.html
 					"New Year's Day"                              : [ 1, 1 ],
 					"Robert E. Lee/Martin Luther King Birthday"   : [ "firstJanuaryMonday", 14 ],
@@ -1782,8 +1782,8 @@
 					"Confederate Memorial Day"                    : [ "firstAprilMonday", 21 ],
 					"Jefferson Davis' Birthday"                   : [ "firstJuneMonday", 0 ]
 				}
-			},
-			'Alaska': {
+			}, /* }}} */
+			'Alaska': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -1797,8 +1797,8 @@
 					"Seward's Day"                : [ "lastMarchMonday", 0 ],
 					"Alaska Day"                  : [ 10, 18 ]
 				}
-			},
-			'Arizona': {
+			}, /* }}} */
+			'Arizona': { /* {{{ */
 				'PH': {
 					"New Year's Day"                              : [ 1, 1 ],
 					"Dr. Martin Luther King Jr./Civil Rights Day" : [ "firstJanuaryMonday", 14 ],
@@ -1811,8 +1811,8 @@
 					"Thanksgiving"                                : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"                               : [ 12, 25 ]
 				}
-			},
-			'Arkansas': {
+			}, /* }}} */
+			'Arkansas': { /* {{{ */
 				'PH': {
 					"New Year's Day"                                           : [ 1, 1 ],
 					"Dr. Martin Luther King Jr. and Robert E. Lee's Birthdays" : [ "firstJanuaryMonday", 14 ],
@@ -1826,8 +1826,8 @@
 					"Christmas Eve"                                            : [ 12, 24 ],
 					"Christmas Day"                                            : [ 12, 25 ]
 				}
-			},
-			'California': {
+			}, /* }}} */
+			'California': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -1841,8 +1841,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"César Chávez Day"            : [ 3, 31 ]
 				}
-			},
-			'Colorado': {
+			}, /* }}} */
+			'Colorado': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -1855,8 +1855,8 @@
 					"Thanksgiving"                : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'Connecticut': {
+			}, /* }}} */
+			'Connecticut': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -1871,8 +1871,8 @@
 					"Lincoln's Birthday"          : [ 2, 12 ],
 					"Good Friday"                 : [ "easter", -2 ]
 				}
-			},
-			'Delaware': {
+			}, /* }}} */
+			'Delaware': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -1887,8 +1887,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Good Friday"                 : [ "easter", -2 ]
 				}
-			},
-			'District of Columbia': {
+			}, /* }}} */
+			'District of Columbia': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -1902,8 +1902,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Emancipation Day"            : [ 4, 16 ]
 				}
-			},
-			'Florida': {
+			}, /* }}} */
+			'Florida': { /* {{{ */
 				'PH': { // http://www.leg.state.fl.us/Statutes/index.cfm?App_mode=Display_Statute&Search_String=&URL=0100-0199/0110/Sections/0110.117.html
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -1915,8 +1915,8 @@
 					"Friday after Thanksgiving"   : [ "firstNovemberThursday", 22 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'Georgia': {
+			}, /* }}} */
+			'Georgia': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -1931,8 +1931,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Confederate Memorial Day"    : [ "lastAprilMonday", 0 ]
 				}
-			},
-			'Guam': {
+			}, /* }}} */
+			'Guam': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -1950,8 +1950,8 @@
 					"Lady of Camarin Day"         : [ 12, 8 ],
 					"Christmas Day"               : [ 12, 25 ],
 				}
-			},
-			'Hawaii': {
+			}, /* }}} */
+			'Hawaii': { /* {{{ */
 				'PH': {
 					"New Year's Day"                      : [ 1, 1 ],
 					"Martin Luther King, Jr. Day"         : [ "firstJanuaryMonday", 14 ],
@@ -1967,8 +1967,8 @@
 					"Statehood Day"                       : [ "firstAugustFriday", 14 ],
 					"Election Day"                        : [ "firstNovemberMonday", 1 ]
 				}
-			},
-			'Idaho': {
+			}, /* }}} */
+			'Idaho': { /* {{{ */
 				'PH': {
 					"New Year's Day"                                 : [ 1, 1 ],
 					"Martin Luther King, Jr.-Idaho Human Rights Day" : [ "firstJanuaryMonday", 14 ],
@@ -1981,8 +1981,8 @@
 					"Thanksgiving"                                   : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"                                  : [ 12, 25 ]
 				}
-			},
-			'Illinois': {
+			}, /* }}} */
+			'Illinois': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -1998,8 +1998,8 @@
 					"Casimir Pulaski Day"         : [ "firstMarchMonday", 0 ],
 					"Election Day"                : [ "firstNovemberMonday", 1 ]
 				}
-			},
-			'Indiana': {
+			}, /* }}} */
+			'Indiana': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2016,8 +2016,8 @@
 					"Primary Election Day"        : [ "firstMayMonday", 1 ],
 					"Election Day"                : [ "firstNovemberMonday", 1 ]
 				}
-			},
-			'Iowa': {
+			}, /* }}} */
+			'Iowa': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2031,8 +2031,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Lincoln's Birthday"          : [ 2, 12 ]
 				}
-			},
-			'Kansas': {
+			}, /* }}} */
+			'Kansas': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2045,8 +2045,8 @@
 					"Thanksgiving"                : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'Kentucky': {
+			}, /* }}} */
+			'Kentucky': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2062,8 +2062,8 @@
 					"New Year's Eve"              : [ 12, 31 ],
 					"Good Friday"                 : [ "easter", -2 ]
 				}
-			},
-			'Louisiana': {
+			}, /* }}} */
+			'Louisiana': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2079,8 +2079,8 @@
 					"Good Friday"                 : [ "easter", -2 ],
 					"Election Day"                : [ "firstNovemberMonday", 1 ]
 				}
-			},
-			'Maine': {
+			}, /* }}} */
+			'Maine': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2094,8 +2094,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Patriots' Day"               : [ "firstAprilMonday", 14 ]
 				}
-			},
-			'Maryland': {
+			}, /* }}} */
+			'Maryland': { /* {{{ */
 				'PH': {
 					"New Year's Day"               : [ 1, 1 ],
 					"Martin Luther King, Jr. Day"  : [ "firstJanuaryMonday", 14 ],
@@ -2109,8 +2109,8 @@
 					"Native American Heritage Day" : [ "firstNovemberThursday", 22 ],
 					"Christmas Day"                : [ 12, 25 ]
 				}
-			},
-			'Massachusetts': {
+			}, /* }}} */
+			'Massachusetts': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2124,8 +2124,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Patriots' Day"               : [ "firstAprilMonday", 14 ]
 				}
-			},
-			'Michigan': {
+			}, /* }}} */
+			'Michigan': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2140,8 +2140,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"New Year's Eve"              : [ 12, 31 ]
 				}
-			},
-			'Minnesota': {
+			}, /* }}} */
+			'Minnesota': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2154,8 +2154,8 @@
 					"Thanksgiving"                : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'Mississippi': {
+			}, /* }}} */
+			'Mississippi': { /* {{{ */
 				'PH': {
 					"New Year's Day"                                     : [ 1, 1 ],
 					"Martin Luther King's and Robert E. Lee's Birthdays" : [ "firstJanuaryMonday", 14 ],
@@ -2169,8 +2169,8 @@
 					"Christmas Day"                                      : [ 12, 25 ],
 					"Confederate Memorial Day"                           : [ "lastAprilMonday", 0 ]
 				}
-			},
-			'Missouri': {
+			}, /* }}} */
+			'Missouri': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2184,8 +2184,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Truman Day"                  : [ 5, 8 ]
 				}
-			},
-			'Montana': {
+			}, /* }}} */
+			'Montana': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2201,8 +2201,8 @@
 					"Christmas Eve"               : [ 12, 24 ],
 					"New Year's Eve"              : [ 12, 31 ]
 				}
-			},
-			'Nebraska': {
+			}, /* }}} */
+			'Nebraska': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2216,8 +2216,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Arbor Day"                   : [ "lastAprilFriday", 0 ]
 				}
-			},
-			'Nevada': {
+			}, /* }}} */
+			'Nevada': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2231,8 +2231,8 @@
 					"Nevada Day"                  : [ "lastOctoberFriday", 0 ],
 					"Family Day"                  : [ "firstNovemberThursday", 22 ]
 				}
-			},
-			'New Hampshire': {
+			}, /* }}} */
+			'New Hampshire': { /* {{{ */
 				'PH': {
 					"New Year's Day"                           : [ 1, 1 ],
 					"Martin Luther King, Jr. Civil Rights Day" : [ "firstJanuaryMonday", 14 ],
@@ -2247,8 +2247,8 @@
 					"Christmas Day"                            : [ 12, 25 ],
 					"Election Day"                             : [ "firstNovemberMonday", 1 ]
 				}
-			},
-			'New Jersey': {
+			}, /* }}} */
+			'New Jersey': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2264,8 +2264,8 @@
 					"Good Friday"                 : [ "easter", -2 ],
 					"Election Day"                : [ "firstNovemberMonday", 1 ]
 				}
-			},
-			'New Mexico': {
+			}, /* }}} */
+			'New Mexico': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2278,8 +2278,8 @@
 					"Day after Thanksgiving"      : [ "firstNovemberThursday", 22 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'New York': {
+			}, /* }}} */
+			'New York': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2294,8 +2294,8 @@
 					"Lincoln's Birthday"          : [ 2, 12 ],
 					"Election Day"                : [ "firstNovemberMonday", 1 ]
 				}
-			},
-			'North Carolina': {
+			}, /* }}} */
+			'North Carolina': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2312,8 +2312,8 @@
 					"Day after Christmas"         : [ 12, 26 ],
 					"Good Friday"                 : [ "easter", -2 ]
 				}
-			},
-			'North Dakota': {
+			}, /* }}} */
+			'North Dakota': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2326,8 +2326,8 @@
 					"Thanksgiving"                : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'Ohio': {
+			}, /* }}} */
+			'Ohio': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2340,8 +2340,8 @@
 					"Thanksgiving"                : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'Oklahoma': {
+			}, /* }}} */
+			'Oklahoma': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2355,8 +2355,8 @@
 					"Day after Thanksgiving"      : [ "firstNovemberThursday", 22 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'Oregon': {
+			}, /* }}} */
+			'Oregon': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2369,8 +2369,8 @@
 					"Thanksgiving"                : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'Pennsylvania': {
+			}, /* }}} */
+			'Pennsylvania': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2384,8 +2384,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Flag Day"                    : [ 6, 14 ]
 				}
-			},
-			'Puerto Rico': {
+			}, /* }}} */
+			'Puerto Rico': { /* {{{ */
 				'PH': {
 					"Día de Año Nuevo"                         : [ 1, 1 ],
 					"Día de Reyes"                             : [ 1, 6 ],
@@ -2407,8 +2407,8 @@
 					"Noche Buena"                              : [ 12, 24 ],
 					"Día de Navidad"                           : [ 12, 25 ]
 				}
-			},
-			'Rhode Island': {
+			}, /* }}} */
+			'Rhode Island': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2422,8 +2422,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Victory Day"                 : [ "firstAugustMonday", 7 ]
 				}
-			},
-			'South Carolina': {
+			}, /* }}} */
+			'South Carolina': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2437,8 +2437,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Confederate Memorial Day"    : [ 5, 10 ]
 				}
-			},
-			'South Dakota': {
+			}, /* }}} */
+			'South Dakota': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2451,8 +2451,8 @@
 					"Thanksgiving"                : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'Tennessee': {
+			}, /* }}} */
+			'Tennessee': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2467,8 +2467,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Good Friday"                 : [ "easter", -2 ]
 				}
-			},
-			'Texas': {
+			}, /* }}} */
+			'Texas': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2484,8 +2484,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Day after Christmas"         : [ 12, 26 ]
 				}
-			},
-			'United States Virgin Islands': {
+			}, /* }}} */
+			'United States Virgin Islands': { /* {{{ */
 				'PH': {
 					"New Year's Day"                            : [ 1, 1 ],
 					"Martin Luther King, Jr. Day"               : [ "firstJanuaryMonday", 14 ],
@@ -2509,8 +2509,8 @@
 					"Christmas Second Day"                      : [ 12, 26 ],
 					"New Year's Eve"                            : [ 12, 31 ]
 				}
-			},
-			'Utah': {
+			}, /* }}} */
+			'Utah': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2524,8 +2524,8 @@
 					"Christmas Day"               : [ 12, 25 ],
 					"Pioneer Day"                 : [ 7, 24 ]
 				}
-			},
-			'Vermont': {
+			}, /* }}} */
+			'Vermont': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2540,8 +2540,8 @@
 					"Town Meeting Day"            : [ "firstMarchTuesday", 0 ],
 					"Battle of Bennington"        : [ "firstAugustMonday", 14 ]
 				}
-			},
-			'Virginia': {
+			}, /* }}} */
+			'Virginia': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Lee-Jackson Day"             : [ "firstJanuaryMonday", 11 ],
@@ -2555,8 +2555,8 @@
 					"Thanksgiving"                : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'Washington': {
+			}, /* }}} */
+			'Washington': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2569,8 +2569,8 @@
 					"Thanksgiving"                : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			},
-			'West Virginia': {
+			}, /* }}} */
+			'West Virginia': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2585,8 +2585,8 @@
 					"West Virginia Day"           : [ 6, 20 ],
 					"Lincoln's Day"               : [ "firstNovemberThursday", 22 ]
 				}
-			},
-			'Wisconsin': {
+			}, /* }}} */
+			'Wisconsin': { /* {{{ */
 				'PH': { // http://docs.legis.wisconsin.gov/statutes/statutes/995/20
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2601,8 +2601,8 @@
 					"Primary Election Day"        : [ "firstAugustTuesday", 7 ],
 					"Election Day"                : [ "firstNovemberMonday", 1 ]
 				}
-			},
-			'Wyoming': {
+			}, /* }}} */
+			'Wyoming': { /* {{{ */
 				'PH': {
 					"New Year's Day"              : [ 1, 1 ],
 					"Martin Luther King, Jr. Day" : [ "firstJanuaryMonday", 14 ],
@@ -2615,7 +2615,7 @@
 					"Thanksgiving"                : [ "firstNovemberThursday", 21 ],
 					"Christmas Day"               : [ 12, 25 ]
 				}
-			}
+			} /* }}} */
 		}, // }}}
 		'si': { // {{{
 			'PH': { // http://www.vlada.si/o_sloveniji/politicni_sistem/prazniki/
@@ -2652,38 +2652,52 @@
 				'Santo Stefano'                             : [ 12, 26 ],
 			},
 		}, // }}}
+		'cz': { // {{{
+			'PH': { // http://www.mpsv.cz/cs/74 or english: https://en.wikipedia.org/wiki/Public_holidays_in_the_Czech_Republic
+				'Den obnovy samostatného českého státu'          : [  1,  1 ],
+				'Velikonoční pondělí'                            : [ 'easter',  1 ],
+				'Svátek práce'                                   : [  5,  1 ],
+				'Den vítězství'                                  : [  5,  8 ],
+				'Den slovanských věrozvěstů Cyrila a Metoděje'   : [  7,  5 ],
+				'Den upálení mistra Jana Husa'                   : [  7,  6 ],
+				'Den české státnosti'                            : [  9, 28 ],
+				'Den vzniku samostatného československého státu' : [ 10, 28 ],
+				'Den boje za svobodu a demokracii'               : [ 11, 17 ],
+				'Štědrý den'                                     : [ 12, 24 ],
+				'1. svátek vánoční'                              : [ 12, 25 ],
+				'2. svátek vánoční'                              : [ 12, 26 ],
+			},
+		}, // }}}
 	};
 	// }}}
 
 	// error correction {{{
-	// Taken form http://www.netzwolf.info/j/osm/time_domain.js
-	// Credits go to Netzwolf
+	// Initially taken form http://www.netzwolf.info/j/osm/time_domain.js
+	// Credits go to Netzwolf.
 	//
 	// Key to word_error_correction is the token name except wrong_words
 	var word_error_correction = {
 		wrong_words: { /* {{{ */
 			'Assuming "<ok>" for "<ko>".': {
-				'Frühling':  'Mar-May',
-				'Frühjahr':  'Mar-May',
-				'Sommer':    'Jun-Aug',
-				'Herbst':    'Sep-Nov',
-				'winter':    'Dec-Feb',
-			}, '"<ko>" wird als "<ok>" interpertiert.': {
+				'daytime': 'sunrise-sunset',
 				'spring':  'Mar-May',
 				'summer':  'Jun-Aug',
 				'autumn':  'Sep-Nov',
+				'winter':  'Dec-Feb',
+				'_': '-',
+				'=': '-',
+			}, '"<ko>" wird als "<ok>" interpertiert.': {
+				'frühling': 'Mar-May',
+				'frühjahr': 'Mar-May',
+				'sommer':   'Jun-Aug',
+				'herbst':   'Sep-Nov',
 				// 'winter':  'Dec-Feb', // Same as in English.
-				// morning: '08:00-12:00',
-				// evening: '13:00-18:00',
-				'_':  '-',
-				'daytime': 'sunrise-sunset',
+				// 'morning': '08:00-12:00',
+				// 'evening': '13:00-18:00',
 			}, 'Bitte benutze die englische Schreibweise "<ok>" für "<ko>".': {
-				'sommer':   'summer',
-				'werktag':  'Mo-Fr',
-				'werktags': 'Mo-Fr',
+				'werktags?': 'Mo-Fr',
 			}, 'Bitte benutze "<ok>" für "<ko>". Beispiel: "Mo-Fr 08:00-12:00; Tu off".': {
-				'ruhetag':     'off',
-				'ruhetage':    'off',
+				'ruhetage?':   'off',
 				'geschlossen': 'off',
 				'geschl':      'off',
 				// 'ausser':      'off',
@@ -2692,14 +2706,12 @@
 				'gesloten':   'off',
 				'feestdag':   'PH',
 				'feestdagen': 'PH',
-			}, 'Assuming "<ok>" for "<ko>". Please avoid using "workday": http://wiki.openstreetmap.org/wiki/Talk:Key:opening_hours#need_syntax_for_holidays_and_workingdays': {
+			}, 'Assuming "<ok>" for "<ko>". Please avoid using "workday": https://wiki.openstreetmap.org/wiki/Talk:Key:opening_hours#need_syntax_for_holidays_and_workingdays': {
 				// Used around 260 times but the problem is, that work day might be different in other countries.
-				'wd':           'Mo-Fr',
-				'on work day':  'Mo-Fr',
-				'on work days': 'Mo-Fr',
-				'weekday':      'Mo-Fr',
-				'weekdays':     'Mo-Fr',
-				'vardagar':     'Mo-Fr',
+				'wd':            'Mo-Fr',
+				'on work days?': 'Mo-Fr',
+				'weekdays?':     'Mo-Fr',
+				'vardagar':      'Mo-Fr',
 			}, 'Please use something like "Mo off" instead "<ko>".': {
 				'except': 'off',
 			}, 'Please omit "<ko>" or use a colon instead: "12:00-14:00".': {
@@ -2709,31 +2721,26 @@
 				'hs':     '',
 				'hrs':    '',
 				'hours':  '',
-				'·':      '',
+				// '·':      '', // Sometimes used to separate opening hours (on websites).
 			}, 'Please omit "<ko>". The key must not be in the value.': {
-				'opening_hours=': '',
+				'opening_hours\\s*=': '',
 			}, 'Please omit "<ko>". You might want to express open end which can be specified as "12:00+" for example.': {
 				'from': '',
 			}, 'You can use notation "<ok>" for "<ko>" in the case that you want to express open end times. Example: "12:00+".': {
-				'til late': '+',
-				'till late': '+',
-				'bis open end': '+',
-				'-late': '+',
-				'-open end': '+',
-				'-openend': '+',
+				'(:?bis|till?|-|–)? ?(?:open ?end|late)': '+',
 			}, 'Please use notation "<ok>" for "<ko>". If the times are unsure or vary consider a comment e.g. 12:00-14:00 "only on sunshine".': {
 				'~':  '-',
 				'～': '-',
 			}, 'Please use notation "<ok>" for "<ko>". Fallback rule: 12:00-14:00 || "call us"': {
 				'otherwise':  '||',
-			}, 'You can use notation "<ok>" for "<ko>" temporally if the syntax will still be valid.': {
-				'?':  'unknown "please add this if known"',
+			}, 'You can use notation "<ok>" for "?" temporally if the syntax will still be valid.': {
+				'\\?':  'unknown "please add this if known"',
 			}, 'Please use notation "<ok>" for "<ko>". Although using "–" is typographical correct, the opening_hours syntax is defined with the normal hyphen. Correct typography should be done on application level …': {
 				'–':  '-',
 			}, 'Please use notation "<ok>" for "<ko>".': {
 				'→':               '-',
 				'−':               '-',
-				'=':               '-',
+				'—':               '-',
 				'ー':              '-',
 				'to':              '-',
 				'до':              '-',
@@ -2743,8 +2750,7 @@
 				'ás':              '-', // language unknown
 				'às':              '-', // language unknown
 				'ate':             '-', // language unknown
-				'till':            '-',
-				'til':             '-',
+				'till?':           '-',
 				'until':           '-',
 				'through':         '-',
 				'and':             ',',
@@ -2753,6 +2759,8 @@
 				'：':              ':',
 				'°°':              ':00',
 				'always':          '24/7',
+				'always open':     '24/7',
+				'always closed':   'closed',
 				'nonstop':         '24/7',
 				'24x7':            '24/7',
 				'anytime':         '24/7',
@@ -2775,30 +2783,22 @@
 				'7 days a week':   'Mo-Su',
 				'7 days/week':	   'Mo-Su',
 				'24 hours 7 days a week':   '24/7',
-				'24 hours':		   '00:00-24:00',
-				'midday':          '12:00',
-				'midnight':        '00:00',
-				'holiday':         'PH',
-				'holidays':        'PH',
-				'public holidays': 'PH',
-				'public holiday':  'PH',
-				'day after public holiday':      'PH +1 day',
-				'one day after public holiday':  'PH +1 day',
-				'day before public holiday':     'PH -1 day',
-				'one day before public holiday': 'PH -1 day',
-				'school holiday':  'SH',
-				'school holidays': 'SH',
-				// summerholiday:  'SH',
-				// summerholidays: 'SH',
+				'24 hours':		    '00:00-24:00',
+				'midday':           '12:00',
+				'midnight':         '00:00',
+				'(?:public )?holidays?': 'PH',
+				'(?:one )?day after public holiday':  'PH +1 day',
+				'(?:one )?day before public holiday': 'PH -1 day',
+				'school ?holidays?': 'SH',
 				/* Not implemented {{{ */
 				// 'day after school holiday':      'SH +1 day',
 				// 'one day after school holiday':  'SH +1 day',
 				// 'day before school holiday':     'SH -1 day',
 				// 'one day before school holiday': 'SH -1 day',
 				/* }}} */
-				'weekend':         'Sa,Su',
-				'weekends':        'Sa,Su',
+				'weekends?':       'Sa,Su',
 				'daylight':        'sunrise-sunset',
+				'(?:on|by)?(?:_| )?appointments?':  '"on appointment"',
 			}, 'Please use notation "<ok>" for "<ko>". Those characters look very similar but are not the same!': {
 				'оff':             'off', // Russian o
 			}, 'Please use time format in 24 hours notation ("<ko>"). If PM is used you might have to convert the hours to the 24 hours notation.': {
@@ -2812,6 +2812,7 @@
 				'zwischen': '',
 				'ist': '',
 				'durchgehend': '',
+				'öffnungszeit(?:en)?:?': '',
 			}, 'Bitte verzichte auf "<ko>". Sie möchten eventuell eine Öffnungszeit ohne vorgegebenes Ende (Open End) angeben. Beispiel: "12:00+"': {
 				'ab':  '',
 				'von': '',
@@ -2821,20 +2822,15 @@
 			}, 'Bitte benutze die Schreibweise "<ok>" für "<ko>".': {
 				'bis':         '-',
 				'täglich':     'Mo-Su',
-				'schulferien': 'SH',
-				'sonn und feiertag':   'PH,Su',
-				'sonn und feiertags':  'PH,Su',
-				'sonn- und feiertags': 'PH,Su',
-				'sonn-/feiertag':      'PH,Su',
-				'sonn-/feiertags':     'PH,Su',
-				'an sonn- und feiertagen': 'PH,Su',
-				'nur sonn-/feiertags': 'PH,Su',
-				'sonn- und feiertage': 'PH,Su',
-			}, 'Bitte benutze die Schreibweise "<ok>" für "<ko>". Es ist war typografisch korrekt aber laut der Spezifikation für opening_hours nicht erlaubt. Siehe auch: http://wiki.openstreetmap.org/wiki/DE:Key:opening_hours/specification.': {
+				'(?:schul)?ferien': 'SH',
+				'(?:an|nur)? ?sonn-?(?: und |/)feiertag(?:s|en?)?': 'PH,Su',
+				'nach(?: |_)vereinbarung':   '"Nach Vereinbarung"',
+				'nach(?: |_)absprache':      '"Nach Absprache"',
+			}, 'Bitte benutze die Schreibweise "<ok>" für "<ko>". Es ist war typografisch korrekt aber laut der Spezifikation für opening_hours nicht erlaubt. Siehe auch: https://wiki.openstreetmap.org/wiki/DE:Key:opening_hours/specification.': {
 				'„': '"',
 				'“': '"',
 				'”': '"',
-			}, 'Please use notation "<ok>" for "<ko>". The used quote signs might be typographically correct but are not defined in the specification. See http://wiki.openstreetmap.org/wiki/Key:opening_hours/specification.': {
+			}, 'Please use notation "<ok>" for "<ko>". The used quote signs might be typographically correct but are not defined in the specification. See https://wiki.openstreetmap.org/wiki/Key:opening_hours/specification.': {
 				'«': '"',
 				'»': '"',
 				'‚': '"',
@@ -2844,19 +2840,17 @@
 				'」': '"',
 				'『': '"',
 				'』': '"',
-			}, 'Please use notation "<ok>" for "<ko>". The used quote signs are not defined in the specification. See http://wiki.openstreetmap.org/wiki/Key:opening_hours/specification.': {
+			}, 'Please use notation "<ok>" for "<ko>". The used quote signs are not defined in the specification. See https://wiki.openstreetmap.org/wiki/Key:opening_hours/specification.': {
 				"'": '"',
 			}, 'You might want to use comments instead of brackets (which are not valid in this context). If you do, replace "<ok>" with "<ko>".': {
 				// '（': '"',
 				// '）': '"',
-			}, 'Bitte benutze die Schreibweise "<ok>" als Ersatz für "und" bzw. "u.".': {
-				'und': ',',
-				'u':   ',',
+			}, 'Bitte benutze die Schreibweise "<ok>" als Ersatz für "<ko>".': {
+				'und':  ',',
+				'u':    ',',
+				'auch': ',',
 			}, 'Bitte benutze die englische Abkürzung "<ok>" für "<ko>".': {
-				'feiertag':   'PH',
-				'feiertags':  'PH',
-				'feiertage':  'PH',
-				'feiertagen': 'PH'
+				'(?:an )?feiertag(?:s|en?)?': 'PH',
 			}, 'S\'il vous plaît utiliser "<ok>" pour "<ko>".': {
 				'fermé':        'off',
 				'et':           ',',
@@ -2880,7 +2874,7 @@
 				'nov': 10,
 				'dec': 11,
 			}, 'Please use the English abbreviation "<ok>" for "<ko>".': {
-				'jänner':   0, // Austria
+				'jänner':     0, // Austria
 				'january':    0,
 				'february':   1,
 				'march':      2,
@@ -2933,7 +2927,7 @@
 
 		calcday: {
 			'default': {
-				'day': 'day',
+				'day':  'day',
 				'days': 'days',
 			},
 		},
@@ -2952,91 +2946,67 @@
 				'w':          3,
 				'f':          5,
 			}, 'Please use the abbreviation "<ok>" for "<ko>".': {
-				'sun':        0,
-				'sunday':     0,
-				'sundays':    0,
-				'mon':        1,
-				'monday':     1,
-				'mondays':    1,
-				'tue':        2,
-				'tues':       2, // Used here: http://www.westerhambeauty.co.uk/contact.php
-				'tuesday':    2,
-				'tuesdays':   2,
-				'wed':        3,
-				'weds':       3,
-				'wednesday':  3,
-				'wednesdays': 3,
-				'thu':        4,
-				'thur':       4,
-				'thurs':      4,
-				'thursday':   4,
-				'thursdays':  4,
-				'fri':        5,
-				'friday':     5,
-				'fridays':    5,
-				'sat':        6,
-				'saturday':   6,
-				'saturdays':  6,
+				'sun':         0,
+				'sunday':      0,
+				'sundays?':    0,
+				'mon':         1,
+				'mondays?':    1,
+				'tues?':       2, // Used here:  http://www.westerhambeauty.co.uk/contact.php
+				'tuesdays?':   2,
+				'weds?':       3,
+				'wednesdays?': 3,
+				'thu':         4,
+				'thurs?':      4,
+				'thursdays?':  4,
+				'fri':         5,
+				'fridays?':    5,
+				'sat':         6,
+				'saturdays?':  6,
 			}, 'Bitte benutze die englische Abkürzung "<ok>" für "<ko>". Could also mean Saturday in Polish …': {
 				'so':         0,
 			}, 'Bitte benutze die englische Abkürzung "<ok>" für "<ko>".': {
-				'son':         0,
-				'sonntag':     0,
-				'sonn-':       0,
-				'sonntags':    0,
-				'montag':      1,
-				'montags':     1,
-				'di':          2,
-				'die':         2,
-				'dienstag':    2,
-				'dienstags':   2,
-				'mi':          3,
-				'mit':         3,
-				'mittwoch':    3,
-				'mittwochs':   3,
-				'do':          4,
-				'don':         4,
-				'donnerstag':  4,
-				'donnerstags': 4,
-				'fre':         5,
-				'freitag':     5,
-				'freitags':    5,
-				'sam':         6,
-				'samstag':     6,
-				'samstags':    6,
+				'son':          0,
+				'sonn-':        0,
+				'sonntags?':    0,
+				'montags?':     1,
+				'di':           2,
+				'die?':         2,
+				'dienstags?':   2,
+				'mi':           3,
+				'mit?':         3,
+				'mittwochs?':   3,
+				'don?':         4,
+				'donnerstags?': 4,
+				'fre':          5,
+				'freitags?':    5,
+				'sam':          6,
+				'samstags?':    6,
 			}, 'S\'il vous plaît utiliser l\'abréviation "<ok>" pour "<ko>".': {
-				'dim':      0,
-				'dimanche': 0,
-				'lu':       1,
-				'lun':      1,
-				'lundi':    1,
-				'mardi':    2,
-				'mer':      3,
-				'mercredi': 3,
-				'je':       4,
-				'jeu':      4,
-				'jeudi':    4,
-				've':       5,
-				'ven':      5,
-				'vendredi': 5,
-				'samedi':   6,
+				'dim':       0,
+				'dimanche':  0,
+				'lun?':      1,
+				'lundi':     1,
+				'mardi':     2,
+				'mer':       3,
+				'mercredi':  3,
+				'jeu?':      4,
+				'jeudi':     4,
+				'ven?':      5,
+				'vendredi':  5,
+				'samedi':    6,
 			}, 'Neem de engelse afkorting "<ok>" voor "<ko>" alstublieft.': {
-				'zo':        0,
-				'zon':       0,
+				'zon?':      0,
 				'zontag':    0, // correct?
 				'zondag':    0,
 				'maandag':   1,
 				'din':       2,
 				'dinsdag':   2,
-				'wo':        3,
-				'woe':       3,
+				'woe?':      3,
 				'woensdag':  3,
 				'donderdag': 4,
-				'vr':        5,
-				'vri':       5,
+				'vri?':      5,
 				'vrijdag':   5,
-				'za':        6,
-				'zat':       6,
+				'zat?':      6,
 				'zaterdag':  6,
 			}, 'Please use the English abbreviation "<ok>" for "<ko>".': { // FIXME: Translate to Czech.
 				'neděle':  0,
@@ -3080,13 +3050,29 @@
 				'lördag':   6,
 				'lördagar': 6,
 			}, 'Please use the English abbreviation "<ok>" (Polish) for "<ko>".': {
-				'niedziela': 0, 'niedz': 0, 'n': 0, 'ndz': 0,
-				'poniedziałek': 1, 'poniedzialek': 1, 'pon': 1, 'pn': 1,
-				'wtorek': 2, 'wt': 2,
-				'środa': 3, 'sroda': 3, 'śr': 3, 'sr': 3,
-				'czwartek': 4, 'czw': 4, 'cz': 4,
-				'piątek': 5, 'piatek': 5, 'pt': 5,
-				'sobota': 6, 'sob': 6, // 'so': 6 // abbreviation also used in German
+				'niedziela':     0,
+				'niedz':         0,
+				'n':             0,
+				'ndz':           0,
+				'poniedziałek':  1,
+				'poniedzialek':  1,
+				'pon':           1,
+				'pn':            1,
+				'wtorek':        2,
+				'wt':            2,
+				'środa':         3,
+				'sroda':         3,
+				'śr':            3,
+				'sr':            3,
+				'czwartek':      4,
+				'czw':           4,
+				'cz':            4,
+				'piątek':        5,
+				'piatek':        5,
+				'pt':            5,
+				'sobota':        6,
+				'sob':           6,
+				// 'so':         6 // abbreviation also used in German
 			}, 'Please use the English abbreviation "<ok>" (Russian) for "<ko>".': {
 				'воскресенье' : 0,
 				'Вс'          : 0,
@@ -3140,20 +3126,183 @@
 		},
 	};
 	// }}}
+
+	/* error and warning messages {{{ */
+	var lang = {
+		'unexpected token': 'Unexpected token: "__token__" This means that the syntax is not valid at that point or it is currently not supported.',
+		'no string': 'The value (first parameter) is not a string.',
+		'nothing': 'The value contains nothing meaningful which can be parsed.',
+		'nothing useful': 'This rule does not contain anything useful. Please remove this empty rule.',
+		'programmers joke': 'Might it be possible that you are a programmer and adding a semicolon after each statement is hardwired in your muscle memory ;) ?'
+			+ ' The thing is that the semicolon in the opening_hours syntax is defined as rule separator.'
+			+ ' So for compatibility reasons you should omit this last semicolon.',
+		'interpreted as year': 'The number __number__ will be interpreted as year.'
+			+ ' This is probably not intended. Times can be specified as "12:00".',
+		'rule before fallback empty': 'Rule before fallback rule does not contain anything useful',
+		'hour min seperator': 'Please use ":" as hour/minute-separator',
+		'warnings severity': 'The parameter optional_conf_parm["warnings_severity"] must be an integer number between 0 and 7 (inclusive).'
+			+ ' Given __severity__'
+			+ ', expected one of the following numbers: __allowed__.',
+		'optional conf parm type': 'The optional_conf_parm parameter is of unknown type.'
+			+ ' Given __given__',
+		'conf param tag key missing': 'The optional_conf_parm["tag_key"] is missing, required by optional_conf_parm["map_value"].',
+		'conf param mode invalid': 'The optional_conf_parm["mode"] parameter is a invalid number.'
+			+ ' Gave __given__'
+			+ ', expected one of the following numbers: __allowed__.',
+		'conf param unkown type': 'The optional_conf_parm["__key__"] parameter is of unknown type.'
+			+ ' Given __given__'
+			+ ', expected __expected__.',
+		'library bug': 'An error occurred during evaluation of the value "__value__".'
+			+ ' Please file a bug report here: __url__.__message__',
+		'use multi': 'You have used __count__ __part2__ Rules can be separated by ";".',
+		'selector multi 2a': '__what__ in one rule. You may only use one in one rule.',
+		'selector multi 2b': 'not connected __what__ in one rule. This is probably an error.'
+			+ ' Equal selector types can (and should) always be written in conjunction separated by comma.'
+			+ ' Example for time ranges "12:00-13:00,15:00-18:00".'
+			+ ' Example for weekdays "Mo-We,Fr".',
+		'selector state': 'state keywords',
+		'comments': 'comments',
+		'holiday ranges': 'holiday ranges',
+		'months': 'months',
+		'weekdays': 'weekdays',
+		'ranges': 'ranges',
+		'default state': "This rule which changes the default state (which is closed) for all following rules is not the first rule."
+			+ " The rule will overwrite all previous rules."
+			+ " It can be legitimate to change the default state to open for example"
+			+ " and then only specify for which times the facility is closed.",
+		'vague': "This rule is not very explicit because there is no time selector being used."
+			+ " Please add a time selector to this rule or use a comment to make it more explicit.",
+		'empty comment': "You have used an empty comment."
+			+ " Please either write something in the comment or use the keyword unknown instead.",
+		'separator_for_readability': "You have used the optional symbol <separator_for_readability> in the wrong place."
+			+ " Please check the syntax specification to see where it could be used or remove it.",
+		'strange 24/7': 'You used 24/7 in a way that is probably not interpreted as "24 hours 7 days a week".'
+			+ ' For correctness you might want to use "open" or "closed"'
+			+ ' for this rule and then write your exceptions which should achieve the same goal and is more clear'
+			+ ' e.g. "open; Mo 12:00-14:00 off".',
+		'public holiday': 'There was no PH (public holiday) specified. This is not very explicit.__part2__'
+			+ ' Please either append a "PH off" rule if the amenity is closed on all public holidays'
+			+ ' or use something like "Sa,Su,PH 12:00-16:00" to say that on Saturdays, Sundays and on public holidays the amenity is open 12:00-16:00.'
+			+ ' If you are not certain try to find it out. If you can’t then do not add PH to the value and ignore this warning.',
+		'public holiday part2': ' Unfortunately the tag key (e.g. "opening_hours", or "lit") is unknown to opening_hours.js. '
+			+ 'This warning only applies to the key __keys__. If your value is for that key than read on. If not you can ignore the following.',
+		'switched': 'The selector "__first__" was switched with'
+			+ ' the selector "__second__"'
+			+ ' for readablitity and compatibiltity reasons.',
+		'no colon after': 'Please don’t use ":" after __token__.',
+		'number -5 to 5': 'Number between -5 and 5 (except 0) expected.',
+		'one weekday constraint': 'You can not use more than one constrained weekday in a month range',
+		'range contrainted weekdays': 'You can not use a range of constrained weekdays in a month range',
+		'expected': '"__symbol__" expected.',
+		'range zero': 'You can not use __type__ ranges with period equals zero.',
+		'period one year+': 'Please don’t use __type__ ranges with period equals one.'
+			+ ' If you want to express that a facility is open starting from a year without limit use "<year>+".',
+		'period one': 'Please don’t use __type__ ranges with period equals one.',
+		'month 31': "The day for __month__ must be between 1 and 31.",
+		'month 30': "Month __month__ doesn't have 31 days. The last day of __month__ is day 30.",
+		'month feb': 'Month __month__ either has 28 or 29 days (leap years).',
+		'point in time': 'hyphen (-) or open end (+) in time range __calc__expected.'
+			+ ' For working with points in time, the mode for __libraryname__ has to be altered.'
+			+ ' Maybe wrong tag?',
+		'calculation': 'calculation',
+		'time range continue': 'Time range does not continue as expected',
+		'period continue': 'Time period does not continue as expected. Example "/01:30".',
+		'time range mode': '__libraryname__ is running in "time range mode". Found point in time.',
+		'point in time mode': '__libraryname__ is running in "points in time mode". Found time range.',
+		'outside current day': 'Time range starts outside of the current day',
+		'two midnights': 'Time spanning more than two midnights not supported',
+		'without minutes': 'Time range without minutes specified. Not very explicit!'
+			+ ' Please use this syntax instead "__syntax__".',
+		'outside day': 'Time range starts outside of the current day',
+		'zero calculation': 'Adding zero in a variable time calculation does not change the variable time.'
+			+ ' Please omit the calculation (example: "sunrise-(sunset-00:00)").',
+		'calculation syntax': 'Calculation with variable time is not in the right syntax',
+		'missing': 'Missing "__symbol__"',
+		'(time)': '(time)',
+		'bad range': 'Bad range: __from__-__to__',
+		'] or more numbers': '"]" or more numbers expected.',
+		'additional rule no sense': 'An additional rule does not make sense here. Just use a ";" as rule separator.'
+			+ ' See https://wiki.openstreetmap.org/wiki/Key:opening_hours/specification#explain:additional_rule_separator',
+		'unexpected token weekday range': 'Unexpected token in weekday range: __token__',
+		'max differ': 'There should be no reason to differ more than __maxdiffer__ days from a __name__. If so tell us …',
+		'adding 0': 'Adding 0 does not change the date. Please omit this.',
+		'unexpected token holiday': 'Unexpected token (holiday parser): __token__',
+		'no SH defintion': 'School holiday __name__ has no definition for the year __year__'
+			+ ' You can also add them: __repository_url__',
+		'no PH definition': 'There are no holidays __name__ defined for country __cc__.'
+			+ ' You can also add them: __repository_url__',
+		'no PH definition state': 'There are no holidays __name__ defined for country __cc__ and state __state__.'
+			+ ' You can also add them: __repository_url__',
+		'no country code': 'Country code missing which is needed to select the correct holidays (see README how to provide it)',
+		'movable no formular': 'Movable day __name__ can not not be calculated.'
+			+ ' Please add the formula how to calculate it.',
+		'movable not in year': 'The movable day __name__ plus __days__'
+			+ ' days is not in the year of the movable day anymore. Currently not supported.',
+		'year range one year': 'A year range in which the start year is equal to the end year does not make sense.'
+			+ ' Please remove the end year. E.g. "__year__ May 23"',
+		'year range reverse': 'A year range in which the start year is greater than the end year does not make sense.'
+			+ ' Please turn it over.',
+		'year past': 'The year is in the past.',
+		'unexpected token year range': 'Unexpected token in year range: __token__',
+		'week range reverse': 'You have specified a week range in reverse order or leaping over a year. This is (currently) not supported.',
+		'week negative': 'You have specified a week date less then one. A valid week date range is 1-53.',
+		'week exceed': 'You have specified a week date greater then 53. A valid week date range is 1-53.',
+		'week period less than 2': 'You have specified a week period which is less than two.'
+			+ ' If you want to select the whole range from week __weekfrom__ to week __weekto__ then just omit the "/__period__".',
+		'week period greater than 26': 'You have specified a week period which is greater than 26.'
+			+ ' 26.5 is the half of the maximum 53 week dates per year so a week date period greater than 26 would only apply once per year.'
+			+ ' Please specify the week selector as "week __weekfrom__" if that is what you want to express.',
+		'unexpected token week range': 'Unexpected token in week range: __token__',
+		'unexpected token month range': 'Unexpected token in month range: __token__',
+		'day range reverse': 'Range in wrong order. From day is greater than to day.',
+		'open end': 'Specified as open end. Closing time was guessed.',
+		'date parameter needed': 'Date parameter needed.',
+	}
+	// }}}
 	// }}}
 
 	// make the library accessible for the outside world {{{
 	if (typeof exports === 'object') {
 		// For nodejs
 		var SunCalc = require('suncalc');
-		module.exports = factory(SunCalc, holidays, word_error_correction);
+		try { // as long as it is an optional dependency
+			var moment = require('moment');
+		} catch (er) {}
+		try { // as long as it is an optional dependency
+			var i18n = require('./locales/core');
+		} catch (er) {}
+		module.exports = factory(SunCalc, moment, i18n, holidays, word_error_correction, lang);
 	} else {
 		// For browsers
-		root.opening_hours = factory(root.SunCalc, holidays, word_error_correction);
+		root.opening_hours = factory(root.SunCalc, root.moment, root.i18n, holidays, word_error_correction, lang);
 	}
 	/// }}}
-}(this, function (SunCalc, holidays, word_error_correction) {
-	return function(value, nominatiomJSON, oh_mode) {
+}(this, function (SunCalc, moment, i18n, holidays, word_error_correction, lang) {
+
+	/* translation function {{{ */
+	/* Roughly compatibly to i18next so we can replace everything by i18next include later
+	 * sprintf support
+	 */
+	var t = function(str, variables) {
+		if (typeof i18n === 'object' && typeof i18n.t === 'function') {
+			if (['de'].indexOf(i18n.lng()) !== -1) {
+				return i18n.t('opening_hours:texts.' + str, variables);
+			}
+		}
+		var text = lang[str];
+		if (typeof text === 'undefined') {
+			text = str;
+		}
+		return text.replace(/__([^_]*)__/g, function (match, c) {
+			return typeof variables[c] !== 'undefined'
+				? variables[c]
+				: match
+				;
+		})
+	};
+	/* }}} */
+
+	return function(value, nominatiomJSON, optional_conf_parm) {
 		// short constants {{{
 		var word_value_replacement = { // If the correct values can not be calculated.
 			dawn    : 60 * 5 + 30,
@@ -3174,6 +3323,27 @@
 			'leave_weekday_sep_one_day_betw': true, // use the separator (either "," or "-" which is used to separate days which follow to each other like Sa,Su or Su-Mo
 			'sep_one_day_between': ',',      // separator which should be used
 			'zero_pad_month_and_week_numbers': false, // Format week (e.g. `week 01`) and month day numbers (e.g. `Jan 01`) with "%02d".
+			'locale': 'en',                  // use local language (needs moment.js / i18n.js)
+		};
+
+		var osm_tag_defaults = {
+			'opening_hours'       :  { 'mode' :  0, 'warn_for_PH_missing' :  true, },
+			'collection_times'    :  { 'mode' :  2, },
+			'opening_hours:.+'    :  { 'mode' :  0, },
+			'.+:opening_hours'    :  { 'mode' :  0, },
+			'.+:opening_hours:.+' :  { 'mode' :  0, },
+			'smoking_hours'       :  { 'mode' :  0, },
+			'service_times'       :  { 'mode' :  2, },
+			'happy_hours'         :  { 'mode' :  0, },
+			'lit'                 :  { 'mode' :  0,
+				map: {
+					'yes'      : 'sunset-sunrise open "specified as yes: At night (unknown time schedule or daylight detection)"',
+					'automatic': 'unknown "specified as automatic: When someone enters the way the lights are turned on."',
+					'no'       : 'off "specified as no: There are no lights installed."',
+					'interval' : 'unknown "specified as interval"',
+					'limited'  : 'unknown "specified as limited"',
+				}
+			},
 		};
 
 		var minutes_in_day = 60 * 24;
@@ -3185,42 +3355,116 @@
 		var issues_url     = repository_url + '/issues?state=open';
 		// }}}
 
-		// constructor parameters {{{
-		// Evaluate additional information which can be given. They are
-		// required to reasonably calculate 'sunrise' and to use the correct
-		// holidays.
+		/* Optional constructor parameters {{{ */
+
+		/* nominatiomJSON {{{
+		 *
+		 * required to reasonably calculate 'sunrise' and holidays.
+		 */
 		var location_cc, location_state, lat, lon;
-		if (typeof nominatiomJSON != 'undefined') {
-			if (typeof nominatiomJSON.address != 'undefined') {
-				if (typeof nominatiomJSON.address.country_code != 'undefined') {
+		if (typeof nominatiomJSON === 'object') {
+			if (typeof nominatiomJSON.address !== 'undefined') {
+				if (typeof nominatiomJSON.address.country_code !== 'undefined') {
 					location_cc    = nominatiomJSON.address.country_code;
 				}
-				if (typeof nominatiomJSON.address.state != 'undefined') {
+				if (typeof nominatiomJSON.address.state !== 'undefined') {
 					location_state = nominatiomJSON.address.state;
-				} else if (typeof nominatiomJSON.address.county != 'undefined') {
+				} else if (typeof nominatiomJSON.address.county !== 'undefined') {
 					location_state = nominatiomJSON.address.county;
 				}
 			}
 
-			if (typeof nominatiomJSON.lon != 'undefined') { // lat will be tested later …
+			if (typeof nominatiomJSON.lon !== 'undefined') { // lat will be tested later …
 				lat = nominatiomJSON.lat;
 				lon = nominatiomJSON.lon;
 			}
+		} else if (typeof nominatiomJSON !== 'undefined') {
+			throw 'The nominatiomJSON parameter is of unknown type.'
+				+ ' Given ' + typeof(nominatiomJSON)
+				+ ', expected object.';
+		}
+		/* }}} */
+
+		/* mode (and other things … ) {{{
+		 *
+		 * 0: time ranges (default), tags: opening_hours, lit, …
+		 * 1: points in time
+		 * 2: both (time ranges and points in time), tags: collection_times, service_times
+		 */
+
+		var warnings_severity = 4;
+		/* Default, currently the highest severity supported.
+		 * This number is expected to be >= 4. This is not explicitly checked.
+		 */
+
+		var oh_mode;
+		var oh_map_value = false;
+		var oh_key, oh_regex_key;
+
+		if (typeof optional_conf_parm === 'number') {
+			oh_mode = optional_conf_parm;
+		} else if (typeof optional_conf_parm === 'object') {
+			if (checkOptionalConfParm('mode', 'number')) {
+				oh_mode = optional_conf_parm['mode'];
+			}
+			var locale = optional_conf_parm.locale || 'en';
+			if (typeof i18n === 'object' && i18n.lng() !== locale) {
+				i18n.setLng(locale);
+			}
+			if (checkOptionalConfParm('warnings_severity', 'number')) {
+				warnings_severity = optional_conf_parm['warnings_severity'];
+				if ([ 0, 1, 2, 3, 4, 5, 6, 7 ].indexOf(warnings_severity) === -1) {
+					throw t('warnings severity', { 'severity': warnings_severity, 'allowed': '[ 0, 1, 2, 3, 4, 5, 6, 7 ]' });
+				}
+			}
+			if (checkOptionalConfParm('tag_key', 'string')) {
+				oh_key = optional_conf_parm['tag_key'];
+			}
+			if (checkOptionalConfParm('map_value', 'boolean')) {
+				oh_map_value = true;
+			}
+		} else if (typeof optional_conf_parm !== 'undefined') {
+			throw t('optional conf parm type', { 'given': typeof(optional_conf_parm) });
 		}
 
-		// 0: time ranges (default), tags: opening_hours, lit, …
-		// 1: points in time
-		// 2: both (time ranges and points in time), tags: collection_times, service_times
-		if (typeof oh_mode == 'undefined') {
-			oh_mode = 0;
-		} else if (!(typeof oh_mode == 'number' && (oh_mode === 0 || oh_mode == 1 || oh_mode == 2))) {
-			throw 'The third constructor parameter is oh_mode and must be a number (0, 1 or 2)';
+		if (typeof oh_key === 'string') {
+			oh_regex_key = getRegexKeyForKeyFromOsmDefaults(oh_key)
+
+			if (oh_map_value
+				&& typeof osm_tag_defaults[oh_regex_key]['map'] === 'object'
+				&& typeof osm_tag_defaults[oh_regex_key]['map'][value] === 'string'
+				) {
+
+				value = osm_tag_defaults[oh_regex_key]['map'][value];
+			}
+		} else if (oh_map_value) {
+			throw t('conf param tag key missing');
 		}
-		// }}}
+
+		if (typeof oh_mode === 'undefined') {
+			if (typeof oh_key === 'string') {
+				if (typeof osm_tag_defaults[oh_regex_key]['mode'] === 'number') {
+					oh_mode = osm_tag_defaults[oh_regex_key]['mode'];
+				} else {
+					oh_mode = 0;
+				}
+			} else {
+				oh_mode = 0;
+			}
+		} else if (oh_mode !== 0 && oh_mode !== 1 && oh_mode !== 2) {
+			throw t('conf param mode invalid', { 'given': oh_mode, 'allowed': '[ 0, 1, 2 ]' });
+		}
+
+		/* }}} */
+		/* }}} */
 
 		// Tokenize value and generate selector functions. {{{
-		if (value.match(/^(?:\s*;?\s*)+$/))
-			throw 'Value contains nothing meaningful which can be parsed';
+		if (typeof value !== 'string') {
+			throw t('no string');
+		}
+		if (value.match(/^(?:\s*;?\s*)+$/)) {
+			throw t('nothing');
+		}
 
 		var parsing_warnings = []; // Elements are fed into function formatWarnErrorMessage(nrule, at, message)
 		var done_with_warnings = false; // The functions which throw warnings can be called multiple times.
@@ -3238,11 +3482,9 @@
 			if (tokens[nrule][0].length === 0) {
 				// Rule does contain nothing useful e.g. second rule of '10:00-12:00;' (empty) which needs to be handled.
 				parsing_warnings.push([nrule, -1,
-					'This rule does not contain anything useful. Please remove this empty rule.'
-					+ (nrule == tokens.length - 1 && nrule > 0 && !tokens[nrule][1] ?
-						' Might it be possible that you are a programmer and adding a semicolon after each statement is hardwired in your muscle memory ;) ?'
-						+ ' The thing is that the semicolon in the opening_hours syntax is defined as rule separator.'
-						+ ' So for compatibility reasons you should omit this last semicolon.': '')
+					t('nothing useful')
+					+ (nrule === tokens.length - 1 && nrule > 0 && !tokens[nrule][1] ?
+						' ' + t('programmers joke') : '')
 					]);
 				continue;
 			}
@@ -3250,7 +3492,7 @@
 			var continue_at = 0;
 			var next_rule_is_additional = false;
 			do {
-				if (continue_at == tokens[nrule][0].length) break;
+				if (continue_at === tokens[nrule][0].length) break;
 				// Additional rule does contain nothing useful e.g. second rule of '10:00-12:00,' (empty) which needs to be handled.
 
 				var selectors = {
@@ -3281,7 +3523,7 @@
 
 				selectors.build_from_token_rule = [ nrule, continue_at, new_tokens.length ];
 				continue_at = parseGroup(tokens[nrule][0], continue_at, selectors, nrule);
-				if (typeof continue_at == 'object') {
+				if (typeof continue_at === 'object') {
 					continue_at = continue_at[0];
 				} else {
 					continue_at = 0;
@@ -3355,7 +3597,45 @@
 		}
 		// console.log(JSON.stringify(tokens, null, '    '));
 		// console.log(JSON.stringify(new_tokens, null, '    '));
-		// }}}
+		/* }}} */
+
+		/* Helper functions {{{ */
+		/* Get regex string key from key osm_tag_defaults. {{{
+		 *
+		 * :param key: Tag key e.g. opening_hours:kitchen.
+		 * :returns: Regex key from osm_tag_defaults e.g. opening_hours:.*
+		 */
+		function getRegexKeyForKeyFromOsmDefaults(key) {
+			var regex_key;
+
+			for (var osm_key in osm_tag_defaults) {
+				if (key === osm_key) { // Exact match.
+					regex_key = osm_key;
+					break;
+				} else if (key.match(osm_key)) {
+					regex_key = osm_key;
+				}
+			}
+			return regex_key;
+		}
+		/* }}} */
+
+		/* Check given element in optional_conf_parm. {{{
+		 *
+		 * :param key: Key of optional_conf_parm.
+		 * :param expected_type: Expected `typeof()` the parameter.
+		 * :returns: True if the expected type matches the given type.
+		 */
+		function checkOptionalConfParm(key, expected_type) {
+			if (typeof optional_conf_parm[key] === expected_type) {
+				return true;
+			} else if (typeof optional_conf_parm[key] !== 'undefined') {
+				throw t('conf param unkown type', { 'key': key, 'given': typeof(optional_conf_parm[key]), 'expected': expected_type });
+			}
+			return false;
+		}
+		/* }}} */
+		/* }}} */
 
 		/* Format warning or error message for the user. {{{
 		 *
@@ -3366,17 +3646,17 @@
 		 */
 		function formatWarnErrorMessage(nrule, at, message) {
 			// FIXME: Change to new_tokens.
-			if (typeof nrule == 'number') {
+			if (typeof nrule === 'number') {
 				var pos = 0;
-				if (nrule == -1) { // Usage of rule index not required because we do have access to value.length.
+				if (nrule === -1) { // Usage of rule index not required because we do have access to value.length.
 					pos = value.length - at;
 				} else { // Issue accrued at a later time, position in string needs to be reconstructed.
-					if (typeof tokens[nrule][0][at] == 'undefined') {
-						if (typeof tokens[nrule][0] && at == -1) {
+					if (typeof tokens[nrule][0][at] === 'undefined') {
+						if (typeof tokens[nrule][0] && at === -1) {
 							pos = value.length;
-							if (typeof tokens[nrule+1] == 'object' && typeof tokens[nrule+1][2] == 'number') {
+							if (typeof tokens[nrule+1] === 'object' && typeof tokens[nrule+1][2] === 'number') {
 								pos -= tokens[nrule+1][2];
-							} else if (typeof tokens[nrule][2] == 'number') {
+							} else if (typeof tokens[nrule][2] === 'number') {
 								pos -= tokens[nrule][2];
 							}
 						} else {
@@ -3384,7 +3664,7 @@
 							//
 							formatLibraryBugMessage('Bug in warning generation code which could not determine the exact position of the warning or error in value.');
 							pos = value.length;
-							if (typeof tokens[nrule][2] != 'undefined') {
+							if (typeof tokens[nrule][2] !== 'undefined') {
 								// Fallback: Point to last token in the rule which caused the problem.
 								// Run real_test regularly to fix the problem before a user is confronted with it.
 								pos -= tokens[nrule][2];
@@ -3397,15 +3677,15 @@
 						}
 					} else {
 						pos = value.length;
-						if (typeof tokens[nrule][0][at+1] != 'undefined') {
+						if (typeof tokens[nrule][0][at+1] !== 'undefined') {
 							pos -= tokens[nrule][0][at+1][2];
-						} else if (typeof tokens[nrule][2] != 'undefined') {
+						} else if (typeof tokens[nrule][2] !== 'undefined') {
 							pos -= tokens[nrule][2];
 						}
 					}
 				}
 				return value.substring(0, pos) + ' <--- (' + message + ')';
-			} else if (typeof nrule == 'string') {
+			} else if (typeof nrule === 'string') {
 				return nrule.substring(0, at) + ' <--- (' + message + ')';
 			}
 		}
@@ -3417,14 +3697,12 @@
 		 * :returns: Error message for the user.
 		 */
 		function formatLibraryBugMessage(message) {
-			if (typeof message == 'undefined')
+			if (typeof message === 'undefined')
 				message = '';
 			else
 				message = ' ' + message;
 
-			message = 'An error occurred during evaluation of the value "' + value + '".'
-				+ ' Please file a bug report here: ' + issues_url + '.'
-				+ message;
+			message = t('library bug', { 'value': value, 'url': issues_url, 'message': message });
 			console.log(message);
 			return message;
 		}
@@ -3461,7 +3739,7 @@
 					// special day name (holidays)
 					curr_rule_tokens.push([tmp[0].toUpperCase(), 'holiday', value.length ]);
 					value = value.substr(2);
-				} else if (tmp = value.match(/^(&|_|→|–|−|=|·|opening_hours=|ー|\?|~|～|：|°°|24x7|24 hours 7 days a week|24 hours|7 ?days(?:(?: a |\/)week)?|7j?\/7|all days?|every day|(?:|-|till? |bis )?(?:late|open[ ]?end)|(?:(?:one )?day (?:before|after) )?(?:school|public) holidays?|days?\b|до|рм|ам|jours fériés|on work days?|sonntag?|(?:nur |an )?sonn-?(?:(?: und |\/)feiertag(?:s|en?)?)?|[a-zäößàáéøčěíúýřПнВсо]+\b|à|á|mo|tu|we|th|fr|sa|su|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\.?/i)) {
+				} else if (tmp = value.match(/^(&|_|→|–|−|—|ー|=|·|öffnungszeit(?:en)?:?|opening_hours\s*=|\?|~|～|：|°°|always (?:open|closed)|24x7|24 hours 7 days a week|24 hours|7 ?days(?:(?: a |\/)week)?|7j?\/7|all days?|every day|(:?bis|till?|-|–)? ?(?:open ?end|late)|(?:(?:one )?day (?:before|after) )?(?:school|public) holidays?|days?\b|до|рм|ам|jours fériés|on work days?|sonntags?|(?:nur |an )?sonn-?(?:(?: und |\/)feiertag(?:s|en?)?)?|(?:an )?feiertag(?:s|en?)?|(?:nach|on|by) (?:appointments?|vereinbarung|absprache)|[_a-zäößàáéøčěíúýřПнВсо]+\b|à|á|mo|tu|we|th|fr|sa|su|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\.?/i)) {
 					/* Handle all remaining words and specific other characters with error tolerance.
 					 *
 					 * à|á: Word boundary does not work with unicode chars: 'test à test'.match(/\bà\b/i)
@@ -3473,11 +3751,11 @@
 					 */
 					var correct_val = returnCorrectWordOrToken(tmp[1].toLowerCase(), value.length);
 					// console.log('Error tolerance for string "' + tmp[1] + '" returned "' + correct_val + '".');
-					if (typeof correct_val == 'object') {
+					if (typeof correct_val === 'object') {
 						curr_rule_tokens.push([ correct_val[0], correct_val[1], value.length ]);
 						value = value.substr(tmp[0].length);
-					} else if (typeof correct_val == 'string') {
-						if (tmp[1].toLowerCase() == 'pm') {
+					} else if (typeof correct_val === 'string') {
+						if (tmp[1].toLowerCase() === 'pm') {
 							var hours_token_at = curr_rule_tokens.length - 1;
 							var hours_token;
 							if (hours_token_at >= 0) {
@@ -3493,7 +3771,7 @@
 									hours_token = curr_rule_tokens[hours_token_at];
 								}
 
-								if (typeof hours_token == 'object' && hours_token[0] <= 12) {
+								if (typeof hours_token === 'object' && hours_token[0] <= 12) {
 									hours_token[0] += 12;
 									curr_rule_tokens[hours_token_at] = hours_token;
 								}
@@ -3519,11 +3797,10 @@
 				} else if (tmp = value.match(/^\d+/)) {
 					// number
 					if (Number(tmp[0]) > 1900) { // Assumed to be a year number.
-						curr_rule_tokens.push([tmp[0], 'year', value.length ]);
+						curr_rule_tokens.push([Number(tmp[0]), 'year', value.length ]);
 						if (Number(tmp[0]) >= 2100) // Probably an error
 							parsing_warnings.push([ -1, value.length - 1,
-								'The number ' + Number(tmp[0]) + ' will be interpreted as year.'
-								+ ' This is probably not intended. Times can be specified as "12:00".'
+									t('interpreted as year', {number:  Number(tmp[0])})
 							]);
 					} else {
 						curr_rule_tokens.push([Number(tmp[0]), 'number', value.length ]);
@@ -3546,9 +3823,9 @@
 					for (var pos = 1; pos <= 3; pos += 2) {
 						// console.log('Pos: ' + pos + ', substring: ' + tmp[pos]);
 						var correct_val = returnCorrectWordOrToken(tmp[pos],
-							value.length - (pos == 3 ? tmp[1].length + tmp[2].length : 0)
+							value.length - (pos === 3 ? tmp[1].length + tmp[2].length : 0)
 						);
-						if (typeof correct_val != 'string' && tmp[pos] != '"') {
+						if (typeof correct_val !== 'string' && tmp[pos] !== '"') {
 							throw formatLibraryBugMessage(
 								'A character for error tolerance was allowed in the regular expression'
 								+ ' but is not covered by word_error_correction'
@@ -3570,7 +3847,7 @@
 					// || terminates rule
 					// Next tokens belong to a fallback rule.
 					if (curr_rule_tokens.length === 0)
-						throw formatWarnErrorMessage(-1, value.length - 2, 'Rule before fallback rule does not contain anything useful');
+						throw formatWarnErrorMessage(-1, value.length - 2, t('rule before fallback empty'));
 
 					all_tokens.push([ curr_rule_tokens, last_rule_fallback_terminated, value.length ]);
 					curr_rule_tokens = [];
@@ -3588,8 +3865,8 @@
 					value = value.substr(tmp[0].length);
 				} else if (value.match(/^[:.]/)) {
 					// time separator
-					if (value[0] == '.' && !done_with_warnings)
-						parsing_warnings.push([ -1, value.length - 1, 'Please use ":" as hour/minute-separator' ]);
+					if (value[0] === '.' && !done_with_warnings)
+						parsing_warnings.push([ -1, value.length - 1, t('hour min seperator')]);
 					curr_rule_tokens.push([ ':', 'timesep', value.length ]);
 					value = value.substr(1);
 				} else {
@@ -3619,28 +3896,28 @@
 			for (var token_name in word_error_correction) {
 				for (var comment in word_error_correction[token_name]) {
 					for (var old_val in word_error_correction[token_name][comment]) {
-						if (old_val == word) {
+						if (word.match(new RegExp('^' + old_val + '$'))) {
 							var val = word_error_correction[token_name][comment][old_val];
-							if (comment == 'default') {
+							if (comment === 'default') {
 								// Return internal representation of word.
 								return [ val, token_name ];
-							} else if (token_name == 'wrong_words' && !done_with_warnings) {
+							} else if (token_name === 'wrong_words' && !done_with_warnings) {
 								// Replace wrong words or characters with correct ones.
 								// This will return a string which is then being tokenized.
-								parsing_warnings.push([ -1, value_length - old_val.length,
-									comment.replace(/<ko>/, old_val).replace(/<ok>/, val) ]);
+								parsing_warnings.push([ -1, value_length - word.length,
+									comment.replace(/<ko>/, word).replace(/<ok>/, val) ]);
 								return val;
 							} else {
 								// Get correct string value from the 'default' hash and generate warning.
 								var correct_abbr;
 								for (correct_abbr in word_error_correction[token_name]['default']) {
-									if (word_error_correction[token_name]['default'][correct_abbr] == val)
+									if (word_error_correction[token_name]['default'][correct_abbr] === val)
 										break;
 								}
-								if (typeof correct_abbr == 'undefined') {
+								if (typeof correct_abbr === 'undefined') {
 									throw formatLibraryBugMessage('Including the stacktrace.');
 								}
-								if (token_name != 'timevar') {
+								if (token_name !== 'timevar') {
 									// Everything else than timevar:
 									// E.g. 'Mo' start with a upper case letter.
 									// It just looks better.
@@ -3648,8 +3925,8 @@
 										+ correct_abbr.slice(1);
 								}
 								if (!done_with_warnings)
-									parsing_warnings.push([ -1, value_length - old_val.length,
-										comment.replace(/<ko>/, old_val).replace(/<ok>/, correct_abbr) ]);
+									parsing_warnings.push([ -1, value_length - word.length,
+										comment.replace(/<ko>/, word).replace(/<ok>/, correct_abbr) ]);
 								return [ val, token_name ];
 							}
 						}
@@ -3666,7 +3943,11 @@
 		 * :returns: Warnings as list with one warning per element.
 		 */
 		function getWarnings(it) {
-			if (!done_with_warnings && typeof it == 'object') {
+			if (warnings_severity < 4) {
+				return [];
+			}
+
+			if (!done_with_warnings && typeof it === 'object') {
 				/* getWarnings was called in a state without critical errors.
 				 * We can do extended tests.
 				 */
@@ -3678,8 +3959,8 @@
 				 * code in the (sub) selector parser function directly.
 				 */
 
-				var wide_range_selectors = [ 'year', 'month', 'week', 'holiday' ];
-				var small_range_selectors = [ 'weekday', 'time', '24/7', 'state', 'comment'];
+				var wide_range_selector_order = [ 'year', 'month', 'week', 'holiday' ];
+				var small_range_selector_order = [ 'weekday', 'time', '24/7', 'state', 'comment'];
 
 				// How many times was a selector_type used per rule? {{{
 				var used_selectors = [];
@@ -3701,13 +3982,19 @@
 						selector_start_end_type = getSelectorRange(new_tokens[nrule][0], selector_start_end_type[1]);
 						// console.log(selector_start_end_type, new_tokens[nrule][0].length);
 
-						if (selector_start_end_type[0] == selector_start_end_type[1] &&
-							new_tokens[nrule][0][selector_start_end_type[0]][0] == '24/7'
+						for (var token_pos = 0; token_pos <= selector_start_end_type[1]; token_pos++) {
+							if (typeof new_tokens[nrule][0][token_pos] === 'object' && new_tokens[nrule][0][token_pos][0] === 'PH') {
+								has_token['PH'] = true;
+							}
+						}
+
+						if (selector_start_end_type[0] === selector_start_end_type[1] &&
+							new_tokens[nrule][0][selector_start_end_type[0]][0] === '24/7'
 							) {
 								has_token['24/7'] = true;
 						}
 
-						if (typeof used_selectors[nrule][selector_start_end_type[2]] != 'object') {
+						if (typeof used_selectors[nrule][selector_start_end_type[2]] !== 'object') {
 							used_selectors[nrule][selector_start_end_type[2]] = [ selector_start_end_type[1] ];
 						} else {
 							used_selectors[nrule][selector_start_end_type[2]].push(selector_start_end_type[1]);
@@ -3727,40 +4014,27 @@
 						// console.log(selector_type + ' use at: ' + used_selectors[nrule][selector_type].length);
 						if (used_selectors[nrule][selector_type].length > 1) {
 							parsing_warnings.push([nrule, used_selectors[nrule][selector_type][used_selectors[nrule][selector_type].length - 1],
-								'You have used ' + used_selectors[nrule][selector_type].length
-								+ (selector_type.match(/^(?:comment|state)/) ?
-									' ' + selector_type
-									+ (selector_type == 'state' ? ' keywords' : 's')
-									+ ' in one rule.'
-									+ ' You may only use one in one rule.'
-									:
-									' not connected ' + selector_type
-									+ (selector_type.match(/^(?:month|weekday)$/) ? 's' : ' ranges')
-									+ ' in one rule.'
-									+ ' This is probably an error.'
-									+ ' Equal selector types can (and should) always be written in conjunction separated by comma.'
-									+ ' Example for time ranges "12:00-13:00,15:00-18:00".'
-									+ ' Example for weekdays "Mo-We,Fr".'
-								  )
-								+ ' Rules can be separated by ";".' ]
+								t('use multi', {
+									'count': used_selectors[nrule][selector_type].length,
+									'part2': (
+										selector_type.match(/^(?:comment|state)/) ?
+											t('selector multi 2a', {'what': (selector_type === 'state' ? t('selector state'): t('comments'))})
+											:
+											t('selector multi 2b', {'what': t(selector_type + (selector_type.match(/^(?:month|weekday)$/) ? 's' : ' ranges'))})
+									)
+								})]
 							);
 							done_with_selector_reordering = true; // Correcting the selector order makes no sense if this kind of issue exists.
 						}
 					}
 					/* }}} */
-
 					/* Check if change default state rule is not the first rule {{{ */
 					if (   typeof used_selectors[nrule].state === 'object'
 						&& Object.keys(used_selectors[nrule]).length === 1
 					) {
 
 						if (nrule !== 0) {
-							parsing_warnings.push([nrule, new_tokens[nrule][0].length - 1,
-								"This rule which changes the default state (which is closed) for all following rules is not the first rule."
-								+ " The rule will overwrite all previous rules."
-								+ " It can be legitimate to change the default state to open for example"
-								+ " and then only specify for which times the facility is closed."
-							]);
+							parsing_warnings.push([nrule, new_tokens[nrule][0].length - 1, t('default state')]);
 						}
 					/* }}} */
 					/* Check if a rule (with state open) has no time selector {{{ */
@@ -3774,28 +4048,38 @@
 								typeof used_selectors[nrule]['24/7'] === 'undefined'
 						) {
 
-							parsing_warnings.push([nrule, new_tokens[nrule][0].length - 1,
-								"This rule is not very explicit because there is no time selector being used."
-								+ " Please add a time selector to this rule or use a comment to make it more explicit."
-							]);
+							parsing_warnings.push([nrule, new_tokens[nrule][0].length - 1, t('vague')]);
 						}
 					}
 					/* }}} */
-
 					/* Check if empty comment was given {{{ */
 					if (typeof used_selectors[nrule].comment === 'object'
 						&& new_tokens[nrule][0][used_selectors[nrule].comment[0]][0].length === 0
 					) {
 
-						parsing_warnings.push([nrule, used_selectors[nrule].comment[0],
-							"You have used an empty comment."
-							+ " Please either write something in the comment or use the keyword unknown instead."
-						]);
+						parsing_warnings.push([nrule, used_selectors[nrule].comment[0], t('empty comment')]);
+					}
+					/* }}} */
+					/* Check for valid use of <separator_for_readability> {{{ */
+					for (var i = 0; i < used_selectors_types_array[nrule].length - 1; i++) {
+						var selector_type = used_selectors_types_array[nrule][i];
+						var next_selector_type = used_selectors_types_array[nrule][i+1];
+						if (   (   wide_range_selector_order.indexOf(selector_type)       !== -1
+								&& wide_range_selector_order.indexOf(next_selector_type)  !== -1
+							) || ( small_range_selector_order.indexOf(selector_type)      !== -1
+								&& small_range_selector_order.indexOf(next_selector_type) !== -1)
+							) {
+
+							if (new_tokens[nrule][0][used_selectors[nrule][selector_type][0]][0] === ':') {
+								parsing_warnings.push([nrule, used_selectors[nrule][selector_type][0],
+									t('separator_for_readability')
+								]);
+							}
+						}
 					}
 					/* }}} */
 
-					/* Check if rule with closed|off modifier is additional {{{ */
-					/* FIXME: Enable this test. */
+					/* FIXME: Enable (currently disabled): Check if rule with closed|off modifier is additional {{{ */
 					if (typeof new_tokens[nrule][0][0] === 'object'
 							&& new_tokens[nrule][0][0][0] === ','
 							&& new_tokens[nrule][0][0][1] === 'rule separator'
@@ -3814,37 +4098,44 @@
 					}
 					/* }}} */
 
-					/* Check for valid use of <separator_for_readability> {{{ */
-					for (var i = 0; i < used_selectors_types_array[nrule].length - 1; i++) {
-						var selector_type = used_selectors_types_array[nrule][i];
-						var next_selector_type = used_selectors_types_array[nrule][i+1];
-						if (   (   wide_range_selectors.indexOf(selector_type)       != -1
-								&& wide_range_selectors.indexOf(next_selector_type)  != -1
-							) || ( small_range_selectors.indexOf(selector_type)      != -1
-								&& small_range_selectors.indexOf(next_selector_type) != -1)
-							) {
-
-							if (new_tokens[nrule][0][used_selectors[nrule][selector_type][0]][0] == ':') {
-								parsing_warnings.push([nrule, used_selectors[nrule][selector_type][0],
-									"You have used the optional symbol <separator_for_readability> in the wrong place."
-									+ " Please check the syntax specification to see where it could be used or remove it."
-								]);
-							}
-						}
-					}
-					/* }}} */
-
 				}
 
 				/* Check if 24/7 is used and it does not mean 24/7 because there are other rules {{{ */
 				var has_advanced = it.advance();
 
 				if (has_advanced === true && has_token['24/7'] && !done_with_warnings) {
-					parsing_warnings.push([ -1, 0, 'You used 24/7 in a way that is probably not interpreted as "24 hours 7 days a week".'
-							// Probably because of: "24/7; 12:00-14:00 open", ". Needs extra testing.
-							+ ' For correctness you might want to use "open" or "closed"'
-							+ ' for this rule and then write your exceptions which should achieve the same goal and is more clear'
-							+ ' e.g. "open; Mo 12:00-14:00 off".']);
+					parsing_warnings.push([ -1, 0,
+						// Probably because of: "24/7; 12:00-14:00 open", ". Needs extra testing.
+						t('strange 24/7')
+					]);
+				}
+				/* }}} */
+
+				/* Check for missing PH. {{{ */
+				if (	warnings_severity >= 5
+					&& !has_token['PH']
+					&& !has_token['24/7']
+					&& !done_with_warnings
+					&& (
+							(
+								typeof oh_key === 'string'
+								&& osm_tag_defaults[oh_regex_key]['warn_for_PH_missing']
+							)
+							|| (typeof oh_key !== 'string')
+					   )
+					) {
+
+					var keys_with_warn_for_PH_missing = [];
+					for (var key in osm_tag_defaults) {
+						if (osm_tag_defaults[key]['warn_for_PH_missing']) {
+							keys_with_warn_for_PH_missing.push(key);
+						}
+					}
+					parsing_warnings.push([ -1, 0,
+						t('public holiday', { 'part2': (typeof oh_key !== 'string'
+							? t('public holiday part2', {'keys': keys_with_warn_for_PH_missing.join(', ')}) : '')})
+							// + '(see README how to provide it)' // UI of the evaluation tool does not allow to provide it (currently).
+					]);
 				}
 				/* }}} */
 
@@ -3872,12 +4163,12 @@
 		 *		  the token is the start of a selector.
 		 */
 		function tokenIsTheBeginOfSelector(tokens, at) {
-			if (typeof tokens[at][3] == 'string') {
+			if (typeof tokens[at][3] === 'string') {
 				return 3;
-			} else if (tokens[at][1] == 'comment'
-					|| tokens[at][1] == 'state'
-					|| tokens[at][1] == '24/7'
-					|| tokens[at][1] == 'rule separator'
+			} else if (tokens[at][1] === 'comment'
+					|| tokens[at][1] === 'state'
+					|| tokens[at][1] === '24/7'
+					|| tokens[at][1] === 'rule separator'
 				){
 
 				return 1;
@@ -3915,7 +4206,7 @@
 				// Selector consists of a single token.
 
 				// Include tailing colon.
-				if (selector_end + 1 < tokens.length && tokens[selector_end + 1][0] == ':')
+				if (selector_end + 1 < tokens.length && tokens[selector_end + 1][0] === ':')
 					selector_end++;
 
 				return [ selector_start, selector_end, tokens[selector_start][pos_in_token_array] ];
@@ -3942,42 +4233,65 @@
 		 * :returns: Prettified value string or object if get_internals is true.
 		 */
 		function prettifyValue(argument_hash) {
-			var user_conf = {},
-				get_internals   = false,
-				rule_index;
-			if (typeof argument_hash != 'undefined') {
-
-				if (typeof argument_hash.conf === 'object')
-					user_conf = argument_hash.conf;
-
-				if (typeof argument_hash.rule_index === 'number')
-					rule_index = argument_hash.rule_index;
-
-				if (argument_hash.get_internals === true)
-					get_internals = true;
-			}
-
-			for (var key in default_prettify_conf) {
-				if (typeof user_conf[key] == 'undefined')
-					user_conf[key] = default_prettify_conf[key];
-			}
+			var user_conf = {};
+			var get_internals = false;
+			var rule_index;
 
 			prettified_value = '';
 			var prettified_value_array = [];
+
+			if (typeof argument_hash !== 'undefined') {
+				if (typeof argument_hash.conf === 'object') {
+					user_conf = argument_hash.conf;
+					console.log(user_conf);
+				}
+
+				if (typeof argument_hash.rule_index === 'number') {
+					rule_index = argument_hash.rule_index;
+				}
+
+				if (argument_hash.get_internals === true) {
+					get_internals = true;
+				}
+
+			}
+
+			for (var key in default_prettify_conf) {
+				if (typeof user_conf[key] === 'undefined')
+					user_conf[key] = default_prettify_conf[key];
+			}
+
+			if (typeof moment === 'object' && typeof user_conf['locale'] === 'string' && user_conf['locale'] !== 'en') {
+				// build translation arrays from moment
+				// var currentLocale = moment.locale();
+				moment.locale('en');
+				var weekdays_en = moment.weekdaysMin();
+				// monthShort would not return what we like
+				var months_en = moment.months().map(function (month) {
+					return month.substr(0,3);
+				});
+				// FIXME: Does not work in Firefox?
+				moment.locale(user_conf['locale']);
+				var weekdays_local = moment.weekdaysMin();
+				var months_local = moment.months().map(function (month) {
+					return month.substr(0,3);
+				});
+				// console.log(months_local);
+			}
 
 			for (var nrule = 0; nrule < new_tokens.length; nrule++) {
 				if (new_tokens[nrule][0].length === 0) continue;
 				// Rule does contain nothing useful e.g. second rule of '10:00-12:00;' (empty) which needs to be handled.
 
-				if (typeof rule_index == 'number') {
-					if (rule_index != nrule) continue;
+				if (typeof rule_index === 'number') {
+					if (rule_index !== nrule) continue;
 				} else {
 					if (nrule !== 0)
 						prettified_value += (
 							new_tokens[nrule][1]
 								? user_conf.rule_sep_string + '|| '
 								: (
-									new_tokens[nrule][0][0][1] == 'rule separator'
+									new_tokens[nrule][0][0][1] === 'rule separator'
 									? ','
 									: (
 										user_conf.print_semicolon
@@ -3988,11 +4302,10 @@
 							user_conf.rule_sep_string);
 				}
 
-				var selector_start_end_type = [ 0, 0, undefined ],
-					prettified_group_value = [];
-				// console.log(new_tokens[nrule][0]);
+				var selector_start_end_type = [ 0, 0, undefined ];
+				var prettified_group_value = [];
 				var count = 0;
-
+				// console.log(new_tokens[nrule][0]);
 
 				do {
 					selector_start_end_type = getSelectorRange(new_tokens[nrule][0], selector_start_end_type[1]);
@@ -4002,7 +4315,7 @@
 						throw formatLibraryBugMessage('infinite loop');
 					}
 
-					if (selector_start_end_type[2] != 'rule separator') {
+					if (selector_start_end_type[2] !== 'rule separator') {
 						prettified_group_value.push(
 							[
 								selector_start_end_type,
@@ -4034,6 +4347,23 @@
 				}
 				var old_prettified_value_length = prettified_value.length;
 
+				if (typeof user_conf['locale'] === 'string' && user_conf['locale'] !== 'en') {
+					for (var i = 0; i < prettified_group_value.length; i++) {
+						type = prettified_group_value[i][0][2];
+						if (type === 'weekday') {
+							for(var key in weekdays_en) {
+								prettified_group_value[i][1] = prettified_group_value[i][1].replace(new RegExp(weekdays_en[key], 'g'), weekdays_local[key]);
+							}
+						} else if (type === 'month') {
+							for(var key in months_en) {
+								prettified_group_value[i][1] = prettified_group_value[i][1].replace(new RegExp(months_en[key], 'g'), months_local[key]);
+							}
+						} else {
+							prettified_group_value[i][1] = i18n.t(['opening_hours:pretty.' + prettified_group_value[i][1], prettified_group_value[i][1]]);
+						}
+					}
+				}
+
 				prettified_value += prettified_group_value.map(
 					function (array) {
 						return array[1];
@@ -4044,7 +4374,7 @@
 
 				if (!done_with_selector_reordering_warnings) {
 					for (var i = 0, l = not_sorted_prettified_group_value.length; i < l; i++) {
-						if (not_sorted_prettified_group_value[i] != prettified_group_value[i]) {
+						if (not_sorted_prettified_group_value[i] !== prettified_group_value[i]) {
 							// console.log(i + ': ' + prettified_group_value[i][0][2]);
 							var length = i + old_prettified_value_length; // i: Number of spaces in string.
 							for (var x = 0; x <= i; x++) {
@@ -4052,10 +4382,10 @@
 								// console.log('Length: ' + length + ' ' + prettified_group_value[x][1]);
 							}
 							// console.log(length);
-							parsing_warnings.push([ prettified_value, length,
-								'The selector "' + prettified_group_value[i][0][2] + '" was switched with'
-								+ ' the selector "' + not_sorted_prettified_group_value[i][0][2] + '"'
-								+ ' for readablitity and compatibiltity reasons.'
+							parsing_warnings.push([ prettified_value, length, t('switched', {
+								'first': prettified_group_value[i][0][2],
+								'second': not_sorted_prettified_group_value[i][0][2]
+							})
 							]);
 						}
 					}
@@ -4155,16 +4485,16 @@
 					tokens[at][3] = 'week';
 					at = parseWeekRange(tokens, at);
 
-				} else if (at !== 0 && at != tokens.length - 1 && tokens[at][0] == ':') {
+				} else if (at !== 0 && at !== tokens.length - 1 && tokens[at][0] === ':') {
 					/* Ignore colon if they appear somewhere else than as time separator.
 					 * Except the start or end of the value.
 					 * This provides compatibility with the syntax proposed by Netzwolf:
-					 * http://wiki.openstreetmap.org/wiki/Key:opening_hours/specification#separator_for_readability
+					 * https://wiki.openstreetmap.org/wiki/Key:opening_hours/specification#separator_for_readability
 					 * Check for valid use of <separator_for_readability> is implemented in function getWarnings().
 					 */
 
 					if (!done_with_warnings && matchTokens(tokens, at-1, 'holiday'))
-						parsing_warnings.push([nrule, at, 'Please don’t use ":" after ' + tokens[at-1][1] + '.']);
+						parsing_warnings.push([nrule, at, t('no colon after', { 'token': tokens[at-1][1] })]);
 
 					at++;
 				} else if (matchTokens(tokens, at, 'number', 'timesep')
@@ -4176,9 +4506,9 @@
 
 				} else if (matchTokens(tokens, at, 'state')) {
 
-					if (tokens[at][0] == 'open') {
+					if (tokens[at][0] === 'open') {
 						selectors.meaning = true;
-					} else if (tokens[at][0] == 'closed' || tokens[at][0] == 'off') {
+					} else if (tokens[at][0] === 'closed' || tokens[at][0] === 'off') {
 						selectors.meaning = false;
 					} else {
 						selectors.meaning = false;
@@ -4187,7 +4517,7 @@
 
 					rule_modifier_specified = true;
 					at++;
-					if (typeof tokens[at] == 'object' && tokens[at][0] == ',') // additional rule
+					if (typeof tokens[at] === 'object' && tokens[at][0] === ',') // additional rule
 						at = [ at + 1 ];
 
 				} else if (matchTokens(tokens, at, 'comment')) {
@@ -4201,20 +4531,18 @@
 
 					rule_modifier_specified = true;
 					at++;
-					if (typeof tokens[at] == 'object' && tokens[at][0] == ',') // additional rule
+					if (typeof tokens[at] === 'object' && tokens[at][0] === ',') // additional rule
 						at = [ at + 1 ];
-				} else if ((at === 0 || at == tokens.length - 1) && matchTokens(tokens, at, 'rule separator')) {
+				} else if ((at === 0 || at === tokens.length - 1) && matchTokens(tokens, at, 'rule separator')) {
 					at++;
 					console.log("value: " + nrule);
 					// throw formatLibraryBugMessage('Not implemented yet.');
 				} else {
 					var warnings = getWarnings();
-					throw formatWarnErrorMessage(nrule, at, 'Unexpected token: "' + tokens[at][1]
-						+ '" This means that the syntax is not valid at that point or it is currently not supported.')
-						+ (warnings ? ' ' + warnings.join('; ') : '');
+					throw formatWarnErrorMessage(nrule, at, t('unexpected token', {token: tokens[at][1] })) + (warnings ? (' ' + warnings.join('; ')) : '');
 				}
 
-				if (typeof at == 'object') { // additional rule
+				if (typeof at === 'object') { // additional rule
 					tokens[at[0] - 1][1] = 'rule separator';
 					break;
 				}
@@ -4225,10 +4553,10 @@
 
 		function get_last_token_pos_in_token_group(tokens, at, last_at) {
 			for (at++; at < last_at; at++) {
-				if (typeof tokens[at] != 'undefined') {
-					if (typeof tokens[at][3] == 'string'
-							|| tokens[at][1] == 'comment'
-							|| tokens[at][1] == 'state'){
+				if (typeof tokens[at] !== 'undefined') {
+					if (typeof tokens[at][3] === 'string'
+							|| tokens[at][1] === 'comment'
+							|| tokens[at][1] === 'state'){
 
 							return at - 1;
 					}
@@ -4266,7 +4594,7 @@
 		// }}}
 
 		/* Function to determine whether an array contains a value {{{
-		 * Source: http://stackoverflow.com/a/1181586
+		 * Source: https://stackoverflow.com/a/1181586
 		 *
 		 * :param needle: Element to find.
 		 * :returns: Index of element if present, if not present returns -1.
@@ -4341,21 +4669,21 @@
 				// bad number
 				if (from === 0 || from < -5 || from > 5)
 					throw formatWarnErrorMessage(nrule, at,
-						'Number between -5 and 5 (except 0) expected');
+						t('number -5 to 5'));
 
-				if (from == to) {
+				if (from === to) {
 					if (number !== 0)
 						throw formatWarnErrorMessage(nrule, at,
-							'You can not use more than one constrained weekday in a month range');
+							t('one weekday constraint'));
 					number = from;
 				} else {
 					throw formatWarnErrorMessage(nrule, at+2,
-						'You can not use a range of constrained weekdays in a month range');
+						t('range contrainted weekdays'));
 				}
 			});
 
 			if (!matchTokens(tokens, endat, ']'))
-				throw formatWarnErrorMessage(nrule, endat, '"]" expected.');
+				throw formatWarnErrorMessage(nrule, endat, t('expected', {symbol: ']'}));
 
 			return [ number, endat + 1 ];
 		}
@@ -4368,15 +4696,12 @@
 
 			if (period === 0) {
 				throw formatWarnErrorMessage(nrule, at,
-					'You can not use '+ period_type +' ranges with period equals zero.');
+					t('range zero', { 'type': period_type }));
 			} else if (period === 1) {
-				if (typeof parm_string == 'string' && parm_string == 'no_end_year')
-					parsing_warnings.push([nrule, at,
-						'Please don’t use '+ period_type +' ranges with period equals one.'
-						+ ' If you want to express that a facility is open starting from a year without limit use "<year>+".']);
+				if (typeof parm_string === 'string' && parm_string === 'no_end_year')
+					parsing_warnings.push([nrule, at, t('period one year+', {'type': period_type})]);
 				else
-					parsing_warnings.push([nrule, at,
-						'Please don’t use '+ period_type +' ranges with period equals one.']);
+					parsing_warnings.push([nrule, at, t('period one', {'type': period_type})]);
 			}
 		}
 
@@ -4395,7 +4720,7 @@
 
 			tmp_date.setDate(tmp_date.getDate() + (constrained_weekday[0] + (constrained_weekday[0] > 0 ? -1 : 0)) * 7);
 
-			if (typeof add_days != 'undefined' && add_days[1])
+			if (typeof add_days !== 'undefined' && add_days[1])
 				tmp_date.setDate(tmp_date.getDate() + add_days[0]);
 
 			return tmp_date;
@@ -4411,17 +4736,18 @@
 		function checkIfDateIsValid(month, day, nrule, at) {
 			// May use this instead. The problem is that this does not give feedback as precise as the code which is used in this function.
 			// var testDate = new Date(year, month, day);
-			// if (testDate.getDate() != day || testDate.getMonth() != month || testDate.getFullYear() != year) {
+			// if (testDate.getDate() !== day || testDate.getMonth() !== month || testDate.getFullYear() !== year) {
 			// 	console.error('date not valid');
 			// }
 
 			// https://en.wikipedia.org/wiki/Month#Julian_and_Gregorian_calendars
-			if (day < 1 || day > 31)
-				throw formatWarnErrorMessage(nrule, at, 'Day must be between 1 and 31.');
-			if ((month==3 || month==5 || month==8 || month==10) && day==31)
-				throw formatWarnErrorMessage(nrule, at, 'Month ' + months[month] + " doesn't have 31 days.!");
-			if (month == 1 && day == 30)
-				throw formatWarnErrorMessage(nrule, at, 'Month ' + months[1]+ " either has 28 or 29 days (leap years).");
+			if (day < 1 || day > 31) {
+				throw formatWarnErrorMessage(nrule, at, t('month 31', {'month': months[month]}));
+			} else if ((month === 3 || month === 5 || month === 8 || month === 10) && day === 31) {
+				throw formatWarnErrorMessage(nrule, at, t('month 30', {'month': months[month]}));
+			} else if (month === 1 && day === 30) {
+				throw formatWarnErrorMessage(nrule, at, t('month feb', {'month': months[month]}));
+			}
 		}
 		// }}}
 		// }}}
@@ -4477,17 +4803,17 @@
 								throw formatWarnErrorMessage(nrule,
 									at+(
 										has_normal_time[0] ? (
-											typeof tokens[at+3] == 'object' ? 3 : 2
+											typeof tokens[at+3] === 'object' ? 3 : 2
 										) : (
 											has_time_var_calc[0] ? 2 : (
-													typeof tokens[at+1] != 'undefined' ? 1 : 0
+													typeof tokens[at+1] !== 'undefined' ? 1 : 0
 												)
 										)
 									),
-									'hyphen (-) or open end (+) in time range '
-									+ (has_time_var_calc[0] ? 'calculation ' : '') + 'expected.'
-									+ ' For working with points in time, the mode for ' + library_name + ' has to be altered.'
-									+ ' Maybe wrong tag?');
+									t('point in time', {
+										'calc': (has_time_var_calc[0] ? t('calculation') + ' ' : ''),
+										'libraryname': library_name
+									}));
 							} else {
 								minutes_to = minutes_from + 1;
 								is_point_in_time = true;
@@ -4509,8 +4835,8 @@
 						has_normal_time[1] = matchTokens(tokens, at_end_time, 'number', 'timesep', 'number');
 						has_time_var_calc[1]      = matchTokens(tokens, at_end_time, '(', 'timevar');
 						if (!has_normal_time[1] && !matchTokens(tokens, at_end_time, 'timevar') && !has_time_var_calc[1]) {
-							throw formatWarnErrorMessage(nrule, at_end_time - (typeof tokens[at_end_time] != 'undefined' ? 0 : 1),
-									'Time range does not continue as expected');
+							throw formatWarnErrorMessage(nrule, at_end_time - (typeof tokens[at_end_time] !== 'undefined' ? 0 : 1),
+									t('time range continue'));
 						} else {
 							if (has_normal_time[1]) {
 								minutes_to = getMinutesByHoursMinutes(tokens, nrule, at_end_time);
@@ -4539,24 +4865,24 @@
 							at += 2;
 							if (matchTokens(tokens, at, 'timesep'))
 								throw formatWarnErrorMessage(nrule, at,
-									'Time period does not continue as expected. Exampe "/01:30".');
+									t('period continue'));
 						}
 
 						// Check at this later state in the if condition to get the correct position.
 						if (oh_mode === 0)
 							throw formatWarnErrorMessage(nrule, at - 1,
-								'opening_hours is running in "time range mode". Found point in time.');
+								t('time range mode', {'libraryname': library_name}));
 
 						is_point_in_time = true;
 					} else if (matchTokens(tokens, at, '+')) {
 						parseTimeRange(tokens, at_end_time, selectors, minutes_to < minutes_from ? 1 : true);
 						at++;
-					} else if (oh_mode == 1 && !is_point_in_time) {
+					} else if (oh_mode === 1 && !is_point_in_time) {
 						throw formatWarnErrorMessage(nrule, at_end_time,
-							'opening_hours is running in "points in time mode". Found time range.');
+							t('point in time mode', {'libraryname': library_name}));
 					}
 
-					if (typeof lat != 'undefined') { // lon will also be defined (see above)
+					if (typeof lat !== 'undefined') { // lon will also be defined (see above)
 						if (!has_normal_time[0] || !(has_normal_time[1] || has_open_end || is_point_in_time) )
 							week_stable = false;
 					} else { // we can not calculate exact times so we use the already applied constants (word_value_replacement).
@@ -4565,16 +4891,15 @@
 
 					// Normalize minutes into range.
 					if (!extended_open_end && minutes_from >= minutes_in_day)
-						throw formatWarnErrorMessage(nrule, at_end_time - 2,
-							'Time range starts outside of the current day');
-					if (minutes_to < minutes_from || ((has_normal_time[0] && has_normal_time[1]) && minutes_from == minutes_to))
+						throw formatWarnErrorMessage(nrule, at_end_time - 2, t('outside current day'));
+					if (minutes_to < minutes_from || ((has_normal_time[0] && has_normal_time[1]) && minutes_from === minutes_to))
 						minutes_to += minutes_in_day;
 					if (minutes_to > minutes_in_day * 2)
 						throw formatWarnErrorMessage(nrule, at_end_time + (has_normal_time[1] ? 4 : (has_time_var_calc[1] ? 7 : 1)) - 2,
-							'Time spanning more than two midnights not supported');
+							t('two midnights'));
 
 					// This shortcut makes always-open range check faster.
-					if (minutes_from === 0 && minutes_to == minutes_in_day) {
+					if (minutes_from === 0 && minutes_to === minutes_in_day) {
 						selectors.time.push(function(date) { return [true]; });
 					} else {
 						if (minutes_to > minutes_in_day) { // has_normal_time[1] must be true
@@ -4592,16 +4917,16 @@
 									// Needs to be added because it was added by
 									// normal times: if (minutes_to < minutes_from)
 									// above the selector construction.
-								} else if (is_point_in_time && typeof point_in_time_period != 'number') {
+								} else if (is_point_in_time && typeof point_in_time_period !== 'number') {
 									minutes_to = minutes_from + 1;
 								}
 
-								if (typeof point_in_time_period == 'number') {
+								if (typeof point_in_time_period === 'number') {
 									if (ourminutes < minutes_from) {
 										return [false, dateAtDayMinutes(date, minutes_from)];
 									} else if (ourminutes <= minutes_to) {
 										for (var cur_min = minutes_from; ourminutes + point_in_time_period >= cur_min; cur_min += point_in_time_period) {
-											if (cur_min == ourminutes) {
+											if (cur_min === ourminutes) {
 												return [true, dateAtDayMinutes(date, ourminutes + 1)];
 											} else if (ourminutes < cur_min) {
 												return [false, dateAtDayMinutes(date, cur_min)];
@@ -4634,10 +4959,10 @@
 									// which returns the selector function.
 								}
 
-								if (typeof point_in_time_period == 'number') {
+								if (typeof point_in_time_period === 'number') {
 									if (ourminutes <= minutes_to) {
 										for (var cur_min = 0; ourminutes + point_in_time_period >= cur_min; cur_min += point_in_time_period) {
-											if (cur_min == ourminutes) {
+											if (cur_min === ourminutes) {
 												return [true, dateAtDayMinutes(date, ourminutes + 1)];
 											} else if (ourminutes < cur_min) {
 												return [false, dateAtDayMinutes(date, cur_min)];
@@ -4661,16 +4986,16 @@
 								if (timevar_string[1]) {
 									var date_to = SunCalc.getTimes(date, lat, lon)[timevar_string[1]];
 									minutes_to  = date_to.getHours() * 60 + date_to.getMinutes() + timevar_add[1];
-								} else if (is_point_in_time && typeof point_in_time_period != 'number') {
+								} else if (is_point_in_time && typeof point_in_time_period !== 'number') {
 									minutes_to = minutes_from + 1;
 								}
 
-								if (typeof point_in_time_period == 'number') {
+								if (typeof point_in_time_period === 'number') {
 									if (ourminutes < minutes_from) {
 										return [false, dateAtDayMinutes(date, minutes_from)];
 									} else if (ourminutes <= minutes_to) {
 										for (var cur_min = minutes_from; ourminutes + point_in_time_period >= cur_min; cur_min += point_in_time_period) {
-											if (cur_min == ourminutes) {
+											if (cur_min === ourminutes) {
 												return [true, dateAtDayMinutes(date, ourminutes + 1)];
 											} else if (ourminutes < cur_min) {
 												return [false, dateAtDayMinutes(date, cur_min)];
@@ -4694,20 +5019,17 @@
 					minutes_from = tokens[at][0]   * 60;
 					minutes_to   = tokens[at+2][0] * 60;
 					if (!done_with_warnings)
-						parsing_warnings.push([nrule, at + 2,
-							'Time range without minutes specified. Not very explicit!'
-							+ ' Please use this syntax instead "'
-							+ (tokens[at][0]   < 10 ? '0' : '') + tokens[at][0]   + ':00-'
-							+ (tokens[at+2][0] < 10 ? '0' : '') + tokens[at+2][0] + ':00".']);
+						parsing_warnings.push([nrule, at + 2, t('without minutes', {
+							'syntax': (tokens[at][0]   < 10 ? '0' : '') + tokens[at][0]   + ':00-'
+								+ (tokens[at+2][0] < 10 ? '0' : '') + tokens[at+2][0] + ':00'
+						})]);
 
 					if (minutes_from >= minutes_in_day)
-						throw formatWarnErrorMessage(nrule, at,
-							'Time range starts outside of the current day');
+						throw formatWarnErrorMessage(nrule, at, t('outside day'));
 					if (minutes_to < minutes_from)
 						minutes_to += minutes_in_day;
 					if (minutes_to > minutes_in_day * 2)
-						throw formatWarnErrorMessage(nrule, at + 2,
-							'Time spanning more than two midnights not supported');
+						throw formatWarnErrorMessage(nrule, at + 2, t('two midnights'));
 
 					if (minutes_to > minutes_in_day) {
 						selectors.time.push(function(minutes_from, minutes_to) { return function(date) {
@@ -4747,7 +5069,7 @@
 					if (matchTokens(tokens, at, 'number', 'timesep'))
 						throw formatWarnErrorMessage(nrule, at+1, 'Missing minutes in time range after: "' + tokens[at+1][1] + '"');
 					if (matchTokens(tokens, at, 'number'))
-						throw formatWarnErrorMessage(nrule, at + (typeof tokens[at+1] != 'undefined' ? 1 : 0),
+						throw formatWarnErrorMessage(nrule, at + (typeof tokens[at+1] !== 'undefined' ? 1 : 0),
 								'Missing time separator in time range after: "' + tokens[at][1] + '"');
 					return [ at ];
 				}
@@ -4791,26 +5113,25 @@
 			if (matchTokens(tokens, at+2, '+') || matchTokens(tokens, at+2, '-')) {
 				if (matchTokens(tokens, at+3, 'number', 'timesep', 'number')) {
 					if (matchTokens(tokens, at+6, ')')) {
-						var add_or_subtract = tokens[at+2][0] == '+' ? '1' : '-1';
+						var add_or_subtract = tokens[at+2][0] === '+' ? '1' : '-1';
 						var minutes = getMinutesByHoursMinutes(tokens, nrule, at+3) * add_or_subtract;
 						if (minutes === 0)
-							parsing_warnings.push([ nrule, at+5, 'Adding zero in a variable time calculation does not change the variable time.'
-									+ ' Please omit the calculation (example: "sunrise-(sunset-00:00)").' ]
+							parsing_warnings.push([ nrule, at+5, t('zero calculation') ]
 								);
 						return minutes;
 					} else {
-						error = [ at+6, '. Missing ")".'];
+						error = [ at+6, '. ' + t('missing', {'symbol': ")"}) + '.'];
 					}
 				} else {
-					error = [ at+5, ' (time).'];
+					error = [ at+5, ' ' + t('(time)') + '.'];
 				}
 			} else {
-				error = [ at+2, '. "+" or "-" expected.'];
+				error = [ at+2, '. ' + t('expected', {'symbol': '+" or "-'})];
 			}
 
 			if (error)
 				throw formatWarnErrorMessage(nrule, error[0],
-					'Calculcation with variable time is not in the right syntax' + error[1]);
+					 t('calculation syntax')+ error[1]);
 		}
 		/* }}} */
 		/* }}} */
@@ -4839,27 +5160,27 @@
 						// bad number
 						if (from === 0 || from < -5 || from > 5)
 							throw formatWarnErrorMessage(nrule, at,
-								'Number between -5 and 5 (except 0) expected');
+								t('number -5 to 5'));
 
-						if (from == to) {
+						if (from === to) {
 							numbers.push(from);
 						} else if (from < to) {
 							for (var i = from; i <= to; i++) {
 								// bad number
 								if (i === 0 || i < -5 || i > 5)
 									throw formatWarnErrorMessage(nrule, at+2,
-										'Number between -5 and 5 (except 0) expected.');
+										t('number -5 to 5'));
 
 								numbers.push(i);
 							}
 						} else {
 							throw formatWarnErrorMessage(nrule, at+2,
-								'Bad range: ' + from + '-' + to);
+								t('bad range',{'from': from, 'to': to}));
 						}
 					});
 
 					if (!matchTokens(tokens, endat, ']'))
-						throw formatWarnErrorMessage(nrule, endat, '"]" or more numbers expected.');
+						throw formatWarnErrorMessage(nrule, endat, t('] or more numbers'));
 
 					var add_days = getMoveDays(tokens, endat+1, 6, 'constrained weekdays');
 					week_stable = false;
@@ -4910,7 +5231,7 @@
 								target_day_with_added_moved_days_this_month.setDate(target_day_with_added_moved_days_this_month.getDate()
 									+ (number + (number > 0 ? -1 : 0)) * 7 + add_days);
 
-								if (date_num == getValueForDate(target_day_with_added_moved_days_this_month, false))
+								if (date_num === getValueForDate(target_day_with_added_moved_days_this_month, false))
 									return [true, dateAtDayMinutes(date, minutes_in_day)];
 							} else if (add_days < 0) {
 								target_day_with_added_moved_days_this_month = dateAtNextWeekday(
@@ -4923,7 +5244,7 @@
 										return [false, target_day_with_added_moved_days_this_month];
 								} else {
 									if (target_day_with_added_days_this_month.getTime() < start_of_next_month.getTime()
-										&& getValueForDate(target_day_with_added_days_this_month, false) == date_num)
+										&& getValueForDate(target_day_with_added_days_this_month, false) === date_num)
 										return [true, dateAtDayMinutes(date, minutes_in_day)];
 
 									target_day_with_added_days_this_month = target_day_with_added_moved_days_this_month;
@@ -4931,7 +5252,7 @@
 							}
 
 							// we hit the target day
-							if (date.getDate() == target_day_with_added_days_this_month.getDate()) {
+							if (date.getDate() === target_day_with_added_days_this_month.getDate()) {
 								return [true, dateAtDayMinutes(date, minutes_in_day)];
 							}
 
@@ -4983,8 +5304,13 @@
 				} else if (matchTokens(tokens, at, 'holiday')) {
 					week_stable = false;
 					return parseHoliday(tokens, at, selectors, true, in_holiday_selector);
+				} else if (matchTokens(tokens, at - 1, ',')) { // additional rule
+					throw formatWarnErrorMessage(
+						nrule,
+						at - 1,
+						t('additional rule no sense'));
 				} else {
-					throw formatWarnErrorMessage(nrule, at, 'Unexpected token in weekday range: ' + tokens[at][1]);
+					throw formatWarnErrorMessage(nrule, at, t('unexpected token weekday range', {'token': tokens[at][1]}));
 				}
 
 				if (!matchTokens(tokens, at, ','))
@@ -5011,10 +5337,10 @@
 				// continues with '+ 5 days' or something like that
 				if (tokens[at+1][0] > max_differ)
 					throw formatWarnErrorMessage(nrule, at+2,
-						'There should be no reason to differ more than ' + max_differ + ' days from a ' + name + '. If so tell us …');
+						t('max differ',{'maxdiffer': max_differ, 'name': name}));
 				add_days[0] *= tokens[at+1][0];
 				if (add_days[0] === 0 && !done_with_warnings)
-					parsing_warnings.push([ nrule, at+2, 'Adding 0 does not change the date. Please omit this.' ]);
+					parsing_warnings.push([ nrule, at+2, t('adding 0') ]);
 				add_days[1] = 3;
 			} else {
 				add_days[0] = 0;
@@ -5042,7 +5368,7 @@
 
 			for (; at < tokens.length; at++) {
 				if (matchTokens(tokens, at, 'holiday')) {
-					if (tokens[at][0] == 'PH') {
+					if (tokens[at][0] === 'PH') {
 						var applying_holidays = getMatchingHoliday(tokens[at][0]);
 
 						// Only allow moving one day in the past or in the future.
@@ -5069,14 +5395,14 @@
 
 										if (date_num < last_holiday_last_year_num ) {
 											return [ false, last_holiday_last_year[0] ];
-										} else if (date_num == last_holiday_last_year_num) {
+										} else if (date_num === last_holiday_last_year_num) {
 											return [true, dateAtDayMinutes(last_holiday_last_year[0], minutes_in_day),
 												'Day after ' +last_holiday_last_year[1] ];
 										}
 									}
 
 									return [ false, holidays[i][0] ];
-								} else if (date_num == next_holiday_date_num) {
+								} else if (date_num === next_holiday_date_num) {
 									return [true, new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1),
 										(add_days[0] > 0 ? 'Day after ' : (add_days[0] < 0 ? 'Day before ' : '')) + holidays[i][1] ];
 								}
@@ -5087,7 +5413,7 @@
 								var holidays_next_year = getApplyingHolidaysForYear(applying_holidays, date.getFullYear() + 1, add_days);
 								var first_holidays_next_year = holidays_next_year[0];
 								var first_holidays_next_year_num = getValueForDate(first_holidays_next_year[0], true);
-								if (date_num == first_holidays_next_year_num) {
+								if (date_num === first_holidays_next_year_num) {
 									return [true, dateAtDayMinutes(first_holidays_next_year[0], minutes_in_day),
 										'Day before ' + first_holidays_next_year[1] ];
 								}
@@ -5106,7 +5432,7 @@
 							selectors.holiday.push(selector);
 
 						at += 1 + add_days[1];
-					} else if (tokens[at][0] == 'SH') {
+					} else if (tokens[at][0] === 'SH') {
 						var applying_holidays = getMatchingHoliday(tokens[at][0]);
 
 						var holidays = []; // needs to be sorted each time because of movable days
@@ -5131,13 +5457,14 @@
 
 										// check if we are in the holidays from the last year spanning into this year
 										var last_year_holiday = getSHForYear(applying_holidays[applying_holidays.length - 1], date.getFullYear() - 1, false);
-										if (typeof last_year_holiday != 'undefined') {
+										if (typeof last_year_holiday !== 'undefined') {
 											var last_year_holiday_from = (last_year_holiday[last_year_holiday.length - 4] - 1) * 100
 												+ last_year_holiday[last_year_holiday.length - 3]; // e.g. 1125
 											var last_year_holiday_to   = (last_year_holiday[last_year_holiday.length - 2] - 1) * 100
 												+ last_year_holiday[last_year_holiday.length - 1]; // e.g. 0005
+											// console.log(last_year_holiday_from, last_year_holiday_to);
 
-											if (last_year_holiday_to < last_year_holiday_from && date_num < last_year_holiday_to)
+											if (last_year_holiday_from > last_year_holiday_to && date_num <= last_year_holiday_to)
 												return [ true, new Date(date.getFullYear(),
 													last_year_holiday[last_year_holiday.length - 2] - 1,
 													last_year_holiday[last_year_holiday.length - 1] + 1),
@@ -5150,12 +5477,12 @@
 									} else if (holiday_from <= date_num && (date_num < holiday_to_plus || holiday_ends_next_year)) {
 										return [ true, new Date(date.getFullYear() + holiday_ends_next_year, holiday[2+h] - 1, holiday[3+h] + 1),
 											applying_holidays[i].name ];
-									} else if (holiday_to_plus == date_num) { // selected holiday end is equal to month and day
+									} else if (holiday_to_plus === date_num) { // selected holiday end is equal to month and day
 										if (h + 4 < holiday.length) { // next holiday is next date range of the same holidays
 											h += 4;
 											return [ false, new Date(date.getFullYear(), holiday[0+h] - 1, holiday[1+h]) ];
 										} else {
-											if (i + 1 == applying_holidays.length) { // last holidays are handled, continue all over again
+											if (i + 1 === applying_holidays.length) { // last holidays are handled, continue all over again
 												var holiday = getSHForYear(applying_holidays[0], date.getFullYear() + 1);
 												return [ false, new Date(date.getFullYear() + !holiday_ends_next_year, holiday[0+h] - 1, holiday[1+h]) ];
 											} else { // return the start of the next holidays
@@ -5173,12 +5500,17 @@
 							selectors.weekday.push(selector);
 						else
 							selectors.holiday.push(selector);
-						at += 1;
+						at += 1; // FIXME: test
 					}
 				} else if (matchTokens(tokens, at, 'weekday')) {
 					return parseWeekdayRange(tokens, at, selectors, true);
+				} else if (matchTokens(tokens, at - 1, ',')) { // additional rule
+					throw formatWarnErrorMessage(
+						nrule,
+						at - 1,
+						t('additional rule no sense'));
 				} else {
-					throw formatWarnErrorMessage(nrule, at, 'Unexpected token (school holiday parser): ' + tokens[at][1]);
+					throw formatWarnErrorMessage(nrule, at, t('unexpected token holiday', {'token': tokens[at][1]}));
 				}
 
 				if (!matchTokens(tokens, at, ','))
@@ -5192,7 +5524,7 @@
 
 		/* Returns a number for a date which can then be used to compare just the dates (without the time). {{{
 		 * This is necessary because a selector could be called for the middle of the day and we need to tell if it matches that day.
-		 * Example: Returns 20150015 for Jan 01 2015
+		 * Example: Returns 20150015 for Jan 15 2015
 		 *
 		 * :param date: Date object.
 		 * :param include_year: Boolean. If true include the year.
@@ -5200,7 +5532,7 @@
 		 */
 		function getValueForDate(date, include_year) {
 			// Implicit because undefined evaluates to false.
-			// include_year = typeof include_year != 'undefined' ? include_year : false;
+			// include_year = typeof include_year !== 'undefined' ? include_year : false;
 
 			return (include_year ? date.getFullYear() * 10000 : 0) + date.getMonth() * 100 + date.getDate();
 		}
@@ -5209,16 +5541,15 @@
 		// return the school holiday definition e.g. [ 5, 25, /* to */ 6, 5 ],
 		// for the specified year
 		function getSHForYear(SH_hash, year, fatal) {
-			if (typeof fatal == 'undefined')
+			if (typeof fatal === 'undefined')
 				fatal = true;
 
 			var holiday = SH_hash[year];
-			if (typeof holiday == 'undefined') {
+			if (typeof holiday === 'undefined') {
 				holiday = SH_hash['default']; // applies for any year without explicit definition
-				if (typeof holiday == 'undefined') {
+				if (typeof holiday === 'undefined') {
 					if (fatal) {
-						throw formatLibraryBugMessage('School holiday ' + SH_hash.name + ' has no definition for the year ' + year + '.'
-								+ ' You can also add them: ' + repository_url);
+						throw formatLibraryBugMessage(t('no SH definition', {'name': SH_hash.name, 'year': year, 'repository_url': repository_url}));
 					} else {
 						return undefined;
 					}
@@ -5231,9 +5562,9 @@
 		// First try to get the state, if missing get the country wide holidays
 		// (which can be limited to some states).
 		function getMatchingHoliday(type_of_holidays) {
-			if (typeof location_cc != 'undefined') {
+			if (typeof location_cc !== 'undefined') {
 				if (holidays.hasOwnProperty(location_cc)) {
-					if (typeof location_state != 'undefined'
+					if (typeof location_state !== 'undefined'
 							&& holidays[location_cc][location_state]
 							&& holidays[location_cc][location_state][type_of_holidays]) {
 						// if holidays for the state are specified use it
@@ -5244,27 +5575,26 @@
 						var matching_holiday = {}; // holidays in the country wide scope can be limited to certain states
 						for (var holiday_name in holidays[location_cc][type_of_holidays]) {
 							if (typeof holidays[location_cc][type_of_holidays][holiday_name][2] === 'object') {
-								if (-1 != holidays[location_cc][type_of_holidays][holiday_name][2].indexOf(location_state))
+								if (-1 !== holidays[location_cc][type_of_holidays][holiday_name][2].indexOf(location_state))
 									matching_holiday[holiday_name] = holidays[location_cc][type_of_holidays][holiday_name];
 							} else {
 								matching_holiday[holiday_name] = holidays[location_cc][type_of_holidays][holiday_name];
 							}
 						}
 						if (Object.keys(matching_holiday).length === 0)
-						throw formatLibraryBugMessage('There are no holidays ' + type_of_holidays + ' defined for country ' + location_cc + '.'
-								+ ' You can also add them: ' + repository_url);
+						throw formatLibraryBugMessage(t('no PH definition',
+							{'name': type_of_holidays, 'cc': location_cc, 'repository_url': repository_url}));
 						return matching_holiday;
 					} else {
-						throw formatLibraryBugMessage('Holidays ' + type_of_holidays + ' are not defined for country ' + location_cc
-								+ ' and state ' + location_state + '.'
-								+ ' You can also add them: ' + repository_url);
+						throw formatLibraryBugMessage(t('no PH definition state',
+							{'name': type_of_holidays, 'cc': location_cc, 'state': location_state, 'repository_url': repository_url}));
 					}
 				} else {
-					throw formatLibraryBugMessage('No holidays are defined for country ' + location_cc + '.'
-							+ ' You can also add them: ' + repository_url);
+					throw formatLibraryBugMessage(t('no PH definition',
+						{'name': type_of_holidays, 'cc': location_cc, 'repository_url': repository_url}));
 				}
 			} else { /* We have no idea which holidays do apply because the country code was not provided. */
-				throw 'Country code missing which is needed to select the correct holidays (see README how to provide it)';
+				throw t('no country code');
 			}
 		}
 
@@ -5361,20 +5691,18 @@
 			var next_holiday;
 
 			for (var holiday_name in applying_holidays) {
-				if (typeof applying_holidays[holiday_name][0] == 'string') {
+				if (typeof applying_holidays[holiday_name][0] === 'string') {
 					var selected_movableDay = movableDays[applying_holidays[holiday_name][0]];
 					if (!selected_movableDay)
-						throw 'Movable day ' + applying_holidays[holiday_name][0] + ' can not not be calculated.'
-							+ ' Please add the formula how to calculate it.';
+						throw t('movable no formular', {'name': applying_holidays[holiday_name][0]});
 					next_holiday = new Date(selected_movableDay.getFullYear(),
 							selected_movableDay.getMonth(),
 							selected_movableDay.getDate()
 							+ applying_holidays[holiday_name][1]
 						);
-					if (year != next_holiday.getFullYear())
-						throw 'The movable day ' + applying_holidays[holiday_name][0] + ' plus '
-							+ applying_holidays[holiday_name][1]
-							+ ' days is not in the year of the movable day anymore. Currently not supported.';
+					if (year !== next_holiday.getFullYear())
+						throw t('movable not in year', {
+							'name': applying_holidays[holiday_name][0], 'days': applying_holidays[holiday_name][1]});
 				} else {
 					next_holiday = new Date(year,
 							applying_holidays[holiday_name][0] - 1,
@@ -5431,15 +5759,18 @@
 					var year_from = parseInt(tokens[at][0]);
 					// error checking {{{
 						if (is_range && tokens[at+2][0] <= year_from) {
-						// handle reversed range
-						if (tokens[at+2][0] == year_from)
-							throw formatWarnErrorMessage(nrule, at,
-								'A year range in which the start year is equal to the end year does not make sense.'
-								+ ' Please remove the end year. E.g. "' + year_from + ' May 23"');
-						else
-							throw formatWarnErrorMessage(nrule, at,
-								'A year range in which the start year is greater than the end year does not make sense.'
-								+ ' Please turn it over.');
+							// handle reversed range
+							if (tokens[at+2][0] === year_from) {
+								throw formatWarnErrorMessage(nrule, at, t('year range one year', {'year': year_from }));
+							} else {
+								throw formatWarnErrorMessage(nrule, at, t('year range reverse'));
+							}
+						}
+						if (!is_range && year_from < new Date().getFullYear()) {
+							parsing_warnings.push([ nrule, at, t('year past') ]);
+						}
+						if (is_range && tokens[at+2][0] < new Date().getFullYear()) {
+							parsing_warnings.push([ nrule, at+2, t('year past') ]);
 						}
 					// }}}
 
@@ -5464,7 +5795,7 @@
 						} else if (is_range) {
 							if (ouryear <= year_to)
 								return [true, new Date(year_to + 1, 0, 1)];
-						} else if (ouryear == year_from) {
+						} else if (ouryear === year_from) {
 							return [true];
 						}
 
@@ -5472,9 +5803,11 @@
 
 					}}(tokens, at, year_from, is_range, has_period, period));
 
-					at += 1 + (is_range ? 2 : 0) + (has_period ? (has_period == 2 ? 1 : 2) : 0);
+					at += 1 + (is_range ? 2 : 0) + (has_period ? (has_period === 2 ? 1 : 2) : 0);
+				} else if (matchTokens(tokens, at - 1, ',')) { // additional rule
+					throw formatWarnErrorMessage(nrule, at - 1, t('additional rule no sense'));
 				} else {
-					throw formatWarnErrorMessage(nrule, at, 'Unexpected token in year range: ' + tokens[at][1]);
+					throw formatWarnErrorMessage(nrule, at, t('unexpected token year range', {'token': tokens[at][1]}));
 				}
 
 				if (!matchTokens(tokens, at, ','))
@@ -5501,30 +5834,25 @@
 					var week_from = tokens[at][0];
 					var week_to   = is_range ? tokens[at+2][0] : week_from;
 					if (week_from > week_to) {
-						throw formatWarnErrorMessage(nrule, at+2,
-							'You have specified a week range in reverse order or leaping over a year. This is (currently) not supported.');
+						throw formatWarnErrorMessage(nrule, at+2, t('week range reverse'));
 					}
 					if (week_from < 1) {
-						throw formatWarnErrorMessage(nrule, at,
-							'You have specified a week date less then one. A valid week date range is 1-53.');
+						throw formatWarnErrorMessage(nrule, at, t('week negative'));
 					}
 					if (week_to > 53) {
-						throw formatWarnErrorMessage(nrule, is_range ? at+2 : at,
-							'You have specified a week date greater then 53. A valid week date range is 1-53.');
+						throw formatWarnErrorMessage(nrule, is_range ? at+2 : at, t('week exceed'));
 					}
 					if (is_range) {
 						period = matchTokens(tokens, at+3, '/', 'number');
 						if (period) {
 							period = tokens[at+4][0];
 							if (period < 2) {
-								throw formatWarnErrorMessage(nrule, at+4,
-									'You have specified a week period which is less than two.'
-									+ ' If you want to select the whole range from week ' + week_from + ' to week ' + week_to + ' then just omit the "/' + period + '".');
+								throw formatWarnErrorMessage(nrule, at+4, t('week period less than 2', {
+									'weekfrom': week_from, 'weekto': week_to, 'period': period}));
 							} else if (period > 26) {
-								throw formatWarnErrorMessage(nrule, at+4,
-									'You have specified a week period which is greater than 26.'
-									+ ' 26.5 is the half of the maximum 53 week dates per year so a week date period greater than 26 would only apply once per year.'
-									+ ' Please specify the week selector as "week ' + week_from + '" if that is what you want to express.');
+								throw formatWarnErrorMessage(nrule, at+4, t('week period greater than 26', {
+									'weekfrom': week_from
+								}));
 							}
 						}
 					}
@@ -5533,7 +5861,7 @@
 						week_stable = false;
 					}
 
-					if (!period && week_from == 1 && week_to == 53) {
+					if (!period && week_from === 1 && week_to === 53) {
 						/* Shortcut and work around bug. */
 						selectors.week.push(function(date) { return [true]; });
 					} else {
@@ -5567,13 +5895,15 @@
 							}
 
 							// console.log("Match");
-							return [true, getNextDateOfISOWeek(week_to == 53 ? 1 : week_to + 1, date)];
+							return [true, getNextDateOfISOWeek(week_to === 53 ? 1 : week_to + 1, date)];
 						}}(week_from, week_to, is_range, period));
 					}
 
 					at += 1 + (is_range ? 2 : 0) + (period ? 2 : 0);
+				} else if (matchTokens(tokens, at - 1, ',')) { // additional rule
+					throw formatWarnErrorMessage(nrule, at - 1, t('additional rule no sense'));
 				} else {
-					throw formatWarnErrorMessage(nrule, at, 'Unexpected token in week range: ' + tokens[at][1]);
+					throw formatWarnErrorMessage(nrule, at, t('unexpected token week range', {'token': tokens[at][1]}));
 				}
 
 				if (!matchTokens(tokens, at, ','))
@@ -5583,7 +5913,7 @@
 			return at;
 		}
 
-		// http://stackoverflow.com/a/6117889
+		// https://stackoverflow.com/a/6117889
 		/* For a given date, get the ISO week number
 		 *
 		 * Based on information at:
@@ -5612,7 +5942,7 @@
 		    // Calculate full weeks to nearest Thursday
 		    return Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7)
 		}
-		// http://stackoverflow.com/a/16591175
+		// https://stackoverflow.com/a/16591175
 		function getDateOfISOWeek(w, y) {
 			var simple = new Date(y, 0, 1 + (w - 1) * 7);
 			var dow = simple.getDay();
@@ -5695,7 +6025,7 @@
 
 					at += is_range ? 3 : 1;
 				} else {
-					throw formatWarnErrorMessage(nrule, at, 'Unexpected token in month range: ' + tokens[at][1]);
+					throw formatWarnErrorMessage(nrule, at, t('unexpected token month range', {'token': tokens[at][1]}));
 				}
 
 				if (!matchTokens(tokens, at, ','))
@@ -5735,11 +6065,11 @@
 				if (matchTokens(tokens, at+has_year[0], 'month', 'weekday', '[')) {
 					has_constrained_weekday[0] = getConstrainedWeekday(tokens, at+has_year[0]+3);
 					has_calc[0] = getMoveDays(tokens, has_constrained_weekday[0][1], 6, 'constrained weekdays');
-					at_range_sep = has_constrained_weekday[0][1] + (typeof has_calc[0] != 'undefined' && has_calc[0][1] ? 3 : 0);
+					at_range_sep = has_constrained_weekday[0][1] + (typeof has_calc[0] !== 'undefined' && has_calc[0][1] ? 3 : 0);
 				} else {
 					at_range_sep = at+has_year[0]
 						+ (has_event[0]
-							? (typeof has_calc[0] != 'undefined' && has_calc[0][1] ? 4 : 1)
+							? (typeof has_calc[0] !== 'undefined' && has_calc[0][1] ? 4 : 1)
 							: 2);
 				}
 
@@ -5760,7 +6090,7 @@
 				}
 
 				// monthday range like Jan 26-Feb 26 {{{
-				if (has_year[0] == has_year[1] && (has_month[1] || has_event[1] || has_constrained_weekday[1])) {
+				if (has_year[0] === has_year[1] && (has_month[1] || has_event[1] || has_constrained_weekday[1])) {
 
 					if (has_month[0])
 						checkIfDateIsValid(tokens[at+has_year[0]][0], tokens[at+has_year[0]+1][0], nrule, at+has_year[0]+1);
@@ -5776,13 +6106,12 @@
 							movableDays = getMovableEventsForYear(has_year[0] ? parseInt(tokens[at][0]) : date.getFullYear());
 							from_date = movableDays[tokens[at+has_year[0]][0]];
 
-							if (typeof has_calc[0] != 'undefined' && has_calc[0][1]) {
+							if (typeof has_calc[0] !== 'undefined' && has_calc[0][1]) {
 								var from_year_before_calc = from_date.getFullYear();
 								from_date.setDate(from_date.getDate() + has_calc[0][0]);
-								if (from_year_before_calc != from_date.getFullYear())
+								if (from_year_before_calc !== from_date.getFullYear())
 									throw formatWarnErrorMessage(nrule, at+has_year[0]+has_calc[0][1]*3,
-										'The movable day ' + tokens[at+has_year[0]][0] + ' plus ' + has_calc[0][0]
-										+ ' days is not in the year of the movable day anymore. Currently not supported.');
+										t('movable not in year', {'name': tokens[at+has_year[0]][0], 'days': has_calc[0][0]}));
 							}
 						} else if (has_constrained_weekday[0]) {
 							from_date = getDateForConstrainedWeekday((has_year[0] ? tokens[at][0] : date.getFullYear()), // year
@@ -5802,13 +6131,12 @@
 										: date.getFullYear());
 							to_date = movableDays[tokens[at_sec_event_or_month][0]];
 
-							if (typeof has_calc[1] != 'undefined' && has_calc[1][1]) {
+							if (typeof has_calc[1] !== 'undefined' && has_calc[1][1]) {
 								var to_year_before_calc = to_date.getFullYear();
 								to_date.setDate(to_date.getDate() + has_calc[1][0]);
-								if (to_year_before_calc != to_date.getFullYear())
+								if (to_year_before_calc !== to_date.getFullYear())
 									throw formatWarnErrorMessage(nrule, at_sec_event_or_month+has_calc[1][1],
-										'The movable day ' + tokens[at_sec_event_or_month][0] + ' plus ' + has_calc[1][0]
-										+ ' days is not in the year of the movable day anymore. Currently not supported.');
+										t('movable not in year', {'name': tokens[at_sec_event_or_month][0], 'days':  has_calc[1][0] }));
 							}
 						} else if (has_constrained_weekday[1]) {
 							to_date = getDateForConstrainedWeekday((has_year[1] ? tokens[at_sec_event_or_month-1][0] : date.getFullYear()), // year
@@ -5851,7 +6179,7 @@
 					at = (has_constrained_weekday[1]
 							? has_constrained_weekday[1][1]
 							: at_sec_event_or_month + (has_event[1] ? 1 : 2))
-						+ (typeof has_calc[1] != 'undefined' ? has_calc[1][1] : 0);
+						+ (typeof has_calc[1] !== 'undefined' ? has_calc[1][1] : 0);
 
 					// }}}
 					// Monthday range like Jan 26-31 {{{
@@ -5889,8 +6217,7 @@
 
 						// error checking {{{
 						if (range_to < range_from)
-							throw formatWarnErrorMessage(nrule, at+has_year+3,
-									'Range in wrong order. From day is greater than to day.');
+							throw formatWarnErrorMessage(nrule, at+has_year+3, t('day range reverse'));
 
 						checkIfDateIsValid(month, range_from, nrule, at+1 + has_year);
 						checkIfDateIsValid(month, range_to - 1 /* added previously */,
@@ -5902,13 +6229,13 @@
 
 							var from_date = new Date(has_year ? year : date.getFullYear(),
 								month, range_from);
-							if (month == 1 && range_from != from_date.getDate()) // Only on leap years does this day exist.
+							if (month === 1 && range_from !== from_date.getDate()) // Only on leap years does this day exist.
 								return [false]; // If day 29 does not exist,
 												// then the date object adds one day to date
 												// and this selector should not match.
 							var to_date   = new Date(from_date.getFullYear(),
 								month, range_to);
-							if (month == 1 && is_range && range_to != to_date.getDate()) // Only on leap years does this day exist.
+							if (month === 1 && is_range && range_to !== to_date.getDate()) // Only on leap years does this day exist.
 								return [false];
 
 							if (date.getTime() < from_date.getTime())
@@ -5950,21 +6277,19 @@
 						var movableDays = getMovableEventsForYear((has_year ? tokens[at][0] : date.getFullYear()));
 						var event_date = movableDays[tokens[at+has_year][0]];
 						if (!event_date)
-							throw 'Movable day ' + tokens[at+has_year][0] + ' can not not be calculated.'
-								+ ' Please add the formula how to calculate it.';
+							throw t('movable no formular', {'name': tokens[at+has_year][0]});
 
 						if (add_days[0]) {
 							event_date.setDate(event_date.getDate() + add_days[0]);
-							if (date.getFullYear() != event_date.getFullYear())
-								throw formatWarnErrorMessage(nrule, at+has_year+add_days[1], 'The movable day ' + tokens[at+has_year][0] + ' plus '
-									+ add_days[0]
-									+ ' days is not in the year of the movable day anymore. Currently not supported.');
+							if (date.getFullYear() !== event_date.getFullYear())
+								throw formatWarnErrorMessage(nrule, at+has_year+add_days[1], t('movable not in year', {
+									'name': tokens[at+has_year][0], 'days': add_days[0]}));
 						}
 
 						if (date.getTime() < event_date.getTime())
 							return [false, event_date];
 						// else if (date.getTime() < event_date.getTime() + msec_in_day) // does not work because of daylight saving times
-						else if (event_date.getMonth() * 100 + event_date.getDate() == date.getMonth() * 100 + date.getDate())
+						else if (event_date.getMonth() * 100 + event_date.getDate() === date.getMonth() * 100 + date.getDate())
 							return [true, new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)];
 						else
 							return [false, new Date(date.getFullYear() + 1, 0, 1)];
@@ -5976,7 +6301,7 @@
 					else
 						selectors.monthday.push(selector);
 
-					at += has_year[0] + has_event[0] + (typeof has_calc[0][1] != 'undefined' && has_calc[0][1] ? 3 : 0);
+					at += has_year[0] + has_event[0] + (typeof has_calc[0][1] !== 'undefined' && has_calc[0][1] ? 3 : 0);
 					// }}}
 				} else if (has_constrained_weekday[0]) {
 					at = parseMonthRange(tokens, at);
@@ -6033,7 +6358,7 @@
 						if (res[0]) {
 							has_matching_selector = true;
 
-							if (typeof res[2] == 'string') { // holiday name
+							if (typeof res[2] === 'string') { // holiday name
 								comment = [ res[2], nrule ];
 							}
 
@@ -6109,24 +6434,24 @@
 							match_rule  = rule;
 
 							/* Reset open end comment */
-							if (typeof comment == 'object' && comment[0] === 'Specified as open end. Closing time was guessed.')
+							if (typeof comment === 'object' && comment[0] === t('open end'))
 								comment = undefined;
 
 							// open end
 							if (res[2] === true && (resultstate || unknown)) {
-								comment = [ 'Specified as open end. Closing time was guessed.', match_rule ];
+								comment = [ t('open end'), match_rule ];
 
 								resultstate = false;
 								unknown     = true;
 
 								/* Hack to make second rule in '07:00+,12:00-16:00; 16:00-24:00 closed "needed because of open end"' obsolete {{{ */
-								if (typeof rules[rule].time[timesel+1] == 'function') {
+								if (typeof rules[rule].time[timesel+1] === 'function') {
 
 									var next_res = rules[rule].time[timesel+1](date);
 									if (  !next_res[0]
 										// && next_res[2]
-										&& typeof next_res[1] == 'object'
-										// && getValueForDate(next_res[1], true) != getValueForDate(date, true) // Just to be sure.
+										&& typeof next_res[1] === 'object'
+										// && getValueForDate(next_res[1], true) !== getValueForDate(date, true) // Just to be sure.
 										&& rules[rule].time[timesel](new Date(date.getTime() - 1))[0]
 										/* To distinguish the following two values:
 										 *	 'sunrise-14:00,14:00+',
@@ -6150,10 +6475,10 @@
 								 * + ', ' overwritten part: 00:00-03:00 open + '00:00-02:00 open', // Second internal rule.
 								 */
 								if (	false
-										&& typeof rules[rule-1] == 'object'
-										&& rules[rule].build_from_token_rule.toString() == rules[rule-1].build_from_token_rule.toString()
-										&& typeof rules[rule] == 'object'
-										&& rules[rule].build_from_token_rule.toString() == rules[rule].build_from_token_rule.toString()
+										&& typeof rules[rule-1] === 'object'
+										&& rules[rule].build_from_token_rule.toString() === rules[rule-1].build_from_token_rule.toString()
+										&& typeof rules[rule] === 'object'
+										&& rules[rule].build_from_token_rule.toString() === rules[rule].build_from_token_rule.toString()
 										) {
 
 									var last_wrapping_time_selector = rules[rule].time[rules[rule].time.length - 1];
@@ -6161,10 +6486,10 @@
 									// console.log(last_w_res);
 
 									if (    last_w_res[0]
-											&&  typeof last_w_res[2] == 'undefined'
-											&& (typeof last_w_res[2] == 'undefined' || last_w_res[2] === false) // Do not match for 'Tu 23:59-40:00+'
-											&&  typeof last_w_res[1] == 'object'
-											&& date.getTime() == last_w_res[1].getTime()
+											&&  typeof last_w_res[2] === 'undefined'
+											&& (typeof last_w_res[2] === 'undefined' || last_w_res[2] === false) // Do not match for 'Tu 23:59-40:00+'
+											&&  typeof last_w_res[1] === 'object'
+											&& date.getTime() === last_w_res[1].getTime()
 										) {
 
 										// '05:00-06:00,17:00+,13:00-02:00',
@@ -6194,10 +6519,10 @@
 				}
 			}
 
-			if (typeof rules[match_rule] == 'object' && typeof rules[match_rule].comment == 'string') {
+			if (typeof rules[match_rule] === 'object' && typeof rules[match_rule].comment === 'string') {
 				/* Only use comment if one is explicitly specified. */
 				comment = rules[match_rule].comment;
-			} else if (typeof comment == 'object') {
+			} else if (typeof comment === 'object') {
 				if (comment[1] === match_rule) {
 					comment = comment[0];
 				} else {
@@ -6220,7 +6545,7 @@
 		 */
 		function prettifySelector(tokens, selector_start, selector_end, selector_type, conf) {
 
-			var value = '';
+			var prettified_value = '';
 			var at = selector_start;
 			while (at <= selector_end) {
 				// console.log('At: ' + at + ', token: ' + tokens[at]);
@@ -6228,73 +6553,73 @@
 					if (!conf.leave_weekday_sep_one_day_betw
 						&& at - selector_start > 1 && (matchTokens(tokens, at-1, ',') || matchTokens(tokens, at-1, '-'))
 						&& matchTokens(tokens, at-2, 'weekday')
-						&& tokens[at][0] == (tokens[at-2][0] + 1) % 7) {
-							value = value.substring(0, value.length - 1) + conf.sep_one_day_between;
+						&& tokens[at][0] === (tokens[at-2][0] + 1) % 7) {
+							prettified_value = prettified_value.substring(0, prettified_value.length - 1) + conf.sep_one_day_between;
 					}
-					value += weekdays[tokens[at][0]];
+					prettified_value += weekdays[tokens[at][0]];
 				} else if (at - selector_start > 0 // e.g. '09:0' -> '09:00'
-						&& selector_type == 'time'
+						&& selector_type === 'time'
 						&& matchTokens(tokens, at-1, 'timesep')
 						&& matchTokens(tokens, at, 'number')) {
-					value += (tokens[at][0] < 10 ? '0' : '') + tokens[at][0].toString();
-				} else if (selector_type == 'time' // e.g. '9:00' -> ' 09:00'
+					prettified_value += (tokens[at][0] < 10 ? '0' : '') + tokens[at][0].toString();
+				} else if (selector_type === 'time' // e.g. '9:00' -> ' 09:00'
 						&& conf.zero_pad_hour
-						&& at != tokens.length
+						&& at !== tokens.length
 						&& matchTokens(tokens, at, 'number')
 						&& matchTokens(tokens, at+1, 'timesep')) {
-					value += (
+					prettified_value += (
 							tokens[at][0] < 10 ?
 								(tokens[at][0] === 0 && conf.one_zero_if_hour_zero ?
 								 '' : '0') :
 								'') + tokens[at][0].toString();
-				} else if (selector_type == 'time' // e.g. '9-18' -> '09:00-18:00'
+				} else if (selector_type === 'time' // e.g. '9-18' -> '09:00-18:00'
 						&& at + 2 <= selector_end
 						&& matchTokens(tokens, at, 'number')
 						&& matchTokens(tokens, at+1, '-')
 						&& matchTokens(tokens, at+2, 'number')) {
-					value += (tokens[at][0] < 10 ?
+					prettified_value += (tokens[at][0] < 10 ?
 							(tokens[at][0] === 0 && conf.one_zero_if_hour_zero ? '' : '0')
 							: '') + tokens[at][0].toString();
-					value += ':00-'
+					prettified_value += ':00-'
 						+ (tokens[at+2][0] < 10 ? '0' : '') + tokens[at+2][0].toString()
 						+ ':00';
 					at += 2;
 				} else if (matchTokens(tokens, at, 'comment')) {
-					value += '"' + tokens[at][0].toString() + '"';
+					prettified_value += '"' + tokens[at][0].toString() + '"';
 				} else if (matchTokens(tokens, at, 'closed')) {
-					value += (conf.leave_off_closed ? tokens[at][0] : conf.keyword_for_off_closed);
+					prettified_value += (conf.leave_off_closed ? tokens[at][0] : conf.keyword_for_off_closed);
 				} else if (at - selector_start > 0 && matchTokens(tokens, at, 'number')
-						&& (matchTokens(tokens, at-1, 'month') && selector_type == 'month'
-						||  matchTokens(tokens, at-1, 'week')  && selector_type == 'week'
+						&& (matchTokens(tokens, at-1, 'month') && selector_type === 'month'
+						||  matchTokens(tokens, at-1, 'week')  && selector_type === 'week'
 						)) {
-					value += ' '
+					prettified_value += ' '
 						+ (conf.zero_pad_month_and_week_numbers && tokens[at][0] < 10 ? '0' : '')
 						+ tokens[at][0];
 				} else if (at - selector_start > 0 && matchTokens(tokens, at, 'month')
 						&& matchTokens(tokens, at-1, 'year')) {
-					value += ' ' + months[[tokens[at][0]]];
+					prettified_value += ' ' + months[[tokens[at][0]]];
 				} else if (at - selector_start > 0 && matchTokens(tokens, at, 'event')
 						&& matchTokens(tokens, at-1, 'year')) {
-					value += ' ' + tokens[at][0];
+					prettified_value += ' ' + tokens[at][0];
 				} else if (matchTokens(tokens, at, 'month')) {
-					value += months[[tokens[at][0]]];
+					prettified_value += months[[tokens[at][0]]];
 					if (at + 1 <= selector_end && matchTokens(tokens, at+1, 'weekday'))
-						value += ' ';
+						prettified_value += ' ';
 				} else if (at + 2 <= selector_end
 						&& (matchTokens(tokens, at, '-') || matchTokens(tokens, at, '+'))
 						&& matchTokens(tokens, at+1, 'number', 'calcday')) {
-					value += ' ' + tokens[at][0] + tokens[at+1][0] + ' day' + (Math.abs(tokens[at+1][0]) == 1 ? '' : 's');
+					prettified_value += ' ' + tokens[at][0] + tokens[at+1][0] + ' day' + (Math.abs(tokens[at+1][0]) === 1 ? '' : 's');
 					at += 2;
-				} else if (at == selector_end
-						&& selector_type == 'weekday'
-						&& tokens[at][0] == ':') {
+				} else if (at === selector_end
+						&& selector_type === 'weekday'
+						&& tokens[at][0] === ':') {
 					// Do nothing.
 				} else {
-					value += tokens[at][0].toString();
+					prettified_value += tokens[at][0].toString();
 				}
 				at++;
 			}
-			return value;
+			return prettified_value;
 		}
 		// }}}
 
@@ -6302,103 +6627,6 @@
 		// Public interface {{{
 		// All functions below are considered public.
 		//======================================================================
-
-		// Iterator interface {{{
-		this.getIterator = function(date) {
-			return new function(oh) {
-				if (typeof date === 'undefined')
-					date = new Date();
-
-				var prevstate = [ undefined, date, undefined, undefined, undefined ];
-				var state = oh.getStatePair(date);
-
-				/* getDate {{{ */
-				this.getDate = function() {
-					return prevstate[1];
-				};
-				/* }}} */
-
-				/* setDate {{{ */
-				this.setDate = function(date) {
-					if (typeof date != 'object')
-						throw 'Date parameter needed.';
-
-					prevstate = [ undefined, date, undefined, undefined, undefined ];
-					state     = oh.getStatePair(date);
-				};
-				/* }}} */
-
-				/* getState: Check whether facility is `open' {{{ */
-				this.getState = function() {
-					return state[0];
-				};
-				/* }}} */
-
-				/* getUnknown: Checks whether the opening state is conditional or unknown {{{ */
-				this.getUnknown = function() {
-					return state[2];
-				};
-				/* }}} */
-
-				/* getStateString: Get state string. Either 'open', 'unknown' or 'closed' {{{ */
-				this.getStateString = function(past) {
-					return (state[0] ? 'open' : (state[2] ? 'unknown' : (past ? 'closed' : 'close')));
-				};
-				/* }}} */
-
-				/* getComment: Get the comment, undefined in none {{{ */
-				this.getComment = function() {
-					return state[3];
-				};
-				/* }}} */
-
-				/* getMatchingRule: Get the rule which matched thus deterrents the current state {{{ */
-				this.getMatchingRule = function() {
-					if (typeof state[4] == 'undefined')
-						return undefined;
-
-					return rules[state[4]].build_from_token_rule[2];
-				};
-				/* }}} */
-
-				/* advance: Advances to the next position {{{ */
-				this.advance = function(datelimit) {
-					if (typeof datelimit === 'undefined')
-						datelimit = new Date(prevstate[1].getTime() + msec_in_day * 366 * 5);
-					else if (datelimit.getTime() <= prevstate[1].getTime())
-						return false; // The limit for advance needs to be after the current time.
-
-					do {
-						// open range, we won't be able to advance
-						if (typeof state[1] === 'undefined')
-							return false;
-
-						// console.log('\n' + 'previous check time:', prevstate[1]
-							// + ', current check time:',
-							// // (state[1].getHours() < 10 ? '0' : '') + state[1].getHours() +
-							// // ':'+(state[1].getMinutes() < 10 ? '0' : '')+ state[1].getMinutes(), state[1].getDate(),
-							// state[1],
-							// (state[0] ? 'open' : (state[2] ? 'unknown' : 'closed')) + ', comment:', state[3]);
-
-						// We're going backwards or staying at place.
-						// This always indicates coding error in a selector code.
-						if (state[1].getTime() <= prevstate[1].getTime())
-							throw 'Fatal: infinite loop in nextChange';
-
-						// don't advance beyond limits (same as open range)
-						if (state[1].getTime() >= datelimit.getTime())
-							return false;
-
-						// do advance
-						prevstate = state;
-						state = oh.getStatePair(prevstate[1]);
-					} while (state[0] === prevstate[0] && state[2] === prevstate[2] && state[3] === prevstate[3]);
-					return true;
-				};
-				/* }}} */
-			}(this);
-		};
-		// }}}
 
 		// Simple API {{{
 
@@ -6466,7 +6694,6 @@
 		/* }}} */
 
 		// High-level API {{{
-
 		/* getOpenIntervals: Get array of open intervals between two dates {{{ */
 		this.getOpenIntervals = function(from, to) {
 			var res = [];
@@ -6478,13 +6705,13 @@
 
 			while (it.advance(to)) {
 				if (it.getState() || it.getUnknown()) {
-					if (res.length !== 0 && typeof res[res.length - 1][1] == 'undefined') {
+					if (res.length !== 0 && typeof res[res.length - 1][1] === 'undefined') {
 						// last state was also open or unknown
 						res[res.length - 1][1] = it.getDate();
 					}
 					res.push([it.getDate(), undefined, it.getUnknown(), it.getComment()]);
 				} else {
-					if (res.length !== 0 && typeof res[res.length - 1][1] == 'undefined') {
+					if (res.length !== 0 && typeof res[res.length - 1][1] === 'undefined') {
 						// only use the first time as closing/change time and ignore closing times which might follow
 						res[res.length - 1][1] = it.getDate();
 					}
@@ -6548,7 +6775,106 @@
 		};
 		/* }}} */
 		/* }}} */
+
+		// Iterator API {{{
+		this.getIterator = function(date) {
+			return new function(oh) {
+				if (typeof date === 'undefined')
+					date = new Date();
+
+				var prevstate = [ undefined, date, undefined, undefined, undefined ];
+				var state = oh.getStatePair(date);
+
+				/* getDate {{{ */
+				this.getDate = function() {
+					return prevstate[1];
+				};
+				/* }}} */
+
+				/* setDate {{{ */
+				this.setDate = function(date) {
+					if (typeof date !== 'object')
+						throw t('date parameter needed');
+
+					prevstate = [ undefined, date, undefined, undefined, undefined ];
+					state     = oh.getStatePair(date);
+				};
+				/* }}} */
+
+				/* getState: Check whether facility is `open' {{{ */
+				this.getState = function() {
+					return state[0];
+				};
+				/* }}} */
+
+				/* getUnknown: Checks whether the opening state is conditional or unknown {{{ */
+				this.getUnknown = function() {
+					return state[2];
+				};
+				/* }}} */
+
+				/* getStateString: Get state string. Either 'open', 'unknown' or 'closed' {{{ */
+				this.getStateString = function(past) {
+					return (state[0] ? 'open' : (state[2] ? 'unknown' : (past ? 'closed' : 'close')));
+				};
+				/* }}} */
+
+				/* getComment: Get the comment, undefined in none {{{ */
+				this.getComment = function() {
+					return state[3];
+				};
+				/* }}} */
+
+				/* getMatchingRule: Get the rule which matched thus deterrents the current state {{{ */
+				this.getMatchingRule = function() {
+					if (typeof state[4] === 'undefined')
+						return undefined;
+
+					return rules[state[4]].build_from_token_rule[2];
+				};
+				/* }}} */
+
+				/* advance: Advances to the next position {{{ */
+				this.advance = function(datelimit) {
+					if (typeof datelimit === 'undefined')
+						datelimit = new Date(prevstate[1].getTime() + msec_in_day * 366 * 5);
+					else if (datelimit.getTime() <= prevstate[1].getTime())
+						return false; // The limit for advance needs to be after the current time.
+
+					do {
+						// open range, we won't be able to advance
+						if (typeof state[1] === 'undefined')
+							return false;
+
+						// console.log('\n' + 'previous check time:', prevstate[1]
+							// + ', current check time:',
+							// // (state[1].getHours() < 10 ? '0' : '') + state[1].getHours() +
+							// // ':'+(state[1].getMinutes() < 10 ? '0' : '')+ state[1].getMinutes(), state[1].getDate(),
+							// state[1],
+							// (state[0] ? 'open' : (state[2] ? 'unknown' : 'closed')) + ', comment:', state[3]);
+
+						// We're going backwards or staying at place.
+						// This always indicates coding error in a selector code.
+						if (state[1].getTime() <= prevstate[1].getTime())
+							throw 'Fatal: infinite loop in nextChange';
+
+						// don't advance beyond limits (same as open range)
+						if (state[1].getTime() >= datelimit.getTime())
+							return false;
+
+						// do advance
+						prevstate = state;
+						state = oh.getStatePair(prevstate[1]);
+					} while (state[0] === prevstate[0] && state[2] === prevstate[2] && state[3] === prevstate[3]);
+					return true;
+				};
+				/* }}} */
+			}(this);
+		};
+		/* }}} */
+
 		/* }}} */
 	};
+
 }));
 // vim: set ts=4 sw=4 tw=0 noet foldmarker={{{,}}} foldlevel=0 foldmethod=marker :

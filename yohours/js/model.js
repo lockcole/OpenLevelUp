@@ -1863,8 +1863,15 @@ OpeningHoursParser: function() {
 							else if(RGX_MONTH.test(singleMonth)) {
 								singleMonth = singleMonth.split('-');
 								monthFrom = YoHours.model.OSM_MONTHS.indexOf(singleMonth[0])+1;
+								if(monthFrom < 1) {
+									throw new Error("Invalid month: "+singleMonth[0]);
+								}
+								
 								if(singleMonth.length > 1) {
 									monthTo = YoHours.model.OSM_MONTHS.indexOf(singleMonth[1])+1;
+									if(monthTo < 1) {
+										throw new Error("Invalid month: "+singleMonth[1]);
+									}
 								}
 								else {
 									monthTo = null;
@@ -1878,6 +1885,9 @@ OpeningHoursParser: function() {
 								//Read monthday start
 								monthFrom = singleMonth[0].split(' ');
 								monthFrom = { day: parseInt(monthFrom[1]), month: YoHours.model.OSM_MONTHS.indexOf(monthFrom[0])+1 };
+								if(monthFrom.month < 1) {
+									throw new Error("Invalid month: "+monthFrom[0]);
+								}
 								
 								if(singleMonth.length > 1) {
 									monthTo = singleMonth[1].split(' ');
@@ -1889,6 +1899,9 @@ OpeningHoursParser: function() {
 									//Another month
 									else {
 										monthTo = { day: parseInt(monthTo[1]), month: YoHours.model.OSM_MONTHS.indexOf(monthTo[0])+1 };
+										if(monthTo.month < 1) {
+											throw new Error("Invalid month: "+monthTo[0]);
+										}
 									}
 								}
 								else {
@@ -1918,7 +1931,15 @@ OpeningHoursParser: function() {
 							weeks.push({from: weekFrom, to: weekTo});
 						}
 					}
+					else {
+						throw Error("Invalid date selector");
+					}
 				}
+			}
+			
+			//If no read token, throw error
+			if(currentToken == tokens.length - 1) {
+				throw Error("Unreadable string");
 			}
 			
  			// console.log("months",months);
@@ -2198,4 +2219,34 @@ OpeningHoursParser: function() {
 	};
 }
 
+};
+
+
+/**
+ * Check compatibility of opening_hours string with YoHours
+ */
+YoHoursChecker = function() {
+//ATTRIBUTES
+	/** The OpeningHoursParser **/
+	var _parser = new YoHours.model.OpeningHoursParser();
+
+//OTHER METHODS
+	/**
+	 * Check if the opening_hours is readable by YoHours
+	 * @param oh The opening_hours string
+	 * @return True if YoHours can read it and display it
+	 */
+	this.canRead = function(oh) {
+		var result = false;
+		
+		try {
+			var parsed = _parser.parse(oh);
+			if(parsed != null) {
+				result = true;
+			}
+		}
+		catch(e) {;}
+		
+		return result;
+	};
 };

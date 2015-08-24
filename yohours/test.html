@@ -1870,6 +1870,31 @@
 			var builder = new YoHours.model.OpeningHoursBuilder();
 			assert.equal(builder.build(parser.parse("Mo 10:00; PH 11:00")), "Mo 10:00; PH 11:00");
 		});
+		QUnit.test("Parse unsupported 24/7; week 01: Su 01:00-08:00 || \"on appointment\"", function(assert) {
+			var parser = new YoHours.model.OpeningHoursParser();
+			try {
+				assert.notOk(parser.parse("24/7; week 01: Su 01:00-08:00 || \"on appointment\"") instanceof Array);
+			}
+			catch(e) {
+				assert.ok(true);
+			}
+		});
+		
+		/*
+		 * YoHoursChecker
+		 */
+		QUnit.module("Model > YoHoursChecker");
+		QUnit.test("Check valid", function(assert) {
+			var checker = new YoHoursChecker();
+			assert.ok(checker.canRead("24/7; week 01: Su 01:00-08:00"));
+		});
+		QUnit.test("Check invalid", function(assert) {
+			var checker = new YoHoursChecker();
+			assert.notOk(checker.canRead("24/7; week 01: Su 01:00-08:00 || \"on appointment\""));
+			assert.notOk(checker.canRead("not valid oh string"));
+			assert.notOk(checker.canRead("nothing"));
+			assert.notOk(checker.canRead("24/24, 7/7"));
+		});
 	</script>
 </head>
 <body>

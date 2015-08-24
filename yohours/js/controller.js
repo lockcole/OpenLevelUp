@@ -165,7 +165,18 @@ MainController: function() {
 			}
 			catch(e) {
 				console.error(e);
-				_view.getHoursInputView().setValid(false);
+				
+				//Show error
+				var ohTest;
+				try {
+					new opening_hours(str.trim());
+					ohTest = true;
+				}
+				catch(e2) {
+					ohTest = false;
+				}
+				
+				_view.getHoursInputView().setValid(false, ohTest);
 			}
 			
 			_view.getHoursInputView().setValue(str);
