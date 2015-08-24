@@ -169,10 +169,11 @@ MainController: function() {
 				//Show error
 				var ohTest;
 				try {
-					new opening_hours(str.trim());
+					new opening_hours(str.trim(), { lat: 48, lon: -2, address: { country_code: "fr" } });
 					ohTest = true;
 				}
 				catch(e2) {
+					console.error(e2);
 					ohTest = false;
 				}
 				

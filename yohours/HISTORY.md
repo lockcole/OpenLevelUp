@@ -1,8 +1,13 @@
 Changes history
 ===============
 
+24 august 2015
+--------------
+* opening_hours.js used to check if user input is valid (even if not readable by YoHours)
+* YoHoursChecker added to verify simply if an opening_hours value will be readable by YoHours
+
 21 august 2015
--------------
+--------------
 * Optional colon separator for wide range selector removed
 
 19 august 2015
