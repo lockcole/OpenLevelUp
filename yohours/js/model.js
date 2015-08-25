@@ -1120,6 +1120,167 @@ DateRange: function(s, e) {
 
 
 /**
+ * An opening_hours time, such as "08:00" or "08:00-10:00" or "off" (if no start and end)
+ * @param start The start minute (from midnight), can be null
+ * @param end The end minute (from midnight), can be null
+ */
+OhTime: function(start, end) {
+//ATTRIBUTES
+	/** The start minute **/
+	var _start = (start >= 0) ? start : null;
+	
+	/** The end minute **/
+	var _end = (end >= 0) ? end : null;
+
+//ACCESSORS
+	/**
+	 * @return The time in opening_hours format
+	 */
+	this.get = function() {
+		if(_start === null && _end === null) {
+			return "off";
+		}
+		else {
+			return _timeString(start) + ((_end == null) ? "" : "-" + _timeString(_end));
+		}
+	};
+	
+	/**
+	 * @return The start minutes
+	 */
+	this.getStart = function() {
+		return _start;
+	};
+	
+	/**
+	 * @return The end minutes
+	 */
+	this.getEnd = function() {
+		return _end;
+	};
+
+	/**
+	 * @return True if same time
+	 */
+	this.equals = function(t) {
+		return _start == t.getStart() && _end == t.getEnd();
+	};
+	
+//OTHER METHODS
+	/**
+	 * @return The hour in HH:MM format
+	 */
+	function _timeString(minutes) {
+		var h = Math.floor(minutes / 60);
+		var period = "";
+		var m = minutes % 60;
+		return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + period;
+	};
+},
+
+
+
+/**
+ * An opening_hours date, such as "Apr 21", "week 1-15 Mo,Tu", "Apr-Dec Mo-Fr", "SH Su", ...
+ */
+OhDate: function(w) {
+//ATTRIBUTES
+	/** Kind of wide date (monthday, month, week, sh) **/
+	var _wideType = null;
+	
+	/** Wide date **/
+	var _wide = null;
+	
+	/** Weekdays + PH **/
+	var _weekdays = null;
+
+//CONSTRUCTOR
+	//TODO parse w
+
+//ACCESSORS
+	/**
+	 * @return The wide type
+	 */
+	this.getWideType = function() {
+		return _wideType;
+	};
+
+	/**
+	 * @return The monthday, month, week, SH (depends of type)
+	 */
+	this.getWideValue = function() {
+		return _wide;
+	};
+	
+	/**
+	 * @return The date in opening_hours syntax (wide date only, no weekdays)
+	 */
+	this.get = function() {
+		//TODO
+	};
+	
+	/**
+	 * @return The weekdays in opening_hours syntax
+	 */
+	this.getWeekdays = function() {
+		//TODO
+	};
+},
+
+
+
+/**
+ * An opening_hours rule, such as "Mo,Tu 08:00-18:00"
+ */
+OhRule: function() {
+//ATTRIBUTES
+	/** The date selectors **/
+	var _date = [];
+	
+	/** The time selectors **/
+	var _time = [];
+
+//ACCESSORS
+	/**
+	 * @return The date selectors, as an array
+	 */
+	this.getDate = function() {
+		return _date;
+	};
+	
+	/**
+	 * @return The time selectors, as an array
+	 */
+	this.getTime = function() {
+		return _time;
+	};
+	
+	/**
+	 * @return The opening_hours value
+	 */
+	this.get = function() {
+		//TODO
+	};
+
+//MODIFIERS
+	/**
+	 * @param d A new date selector
+	 */
+	this.addDate = function(d) {
+		_date.push(d);
+	};
+	
+	/**
+	 * @param t A new time selector
+	 */
+	this.addTime = function(t) {
+		_time.push(t);
+	};
+},
+
+
+
+/**
  * Class OpeningHoursBuilder, creates opening_hours value from date range object
  */
 OpeningHoursBuilder: function() {
@@ -1133,6 +1294,7 @@ OpeningHoursBuilder: function() {
 		var dateRange;
 		var result = "", resIntv, rangeGeneral, rangeGeneralFor;
 		var generalFor;
+		var readRules = [];
 		
 		//Read each date range
 		for(var rangeId=0, l=dateRanges.length; rangeId < l; rangeId++) {
@@ -1186,10 +1348,40 @@ OpeningHoursBuilder: function() {
 					
 					//Add to result if something was returned by subparsers
 					if(resIntv.length > 0) {
-						if(result.length > 0) { result += "; "; }
-						result += resIntv;
+						readRules = readRules.concat(resIntv);
 					}
 				}
+			}
+		}
+		
+		//Reduce read rules by merging when possible
+		var rrId, merged;
+		
+		for(var i=1, l=readRules.length; i < l; i++) {
+			merged = false;
+			rrId = 0;
+			while(!merged && rrId < i) {
+				if(readRules[rrId] != null) {
+					console.log(readRules[rrId].time+" - "+readRules[i].time+" - "+readRules[rrId].date+" - "+readRules[i].date);
+				}
+				if(readRules[rrId] != null && readRules[rrId].time == readRules[i].time && _sameDateType(readRules[rrId].date, readRules[i].date)) {
+					readRules[rrId].date += ","+readRules[i].date;
+					merged = true;
+				}
+				rrId++;
+			}
+			if(merged) {
+				readRules[i] = null;
+			}
+		}
+		
+		//Create string result
+		var readRule;
+		for(var i=0, l=readRules.length; i < l; i++) {
+			readRule = readRules[i];
+			if(readRule != null) {
+				if(result.length > 0) { result += "; "; }
+				result += _weekSpecialCases(readRule.time, readRule.date);
 			}
 		}
 		
@@ -1212,7 +1404,7 @@ OpeningHoursBuilder: function() {
 		var interval;
 		var result = "";
 		
-		wideSelector = _wideSelectorSeparator(wideSelector);
+		//wideSelector = _wideSelectorSeparator(wideSelector);
 		
 		for(var i=0, l=intervals.length; i < l; i++) {
 			interval = intervals[i];
@@ -1223,7 +1415,7 @@ OpeningHoursBuilder: function() {
 			}
 		}
 		
-		return (result.length == 0) ? wideSelector+"off" : wideSelector+result;
+		return (result.length == 0) ? [{ date: wideSelector, time: "off" }] : [{ date: wideSelector, time: result }];
 	};
 	
 	/**
@@ -1237,7 +1429,7 @@ OpeningHoursBuilder: function() {
 		var intervals = week.getIntervalsDiff(generalDateRange.getTypical());
 		var daysStr;
 		
-		wideSelector = _wideSelectorSeparator(wideSelector);
+		//wideSelector = _wideSelectorSeparator(wideSelector);
 		
 		/*
 		 * Create time intervals per day
@@ -1278,7 +1470,7 @@ OpeningHoursBuilder: function() {
 		/*
 		 * Create string result
 		 */
-		var result = "";
+		var result = [];
 		for(var i=0; i < days.length; i++) {
 			var add = "";
 			
@@ -1353,10 +1545,7 @@ OpeningHoursBuilder: function() {
 			}
 			
 			if (add.length > 0) {
-				if (result.length > 0) {
-					result += "; ";
-				}
-				result += wideSelector+add;
+				result.push({ date: wideSelector, time: add });
 			}
 		}
 		
@@ -1364,7 +1553,7 @@ OpeningHoursBuilder: function() {
 		result = _addDaysOff(daysStatus, daysStr, wideSelector, result);
 		
 		//Special cases
-		result = _weekSpecialCases(result, wideSelector);
+		//result = _weekSpecialCases(result, wideSelector);
 		
 		return result;
 	};
@@ -1381,7 +1570,7 @@ OpeningHoursBuilder: function() {
 		var intervals = week.getIntervals(true);
 		var daysStr;
 		
-		wideSelector = _wideSelectorSeparator(wideSelector);
+		//wideSelector = _wideSelectorSeparator(wideSelector);
 		
 		/*
 		 * Create time intervals per day
@@ -1412,7 +1601,7 @@ OpeningHoursBuilder: function() {
 		/*
 		 * Create string result
 		 */
-		var result = "";
+		var result = [];
 		for(var i=0; i < days.length; i++) {
 			var add = "";
 			
@@ -1453,10 +1642,7 @@ OpeningHoursBuilder: function() {
 			}
 			
 			if (add.length > 0) {
-				if (result.length > 0) {
-					result += "; ";
-				}
-				result += wideSelector+add;
+				result.push( { date: wideSelector, time: add });
 			}
 		}
 		
@@ -1464,7 +1650,7 @@ OpeningHoursBuilder: function() {
 		result = _addDaysOff(daysStatus, daysStr, wideSelector, result);
 		
 		//Special cases
-		result = _weekSpecialCases(result, wideSelector);
+		//result = _weekSpecialCases(result, wideSelector);
 		
 		return result;
 	};
@@ -1480,6 +1666,28 @@ OpeningHoursBuilder: function() {
 	function _wideSelectorSeparator(wideSelector) {
 		if(wideSelector.length > 0) { wideSelector += " "; }
 		return wideSelector;
+	};
+	
+	/**
+	 * @return True if the given dates have the same type
+	 */
+	function _sameDateType(d1, d2) {
+		d1 = d1.split(',')[0];
+		d2 = d2.split(',')[0];
+		
+		var RGX_WEEK_VAL = /^week ([01234]?[0-9]|5[0123])(\-([01234]?[0-9]|5[0123]))?\:?$/;
+		if(RGX_WEEK_VAL.test(d1) && RGX_WEEK_VAL.test(d2)) { return true; }
+		
+		var RGX_MONTH = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))?\:?$/;
+		if(RGX_MONTH.test(d1) && RGX_MONTH.test(d2)) { return true; }
+		
+		var RGX_MONTHDAY = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([012]?[0-9]|3[01])(\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) )?([012]?[0-9]|3[01]))?\:?$/;
+		if(RGX_MONTHDAY.test(d1) && RGX_MONTHDAY.test(d2)) { return true; }
+		
+		var RGX_WEEKDAY = /^(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|easter))(,(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|easter)))*$/;
+		if(RGX_WEEKDAY.test(d1) && RGX_WEEKDAY.test(d2)) { return true; }
+		
+		return false;
 	};
 	
 	/**
@@ -1638,8 +1846,7 @@ OpeningHoursBuilder: function() {
 		}
 		
 		if(resOff.length > 0) {
-			if(result.length > 0) { result += "; "; }
-			result += wideSelector+resOff+" off";
+			result.push({ date: _wideSelectorSeparator(wideSelector)+resOff, time: "off" });
 		}
 		
 		return result;
@@ -1650,21 +1857,24 @@ OpeningHoursBuilder: function() {
 	 */
 	function _weekSpecialCases(result, wideSelector) {
 		//All week with same hours
-		if(/^Mo\-Su (\d{2}|open|closed|off)/.test(result.substr(wideSelector.length))) {
-			result = wideSelector+result.substr(wideSelector.length+6);
+		if(/^Mo\-Su (\d{2}|open|closed|off)/.test(result)) {
+			result = result.substr(6);
+		}
+		if(/Mo\-Su/.test(wideSelector)) {
+			wideSelector = wideSelector.replace(/Mo\-Su/, '').trim();
 		}
 		
 		// 24/7
-		if(result == wideSelector+"00:00-24:00") {
-			result = wideSelector+"24/7";
+		if(result == "00:00-24:00") {
+			result = "24/7";
 		}
 		
 		//Never opened and not full year
 		if(result == "" && wideSelector.length > 0) {
-			result = wideSelector+"off";
+			result = "off";
 		}
 		
-		return result;
+		return (wideSelector.length > 0) ? wideSelector+" "+result : result;
 	};
 	
 	/**
