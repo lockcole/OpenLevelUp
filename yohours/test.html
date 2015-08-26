@@ -1266,6 +1266,10 @@
 			var oh = new YoHours.model.OhTime(0);
 			assert.equal(oh.get(), "00:00");
 		});
+		QUnit.test("Get start = end", function(assert) {
+			var oh = new YoHours.model.OhTime(10,10);
+			assert.equal(oh.get(), "00:10");
+		});
 		QUnit.test("Get with end", function(assert) {
 			var oh = new YoHours.model.OhTime(0, 60);
 			assert.equal(oh.get(), "00:00-01:00");
@@ -1350,8 +1354,8 @@
 			assert.equal(od.getWeekdays(), "Mo,Tu,Th,Sa,Su");
 		});
 		QUnit.test("Get weekdays 2", function(assert) {
-			var od = new YoHours.model.OhDate("Apr 21-Aug 22", "day", [0,1,4,3,2,5,6]);
-			assert.equal(od.getWeekdays(), "Mo-Su");
+			var od = new YoHours.model.OhDate("Apr 21-Aug 22", "day", [0,1,4,3,2,5]);
+			assert.equal(od.getWeekdays(), "Mo-Sa");
 		});
 		QUnit.test("Get weekdays 3", function(assert) {
 			var od = new YoHours.model.OhDate("Apr 21-Aug 22", "day", [0,6]);
@@ -1364,6 +1368,10 @@
 		QUnit.test("Get weekdays 5", function(assert) {
 			var od = new YoHours.model.OhDate("Apr 21-Aug 22", "day", [0,1,2,4,5,6]);
 			assert.equal(od.getWeekdays(), "Mo-We,Fr-Su");
+		});
+		QUnit.test("Get weekdays 6", function(assert) {
+			var od = new YoHours.model.OhDate("Apr 21-Aug 22", "day", [0,1,2,3,4,5,6]);
+			assert.equal(od.getWeekdays(), "");
 		});
 		QUnit.test("Same kind as valid", function(assert) {
 			var od1 = new YoHours.model.OhDate("Apr 21-Aug 22", "day", [0,1,2,4,5,6]);
@@ -1395,6 +1403,24 @@
 			assert.notOk(od1.equals(od2));
 			assert.notOk(od2.equals(od1));
 			assert.ok(od2.equals(od2));
+		});
+		QUnit.test("Add weekday new", function(assert) {
+			var od1 = new YoHours.model.OhDate("Apr 21-Aug 22", "day", [0]);
+			assert.equal(od1.getWd().length, 1);
+			
+			od1.addWeekday(5);
+			assert.equal(od1.getWd().length, 2);
+			assert.equal(od1.getWd()[0], 0);
+			assert.equal(od1.getWd()[1], 5);
+		});
+		QUnit.test("Add weekday existing", function(assert) {
+			var od1 = new YoHours.model.OhDate("Apr 21-Aug 22", "day", [0, 3]);
+			assert.equal(od1.getWd().length, 2);
+			
+			od1.addWeekday(3);
+			assert.equal(od1.getWd().length, 2);
+			assert.equal(od1.getWd()[0], 0);
+			assert.equal(od1.getWd()[1], 3);
 		});
 		
 		/*
@@ -1461,6 +1487,16 @@
 			
 			assert.equal(or.get(), "Mar,Jul-Oct Mo-We,Fr-Su off");
 		});
+		QUnit.test("Get time completely null", function(assert) {
+			var or = new YoHours.model.OhRule();
+			
+			var od1 = new YoHours.model.OhDate("Mar", "month", [0,1,2,4,5,6]);
+			var od2 = new YoHours.model.OhDate("Jul-Oct", "month", [0,1,2,4,5,6]);
+			or.addDate(od1);
+			or.addDate(od2);
+
+			assert.equal(or.get(), "Mar,Jul-Oct Mo-We,Fr-Su off");
+		});
 		QUnit.test("Get date always", function(assert) {
 			var or = new YoHours.model.OhRule();
 			
@@ -1474,12 +1510,34 @@
 			
 			assert.equal(or.get(), "Mo-We,Fr-Su 00:00-01:00,03:00-04:00");
 		});
-		QUnit.test("Same time equal", function(assert) {
+		QUnit.test("Same time equal 1", function(assert) {
 			var or1 = new YoHours.model.OhRule();
 			var or2 = new YoHours.model.OhRule();
 			
 			var ot1 = new YoHours.model.OhTime(10*60, 12*60);
 			var ot2 = new YoHours.model.OhTime(14*60, 16*60);
+			
+			or1.addTime(ot1);
+			or1.addTime(ot2);
+			
+			or2.addTime(ot1);
+			or2.addTime(ot2);
+			
+			assert.ok(or1.sameTime(or2));
+			assert.ok(or2.sameTime(or1));
+		});
+		QUnit.test("Same time equal 2", function(assert) {
+			var or1 = new YoHours.model.OhRule();
+			var or2 = new YoHours.model.OhRule();
+			
+			var od1 = new YoHours.model.OhDate("", "always", [0,1,2,3,4,5,6]);
+			var od2 = new YoHours.model.OhDate("Jun", "month", [3,4,5,6]);
+			
+			or1.addDate(od1);
+			or2.addDate(od2);
+			
+			var ot1 = new YoHours.model.OhTime(0, 24*60);
+			var ot2 = new YoHours.model.OhTime(0, 24*60);
 			
 			or1.addTime(ot1);
 			or1.addTime(ot2);
