@@ -84,3 +84,19 @@ Array.prototype.equals = function (array) {
     }       
     return true;
 };
+
+/**
+ * Does the array contains the given object
+ * @param a The array
+ * @param obj The object to look for
+ * @return True if obj in array
+ */
+Array.prototype.contains = function(obj) {
+	var i = this.length;
+	while (i--) {
+		if (this[i] === obj) {
+			return true;
+		}
+	}
+	return false;
+};

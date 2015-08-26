@@ -1182,20 +1182,25 @@ OhTime: function(start, end) {
 
 /**
  * An opening_hours date, such as "Apr 21", "week 1-15 Mo,Tu", "Apr-Dec Mo-Fr", "SH Su", ...
+ * @param w The wide selector, as string
+ * @param wt The wide selector type (month, week, day, holiday, always)
+ * @param wd The weekdays, as integer array
  */
-OhDate: function(w) {
+OhDate: function(w, wt, wd) {
 //ATTRIBUTES
-	/** Kind of wide date (monthday, month, week, sh) **/
-	var _wideType = null;
+	/** Kind of wide date (month, week, day, holiday, always) **/
+	var _wideType = wt;
 	
 	/** Wide date **/
-	var _wide = null;
+	var _wide = w;
 	
 	/** Weekdays + PH **/
-	var _weekdays = null;
+	var _weekdays = wd.sort();
 
 //CONSTRUCTOR
-	//TODO parse w
+	if(w == null || wt == null || wd == null) {
+		throw Error("Missing parameter");
+	}
 
 //ACCESSORS
 	/**
@@ -1213,17 +1218,71 @@ OhDate: function(w) {
 	};
 	
 	/**
-	 * @return The date in opening_hours syntax (wide date only, no weekdays)
+	 * @return The weekdays array
 	 */
-	this.get = function() {
-		//TODO
+	this.getWd = function() {
+		return _weekdays;
+	};
+	
+	/**
+	 * @param a The other weekdays array
+	 * @return True if same weekdays as other object
+	 */
+	this.sameWd = function(a) {
+		return a.equals(_weekdays);
 	};
 	
 	/**
 	 * @return The weekdays in opening_hours syntax
 	 */
 	this.getWeekdays = function() {
-		//TODO
+		var result = YoHours.model.OSM_DAYS[_weekdays[0]];
+		var firstInRow = _weekdays[0];
+		
+		for(var i=1; i < _weekdays.length; i++) {
+			//When days aren't following
+			if(_weekdays[i-1] != _weekdays[i] - 1) {
+				//Previous day range length > 1
+				if(firstInRow != _weekdays[i-1]) {
+					//Two days
+					if(_weekdays[i-1] - firstInRow == 1) {
+						result += ","+YoHours.model.OSM_DAYS[_weekdays[i-1]];
+					}
+					else {
+						result += "-"+YoHours.model.OSM_DAYS[_weekdays[i-1]];
+					}
+				}
+				
+				//Add the current day
+				result += ","+YoHours.model.OSM_DAYS[_weekdays[i]];
+				firstInRow = _weekdays[i];
+			}
+			else if(i==_weekdays.length-1) {
+				if(_weekdays[i] - firstInRow == 1) {
+					result += ","+YoHours.model.OSM_DAYS[_weekdays[i]];
+				}
+				else {
+					result += "-"+YoHours.model.OSM_DAYS[_weekdays[i]];
+				}
+			}
+		}
+		
+		return result;
+	};
+	
+	/**
+	 * Is the given object of the same kind as this one
+	 * @return True if same weekdays and same wide type
+	 */
+	this.sameKindAs = function(d) {
+		return _wideType == d.getWideType() && d.sameWd(_weekdays);
+	};
+	
+	/**
+	 * @return True if this object is equal to the given one
+	 */
+	this.equals = function(o) {
+		return o instanceof YoHours.model.OhDate && _wideType == o.getWideType() && _wide == o.getWideValue() && o.sameWd(_weekdays);
 	};
 },
 
@@ -1259,7 +1318,51 @@ OhRule: function() {
 	 * @return The opening_hours value
 	 */
 	this.get = function() {
-		//TODO
+		var result = "";
+		
+		//Create date part
+		if(_date.length > 1 || _date[0].getWideValue() != "") {
+			//Add wide selectors
+			for(var i=0, l=_date.length; i < l; i++) {
+				if(i > 0) {
+					result += ",";
+				}
+				result += _date[i].getWideValue();
+			}
+		}
+		
+		//Add weekdays
+		if(_date.length > 0) {
+			result += " "+_date[0].getWeekdays();
+		}
+		
+		//Create time part
+		result += " ";
+		for(var i=0, l=_time.length; i < l; i++) {
+			if(i > 0) {
+				result += ",";
+			}
+			result += _time[i].get();
+		}
+		
+		return result.trim();
+	};
+	
+	/**
+	 * @return True if the given rule has the same time as this one
+	 */
+	this.sameTime = function(o) {
+		if(o.getTime().length != _time.length) {
+			return false;
+		}
+		else {
+			for(var i=0, l=_time.length; i < l; i++) {
+				if(!_time[i].equals(o.getTime()[i])) {
+					return false;
+				}
+			}
+			return true;
+		}
 	};
 
 //MODIFIERS
@@ -1267,14 +1370,32 @@ OhRule: function() {
 	 * @param d A new date selector
 	 */
 	this.addDate = function(d) {
-		_date.push(d);
+		//Check param
+		if(d == null || d == undefined || !d instanceof YoHours.model.OhDate) {
+			throw Error("Invalid parameter");
+		}
+		
+		//Check if date can be added
+		if(_date.length == 0 || (_date[0].getWideType() != "always" && _date[0].sameKindAs(d))) {
+			_date.push(d);
+		}
+		else {
+			if(_date.length != 1 || _date[0].getWideType() != "always" || !_date[0].sameWd(d.getWd())) {
+				throw Error("This date can't be added to this rule");
+			}
+		}
 	};
 	
 	/**
 	 * @param t A new time selector
 	 */
 	this.addTime = function(t) {
-		_time.push(t);
+		if((_time.length == 0 || _time[0].get() != "off") && !_time.contains(t)) {
+			_time.push(t);
+		}
+		else {
+			throw Error("This time can't be added to this rule");
+		}
 	};
 },
 
@@ -1291,6 +1412,62 @@ OpeningHoursBuilder: function() {
 	 * @return The opening_hours string
 	 */
 	this.build = function(dateRanges) {
+		var rules = [];
+		var dateRange, ohrules, ohrule, ohruleAdded, ruleId;
+		
+		//Read each date range
+		for(var rangeId=0, l=dateRanges.length; rangeId < l; rangeId++) {
+			dateRange = dateRanges[rangeId];
+			
+			if(dateRange != undefined) {
+				//Get rules for this date range
+				ohrules = _createRules(dateRange);
+				
+				//Process each rule
+				for(var ohruleId=0, orl=ohrules.length; ohruleId < orl; ohruleId++) {
+					ohrule = ohrules[ohruleId];
+					ohruleAdded = false;
+					ruleId = 0;
+					
+					//Try to add them to previously defined ones
+					while(!ohruleAdded && ruleId < rules.length) {
+						if(rules[ruleId].sameTime(ohrule)) {
+							//If first date not same kind as in found rule, continue
+							try {
+								for(var dateId=0, dl=ohrule.getDate().length; dateId < dl; dateId++) {
+									rules[ruleId].addDate(ohrule.getDate()[dateId]);
+								}
+								ohruleAdded = true;
+							}
+							catch(e) {
+								ruleId++;
+							}
+						}
+						else {
+							ruleId++;
+						}
+					}
+					
+					//If not, add as new rule
+					if(!ohruleAdded) {
+						rules.push(ohrule);
+					}
+				}
+			}
+		}
+		
+		//Create result string
+		var result = "";
+		for(var ruleId=0, l=rules.length; ruleId < l; ruleId++) {
+			if(ruleId > 0) { result += "; "; }
+			result += rules[ruleId].get();
+		}
+		
+		//return result;
+		
+		/***************
+		 * Old version *
+		 ***************/
 		var dateRange;
 		var result = "", resIntv, rangeGeneral, rangeGeneralFor;
 		var generalFor;
@@ -1389,6 +1566,14 @@ OpeningHoursBuilder: function() {
 	};
 
 
+	/**
+	 * Create the opening_hours rules for this date range
+	 */
+	function _createRules(dateRange) {
+		//TODO
+		return [];
+	};
+	
 /***********************
  * Top level functions *
  ***********************/
