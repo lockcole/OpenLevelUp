@@ -2620,5 +2620,3 @@ YoHoursChecker = function() {
 		return result;
 	};
 };
-
-var test = new YoHours.model.WideInterval.days(1,2,3,4);
