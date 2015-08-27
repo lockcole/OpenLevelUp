@@ -1196,6 +1196,9 @@ OhDate: function(w, wt, wd) {
 	
 	/** Weekdays + PH **/
 	var _weekdays = wd.sort();
+	
+	/** Overwritten days (to allow create simpler rules) **/
+	var _wdOver = [];
 
 //CONSTRUCTOR
 	if(w == null || wt == null || wd == null) {
@@ -1237,36 +1240,37 @@ OhDate: function(w, wt, wd) {
 	 */
 	this.getWeekdays = function() {
 		var result = "";
+		var wd = _weekdays.concat(_wdOver).sort();
 		
 		//Process only if not 
-		if(_weekdays.length > 1 || _weekdays[0] != -1) {
-			result = YoHours.model.OSM_DAYS[_weekdays[0]];
-			var firstInRow = _weekdays[0];
+		if(wd.length > 1 || wd[0] != -1) {
+			result = YoHours.model.OSM_DAYS[wd[0]];
+			var firstInRow = wd[0];
 			
-			for(var i=1; i < _weekdays.length; i++) {
+			for(var i=1; i < wd.length; i++) {
 				//When days aren't following
-				if(_weekdays[i-1] != _weekdays[i] - 1) {
+				if(wd[i-1] != wd[i] - 1) {
 					//Previous day range length > 1
-					if(firstInRow != _weekdays[i-1]) {
+					if(firstInRow != wd[i-1]) {
 						//Two days
-						if(_weekdays[i-1] - firstInRow == 1) {
-							result += ","+YoHours.model.OSM_DAYS[_weekdays[i-1]];
+						if(wd[i-1] - firstInRow == 1) {
+							result += ","+YoHours.model.OSM_DAYS[wd[i-1]];
 						}
 						else {
-							result += "-"+YoHours.model.OSM_DAYS[_weekdays[i-1]];
+							result += "-"+YoHours.model.OSM_DAYS[wd[i-1]];
 						}
 					}
 					
 					//Add the current day
-					result += ","+YoHours.model.OSM_DAYS[_weekdays[i]];
-					firstInRow = _weekdays[i];
+					result += ","+YoHours.model.OSM_DAYS[wd[i]];
+					firstInRow = wd[i];
 				}
 				else if(i==_weekdays.length-1) {
-					if(_weekdays[i] - firstInRow == 1) {
-						result += ","+YoHours.model.OSM_DAYS[_weekdays[i]];
+					if(wd[i] - firstInRow == 1) {
+						result += ","+YoHours.model.OSM_DAYS[wd[i]];
 					}
 					else {
-						result += "-"+YoHours.model.OSM_DAYS[_weekdays[i]];
+						result += "-"+YoHours.model.OSM_DAYS[wd[i]];
 					}
 				}
 			}
@@ -1297,11 +1301,21 @@ OhDate: function(w, wt, wd) {
 	 * Adds a new weekday in this date
 	 */
 	this.addWeekday = function(wd) {
-		if(!_weekdays.contains(wd)) {
+		if(!_weekdays.contains(wd) && !_wdOver.contains(wd)) {
 			_weekdays.push(wd);
 			_weekdays = _weekdays.sort();
 		}
 	};
+	
+	/**
+	 * Adds an overwritten weekday, which can be included in this date and that will be overwritten in a following rule
+	 */
+	this.addOverwrittenWeekday = function(wd) {
+		if(!_wdOver.contains(wd) && !_weekdays.contains(wd)) {
+			_wdOver.push(wd);
+			_wdOver = _wdOver.sort();
+		}
+	}
 },
 
 
@@ -1380,7 +1394,7 @@ OhRule: function() {
 	 * @return True if the given rule has the same time as this one
 	 */
 	this.sameTime = function(o) {
-		if(o.getTime().length != _time.length) {
+		if(o == undefined || o == null || o.getTime().length != _time.length) {
 			return false;
 		}
 		else {
@@ -1402,6 +1416,15 @@ OhRule: function() {
 
 //MODIFIERS
 	/**
+	 * Adds a weekday to all the dates
+	 */
+	this.addWeekday = function(wd) {
+		for(var i=0; i < _date.length; i++) {
+			_date[i].addWeekday(wd);
+		}
+	};
+	
+	/**
 	 * @param d A new date selector
 	 */
 	this.addDate = function(d) {
@@ -1415,7 +1438,7 @@ OhRule: function() {
 			_date.push(d);
 		}
 		else {
-			if(_date.length != 1 || _date[0].getWideType() != "always" || (_date[0].getWideType() != "always" && !_date[0].sameWd(d.getWd()))) {
+			if(_date.length != 1 || _date[0].getWideType() != "always" || !_date[0].sameWd(d.getWd())) {
 				throw Error("This date can't be added to this rule");
 			}
 		}
@@ -1449,51 +1472,82 @@ OpeningHoursBuilder: function() {
 	this.build = function(dateRanges) {
 		var rules = [];
 		var dateRange, ohrules, ohrule, ohruleAdded, ruleId, rangeGeneral, rangeGeneralFor;
-		var firstDateRange = true;
 		
 		//Read each date range
 		for(var rangeId=0, l=dateRanges.length; rangeId < l; rangeId++) {
 			dateRange = dateRanges[rangeId];
 			
 			if(dateRange != undefined) {
-				//Get rules for this date range
-				ohrules = _createRules(dateRange);
+				//Check if the defined typical week/day is not strictly equal to a previous wider rule
+				rangeGeneral = null;
+				rangeGeneralFor = null;
+				var rangeGenId=rangeId-1;
+				while(rangeGenId >= 0 && rangeGeneral == null) {
+					if(dateRanges[rangeGenId] != undefined) {
+						generalFor = dateRanges[rangeGenId].isGeneralFor(dateRange.getStart(), dateRange.getEnd());
+						if(
+							dateRanges[rangeGenId].hasSameTypical(dateRange)
+							&& (
+								dateRanges[rangeGenId].isSameRange(dateRange.getStart(), dateRange.getEnd())
+								|| generalFor
+							)
+						) {
+							rangeGeneral = rangeGenId;
+						}
+						else if(generalFor && dateRanges[rangeGenId].definesTypicalWeek() && dateRange.definesTypicalWeek()) {
+							rangeGeneralFor = rangeGenId; //Keep this ID to make differences in order to simplify result
+						}
+					}
+					rangeGenId--;
+				}
 				
-				//Process each rule
-				for(var ohruleId=0, orl=ohrules.length; ohruleId < orl; ohruleId++) {
-					ohrule = ohrules[ohruleId];
-					ohruleAdded = false;
-					ruleId = 0;
+				if(rangeId == 0 || rangeGeneral == null) {
+					//Get rules for this date range
+					if(dateRange.definesTypicalWeek()) {
+						if(rangeGeneralFor != null) {
+							ohrules = _buildWeekDiff(dateRange, dateRanges[rangeGeneralFor]);
+						}
+						else {
+							ohrules = _buildWeek(dateRange);
+						}
+					}
+					else {
+						ohrules = _buildDay(dateRange);
+					}
 					
-					//Try to add them to previously defined ones
-					while(!ohruleAdded && ruleId < rules.length) {
-						//Identical one
-						console.log(ohruleId, ruleId, rules[ruleId].sameTime(ohrule));
-						if(rules[ruleId].sameTime(ohrule)) {
-							try {
-								for(var dateId=0, dl=ohrule.getDate().length; dateId < dl; dateId++) {
-									console.log(ohrule.getDate()[dateId].getWideValue(), ohrule.getDate()[dateId].getWeekdays());
-									rules[ruleId].addDate(ohrule.getDate()[dateId]);
+					//Process each rule
+					for(var ohruleId=0, orl=ohrules.length; ohruleId < orl; ohruleId++) {
+						ohrule = ohrules[ohruleId];
+						ohruleAdded = false;
+						ruleId = 0;
+						
+						//Try to add them to previously defined ones
+						while(!ohruleAdded && ruleId < rules.length) {
+							//Identical one
+							if(rules[ruleId].sameTime(ohrule)) {
+								try {
+									for(var dateId=0, dl=ohrule.getDate().length; dateId < dl; dateId++) {
+										console.log(ohrule.getDate()[dateId].getWideValue(), ohrule.getDate()[dateId].getWeekdays());
+										rules[ruleId].addDate(ohrule.getDate()[dateId]);
+									}
+									ohruleAdded = true;
 								}
-								ohruleAdded = true;
+								//If first date not same kind as in found rule, continue
+								catch(e) {
+									ruleId++;
+								}
 							}
-							//If first date not same kind as in found rule, continue
-							catch(e) {
+							else {
 								ruleId++;
 							}
 						}
-						else {
-							ruleId++;
+						
+						//If not, add as new rule
+						if(!ohruleAdded) {
+							rules.push(ohrule);
 						}
 					}
-					
-					//If not, add as new rule
-					if(!ohruleAdded && (!firstDateRange || !ohrule.isOff())) {
-						rules.push(ohrule);
-					}
 				}
-				
-				firstDateRange = false;
 			}
 		}
 		
@@ -1507,200 +1561,51 @@ OpeningHoursBuilder: function() {
 		return result;
 	};
 
-
-	/**
-	 * Create the opening_hours rules for this date range
-	 */
-	function _createRules(dateRange) {
-		var result = [];
-		var intervals = dateRange.getTypical().getIntervals(true);
-		var interval, rule, date;
-		
-		/*
-		 * Typical week
-		 */
-		if(dateRange.definesTypicalWeek()) {
-			var dateMerged;
-			
-			/*
-			 * Create time intervals per day
-			 */
-			var monday0 = -1;
-			var sunday24 = -1;
-			var days = [];
-			
-			//Create rule for each day of the week
-			for(var i=0; i < 7; i++) {
-				days.push(new YoHours.model.OhRule());
-				days[i].addDate(new YoHours.model.OhDate(dateRange.getTimeSelector(), dateRange.getType(), [ i ]));
-			}
-			
-			for(var i=0, l=intervals.length; i < l; i++) {
-				interval = intervals[i];
-				
-				if(interval != undefined) {
-					//Handle sunday 24:00 with monday 00:00
-					if(interval.getStartDay() == YoHours.model.DAYS_MAX && interval.getEndDay() == YoHours.model.DAYS_MAX && interval.getTo() == YoHours.model.MINUTES_MAX) {
-						sunday24 = interval.getFrom();
-					}
-					if(interval.getStartDay() == 0 && interval.getEndDay() == 0 && interval.getFrom() == 0) {
-						monday0 = interval.getTo();
-					}
-					
-					try {
-						//Interval in a single day
-						if(interval.getStartDay() == interval.getEndDay()) {
-							days[interval.getStartDay()].addTime(
-								new YoHours.model.OhTime(interval.getFrom(), interval.getTo())
-							);
-						}
-						//Interval on two days
-						else if(interval.getEndDay() - interval.getStartDay() == 1) {
-							//Continuous night
-							if(interval.getFrom() > interval.getTo()) {
-								days[interval.getStartDay()].addTime(
-									new YoHours.model.OhTime(interval.getFrom(), interval.getTo())
-								);
-							}
-							//Separated days
-							else {
-								days[interval.getStartDay()].addTime(
-									new YoHours.model.OhTime(interval.getFrom(), YoHours.model.MINUTES_MAX)
-								);
-								days[interval.getEndDay()].addTime(
-									new YoHours.model.OhTime(0, interval.getTo())
-								);
-							}
-						}
-						//Interval on more than two days
-						else {
-							for(var j=interval.getStartDay(), end=interval.getEndDay(); j <= end; j++) {
-								if(j == interval.getStartDay()) {
-									days[j].addTime(
-										new YoHours.model.OhTime(interval.getFrom(), YoHours.model.MINUTES_MAX)
-									);
-								}
-								else if(j == interval.getEndDay()) {
-									days[j].addTime(
-										new YoHours.model.OhTime(0, interval.getTo())
-									);
-								}
-								else {
-									days[j].addTime(
-										new YoHours.model.OhTime(0, YoHours.model.MINUTES_MAX)
-									);
-								}
-							}
-						}
-					}
-					catch(e) {
-						console.warn(e);
-					}
-				}
-			}
-			
-			//Create continuous night for monday-sunday
-			if(monday0 >= 0 && sunday24 >= 0 && monday0 < sunday24) {
-				days[0].getTime().sort(_sortOhTime);
-				days[6].getTime().sort(_sortOhTime);
-				
-				//Change sunday interval
-				days[6].getTime()[days[6].length-1] = new YoHours.model.OhTime(sunday24, monday0);
-				
-				//Remove monday interval
-				days[0].getTime().shift();
-			}
-			
-			//Merge days with same opening hours
-			result.push(days[0]);
-			var dm=0;
-			for(var d=1; d < days.length; d++) {
-				dateMerged = false;
-				dm = 0;
-				while(!dateMerged && dm < d) {
-					if(days[dm].sameTime(days[d])) {
-						days[dm].getDate()[0].addWeekday(d);
-						dateMerged = true;
-					}
-					dm++;
-				}
-				
-				if(!dateMerged) {
-					result.push(days[d]);
-				}
-			}
-		}
-		/*
-		 * Typical day
-		 */
-		else {
-			//Create rule
-			rule = new YoHours.model.OhRule();
-			date = new YoHours.model.OhDate(dateRange.getTimeSelector(), dateRange.getType(), [ -1 ]);
-			rule.addDate(date);
-			
-			//Read time
-			for(var i=0, l=intervals.length; i < l; i++) {
-				interval = intervals[i];
-				
-				if(interval != undefined) {
-					rule.addTime(new YoHours.model.OhTime(interval.getFrom(), interval.getTo()));
-				}
-			}
-			
-			result.push(rule);
-		}
-		
-		return result;
-	};
 	
 /***********************
  * Top level functions *
  ***********************/
-
+	
 	/**
-	 * Reads a day to create an opening_hours string
-	 * @param day The day object to read
-	 * @param wideSelector A wide time selector to add (for example Jan-Mar)
-	 * @return The opening_hours string
+	 * Creates rules for a given typical day
+	 * @param dateRange The date range defining a typical day
+	 * @return An array of OhRules
 	 */
-	function _buildDay(day, wideSelector) {
-		var intervals = day.getIntervals(true);
+	function _buildDay(dateRange) {
+		var intervals = dateRange.getTypical().getIntervals(true);
 		var interval;
-		var result = "";
 		
-		//wideSelector = _wideSelectorSeparator(wideSelector);
+		//Create rule
+		var rule = new YoHours.model.OhRule();
+		var date = new YoHours.model.OhDate(dateRange.getTimeSelector(), dateRange.getType(), [ -1 ]);
+		rule.addDate(date);
 		
+		//Read time
 		for(var i=0, l=intervals.length; i < l; i++) {
 			interval = intervals[i];
 			
 			if(interval != undefined) {
-				if(result.length > 0) { result += ", "; }
-				result += _timeString(interval.getFrom())+((interval.getFrom() == interval.getTo() && interval.getStartDay() == interval.getEndDay()) ? "" : "-"+_timeString(interval.getTo()));
+				rule.addTime(new YoHours.model.OhTime(interval.getFrom(), interval.getTo()));
 			}
 		}
 		
-		return (result.length == 0) ? [{ date: wideSelector, time: "off" }] : [{ date: wideSelector, time: result }];
+		return [ rule ];
 	};
 	
 	/**
 	 * Reads a week to create an opening_hours string for weeks which are overwriting a previous one
-	 * @param week The week object to read
-	 * @param wideSelector A wide time selector to add (for example Jan-Mar)
-	 * @param generalDateRange A general date range containing this one, or null if no one available
-	 * @return The opening_hours string
+	 * @param dateRange The date range defining a typical day
+	 * @param generalDateRange The date range which is wider than this one
+	 * @return An array of OhRules
 	 */
-	function _buildWeekDiff(week, wideSelector, generalDateRange) {
-		var intervals = week.getIntervalsDiff(generalDateRange.getTypical());
-		var daysStr;
-		
-		//wideSelector = _wideSelectorSeparator(wideSelector);
+	function _buildWeekDiff(dateRange, generalDateRange) {
+		var intervals = dateRange.getTypical().getIntervalsDiff(generalDateRange.getTypical());
 		
 		/*
 		 * Create time intervals per day
 		 */
 		//Open
-		var timeIntervals = _createTimeIntervals(intervals.open);
+		var timeIntervals = _createTimeIntervals(dateRange.getTimeSelector(), dateRange.getType(), intervals.open);
 		var monday0 = timeIntervals[0];
 		var sunday24 = timeIntervals[1];
 		var days = timeIntervals[2];
@@ -1710,16 +1615,16 @@ OpeningHoursBuilder: function() {
 			interval = intervals.closed[i];
 			
 			for(var j=interval.getStartDay(); j <= interval.getEndDay(); j++) {
-				days[j] = [ "off" ];
+				days[j].addTime(new YoHours.model.OhTime());
 			}
 		}
 		
 		//Create continuous night for monday-sunday
 		days = _nightMonSun(days, monday0, sunday24);
 		
-		//Create interval strings per day
-		daysStr = _createDaysStrings(days, false);
-		
+		/*
+		 * Group rules with same time
+		 */
 		// 0 means nothing done with this day yet
 		// 8 means the day is off
 		// -8 means the day is off and should be shown
@@ -1728,75 +1633,93 @@ OpeningHoursBuilder: function() {
 		// range of days with same opening_hours
 		var daysStatus = [];
 		
+		//Init status
 		for(var i=0; i < YoHours.model.OSM_DAYS.length; i++) {
 			daysStatus[i] = 0;
 		}
 		
-		/*
-		 * Create string result
-		 */
+		//Read rules
 		var result = [];
 		for(var i=0; i < days.length; i++) {
 			var add = "";
 			
-			//We ignore days without defined daysStr, because they are identical to previous rule and should be omitted
+			//We ignore days without defined time, because they are identical to previous rule and should be omitted
 			
 			//Off days
-			if(daysStr[i] == "off") {
+			if(days[i].isOff() && days[i].getTime().length == 1) {
 				daysStatus[i] = -8;
+				
+				//Try to merge with another off day
+				var merged = false, mdOff = 0;
+				while(!merged && mdOff < i) {
+					if(days[mdOff].isOff()) {
+						days[mdOff].addWeekday(i);
+						merged = true;
+					}
+					else {
+						mdOff++;
+					}
+				}
+				
+				//If not merged, add it
+				if(!merged) {
+					result.push(days[i]);
+				}
 			}
-			else if(daysStr[i] == "") {
+			else if(days[i].isOff() && days[i].getTime().length == 0) {
 				daysStatus[i] = 8;
 			}
 			else if(daysStatus[i] <= 0 && daysStatus[i] > -8) {
 				daysStatus[i] = i+1;
 				var sameDayCount = 1;
 				var lastSameDay = i;
-				var addDay = (i == days.length - 1) ? YoHours.model.OSM_DAYS[i] : "";
+				var addDay = (i == days.length - 1) ? [ days[i] ] : [];
 				
 				//Find other days with the same hours
 				for(var j=i+1; j < days.length; j++) {
 					//Keep going through days
-					if(daysStr[i] == daysStr[j]) {
+					if(days[i].sameTime(days[j])) {
 						daysStatus[j] = i+1;
 						lastSameDay = j;
 						sameDayCount++;
 						
 						//Create day interval string
-						if(j == days.length -1 && daysStr[i].length > 0) {
-							//Add comma
-							if(sameDayCount >= 1 && addDay.length > 0) { addDay += ","; }
-							
+						if(j == days.length -1 && days[i].getTime().length > 0) {
 							//Add interval depending of its length
 							if (sameDayCount == 1) {
 								// a single Day with this special opening_hours
-								addDay += YoHours.model.OSM_DAYS[j];
+								addDay.push(days[j]);
 							} else if (sameDayCount == 2) {
 								// exactly two Days with this special opening_hours
-								addDay += YoHours.model.OSM_DAYS[j-1] + "," + YoHours.model.OSM_DAYS[j];
+								days[j-1].addWeekday(j);
+								addDay.push(days[j-1]);
 							} else if (sameDayCount > 2) {
 								// more than two Days with this special opening_hours
-								addDay += YoHours.model.OSM_DAYS[j-sameDayCount+1] + "-" + YoHours.model.OSM_DAYS[j];
+								for(var k = j-sameDayCount+2; k <= j; k++) {
+									days[j-sameDayCount+1].addWeekday(k);
+								}
+								addDay.push(days[j-sameDayCount+1]);
 							}
 						}
 					}
 					//Add previous days range
 					else {
 						//Create day interval string
-						if(daysStr[i].length > 0) {
-							//Add comma
-							if(sameDayCount >= 1 && addDay.length > 0) { addDay += ","; }
-							
+						if(days[i].getTime().length > 0) {
 							//Add interval depending of its length
 							if (sameDayCount == 1) {
 								// a single Day with this special opening_hours
-								addDay += YoHours.model.OSM_DAYS[j-1];
+								addDay.push(days[j-1]);
 							} else if (sameDayCount == 2) {
 								// exactly two Days with this special opening_hours
-								addDay += YoHours.model.OSM_DAYS[j-2] + "," + YoHours.model.OSM_DAYS[j-1];
+								days[j-2].addWeekday(j-1);
+								addDay.push(days[j-2]);
 							} else if (sameDayCount > 2) {
 								// more than two Days with this special opening_hours
-								addDay += YoHours.model.OSM_DAYS[j-sameDayCount] + "-" + YoHours.model.OSM_DAYS[j-1];
+								for(var k = j-sameDayCount+1; k <= j-1; k++) {
+									days[j-sameDayCount].addWeekday(k);
+								}
+								addDay.push(days[j-sameDayCount]);
 							}
 						}
 						sameDayCount = 0;
@@ -1805,42 +1728,31 @@ OpeningHoursBuilder: function() {
 				}
 				
 				if(addDay.length > 0) {
-					 add += addDay + " " + daysStr[i];
+					result = result.concat(addDay);
 				}
-			}
-			
-			if (add.length > 0) {
-				result.push({ date: wideSelector, time: add });
 			}
 		}
 		
-		//Add days off
-		result = _addDaysOff(daysStatus, daysStr, wideSelector, result);
-		
-		//Special cases
-		//result = _weekSpecialCases(result, wideSelector);
+		result = _mergeDays(result);
 		
 		return result;
 	};
 
 	/**
-	 * Reads a week to create an opening_hours string
+	 * Create rules for a date range defining a typical week
 	 * Algorithm inspired by OpeningHoursEdit plugin for JOSM
-	 * @param week The week object to read
-	 * @param wideSelector A wide time selector to add (for example Jan-Mar)
-	 * @param hideDaysOff True if you want to hide unnecessary off days
-	 * @return The opening_hours string
+	 * @param dateRange The date range defining a typical day
+	 * @return An array of OhRules
 	 */
-	function _buildWeek(week, wideSelector, hideDaysOff) {
-		var intervals = week.getIntervals(true);
-		var daysStr;
-		
-		//wideSelector = _wideSelectorSeparator(wideSelector);
+	function _buildWeek(dateRange) {
+		var result = [];
+		var intervals = dateRange.getTypical().getIntervals(true);
+		var interval, rule, date;
 		
 		/*
 		 * Create time intervals per day
 		 */
-		var timeIntervals = _createTimeIntervals(intervals);
+		var timeIntervals = _createTimeIntervals(dateRange.getTimeSelector(), dateRange.getType(), intervals);
 		var monday0 = timeIntervals[0];
 		var sunday24 = timeIntervals[1];
 		var days = timeIntervals[2];
@@ -1848,9 +1760,9 @@ OpeningHoursBuilder: function() {
 		//Create continuous night for monday-sunday
 		days = _nightMonSun(days, monday0, sunday24);
 		
-		//Create interval strings per day
-		daysStr = _createDaysStrings(days, true);
-		
+		/*
+		 * Group rules with same time
+		 */
 		// 0 means nothing done with this day yet
 		// 8 means the day is off
 		// -8 means the day is off and should be shown
@@ -1859,29 +1771,42 @@ OpeningHoursBuilder: function() {
 		// range of days with same opening_hours
 		var daysStatus = [];
 		
+		//Init status
 		for(var i=0; i < YoHours.model.OSM_DAYS.length; i++) {
 			daysStatus[i] = 0;
 		}
 		
-		/*
-		 * Create string result
-		 */
-		var result = [];
+		//Read status
 		for(var i=0; i < days.length; i++) {
-			var add = "";
-			
-			if (daysStr[i] == 'off' && daysStatus[i] == 0) {
-				daysStatus[i] = (hideDaysOff) ? 8 : -8;
-			} else if (daysStr[i] == 'off' && daysStatus[i] < 0 && daysStatus[i] > -8) {
-				//add = YoHours.model.OSM_DAYS[i] + " off";
+			if(days[i].isOff() && daysStatus[i] == 0) {
+				daysStatus[i] = 8;
+			}
+			else if(days[i].isOff() && daysStatus[i] < 0 && daysStatus[i] > -8) {
 				daysStatus[i] = -8;
+				
+				//Try to merge with another off day
+				var merged = false, mdOff = 0;
+				while(!merged && mdOff < i) {
+					if(days[mdOff].isOff()) {
+						days[mdOff].addWeekday(i);
+						merged = true;
+					}
+					else {
+						mdOff++;
+					}
+				}
+				
+				//If not merged, add it
+				if(!merged) {
+					result.push(days[i]);
+				}
 			} else if (daysStatus[i] <= 0 && daysStatus[i] > -8) {
 				daysStatus[i] = i + 1;
 				var lastSameDay = i;
 				var sameDayCount = 1;
 				
 				for(var j = i + 1; j < days.length; j++) {
-					if (daysStr[i] == daysStr[j]) {
+					if (days[i].sameTime(days[j])) {
 						daysStatus[j] = i + 1;
 						lastSameDay = j;
 						sameDayCount++;
@@ -1889,31 +1814,27 @@ OpeningHoursBuilder: function() {
 				}
 				if (sameDayCount == 1) {
 					// a single Day with this special opening_hours
-					add = YoHours.model.OSM_DAYS[i] + " " + daysStr[i];
+					result.push(days[i]);
 				} else if (sameDayCount == 2) {
 					// exactly two Days with this special opening_hours
-					add = YoHours.model.OSM_DAYS[i] + "," + YoHours.model.OSM_DAYS[lastSameDay] + " "
-					+ daysStr[i];
+					days[i].addWeekday(lastSameDay);
+					result.push(days[i]);
 				} else if (sameDayCount > 2) {
 					// more than two Days with this special opening_hours
-					add = YoHours.model.OSM_DAYS[i] + "-" + YoHours.model.OSM_DAYS[lastSameDay] + " "
-					+ daysStr[i];
 					for (var j = i + 1; j < lastSameDay; j++) {
+						days[i].addWeekday(j);
 						if (daysStatus[j] == 0) {
 							daysStatus[j] = -i - 1;
 						}
 					}
+					days[i].addWeekday(lastSameDay);
+					result.push(days[i]);
 				}
-			}
-			
-			if (add.length > 0) {
-				result.push( { date: wideSelector, time: add });
 			}
 		}
 		
-		//Add days off
-		result = _addDaysOff(daysStatus, daysStr, wideSelector, result);
-
+		result = _mergeDays(result);
+		
 		return result;
 	};
 
@@ -1921,73 +1842,54 @@ OpeningHoursBuilder: function() {
 /****************************************
  * Utility functions for top-level ones *
  ****************************************/
-
-	/**
-	 * Adds the good separator for wide selector
-	 */
-	function _wideSelectorSeparator(wideSelector) {
-		if(wideSelector.length > 0) { wideSelector += " "; }
-		return wideSelector;
-	};
 	
 	/**
-	 * @return True if the given dates have the same type
+	 * Merge days with same opening time
 	 */
-	function _sameDateType(d1, d2) {
-		d1 = d1.split(',')[0];
-		d2 = d2.split(',')[0];
+	function _mergeDays(rules) {
+		if(rules.length == 0) { return rules; }
 		
-		var RGX_WEEK_VAL = /^week ([01234]?[0-9]|5[0123])(\-([01234]?[0-9]|5[0123]))?\:?$/;
-		if(RGX_WEEK_VAL.test(d1) && RGX_WEEK_VAL.test(d2)) { return true; }
+		var result = [];
+		var dateMerged;
 		
-		var RGX_MONTH = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))?\:?$/;
-		if(RGX_MONTH.test(d1) && RGX_MONTH.test(d2)) { return true; }
-		
-		var RGX_MONTHDAY = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([012]?[0-9]|3[01])(\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) )?([012]?[0-9]|3[01]))?\:?$/;
-		if(RGX_MONTHDAY.test(d1) && RGX_MONTHDAY.test(d2)) { return true; }
-		
-		var RGX_WEEKDAY = /^(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|easter))(,(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|easter)))*$/;
-		if(RGX_WEEKDAY.test(d1) && RGX_WEEKDAY.test(d2)) { return true; }
-		
-		return false;
-	};
-	
-	/**
-	 * Creates the days string in opening_hours syntax
-	 */
-	function _createDaysStrings(days, showOff) {
-		var daysStr = [];
-		
-		for(var i=0; i < days.length; i++) {
-			var intervalsStr = '';
-			if(days[i].length > 0) {
-				days[i].sort();
-				for(var j=0; j < days[i].length; j++) {
-					if(j > 0) {
-						intervalsStr += ',';
-					}
-					intervalsStr += days[i][j];
+		result.push(rules[0]);
+		var dm=0;
+		for(var d=1; d < rules.length; d++) {
+			dateMerged = false;
+			dm = 0;
+			while(!dateMerged && dm < d) {
+				if(rules[dm].sameTime(rules[d])) {
+					rules[dm].getDate()[0].addWeekday(d);
+					dateMerged = true;
 				}
+				dm++;
 			}
-			else if(showOff) {
-				intervalsStr = 'off';
+			
+			if(!dateMerged) {
+				result.push(rules[d]);
 			}
-
-			daysStr[i] = intervalsStr;
 		}
 		
-		return daysStr;
+		//TODO missing merged days
+		
+		return result;
 	};
 	
 	/**
 	 * Creates time intervals for each day
 	 * @return [ monday0, sunday24, days ]
 	 */
-	function _createTimeIntervals(intervals) {
-		var interval;
+	function _createTimeIntervals(timeSelector, type, intervals) {
 		var monday0 = -1;
 		var sunday24 = -1;
-		var days = [ [], [], [], [], [], [], [] ];
+		var days = [];
+		var interval;
+		
+		//Create rule for each day of the week
+		for(var i=0; i < 7; i++) {
+			days.push(new YoHours.model.OhRule());
+			days[i].addDate(new YoHours.model.OhDate(timeSelector, type, [ i ]));
+		}
 		
 		for(var i=0, l=intervals.length; i < l; i++) {
 			interval = intervals[i];
@@ -2001,41 +1903,54 @@ OpeningHoursBuilder: function() {
 					monday0 = interval.getTo();
 				}
 				
-				//Interval in a single day
-				if(interval.getStartDay() == interval.getEndDay()) {
-					days[interval.getStartDay()].push(
-						_timeString(interval.getFrom())
-						+((interval.getFrom() == interval.getTo() && interval.getStartDay() == interval.getEndDay()) ? "" : "-"+_timeString(interval.getTo()))
-					);
-				}
-				//Interval on two days
-				else if(interval.getEndDay() - interval.getStartDay() == 1) {
-					//Continuous night
-					if(interval.getFrom() > interval.getTo()) {
-						days[interval.getStartDay()].push(
-							_timeString(interval.getFrom())
-							+((interval.getFrom() == interval.getTo() && interval.getStartDay() == interval.getEndDay()) ? "" : "-"+_timeString(interval.getTo()))
+				try {
+					//Interval in a single day
+					if(interval.getStartDay() == interval.getEndDay()) {
+						days[interval.getStartDay()].addTime(
+							new YoHours.model.OhTime(interval.getFrom(), interval.getTo())
 						);
 					}
-					//Separated days
+					//Interval on two days
+					else if(interval.getEndDay() - interval.getStartDay() == 1) {
+						//Continuous night
+						if(interval.getFrom() > interval.getTo()) {
+							days[interval.getStartDay()].addTime(
+								new YoHours.model.OhTime(interval.getFrom(), interval.getTo())
+							);
+						}
+						//Separated days
+						else {
+							days[interval.getStartDay()].addTime(
+								new YoHours.model.OhTime(interval.getFrom(), YoHours.model.MINUTES_MAX)
+							);
+							days[interval.getEndDay()].addTime(
+								new YoHours.model.OhTime(0, interval.getTo())
+							);
+						}
+					}
+					//Interval on more than two days
 					else {
-						days[interval.getStartDay()].push(_timeString(interval.getFrom())+"-24:00");
-						days[interval.getEndDay()].push("00:00-"+_timeString(interval.getTo()));
+						for(var j=interval.getStartDay(), end=interval.getEndDay(); j <= end; j++) {
+							if(j == interval.getStartDay()) {
+								days[j].addTime(
+									new YoHours.model.OhTime(interval.getFrom(), YoHours.model.MINUTES_MAX)
+								);
+							}
+							else if(j == interval.getEndDay()) {
+								days[j].addTime(
+									new YoHours.model.OhTime(0, interval.getTo())
+								);
+							}
+							else {
+								days[j].addTime(
+									new YoHours.model.OhTime(0, YoHours.model.MINUTES_MAX)
+								);
+							}
+						}
 					}
 				}
-				//Interval on more than two days
-				else {
-					for(var j=interval.getStartDay(), end=interval.getEndDay(); j <= end; j++) {
-						if(j == interval.getStartDay()) {
-							days[j].push(_timeString(interval.getFrom())+"-24:00");
-						}
-						else if(j == interval.getEndDay()) {
-							days[j].push("00:00-"+_timeString(interval.getTo()));
-						}
-						else {
-							days[j].push("00:00-24:00");
-						}
-					}
+				catch(e) {
+					console.warn(e);
 				}
 			}
 		}
@@ -2048,95 +1963,16 @@ OpeningHoursBuilder: function() {
 	 */
 	function _nightMonSun(days, monday0, sunday24) {
 		if(monday0 >= 0 && sunday24 >= 0 && monday0 < sunday24) {
-			days[0].sort();
-			days[6].sort();
+			days[0].getTime().sort(_sortOhTime);
+			days[6].getTime().sort(_sortOhTime);
 			
 			//Change sunday interval
-			days[6][days[6].length-1] = _timeString(sunday24)+"-"+_timeString(monday0);
+			days[6].getTime()[days[6].getTime().length-1] = new YoHours.model.OhTime(sunday24, monday0);
 			
 			//Remove monday interval
-			days[0].shift();
+			days[0].getTime().shift();
 		}
 		return days;
-	};
-	
-	/**
-	 * Add days off
-	 */
-	function _addDaysOff(daysStatus, daysStr, wideSelector, result) {
-		var resOff = "";
-		for(var i=0; i < daysStatus.length; i++) {
-			var add = "";
-			
-			if(daysStatus[i] == -8) {
-				var lastSameDay = i;
-				var sameDayCount = 1;
-				
-				for(var j = i + 1; j < 7; j++) {
-					if (daysStr[i] == daysStr[j]) {
-						daysStatus[j] = -9;
-						lastSameDay = j;
-						sameDayCount++;
-					}
-					else {
-						break;
-					}
-				}
-				if (sameDayCount == 1) {
-					// a single Day with this special opening_hours
-					add = YoHours.model.OSM_DAYS[i];
-				} else if (sameDayCount == 2) {
-					// exactly two Days with this special opening_hours
-					add = YoHours.model.OSM_DAYS[i] + "," + YoHours.model.OSM_DAYS[lastSameDay];
-				} else if (sameDayCount > 2) {
-					// more than two Days with this special opening_hours
-					add = YoHours.model.OSM_DAYS[i] + "-" + YoHours.model.OSM_DAYS[lastSameDay];
-					for (var j = i + 1; j < lastSameDay; j++) {
-						if (daysStatus[j] == 0) {
-							daysStatus[j] = -i - 1;
-						}
-					}
-				}
-			}
-			
-			if (add.length > 0) {
-				if (resOff.length > 0) {
-					resOff += ",";
-				}
-				resOff += add;
-			}
-		}
-		
-		if(resOff.length > 0) {
-			result.push({ date: _wideSelectorSeparator(wideSelector)+resOff, time: "off" });
-		}
-		
-		return result;
-	};
-	
-	/**
-	 * Changes the result depending of some special cases in syntax
-	 */
-	function _weekSpecialCases(result, wideSelector) {
-		//All week with same hours
-		if(/^Mo\-Su (\d{2}|open|closed|off)/.test(result)) {
-			result = result.substr(6);
-		}
-		if(/Mo\-Su/.test(wideSelector)) {
-			wideSelector = wideSelector.replace(/Mo\-Su/, '').trim();
-		}
-		
-		// 24/7
-		if(result == "00:00-24:00") {
-			result = "24/7";
-		}
-		
-		//Never opened and not full year
-		if(result == "" && wideSelector.length > 0) {
-			result = "off";
-		}
-		
-		return (wideSelector.length > 0) ? wideSelector+" "+result : result;
 	};
 	
 	/**
@@ -2144,17 +1980,6 @@ OpeningHoursBuilder: function() {
 	 */
 	function _sortOhTime(a, b) {
 		return a.getStart() - b.getStart();
-	};
-	
-	/**
-	 * @param minutes integer in range from 0 and 24*60 inclusive
-	 * @return a formatted string of the time (for example "13:45")
-	 */
-	function _timeString(minutes) {
-		var h = Math.floor(minutes / 60);
-		var period = "";
-		var m = minutes % 60;
-		return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + period;
 	};
 },
 

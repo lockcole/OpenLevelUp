@@ -1422,6 +1422,26 @@
 			assert.equal(od1.getWd()[0], 0);
 			assert.equal(od1.getWd()[1], 3);
 		});
+		QUnit.test("Add overwritten weekday new", function(assert) {
+			var od1 = new YoHours.model.OhDate("Apr 21-Aug 22", "day", [0]);
+			assert.equal(od1.getWeekdays(), "Mo");
+			od1.addOverwrittenWeekday(2);
+			assert.equal(od1.getWeekdays(), "Mo,We");
+		});
+		QUnit.test("Add overwritten weekday existing wd", function(assert) {
+			var od1 = new YoHours.model.OhDate("Apr 21-Aug 22", "day", [0,2]);
+			assert.equal(od1.getWeekdays(), "Mo,We");
+			od1.addOverwrittenWeekday(2);
+			assert.equal(od1.getWeekdays(), "Mo,We");
+		});
+		QUnit.test("Add overwritten weekday existing over wd", function(assert) {
+			var od1 = new YoHours.model.OhDate("Apr 21-Aug 22", "day", [0,2]);
+			assert.equal(od1.getWeekdays(), "Mo,We");
+			od1.addOverwrittenWeekday(4);
+			assert.equal(od1.getWeekdays(), "Mo,We,Fr");
+			od1.addOverwrittenWeekday(4);
+			assert.equal(od1.getWeekdays(), "Mo,We,Fr");
+		});
 		
 		/*
 		 * OhRule
@@ -1687,6 +1707,49 @@
 			assert.equal(or.getTime()[0], ot1);
 			assert.equal(or.getTime()[1], ot2);
 		});
+		QUnit.test("Is off 1", function(assert) {
+			var or = new YoHours.model.OhRule();
+			assert.equal(or.getTime().length, 0);
+			
+			assert.ok(or.isOff());
+			
+			var ot1 = new YoHours.model.OhTime();
+			or.addTime(ot1);
+			assert.equal(or.getTime().length, 1);
+			assert.equal(or.getTime()[0], ot1);
+
+			assert.ok(or.isOff());
+		});
+		QUnit.test("Is off 2", function(assert) {
+			var or = new YoHours.model.OhRule();
+			assert.equal(or.getTime().length, 0);
+			
+			assert.ok(or.isOff());
+			
+			var ot1 = new YoHours.model.OhTime(5*60, 7*60);
+			or.addTime(ot1);
+			assert.equal(or.getTime().length, 1);
+			assert.equal(or.getTime()[0], ot1);
+
+			assert.notOk(or.isOff());
+		});
+		QUnit.test("Add weekday", function(assert) {
+			var or = new YoHours.model.OhRule();
+			assert.equal(or.getDate().length, 0);
+			
+			var od1 = new YoHours.model.OhDate("Mar", "month", [0,1]);
+			var od2 = new YoHours.model.OhDate("Jul-Oct", "month", [0,1]);
+			or.addDate(od1);
+			or.addDate(od2);
+			assert.equal(or.getDate().length, 2);
+			assert.equal(or.getDate()[0], od1);
+			assert.equal(or.getDate()[1], od2);
+			
+			or.addWeekday(5);
+			assert.equal(or.getDate().length, 2);
+			assert.equal(or.getDate()[0].getWeekdays(), "Mo,Tu,Sa");
+			assert.equal(or.getDate()[1].getWeekdays(), "Mo,Tu,Sa");
+		});
 		
 		/*
 		 * OpeningHoursBuilder
@@ -1917,7 +1980,7 @@
 			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(0, 0, 8*60, 18*60));
 			dateranges[3].getTypical().addInterval(new YoHours.model.Interval(1, 1, 9*60, 17*60));
 			
-			assert.equal(builder.build(dateranges), "24/7; Jun Mo 08:00-18:00; Jun Tu-Su off; PH off; SH Tu 09:00-17:00; SH Mo,We-Su off");
+			assert.equal(builder.build(dateranges), "24/7; Jun Mo 08:00-18:00; Jun Tu-Su off; PH off; SH Mo,We-Su off; SH Tu 09:00-17:00");
 		});
 		QUnit.test("Build Mo 08:00-18:00 grouping", function(assert) {
 			var builder = new YoHours.model.OpeningHoursBuilder();
