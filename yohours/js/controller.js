@@ -176,7 +176,7 @@ MainController: function() {
 				//Show error
 				var ohTest;
 				try {
-					new opening_hours(str.trim(), { lat: 48, lon: -2, address: { country_code: "fr" } });
+					new opening_hours(str.trim(), null);
 					ohTest = true;
 				}
 				catch(e2) {

@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+27 august 2015
+--------------
+* Bug fix for school holidays hours not applied all week
+* opening_hours.js update (supports null location to check values with holidays)
+
 24 august 2015
 --------------
 * opening_hours.js used to check if user input is valid (even if not readable by YoHours)

@@ -2480,7 +2480,7 @@ OpeningHoursParser: function() {
 			
 			//Case of no weekday defined = all week
 			if(weekdays.length == 0) {
-				if(holidays.length == 0) {
+				if(holidays.length == 0 || (holidays.length == 1 && holidays[0] == "SH")) {
 					weekdays.push({from: 0, to: YoHours.model.OSM_DAYS.length -1 });
 				}
 				else {
