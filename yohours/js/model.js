@@ -22,14 +22,14 @@
  *
  * Model JS classes
  */
-YoHours.model = {
+
 /*
  * ========= CONSTANTS =========
  */
 /**
  * The days in a week
  */
-DAYS: {
+DAYS = {
 	MONDAY: 0,
 	TUESDAY: 1,
 	WEDNESDAY: 2,
@@ -37,47 +37,48 @@ DAYS: {
 	FRIDAY: 4,
 	SATURDAY: 5,
 	SUNDAY: 6
-},
+};
 
 /**
  * The days in OSM
  */
-OSM_DAYS: [ "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su" ],
+OSM_DAYS = [ "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su" ];
 
 /**
  * The days IRL
  */
-IRL_DAYS: [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+IRL_DAYS = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ];
 
 /**
  * The month in OSM
  */
-OSM_MONTHS: [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ],
+OSM_MONTHS = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ];
 
 /**
  * The months IRL
  */
-IRL_MONTHS: [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
+IRL_MONTHS = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 
 /**
  * The last day of month
  */
-MONTH_END_DAY: [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ],
+MONTH_END_DAY = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
 
 /**
  * The maximal minute that an interval can have
  */
-MINUTES_MAX: 1440,
+MINUTES_MAX = 1440;
 
 /**
  * The maximal value of days
  */
-DAYS_MAX: 6,
+DAYS_MAX = 6;
 
 
 /*
  * ========== CLASSES ==========
  */
+
 /**
  * Class Interval, defines an interval in a week where the POI is open.
  * @param dayStart The start week day (use DAYS constants)
@@ -85,59 +86,56 @@ DAYS_MAX: 6,
  * @param minStart The interval start (in minutes since midnight)
  * @param minEnd The interval end (in minutes since midnight)
  */
-Interval: function(dayStart, dayEnd, minStart, minEnd) {
+var Interval = function(dayStart, dayEnd, minStart, minEnd) {
 //ATTRIBUTES
 	/** The start day in the week, see DAYS **/
-	var _dayStart = dayStart;
+	this._dayStart = dayStart;
 	
 	/** The end day in the week, see DAYS **/
-	var _dayEnd = dayEnd;
+	this._dayEnd = dayEnd;
 	
 	/** The interval start, in minutes since midnight (local hour) **/
-	var _start = minStart;
+	this._start = minStart;
 	
 	/** The interval end, in minutes since midnight (local hour) **/
-	var _end = minEnd;
-	
-	/** This object **/
-	var _self = this;
+	this._end = minEnd;
+
+//CONSTRUCTOR
+	if(this._dayEnd == 0 && this._end == 0) {
+		this._dayEnd = DAYS_MAX;
+		this._end = MINUTES_MAX;
+	}
+	//console.log("Interval", this._dayStart, this._dayEnd, this._start, this._end);
+};
 
 //ACCESSORS
 	/**
 	 * @return The start day in the week, see DAYS constants
 	 */
-	this.getStartDay = function() {
-		return _dayStart;
+	Interval.prototype.getStartDay = function() {
+		return this._dayStart;
 	};
 	
 	/**
 	 * @return The end day in the week, see DAYS constants
 	 */
-	this.getEndDay = function() {
-		return _dayEnd;
+	Interval.prototype.getEndDay = function() {
+		return this._dayEnd;
 	};
 	
 	/**
 	 * @return The interval start, in minutes since midnight
 	 */
-	this.getFrom = function() {
-		return _start;
+	Interval.prototype.getFrom = function() {
+		return this._start;
 	};
 	
 	/**
 	 * @return The interval end, in minutes since midnight
 	 */
-	this.getTo = function() {
-		return _end;
+	Interval.prototype.getTo = function() {
+		return this._end;
 	};
-
-//CONSTRUCTOR
-	if(_dayEnd == 0 && _end == 0) {
-		_dayEnd = YoHours.model.DAYS_MAX;
-		_end = YoHours.model.MINUTES_MAX;
-	}
-	//console.log("Interval", _dayStart, _dayEnd, _start, _end);
-},
 
 
 
@@ -145,16 +143,16 @@ Interval: function(dayStart, dayEnd, minStart, minEnd) {
  * A wide interval is an interval of one or more days, weeks, months, holidays.
  * Use WideInterval.days/weeks/months/holidays methods to construct one object.
  */
-// WideInterval: function(start, end) {
+// var WideInterval = function(start, end) {
 // //ATTRIBUTES
 	// /** The start of the interval **/
-	// var _start = start;
+	// var this._start = start;
 	
 	// /** The end of the interval **/
-	// var _end = end || null;
+	// var this._end = end || null;
 
 	// /** The kind of interval **/
-	// var _type = null;
+	// var this._type = null;
 
 // //CONSTRUCTORS
 	// /**
@@ -162,51 +160,49 @@ Interval: function(dayStart, dayEnd, minStart, minEnd) {
 	 // */
 	// days = function(startDay, startMonth, endDay, endMonth) {
 		// var end = (endDay != null && endMonth != null) ? { day: endDay, month: endMonth } : null;
-		// return new YoHours.model.WideInterval({ day: startDay, month: startMonth }, end);
+		// return new WideInterval({ day: startDay, month: startMonth }, end);
 	// };
-// },
+// };
 
 
 
 /**
  * Class Day, represents a typical day
  */
-Day: function() {
+var Day = function() {
 //ATTRIBUTES
 	/** The intervals defining this week **/
-	var _intervals = [];
+	this._intervals = [];
 	
 	/** The next interval ID **/
-	var _nextInterval = 0;
-	
-	/** This object **/
-	var _self = this;
+	this._nextInterval = 0;
+};
 
 //ACCESSORS
 	/**
 	 * @return This day, as a boolean array (minutes since midnight). True if open, false else.
 	 */
-	this.getAsMinutesArray = function() {
+	Day.prototype.getAsMinutesArray = function() {
 		//Create array with all values set to false
 		//For each minute
 		var minuteArray = [];
-		for (var minute = 0; minute <= YoHours.model.MINUTES_MAX; minute++) {
+		for (var minute = 0; minute <= MINUTES_MAX; minute++) {
 			minuteArray[minute] = false;
 		}
 		
 		//Set to true values where an interval is defined
-		for(var id=0, l=_intervals.length; id < l; id++) {
-			if(_intervals[id] != undefined) {
+		for(var id=0, l=this._intervals.length; id < l; id++) {
+			if(this._intervals[id] != undefined) {
 				var startMinute = null;
 				var endMinute = null;
 				
 				if(
-					_intervals[id].getStartDay() == _intervals[id].getEndDay()
-					|| (_intervals[id].getEndDay() == YoHours.model.DAYS_MAX && _intervals[id].getTo() == YoHours.model.MINUTES_MAX)
+					this._intervals[id].getStartDay() == this._intervals[id].getEndDay()
+					|| (this._intervals[id].getEndDay() == DAYS_MAX && this._intervals[id].getTo() == MINUTES_MAX)
 				) {
 					//Define start and end minute regarding the current day
-					startMinute = _intervals[id].getFrom();
-					endMinute = _intervals[id].getTo();
+					startMinute = this._intervals[id].getFrom();
+					endMinute = this._intervals[id].getTo();
 				}
 				
 				//Set to true the minutes for this day
@@ -216,7 +212,7 @@ Day: function() {
 					}
 				}
 				else {
-					console.log(_intervals[id].getFrom()+" "+_intervals[id].getTo()+" "+_intervals[id].getStartDay()+" "+_intervals[id].getEndDay());
+					console.log(this._intervals[id].getFrom()+" "+this._intervals[id].getTo()+" "+this._intervals[id].getStartDay()+" "+this._intervals[id].getEndDay());
 					throw new Error("Invalid interval");
 				}
 			}
@@ -229,7 +225,7 @@ Day: function() {
 	 * @param clean Clean intervals ? (default: false)
 	 * @return The intervals in this week
 	 */
-	this.getIntervals = function(clean) {
+	Day.prototype.getIntervals = function(clean) {
 		clean = clean || false;
 		
 		if(clean) {
@@ -248,7 +244,7 @@ Day: function() {
 				//Last minute
 				else if(min == lm-1) {
 					if(minuteArray[min]) {
-						intervals.push(new YoHours.model.Interval(
+						intervals.push(new Interval(
 							0,
 							0,
 							minStart,
@@ -264,7 +260,7 @@ Day: function() {
 					}
 					//Ending interval
 					else if(!minuteArray[min] && minStart >= 0) {
-						intervals.push(new YoHours.model.Interval(
+						intervals.push(new Interval(
 							0,
 							0,
 							minStart,
@@ -279,7 +275,7 @@ Day: function() {
 			return intervals;
 		}
 		else {
-			return _intervals;
+			return this._intervals;
 		}
 	};
 
@@ -289,11 +285,11 @@ Day: function() {
 	 * @param interval The new interval
 	 * @return The ID of the added interval
 	 */
-	this.addInterval = function(interval) {
-		_intervals[_nextInterval] = interval;
-		_nextInterval++;
+	Day.prototype.addInterval = function(interval) {
+		this._intervals[this._nextInterval] = interval;
+		this._nextInterval++;
 		
-		return _nextInterval-1;
+		return this._nextInterval-1;
 	};
 	
 	/**
@@ -301,84 +297,81 @@ Day: function() {
 	 * @param id The interval ID
 	 * @param interval The new interval
 	 */
-	this.editInterval = function(id, interval) {
-		_intervals[id] = interval;
+	Day.prototype.editInterval = function(id, interval) {
+		this._intervals[id] = interval;
 	};
 	
 	/**
 	 * Remove the given interval
 	 * @param id the interval ID
 	 */
-	this.removeInterval = function(id) {
-		_intervals[id] = undefined;
+	Day.prototype.removeInterval = function(id) {
+		this._intervals[id] = undefined;
 	};
 	
 	/**
 	 * Redefines this date range intervals with a copy of the given ones
 	 */
-	this.copyIntervals = function(intervals) {
-		_intervals = [];
+	Day.prototype.copyIntervals = function(intervals) {
+		this._intervals = [];
 		for(var i=0; i < intervals.length; i++) {
 			if(intervals[i] != undefined && intervals[i].getStartDay() == 0 && intervals[i].getEndDay() == 0) {
-				_intervals.push($.extend(true, {}, intervals[i]));
+				this._intervals.push($.extend(true, {}, intervals[i]));
 			}
 		}
 		
-		_intervals = _self.getIntervals(true);
+		this._intervals = this.getIntervals(true);
 	};
 	
 	/**
 	 * Removes all defined intervals
 	 */
-	this.clearIntervals = function() {
-		_intervals = [];
+	Day.prototype.clearIntervals = function() {
+		this._intervals = [];
 	};
 
 //OTHER METHODS
 	/**
 	 * Is this day defining the same intervals as the given one ?
 	 */
-	this.sameAs = function(d) {
-		return d.getAsMinutesArray().equals(_self.getAsMinutesArray());
+	Day.prototype.sameAs = function(d) {
+		return d.getAsMinutesArray().equals(this.getAsMinutesArray());
 	};
-},
 
 
 
 /**
  * Class Week, represents a typical week of opening hours.
  */
-Week: function() {
+var Week = function() {
 //ATTRIBUTES
 	/** The intervals defining this week **/
-	var _intervals = [];
-	
-	/** This object **/
-	var _self = this;
+	this._intervals = [];
+};
 
 //ACCESSORS
 	/**
 	 * @return This week, as a two-dimensional boolean array. First dimension is for days (see DAYS), second dimension for minutes since midnight. True if open, false else.
 	 */
-	this.getAsMinutesArray = function() {
+	Week.prototype.getAsMinutesArray = function() {
 		//Create array with all values set to false
 		//For each day
 		var minuteArray = [];
-		for(var day = 0; day <= YoHours.model.DAYS_MAX; day++) {
+		for(var day = 0; day <= DAYS_MAX; day++) {
 			//For each minute
 			minuteArray[day] = [];
-			for (var minute = 0; minute <= YoHours.model.MINUTES_MAX; minute++) {
+			for (var minute = 0; minute <= MINUTES_MAX; minute++) {
 				minuteArray[day][minute] = false;
 			}
 		}
 		
 		//Set to true values where an interval is defined
-		for(var id=0, l=_intervals.length; id < l; id++) {
-			if(_intervals[id] != undefined) {
-				for(var day = _intervals[id].getStartDay(); day <= _intervals[id].getEndDay(); day++) {
+		for(var id=0, l=this._intervals.length; id < l; id++) {
+			if(this._intervals[id] != undefined) {
+				for(var day = this._intervals[id].getStartDay(); day <= this._intervals[id].getEndDay(); day++) {
 					//Define start and end minute regarding the current day
-					var startMinute = (day == _intervals[id].getStartDay()) ? _intervals[id].getFrom() : 0;
-					var endMinute = (day == _intervals[id].getEndDay()) ? _intervals[id].getTo() : YoHours.model.MINUTES_MAX;
+					var startMinute = (day == this._intervals[id].getStartDay()) ? this._intervals[id].getFrom() : 0;
+					var endMinute = (day == this._intervals[id].getEndDay()) ? this._intervals[id].getTo() : MINUTES_MAX;
 
 					//Set to true the minutes for this day
 					if(startMinute != null && endMinute != null) {
@@ -397,7 +390,7 @@ Week: function() {
 	 * @param clean Clean intervals ? (default: false)
 	 * @return The intervals in this week
 	 */
-	this.getIntervals = function(clean) {
+	Week.prototype.getIntervals = function(clean) {
 		clean = clean || false;
 		
 		if(clean) {
@@ -416,9 +409,9 @@ Week: function() {
 						}
 					}
 					//Last minute of sunday
-					else if(day == YoHours.model.DAYS_MAX && min == lm-1) {
+					else if(day == DAYS_MAX && min == lm-1) {
 						if(dayStart >= 0 && minuteArray[day][min]) {
-							intervals.push(new YoHours.model.Interval(
+							intervals.push(new Interval(
 								dayStart,
 								day,
 								minStart,
@@ -436,15 +429,15 @@ Week: function() {
 						//Ending interval
 						else if(!minuteArray[day][min] && dayStart >= 0) {
 							if(min == 0) {
-								intervals.push(new YoHours.model.Interval(
+								intervals.push(new Interval(
 									dayStart,
 									day-1,
 									minStart,
-									YoHours.model.MINUTES_MAX
+									MINUTES_MAX
 								));
 							}
 							else {
-								intervals.push(new YoHours.model.Interval(
+								intervals.push(new Interval(
 									dayStart,
 									day,
 									minStart,
@@ -461,7 +454,7 @@ Week: function() {
 			return intervals;
 		}
 		else {
-			return _intervals;
+			return this._intervals;
 		}
 	};
 	
@@ -470,9 +463,9 @@ Week: function() {
 	 * @param w The general week
 	 * @return The intervals which are different, as object { open: [ Intervals ], closed: [ Intervals ] }
 	 */
-	this.getIntervalsDiff = function(w) {
+	Week.prototype.getIntervalsDiff = function(w) {
 		//Get minutes arrays
-		var myMinArray = _self.getAsMinutesArray();
+		var myMinArray = this.getAsMinutesArray();
 		var wMinArray = w.getAsMinutesArray();
 		
 		//Create diff array
@@ -480,12 +473,12 @@ Week: function() {
 		var dayStart = -1, minStart = -1, minEnd;
 		var diffDay, m, intervalsLength;
 		
-		for(var d=0; d <= YoHours.model.DAYS_MAX; d++) {
+		for(var d=0; d <= DAYS_MAX; d++) {
 			diffDay = false;
 			m = 0;
 			intervalsLength = intervals.open.length;
 
-			while(m <= YoHours.model.MINUTES_MAX) {
+			while(m <= MINUTES_MAX) {
 				//Copy entire day
 				if(diffDay) {
 					//First minute of monday
@@ -496,9 +489,9 @@ Week: function() {
 						}
 					}
 					//Last minute of sunday
-					else if(d == YoHours.model.DAYS_MAX && m == YoHours.model.MINUTES_MAX) {
+					else if(d == DAYS_MAX && m == MINUTES_MAX) {
 						if(dayStart >= 0 && myMinArray[d][m]) {
-							intervals.open.push(new YoHours.model.Interval(
+							intervals.open.push(new Interval(
 								dayStart,
 								d,
 								minStart,
@@ -516,15 +509,15 @@ Week: function() {
 						//Ending interval
 						else if(!myMinArray[d][m] && dayStart >= 0) {
 							if(m == 0) {
-								intervals.open.push(new YoHours.model.Interval(
+								intervals.open.push(new Interval(
 									dayStart,
 									d-1,
 									minStart,
-									YoHours.model.MINUTES_MAX
+									MINUTES_MAX
 								));
 							}
 							else {
-								intervals.open.push(new YoHours.model.Interval(
+								intervals.open.push(new Interval(
 									dayStart,
 									d,
 									minStart,
@@ -554,11 +547,11 @@ Week: function() {
 			
 			//Close intervals if day is identical
 			if(!diffDay && dayStart > -1) {
-				intervals.open.push(new YoHours.model.Interval(
+				intervals.open.push(new Interval(
 					dayStart,
 					d-1,
 					minStart,
-					YoHours.model.MINUTES_MAX
+					MINUTES_MAX
 				));
 				dayStart = -1;
 				minStart = -1;
@@ -568,15 +561,15 @@ Week: function() {
 			if(diffDay && dayStart == -1 && intervalsLength == intervals.open.length) {
 				//Merge with previous interval if possible
 				if(intervals.closed.length > 0 && intervals.closed[intervals.closed.length-1].getEndDay() == d - 1) {
-					intervals.closed[intervals.closed.length-1] = new YoHours.model.Interval(
+					intervals.closed[intervals.closed.length-1] = new Interval(
 																intervals.closed[intervals.closed.length-1].getStartDay(),
 																d,
 																0,
-																YoHours.model.MINUTES_MAX
+																MINUTES_MAX
 															);
 				}
 				else {
-					intervals.closed.push(new YoHours.model.Interval(d, d, 0, YoHours.model.MINUTES_MAX));
+					intervals.closed.push(new Interval(d, d, 0, MINUTES_MAX));
 				}
 			}
 		}
@@ -590,9 +583,9 @@ Week: function() {
 	 * @param interval The new interval
 	 * @return The ID of the added interval
 	 */
-	this.addInterval = function(interval) {
-		_intervals[_intervals.length] = interval;
-		return _intervals.length-1;
+	Week.prototype.addInterval = function(interval) {
+		this._intervals[this._intervals.length] = interval;
+		return this._intervals.length-1;
 	};
 	
 	/**
@@ -600,25 +593,25 @@ Week: function() {
 	 * @param id The interval ID
 	 * @param interval The new interval
 	 */
-	this.editInterval = function(id, interval) {
-		_intervals[id] = interval;
+	Week.prototype.editInterval = function(id, interval) {
+		this._intervals[id] = interval;
 	};
 	
 	/**
 	 * Remove the given interval
 	 * @param id the interval ID
 	 */
-	this.removeInterval = function(id) {
-		_intervals[id] = undefined;
+	Week.prototype.removeInterval = function(id) {
+		this._intervals[id] = undefined;
 	};
 	
 	/**
 	 * Removes all intervals during a given day
 	 */
-	this.removeIntervalsDuringDay = function(day) {
-		var interval, itLength = _intervals.length, dayDiff;
+	Week.prototype.removeIntervalsDuringDay = function(day) {
+		var interval, itLength = this._intervals.length, dayDiff;
 		for(var i=0; i < itLength; i++) {
-			interval = _intervals[i];
+			interval = this._intervals[i];
 			if(interval != undefined) {
 				//If interval over given day
 				if(interval.getStartDay() <= day && interval.getEndDay() >= day) {
@@ -629,15 +622,15 @@ Week: function() {
 						//Create new interval if several day
 						if(interval.getEndDay() - interval.getStartDay() >= 1 && interval.getFrom() <= interval.getTo()) {
 							if(interval.getStartDay() < day) {
-								_self.addInterval(new YoHours.model.Interval(interval.getStartDay(), day-1, interval.getFrom(), 24*60));
+								this.addInterval(new Interval(interval.getStartDay(), day-1, interval.getFrom(), 24*60));
 							}
 							if(interval.getEndDay() > day) {
-								_self.addInterval(new YoHours.model.Interval(day+1, interval.getEndDay(), 0, interval.getTo()));
+								this.addInterval(new Interval(day+1, interval.getEndDay(), 0, interval.getTo()));
 							}
 						}
 						
 						//Delete
-						_self.removeInterval(i);
+						this.removeInterval(i);
 					}
 				}
 			}
@@ -647,11 +640,11 @@ Week: function() {
 	/**
 	 * Redefines this date range intervals with a copy of the given ones
 	 */
-	this.copyIntervals = function(intervals) {
-		_intervals = [];
+	Week.prototype.copyIntervals = function(intervals) {
+		this._intervals = [];
 		for(var i=0; i < intervals.length; i++) {
 			if(intervals[i] != undefined) {
-				_intervals.push($.extend(true, {}, intervals[i]));
+				this._intervals.push($.extend(true, {}, intervals[i]));
 			}
 		}
 	};
@@ -660,10 +653,9 @@ Week: function() {
 	/**
 	 * Is this week defining the same intervals as the given one ?
 	 */
-	this.sameAs = function(w) {
-		return w.getAsMinutesArray().equals(_self.getAsMinutesArray());
+	Week.prototype.sameAs = function(w) {
+		return w.getAsMinutesArray().equals(this.getAsMinutesArray());
 	};
-},
 
 
 
@@ -671,116 +663,113 @@ Week: function() {
  * Class DateRange, defines a range of months, weeks or days.
  * A typical week or day will be associated.
  */
-DateRange: function(s, e) {
+var DateRange = function(s, e) {
 //ATTRIBUTES
 	/** The moment when this interval starts **/
-	var _start;
+	this._start = null;
 	
 	/** The moment when this interval ends (null if only concerning start day) **/
-	var _end;
+	this._end = null;
 
 	/** The kind of interval: month, week, day, holiday **/
-	var _type;
+	this._type = null;
 	
 	/** The typical week or day associated **/
-	var _typical = undefined;
-	
-	var _self = this;
+	this._typical = undefined;
 
 //CONSTRUCTOR
-	function _init() {
-		_self.updateRange(s, e);
-	};
+	this.updateRange(s, e);
+};
 
 //ACCESSORS
 	/**
 	 * Is this interval defining a typical day ?
 	 */
-	this.definesTypicalDay = function() {
-		return _typical instanceof YoHours.model.Day;
+	DateRange.prototype.definesTypicalDay = function() {
+		return this._typical instanceof Day;
 	};
 	
 	/**
 	 * Is this interval defining a typical week ?
 	 */
-	this.definesTypicalWeek = function() {
-		return _typical instanceof YoHours.model.Week;
+	DateRange.prototype.definesTypicalWeek = function() {
+		return this._typical instanceof Week;
 	};
 	
 	/**
 	 * @return The typical day or week
 	 */
-	this.getTypical = function() {
-		return _typical;
+	DateRange.prototype.getTypical = function() {
+		return this._typical;
 	};
 	
 	/**
 	 * @return When this interval starts
 	 */
-	this.getStart = function() {
-		return _start;
+	DateRange.prototype.getStart = function() {
+		return this._start;
 	};
 	
 	/**
 	 * @return When this interval ends
 	 */
-	this.getEnd = function() {
-		return _end;
+	DateRange.prototype.getEnd = function() {
+		return this._end;
 	};
 	
 	/**
 	 * @return The kind of date range (day, week, month, holiday, always)
 	 */
-	this.getType = function() {
-		return _type;
+	DateRange.prototype.getType = function() {
+		return this._type;
 	};
 	
 	/**
 	 * @return The human readable date range
 	 */
-	this.getTimeForHumans = function() {
+	DateRange.prototype.getTimeForHumans = function() {
 		var result;
 		
-		switch(_type) {
+		switch(this._type) {
 			case "day":
-				if(_end != null) {
-					result = "every week from "+YoHours.model.IRL_MONTHS[_start.month-1]+" "+_start.day+" to "+YoHours.model.IRL_MONTHS[_end.month-1]+" "+_end.day;
+				if(this._end != null) {
+					result = "every week from "+IRL_MONTHS[this._start.month-1]+" "+this._start.day+" to "+IRL_MONTHS[this._end.month-1]+" "+this._end.day;
 				}
 				else {
-					result = "day "+YoHours.model.IRL_MONTHS[_start.month-1]+" "+_start.day;
+					result = "day "+IRL_MONTHS[this._start.month-1]+" "+this._start.day;
 				}
 				break;
 
 			case "week":
-				if(_end != null) {
-					result = "every week from week "+_start.week+" to "+_end.week;
+				if(this._end != null) {
+					result = "every week from week "+this._start.week+" to "+this._end.week;
 				}
 				else {
-					result = "week "+_start.week;
+					result = "week "+this._start.week;
 				}
 				break;
 
 			case "month":
-				if(_end != null) {
-					result = "every week from "+YoHours.model.IRL_MONTHS[_start.month-1]+" to "+YoHours.model.IRL_MONTHS[_end.month-1];
+				if(this._end != null) {
+					result = "every week from "+IRL_MONTHS[this._start.month-1]+" to "+IRL_MONTHS[this._end.month-1];
 				}
 				else {
-					result = "every week in "+YoHours.model.IRL_MONTHS[_start.month-1];
+					result = "every week in "+IRL_MONTHS[this._start.month-1];
 				}
 				break;
 
 			case "holiday":
-				if(_start.holiday == "SH") {
+				if(this._start.holiday == "SH") {
 					result = "every week during school holidays";
 				}
-				else if(_start.holiday == "PH") {
+				else if(this._start.holiday == "PH") {
 					result = "every public holidays";
 				}
-				else if(_start.holiday == "easter") {
+				else if(this._start.holiday == "easter") {
 					result = "each easter day";
 				}
 				else {
-					throw new Error("Invalid holiday type: "+_start.holiday);
+					throw new Error("Invalid holiday type: "+this._start.holiday);
 				}
 				break;
 
@@ -795,39 +784,39 @@ DateRange: function(s, e) {
 	/**
 	 * @return The time selector for OSM opening_hours
 	 */
-	this.getTimeSelector = function() {
+	DateRange.prototype.getTimeSelector = function() {
 		var result;
 		
-		switch(_type) {
+		switch(this._type) {
 			case "day":
-				result = YoHours.model.OSM_MONTHS[_start.month-1]+" "+((_start.day < 10) ? "0" : "")+_start.day;
-				if(_end != null) {
+				result = OSM_MONTHS[this._start.month-1]+" "+((this._start.day < 10) ? "0" : "")+this._start.day;
+				if(this._end != null) {
 					//Same month as start ?
-					if(_start.month == _end.month) {
-						result += "-"+((_end.day < 10) ? "0" : "")+_end.day;
+					if(this._start.month == this._end.month) {
+						result += "-"+((this._end.day < 10) ? "0" : "")+this._end.day;
 					}
 					else {
-						result += "-"+YoHours.model.OSM_MONTHS[_end.month-1]+" "+((_end.day < 10) ? "0" : "")+_end.day;
+						result += "-"+OSM_MONTHS[this._end.month-1]+" "+((this._end.day < 10) ? "0" : "")+this._end.day;
 					}
 				}
 				break;
 
 			case "week":
-				result = "week "+((_start.week < 10) ? "0" : "")+_start.week;
-				if(_end != null) {
-					result += "-"+((_end.week < 10) ? "0" : "")+_end.week;
+				result = "week "+((this._start.week < 10) ? "0" : "")+this._start.week;
+				if(this._end != null) {
+					result += "-"+((this._end.week < 10) ? "0" : "")+this._end.week;
 				}
 				break;
 
 			case "month":
-				result = YoHours.model.OSM_MONTHS[_start.month-1];
-				if(_end != null) {
-					result += "-"+YoHours.model.OSM_MONTHS[_end.month-1];
+				result = OSM_MONTHS[this._start.month-1];
+				if(this._end != null) {
+					result += "-"+OSM_MONTHS[this._end.month-1];
 				}
 				break;
 
 			case "holiday":
-				result = _start.holiday;
+				result = this._start.holiday;
 				break;
 
 			case "always":
@@ -842,60 +831,60 @@ DateRange: function(s, e) {
 	/**
 	 * Changes the date range
 	 */
-	this.updateRange = function(start, end) {
-		_start = start || {};
-		_end = end || null;
+	DateRange.prototype.updateRange = function(start, end) {
+		this._start = start || {};
+		this._end = end || null;
 		
 		//Find the kind of interval
-		if(_start.day != undefined) {
-			_type = "day";
-			if(_typical == undefined) {
-				if(_end != null && (_end.month > _start.month || _end.day > _start.day)) {
-					_typical = new YoHours.model.Week();
+		if(this._start.day != undefined) {
+			this._type = "day";
+			if(this._typical == undefined) {
+				if(this._end != null && (this._end.month > this._start.month || this._end.day > this._start.day)) {
+					this._typical = new Week();
 				}
 				else {
-					_typical = new YoHours.model.Day();
-					_end = null;
+					this._typical = new Day();
+					this._end = null;
 				}
 			}
 		}
-		else if(_start.week != undefined) {
-			_type = "week";
-			if(_typical == undefined) {
-				_typical = new YoHours.model.Week();
+		else if(this._start.week != undefined) {
+			this._type = "week";
+			if(this._typical == undefined) {
+				this._typical = new Week();
 			}
 			
 			//Clean end if same as start
-			if(_end != null && _end.week == _start.week) {
-				_end = null;
+			if(this._end != null && this._end.week == this._start.week) {
+				this._end = null;
 			}
 		}
-		else if(_start.month != undefined) {
-			_type = "month";
-			if(_typical == undefined) {
-				_typical = new YoHours.model.Week();
+		else if(this._start.month != undefined) {
+			this._type = "month";
+			if(this._typical == undefined) {
+				this._typical = new Week();
 			}
 			
 			//Clean end if same as start
-			if(_end != null && _end.month == _start.month) {
-				_end = null;
+			if(this._end != null && this._end.month == this._start.month) {
+				this._end = null;
 			}
 		}
-		else if(_start.holiday != undefined) {
-			_type = "holiday";
-			if(_typical == undefined) {
-				if(_start.holiday == "PH" || _start.holiday == "easter") {
-					_typical = new YoHours.model.Day();
+		else if(this._start.holiday != undefined) {
+			this._type = "holiday";
+			if(this._typical == undefined) {
+				if(this._start.holiday == "PH" || this._start.holiday == "easter") {
+					this._typical = new Day();
 				}
 				else {
-					_typical = new YoHours.model.Week();
+					this._typical = new Week();
 				}
 			}
 		}
 		else {
-			_type = "always";
-			if(_typical == undefined) {
-				_typical = new YoHours.model.Week();
+			this._type = "always";
+			if(this._typical == undefined) {
+				this._typical = new Week();
 			}
 		}
 	};
@@ -906,8 +895,8 @@ DateRange: function(s, e) {
 	 * @param dr The other DateRange
 	 * @return True if same typical day/week
 	 */
-	this.hasSameTypical = function(dr) {
-		return _self.definesTypicalDay() == dr.definesTypicalDay() && _typical.sameAs(dr.getTypical());
+	DateRange.prototype.hasSameTypical = function(dr) {
+		return this.definesTypicalDay() == dr.definesTypicalDay() && this._typical.sameAs(dr.getTypical());
 	};
 	
 	/**
@@ -916,7 +905,7 @@ DateRange: function(s, e) {
 	 * @param end The end time
 	 * @return True if same time selector
 	 */
-	this.isSameRange = function(start, end) {
+	DateRange.prototype.isSameRange = function(start, end) {
 		var result = false;
 		
 		//Clean start and end value
@@ -935,48 +924,48 @@ DateRange: function(s, e) {
 			}
 		}
 		
-		switch(_type) {
+		switch(this._type) {
 			case "day":
 				result =
 					(
-					start.day == _start.day
-					&& start.month == _start.month
-					&& (end == _end || (_end != null && end != null && end.day == _end.day && end.month == _end.month))
+					start.day == this._start.day
+					&& start.month == this._start.month
+					&& (end == this._end || (this._end != null && end != null && end.day == this._end.day && end.month == this._end.month))
 					)
 					||
 					(
 					start.day == undefined
-					&& start.month == _start.month
-					&& this.isFullMonth(_start, _end)
+					&& start.month == this._start.month
+					&& this.isFullMonth(this._start, this._end)
 					);
 				break;
 
 			case "week":
 				result =
-					start.week == _start.week
-					&& (end == _end || (_end != null && end != null && end.week == _end.week));
+					start.week == this._start.week
+					&& (end == this._end || (this._end != null && end != null && end.week == this._end.week));
 				break;
 
 			case "month":
 				result = 
 					(
 						start.day != undefined
-						&& start.month == _start.month
+						&& start.month == this._start.month
 						&& (
-							(_end == null && this.isFullMonth(start, end))
-							|| (_end != null && end != null && end.month == _end.month && start.day == 1 && end.day == YoHours.model.MONTH_END_DAY[end.month-1])
+							(this._end == null && this.isFullMonth(start, end))
+							|| (this._end != null && end != null && end.month == this._end.month && start.day == 1 && end.day == MONTH_END_DAY[end.month-1])
 						)
 					)
 					||
 					(
 						start.day == undefined
-						&& start.month == _start.month
-						&& ((_end != null && end != null && end.month == _end.month) || (_end == null && end == null))
+						&& start.month == this._start.month
+						&& ((this._end != null && end != null && end.month == this._end.month) || (this._end == null && end == null))
 					);
 				break;
 
 			case "holiday":
-				result = start.holiday == _start.holiday;
+				result = start.holiday == this._start.holiday;
 				break;
 
 			case "always":
@@ -994,12 +983,12 @@ DateRange: function(s, e) {
 	/**
 	 * Does the given range corresponds to a full month ?
 	 */
-	this.isFullMonth = function(start, end) {
+	DateRange.prototype.isFullMonth = function(start, end) {
 		if(start.month != undefined && start.day == undefined && (end == null || start.month == end.month)) {
 			return true;
 		}
 		else if(start.month != undefined) {
-			return (start.day == 1 && end != null && end.month == start.month && end.day != undefined && end.day == YoHours.model.MONTH_END_DAY[end.month-1]);
+			return (start.day == 1 && end != null && end.month == start.month && end.day != undefined && end.day == MONTH_END_DAY[end.month-1]);
 		}
 		else {
 			return false;
@@ -1012,7 +1001,7 @@ DateRange: function(s, e) {
 	 * @param end The end of the date range
 	 * @return True if this date contains the given one (and is not strictly equal to)
 	 */
-	this.isGeneralFor = function(start, end) {
+	DateRange.prototype.isGeneralFor = function(start, end) {
 		/*
 		 * Analyze the given date range
 		 */
@@ -1059,75 +1048,75 @@ DateRange: function(s, e) {
 		if(this.isSameRange(start, end)) {
 			result = false;
 		}
-		else if(_type == "always") {
+		else if(this._type == "always") {
 			result = true;
 		}
-		else if(_type == "day" && this.definesTypicalWeek()) {
+		else if(this._type == "day" && this.definesTypicalWeek()) {
 			if(type == "day") {
 				//Starting after
-				if(start.month > _start.month || (start.month == _start.month && start.day >= _start.day)) {
+				if(start.month > this._start.month || (start.month == this._start.month && start.day >= this._start.day)) {
 					//Ending before
-					if(end != null && _end != null && (end.month < _end.month || (end.month == _end.month && end.day <= _end.day))) {
+					if(end != null && this._end != null && (end.month < this._end.month || (end.month == this._end.month && end.day <= this._end.day))) {
 						result = true;
 					}
 				}
 			}
 			else if(type == "month"){
 				//Starting after
-				if(start.month > _start.month || (start.month == _start.month && _start.day == 1)) {
+				if(start.month > this._start.month || (start.month == this._start.month && this._start.day == 1)) {
 					//Ending before
-					if(end != null && _end != null && (end.month < _end.month || (end.month == _end.month && _end.day == YoHours.model.MONTH_END_DAY[end.month-1]))) {
+					if(end != null && this._end != null && (end.month < this._end.month || (end.month == this._end.month && this._end.day == MONTH_END_DAY[end.month-1]))) {
 						result = true;
 					}
-					else if(end == null && (_end != null && start.month < _end.month)) {
+					else if(end == null && (this._end != null && start.month < this._end.month)) {
 						result = true;
 					}
 				}
 			}
 		}
-		else if(_type == "week") {
+		else if(this._type == "week") {
 			if(type == "week") {
-				if(start.week >= _start.week) {
-					if(end != null && _end != null && end.week <= _end.week) {
+				if(start.week >= this._start.week) {
+					if(end != null && this._end != null && end.week <= this._end.week) {
 						result = true;
 					}
-					else if(end == null && ((_end != null && start.week <= _end.week) || start.week == _start.week)) {
+					else if(end == null && ((this._end != null && start.week <= this._end.week) || start.week == this._start.week)) {
 						result = true;
 					}
 				}
 			}
 		}
-		else if(_type == "month") {
+		else if(this._type == "month") {
 			if(type == "month") {
-				if(start.month >= _start.month) {
-					if(end != null && _end != null && end.month <= _end.month) {
+				if(start.month >= this._start.month) {
+					if(end != null && this._end != null && end.month <= this._end.month) {
 						result = true;
 					}
-					else if(end == null && ((_end != null && start.month <= _end.month) || start.month == _start.month)) {
+					else if(end == null && ((this._end != null && start.month <= this._end.month) || start.month == this._start.month)) {
 						result = true;
 					}
 				}
 			}
 			else if(type == "day") {
 				if(end != null) {
-					if(_end == null) {
+					if(this._end == null) {
 						if(
-							start.month == _start.month
-							&& end.month == _start.month
-							&& ((start.day >= 1 && end.day < YoHours.model.MONTH_END_DAY[start.month-1])
-							|| (start.day > 1 && end.day <= YoHours.model.MONTH_END_DAY[start.month-1]))
+							start.month == this._start.month
+							&& end.month == this._start.month
+							&& ((start.day >= 1 && end.day < MONTH_END_DAY[start.month-1])
+							|| (start.day > 1 && end.day <= MONTH_END_DAY[start.month-1]))
 						) {
 							result = true;
 						}
 					}
 					else {
-						if(start.month >= _start.month && end.month <= _end.month) {
+						if(start.month >= this._start.month && end.month <= this._end.month) {
 							if(
-								(start.month > _start.month && end.month < _end.month)
-								|| (start.month == _start.month && end.month < _end.month && start.day > 1)
-								|| (start.month > _start.month && end.month == _end.month && end.day < YoHours.model.MONTH_END_DAY[end.month-1])
-								|| (start.day >= 1 && end.day < YoHours.model.MONTH_END_DAY[end.month-1])
-								|| (start.day > 1 && end.day <= YoHours.model.MONTH_END_DAY[end.month-1])
+								(start.month > this._start.month && end.month < this._end.month)
+								|| (start.month == this._start.month && end.month < this._end.month && start.day > 1)
+								|| (start.month > this._start.month && end.month == this._end.month && end.day < MONTH_END_DAY[end.month-1])
+								|| (start.day >= 1 && end.day < MONTH_END_DAY[end.month-1])
+								|| (start.day > 1 && end.day <= MONTH_END_DAY[end.month-1])
 							) {
 								result = true;
 							}
@@ -1139,10 +1128,6 @@ DateRange: function(s, e) {
 		
 		return result;
 	};
-	
-//INIT
-	_init();
-},
 
 
 
@@ -1151,59 +1136,59 @@ DateRange: function(s, e) {
  * @param start The start minute (from midnight), can be null
  * @param end The end minute (from midnight), can be null
  */
-OhTime: function(start, end) {
+var OhTime = function(start, end) {
 //ATTRIBUTES
 	/** The start minute **/
-	var _start = (start >= 0) ? start : null;
+	this._start = (start >= 0) ? start : null;
 	
 	/** The end minute **/
-	var _end = (end >= 0 && end != start) ? end : null;
+	this._end = (end >= 0 && end != start) ? end : null;
+};
 
 //ACCESSORS
 	/**
 	 * @return The time in opening_hours format
 	 */
-	this.get = function() {
-		if(_start === null && _end === null) {
+	OhTime.prototype.get = function() {
+		if(this._start === null && this._end === null) {
 			return "off";
 		}
 		else {
-			return _timeString(start) + ((_end == null) ? "" : "-" + _timeString(_end));
+			return this._timeString(this._start) + ((this._end == null) ? "" : "-" + this._timeString(this._end));
 		}
 	};
 	
 	/**
 	 * @return The start minutes
 	 */
-	this.getStart = function() {
-		return _start;
+	OhTime.prototype.getStart = function() {
+		return this._start;
 	};
 	
 	/**
 	 * @return The end minutes
 	 */
-	this.getEnd = function() {
-		return _end;
+	OhTime.prototype.getEnd = function() {
+		return this._end;
 	};
 
 	/**
 	 * @return True if same time
 	 */
-	this.equals = function(t) {
-		return _start == t.getStart() && _end == t.getEnd();
+	OhTime.prototype.equals = function(t) {
+		return this._start == t.getStart() && this._end == t.getEnd();
 	};
 	
 //OTHER METHODS
 	/**
 	 * @return The hour in HH:MM format
 	 */
-	function _timeString(minutes) {
+	OhTime.prototype._timeString = function(minutes) {
 		var h = Math.floor(minutes / 60);
 		var period = "";
 		var m = minutes % 60;
 		return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + period;
 	};
-},
 
 
 
@@ -1213,65 +1198,66 @@ OhTime: function(start, end) {
  * @param wt The wide selector type (month, week, day, holiday, always)
  * @param wd The weekdays, as integer array (-1 = single day date)
  */
-OhDate: function(w, wt, wd) {
+var OhDate = function(w, wt, wd) {
 //ATTRIBUTES
 	/** Kind of wide date (month, week, day, holiday, always) **/
-	var _wideType = wt;
+	this._wideType = wt;
 	
 	/** Wide date **/
-	var _wide = w;
+	this._wide = w;
 	
 	/** Weekdays + PH **/
-	var _weekdays = wd.sort();
+	this._weekdays = wd.sort();
 	
 	/** Overwritten days (to allow create simpler rules) **/
-	var _wdOver = [];
+	this._wdOver = [];
 
 //CONSTRUCTOR
 	if(w == null || wt == null || wd == null) {
 		throw Error("Missing parameter");
 	}
+};
 
 //ACCESSORS
 	/**
 	 * @return The wide type
 	 */
-	this.getWideType = function() {
-		return _wideType;
+	OhDate.prototype.getWideType = function() {
+		return this._wideType;
 	};
 
 	/**
 	 * @return The monthday, month, week, SH (depends of type)
 	 */
-	this.getWideValue = function() {
-		return _wide;
+	OhDate.prototype.getWideValue = function() {
+		return this._wide;
 	};
 	
 	/**
 	 * @return The weekdays array
 	 */
-	this.getWd = function() {
-		return _weekdays;
+	OhDate.prototype.getWd = function() {
+		return this._weekdays;
 	};
 	
 	/**
 	 * @param a The other weekdays array
 	 * @return True if same weekdays as other object
 	 */
-	this.sameWd = function(a) {
-		return a.equals(_weekdays);
+	OhDate.prototype.sameWd = function(a) {
+		return a.equals(this._weekdays);
 	};
 	
 	/**
 	 * @return The weekdays in opening_hours syntax
 	 */
-	this.getWeekdays = function() {
+	OhDate.prototype.getWeekdays = function() {
 		var result = "";
-		var wd = _weekdays.concat(_wdOver).sort();
+		var wd = this._weekdays.concat(this._wdOver).sort();
 		
 		//Process only if not 
 		if(wd.length > 1 || wd[0] != -1) {
-			result = YoHours.model.OSM_DAYS[wd[0]];
+			result = OSM_DAYS[wd[0]];
 			var firstInRow = wd[0];
 			
 			for(var i=1; i < wd.length; i++) {
@@ -1281,23 +1267,23 @@ OhDate: function(w, wt, wd) {
 					if(firstInRow != wd[i-1]) {
 						//Two days
 						if(wd[i-1] - firstInRow == 1) {
-							result += ","+YoHours.model.OSM_DAYS[wd[i-1]];
+							result += ","+OSM_DAYS[wd[i-1]];
 						}
 						else {
-							result += "-"+YoHours.model.OSM_DAYS[wd[i-1]];
+							result += "-"+OSM_DAYS[wd[i-1]];
 						}
 					}
 					
 					//Add the current day
-					result += ","+YoHours.model.OSM_DAYS[wd[i]];
+					result += ","+OSM_DAYS[wd[i]];
 					firstInRow = wd[i];
 				}
 				else if(i==wd.length-1) {
 					if(wd[i] - firstInRow == 1) {
-						result += ","+YoHours.model.OSM_DAYS[wd[i]];
+						result += ","+OSM_DAYS[wd[i]];
 					}
 					else {
-						result += "-"+YoHours.model.OSM_DAYS[wd[i]];
+						result += "-"+OSM_DAYS[wd[i]];
 					}
 				}
 			}
@@ -1312,100 +1298,100 @@ OhDate: function(w, wt, wd) {
 	 * Is the given object of the same kind as this one
 	 * @return True if same weekdays and same wide type
 	 */
-	this.sameKindAs = function(d) {
-		return _wideType == d.getWideType() && d.sameWd(_weekdays);
+	OhDate.prototype.sameKindAs = function(d) {
+		return this._wideType == d.getWideType() && d.sameWd(this._weekdays);
 	};
 	
 	/**
 	 * @return True if this object is equal to the given one
 	 */
-	this.equals = function(o) {
-		return o instanceof YoHours.model.OhDate && _wideType == o.getWideType() && _wide == o.getWideValue() && o.sameWd(_weekdays);
+	OhDate.prototype.equals = function(o) {
+		return o instanceof OhDate && this._wideType == o.getWideType() && this._wide == o.getWideValue() && o.sameWd(this._weekdays);
 	};
 
 //MODIFIERS
 	/**
 	 * Adds a new weekday in this date
 	 */
-	this.addWeekday = function(wd) {
-		if(!_weekdays.contains(wd) && !_wdOver.contains(wd)) {
-			_weekdays.push(wd);
-			_weekdays = _weekdays.sort();
+	OhDate.prototype.addWeekday = function(wd) {
+		if(!this._weekdays.contains(wd) && !this._wdOver.contains(wd)) {
+			this._weekdays.push(wd);
+			this._weekdays = this._weekdays.sort();
 		}
 	};
 	
 	/**
 	 * Adds an overwritten weekday, which can be included in this date and that will be overwritten in a following rule
 	 */
-	this.addOverwrittenWeekday = function(wd) {
-		if(!_wdOver.contains(wd) && !_weekdays.contains(wd)) {
-			_wdOver.push(wd);
-			_wdOver = _wdOver.sort();
+	OhDate.prototype.addOverwrittenWeekday = function(wd) {
+		if(!this._wdOver.contains(wd) && !this._weekdays.contains(wd)) {
+			this._wdOver.push(wd);
+			this._wdOver = this._wdOver.sort();
 		}
 	}
-},
 
 
 
 /**
  * An opening_hours rule, such as "Mo,Tu 08:00-18:00"
  */
-OhRule: function() {
+var OhRule = function() {
 //ATTRIBUTES
 	/** The date selectors **/
-	var _date = [];
+	this._date = [];
 	
 	/** The time selectors **/
-	var _time = [];
+	this._time = [];
+};
 
 //ACCESSORS
 	/**
 	 * @return The date selectors, as an array
 	 */
-	this.getDate = function() {
-		return _date;
+	OhRule.prototype.getDate = function() {
+		return this._date;
 	};
 	
 	/**
 	 * @return The time selectors, as an array
 	 */
-	this.getTime = function() {
-		return _time;
+	OhRule.prototype.getTime = function() {
+		return this._time;
 	};
 	
 	/**
 	 * @return The opening_hours value
 	 */
-	this.get = function() {
+	OhRule.prototype.get = function() {
 		var result = "";
 		
 		//Create date part
-		if(_date.length > 1 || _date[0].getWideValue() != "") {
+		if(this._date.length > 1 || this._date[0].getWideValue() != "") {
 			//Add wide selectors
-			for(var i=0, l=_date.length; i < l; i++) {
+			for(var i=0, l=this._date.length; i < l; i++) {
 				if(i > 0) {
 					result += ",";
 				}
-				result += _date[i].getWideValue();
+				result += this._date[i].getWideValue();
 			}
 		}
 		
 		//Add weekdays
-		if(_date.length > 0) {
-			var wd = _date[0].getWeekdays();
+		if(this._date.length > 0) {
+			var wd = this._date[0].getWeekdays();
 			if(wd.length > 0) {
 				result += " "+wd;
 			}
 		}
 		
 		//Create time part
-		if(_time.length > 0) {
+		if(this._time.length > 0) {
 			result += " ";
-			for(var i=0, l=_time.length; i < l; i++) {
+			for(var i=0, l=this._time.length; i < l; i++) {
 				if(i > 0) {
 					result += ",";
 				}
-				result += _time[i].get();
+				result += this._time[i].get();
 			}
 		}
 		else {
@@ -1420,13 +1406,13 @@ OhRule: function() {
 	/**
 	 * @return True if the given rule has the same time as this one
 	 */
-	this.sameTime = function(o) {
-		if(o == undefined || o == null || o.getTime().length != _time.length) {
+	OhRule.prototype.sameTime = function(o) {
+		if(o == undefined || o == null || o.getTime().length != this._time.length) {
 			return false;
 		}
 		else {
-			for(var i=0, l=_time.length; i < l; i++) {
-				if(!_time[i].equals(o.getTime()[i])) {
+			for(var i=0, l=this._time.length; i < l; i++) {
+				if(!this._time[i].equals(o.getTime()[i])) {
 					return false;
 				}
 			}
@@ -1437,44 +1423,44 @@ OhRule: function() {
 	/**
 	 * Is this rule concerning off time ?
 	 */
-	this.isOff = function() {
-		return _time.length == 0 || (_time.length == 1 && _time[0].getStart() == null);
-	}
+	OhRule.prototype.isOff = function() {
+		return this._time.length == 0 || (this._time.length == 1 && this._time[0].getStart() == null);
+	};
 
 //MODIFIERS
 	/**
 	 * Adds a weekday to all the dates
 	 */
-	this.addWeekday = function(wd) {
-		for(var i=0; i < _date.length; i++) {
-			_date[i].addWeekday(wd);
+	OhRule.prototype.addWeekday = function(wd) {
+		for(var i=0; i < this._date.length; i++) {
+			this._date[i].addWeekday(wd);
 		}
 	};
 	
 	/**
 	 * Adds an overwritten weekday to all the dates
 	 */
-	this.addOverwrittenWeekday = function(wd) {
-		for(var i=0; i < _date.length; i++) {
-			_date[i].addOverwrittenWeekday(wd);
+	OhRule.prototype.addOverwrittenWeekday = function(wd) {
+		for(var i=0; i < this._date.length; i++) {
+			this._date[i].addOverwrittenWeekday(wd);
 		}
 	};
 	
 	/**
 	 * @param d A new date selector
 	 */
-	this.addDate = function(d) {
+	OhRule.prototype.addDate = function(d) {
 		//Check param
-		if(d == null || d == undefined || !d instanceof YoHours.model.OhDate) {
+		if(d == null || d == undefined || !d instanceof OhDate) {
 			throw Error("Invalid parameter");
 		}
 		
 		//Check if date can be added
-		if(_date.length == 0 || (_date[0].getWideType() != "always" && _date[0].sameKindAs(d))) {
-			_date.push(d);
+		if(this._date.length == 0 || (this._date[0].getWideType() != "always" && this._date[0].sameKindAs(d))) {
+			this._date.push(d);
 		}
 		else {
-			if(_date.length != 1 || _date[0].getWideType() != "always" || !_date[0].sameWd(d.getWd())) {
+			if(this._date.length != 1 || this._date[0].getWideType() != "always" || !this._date[0].sameWd(d.getWd())) {
 				throw Error("This date can't be added to this rule");
 			}
 		}
@@ -1483,29 +1469,29 @@ OhRule: function() {
 	/**
 	 * @param t A new time selector
 	 */
-	this.addTime = function(t) {
-		if((_time.length == 0 || _time[0].get() != "off") && !_time.contains(t)) {
-			_time.push(t);
+	OhRule.prototype.addTime = function(t) {
+		if((this._time.length == 0 || this._time[0].get() != "off") && !this._time.contains(t)) {
+			this._time.push(t);
 		}
 		else {
 			throw Error("This time can't be added to this rule");
 		}
 	};
-},
 
 
 
 /**
  * Class OpeningHoursBuilder, creates opening_hours value from date range object
  */
-OpeningHoursBuilder: function() {
+var OpeningHoursBuilder = function() {};
+
 //OTHER METHODS
 	/**
 	 * Parses several date ranges to create an opening_hours string
 	 * @param dateRanges The date ranges to parse
 	 * @return The opening_hours string
 	 */
-	this.build = function(dateRanges) {
+	OpeningHoursBuilder.prototype.build = function(dateRanges) {
 		var rules = [];
 		var dateRange, ohrules, ohrule, ohruleAdded, ruleId, rangeGeneral, rangeGeneralFor;
 		
@@ -1541,14 +1527,14 @@ OpeningHoursBuilder: function() {
 					//Get rules for this date range
 					if(dateRange.definesTypicalWeek()) {
 						if(rangeGeneralFor != null) {
-							ohrules = _buildWeekDiff(dateRange, dateRanges[rangeGeneralFor]);
+							ohrules = this._buildWeekDiff(dateRange, dateRanges[rangeGeneralFor]);
 						}
 						else {
-							ohrules = _buildWeek(dateRange);
+							ohrules = this._buildWeek(dateRange);
 						}
 					}
 					else {
-						ohrules = _buildDay(dateRange);
+						ohrules = this._buildDay(dateRange);
 					}
 					
 					//Process each rule
@@ -1606,13 +1592,13 @@ OpeningHoursBuilder: function() {
 	 * @param dateRange The date range defining a typical day
 	 * @return An array of OhRules
 	 */
-	function _buildDay(dateRange) {
+	OpeningHoursBuilder.prototype._buildDay = function(dateRange) {
 		var intervals = dateRange.getTypical().getIntervals(true);
 		var interval;
 		
 		//Create rule
-		var rule = new YoHours.model.OhRule();
-		var date = new YoHours.model.OhDate(dateRange.getTimeSelector(), dateRange.getType(), [ -1 ]);
+		var rule = new OhRule();
+		var date = new OhDate(dateRange.getTimeSelector(), dateRange.getType(), [ -1 ]);
 		rule.addDate(date);
 		
 		//Read time
@@ -1620,7 +1606,7 @@ OpeningHoursBuilder: function() {
 			interval = intervals[i];
 			
 			if(interval != undefined) {
-				rule.addTime(new YoHours.model.OhTime(interval.getFrom(), interval.getTo()));
+				rule.addTime(new OhTime(interval.getFrom(), interval.getTo()));
 			}
 		}
 		
@@ -1633,7 +1619,7 @@ OpeningHoursBuilder: function() {
 	 * @param dateRange The date range defining a typical day
 	 * @return An array of OhRules
 	 */
-	function _buildWeek(dateRange) {
+	OpeningHoursBuilder.prototype._buildWeek = function(dateRange) {
 		var result = [];
 		var intervals = dateRange.getTypical().getIntervals(true);
 		var interval, rule, date;
@@ -1641,13 +1627,13 @@ OpeningHoursBuilder: function() {
 		/*
 		 * Create time intervals per day
 		 */
-		var timeIntervals = _createTimeIntervals(dateRange.getTimeSelector(), dateRange.getType(), intervals);
+		var timeIntervals = this._createTimeIntervals(dateRange.getTimeSelector(), dateRange.getType(), intervals);
 		var monday0 = timeIntervals[0];
 		var sunday24 = timeIntervals[1];
 		var days = timeIntervals[2];
 		
 		//Create continuous night for monday-sunday
-		days = _nightMonSun(days, monday0, sunday24);
+		days = this._nightMonSun(days, monday0, sunday24);
 		
 		/*
 		 * Group rules with same time
@@ -1661,7 +1647,7 @@ OpeningHoursBuilder: function() {
 		var daysStatus = [];
 		
 		//Init status
-		for(var i=0; i < YoHours.model.OSM_DAYS.length; i++) {
+		for(var i=0; i < OSM_DAYS.length; i++) {
 			daysStatus[i] = 0;
 		}
 		
@@ -1723,7 +1709,7 @@ OpeningHoursBuilder: function() {
 			}
 		}
 		
-		result = _mergeDays(result);
+		result = this._mergeDays(result);
 		
 		return result;
 	};
@@ -1734,14 +1720,14 @@ OpeningHoursBuilder: function() {
 	 * @param generalDateRange The date range which is wider than this one
 	 * @return An array of OhRules
 	 */
-	function _buildWeekDiff(dateRange, generalDateRange) {
+	OpeningHoursBuilder.prototype._buildWeekDiff = function(dateRange, generalDateRange) {
 		var intervals = dateRange.getTypical().getIntervalsDiff(generalDateRange.getTypical());
 		
 		/*
 		 * Create time intervals per day
 		 */
 		//Open
-		var timeIntervals = _createTimeIntervals(dateRange.getTimeSelector(), dateRange.getType(), intervals.open);
+		var timeIntervals = this._createTimeIntervals(dateRange.getTimeSelector(), dateRange.getType(), intervals.open);
 		var monday0 = timeIntervals[0];
 		var sunday24 = timeIntervals[1];
 		var days = timeIntervals[2];
@@ -1751,12 +1737,12 @@ OpeningHoursBuilder: function() {
 			interval = intervals.closed[i];
 			
 			for(var j=interval.getStartDay(); j <= interval.getEndDay(); j++) {
-				days[j].addTime(new YoHours.model.OhTime());
+				days[j].addTime(new OhTime());
 			}
 		}
 		
 		//Create continuous night for monday-sunday
-		days = _nightMonSun(days, monday0, sunday24);
+		days = this._nightMonSun(days, monday0, sunday24);
 		
 		/*
 		 * Group rules with same time
@@ -1770,7 +1756,7 @@ OpeningHoursBuilder: function() {
 		var daysStatus = [];
 		
 		//Init status
-		for(var i=0; i < YoHours.model.OSM_DAYS.length; i++) {
+		for(var i=0; i < OSM_DAYS.length; i++) {
 			daysStatus[i] = 0;
 		}
 		
@@ -1838,67 +1824,10 @@ OpeningHoursBuilder: function() {
 					days[i].addWeekday(lastSameDay);
 					result.push(days[i]);
 				}
-				// var addDay = (i == days.length - 1) ? [ days[i] ] : [];
-				
-				// //Find other days with the same hours
-				// for(var j=i+1; j < days.length; j++) {
-					// //Keep going through days
-					// if(days[i].sameTime(days[j])) {
-						// daysStatus[j] = i+1;
-						// lastSameDay = j;
-						// sameDayCount++;
-						
-						// //Create day interval string
-						// if(j == days.length -1 && days[i].getTime().length > 0) {
-							// //Add interval depending of its length
-							// if (sameDayCount == 1) {
-								// // a single Day with this special opening_hours
-								// addDay.push(days[j]);
-							// } else if (sameDayCount == 2) {
-								// // exactly two Days with this special opening_hours
-								// days[j-1].addWeekday(j);
-								// addDay.push(days[j-1]);
-							// } else if (sameDayCount > 2) {
-								// // more than two Days with this special opening_hours
-								// for(var k = j-sameDayCount+2; k <= j; k++) {
-									// days[j-sameDayCount+1].addWeekday(k);
-								// }
-								// addDay.push(days[j-sameDayCount+1]);
-							// }
-						// }
-					// }
-					// //Add previous days range
-					// else {
-						// //Create day interval string
-						// if(days[i].getTime().length > 0) {
-							// //Add interval depending of its length
-							// if (sameDayCount == 1) {
-								// // a single Day with this special opening_hours
-								// addDay.push(days[j-1]);
-							// } else if (sameDayCount == 2) {
-								// // exactly two Days with this special opening_hours
-								// days[j-2].addWeekday(j-1);
-								// addDay.push(days[j-2]);
-							// } else if (sameDayCount > 2) {
-								// // more than two Days with this special opening_hours
-								// for(var k = j-sameDayCount+1; k <= j-1; k++) {
-									// days[j-sameDayCount].addWeekday(k);
-								// }
-								// addDay.push(days[j-sameDayCount]);
-							// }
-						// }
-						// sameDayCount = 0;
-						// daysStatus[j] = -i-1;
-					// }
-				// }
-				
-				// if(addDay.length > 0) {
-					// result = result.concat(addDay);
-				// }
 			}
 		}
 		
-		result = _mergeDays(result);
+		result = this._mergeDays(result);
 		
 		return result;
 	};
@@ -1911,7 +1840,7 @@ OpeningHoursBuilder: function() {
 	/**
 	 * Merge days with same opening time
 	 */
-	function _mergeDays(rules) {
+	OpeningHoursBuilder.prototype._mergeDays = function(rules) {
 		if(rules.length == 0) { return rules; }
 		
 		var result = [];
@@ -1945,7 +1874,7 @@ OpeningHoursBuilder: function() {
 	 * Creates time intervals for each day
 	 * @return [ monday0, sunday24, days ]
 	 */
-	function _createTimeIntervals(timeSelector, type, intervals) {
+	OpeningHoursBuilder.prototype._createTimeIntervals = function(timeSelector, type, intervals) {
 		var monday0 = -1;
 		var sunday24 = -1;
 		var days = [];
@@ -1953,8 +1882,8 @@ OpeningHoursBuilder: function() {
 		
 		//Create rule for each day of the week
 		for(var i=0; i < 7; i++) {
-			days.push(new YoHours.model.OhRule());
-			days[i].addDate(new YoHours.model.OhDate(timeSelector, type, [ i ]));
+			days.push(new OhRule());
+			days[i].addDate(new OhDate(timeSelector, type, [ i ]));
 		}
 		
 		for(var i=0, l=intervals.length; i < l; i++) {
@@ -1962,7 +1891,7 @@ OpeningHoursBuilder: function() {
 			
 			if(interval != undefined) {
 				//Handle sunday 24:00 with monday 00:00
-				if(interval.getStartDay() == YoHours.model.DAYS_MAX && interval.getEndDay() == YoHours.model.DAYS_MAX && interval.getTo() == YoHours.model.MINUTES_MAX) {
+				if(interval.getStartDay() == DAYS_MAX && interval.getEndDay() == DAYS_MAX && interval.getTo() == MINUTES_MAX) {
 					sunday24 = interval.getFrom();
 				}
 				if(interval.getStartDay() == 0 && interval.getEndDay() == 0 && interval.getFrom() == 0) {
@@ -1973,7 +1902,7 @@ OpeningHoursBuilder: function() {
 					//Interval in a single day
 					if(interval.getStartDay() == interval.getEndDay()) {
 						days[interval.getStartDay()].addTime(
-							new YoHours.model.OhTime(interval.getFrom(), interval.getTo())
+							new OhTime(interval.getFrom(), interval.getTo())
 						);
 					}
 					//Interval on two days
@@ -1981,16 +1910,16 @@ OpeningHoursBuilder: function() {
 						//Continuous night
 						if(interval.getFrom() > interval.getTo()) {
 							days[interval.getStartDay()].addTime(
-								new YoHours.model.OhTime(interval.getFrom(), interval.getTo())
+								new OhTime(interval.getFrom(), interval.getTo())
 							);
 						}
 						//Separated days
 						else {
 							days[interval.getStartDay()].addTime(
-								new YoHours.model.OhTime(interval.getFrom(), YoHours.model.MINUTES_MAX)
+								new OhTime(interval.getFrom(), MINUTES_MAX)
 							);
 							days[interval.getEndDay()].addTime(
-								new YoHours.model.OhTime(0, interval.getTo())
+								new OhTime(0, interval.getTo())
 							);
 						}
 					}
@@ -1999,17 +1928,17 @@ OpeningHoursBuilder: function() {
 						for(var j=interval.getStartDay(), end=interval.getEndDay(); j <= end; j++) {
 							if(j == interval.getStartDay()) {
 								days[j].addTime(
-									new YoHours.model.OhTime(interval.getFrom(), YoHours.model.MINUTES_MAX)
+									new OhTime(interval.getFrom(), MINUTES_MAX)
 								);
 							}
 							else if(j == interval.getEndDay()) {
 								days[j].addTime(
-									new YoHours.model.OhTime(0, interval.getTo())
+									new OhTime(0, interval.getTo())
 								);
 							}
 							else {
 								days[j].addTime(
-									new YoHours.model.OhTime(0, YoHours.model.MINUTES_MAX)
+									new OhTime(0, MINUTES_MAX)
 								);
 							}
 						}
@@ -2027,13 +1956,13 @@ OpeningHoursBuilder: function() {
 	/**
 	 * Changes days array to make sunday - monday night continuous if needed
 	 */
-	function _nightMonSun(days, monday0, sunday24) {
+	OpeningHoursBuilder.prototype._nightMonSun = function(days, monday0, sunday24) {
 		if(monday0 >= 0 && sunday24 >= 0 && monday0 < sunday24) {
-			days[0].getTime().sort(_sortOhTime);
-			days[6].getTime().sort(_sortOhTime);
+			days[0].getTime().sort(this._sortOhTime);
+			days[6].getTime().sort(this._sortOhTime);
 			
 			//Change sunday interval
-			days[6].getTime()[days[6].getTime().length-1] = new YoHours.model.OhTime(sunday24, monday0);
+			days[6].getTime()[days[6].getTime().length-1] = new OhTime(sunday24, monday0);
 			
 			//Remove monday interval
 			days[0].getTime().shift();
@@ -2044,10 +1973,9 @@ OpeningHoursBuilder: function() {
 	/**
 	 * Sort OhTime objects by start hour
 	 */
-	function _sortOhTime(a, b) {
+	OpeningHoursBuilder.prototype._sortOhTime = function(a, b) {
 		return a.getStart() - b.getStart();
 	};
-},
 
 
 
@@ -2055,17 +1983,18 @@ OpeningHoursBuilder: function() {
  * Class OpeningHoursParser, creates DateRange/Week/Day objects from opening_hours string
  * Based on a subpart of grammar defined at http://wiki.openstreetmap.org/wiki/Key:opening_hours/specification
  */
-OpeningHoursParser: function() {
+var OpeningHoursParser = function() {
 //CONSTANTS
-	var RGX_RULE_MODIFIER = /^(open|closed|off)$/i;
-	var RGX_WEEK_KEY = /^week$/;
-	var RGX_WEEK_VAL = /^([01234]?[0-9]|5[0123])(\-([01234]?[0-9]|5[0123]))?(,([01234]?[0-9]|5[0123])(\-([01234]?[0-9]|5[0123]))?)*\:?$/;
-	var RGX_MONTH = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))?\:?$/;
-	var RGX_MONTHDAY = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([012]?[0-9]|3[01])(\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) )?([012]?[0-9]|3[01]))?\:?$/;
-	var RGX_TIME = /^((([01]?[0-9]|2[01234])\:[012345][0-9](\-([01]?[0-9]|2[01234])\:[012345][0-9])?(,([01]?[0-9]|2[01234])\:[012345][0-9](\-([01]?[0-9]|2[01234])\:[012345][0-9])?)*)|(24\/7))$/;
-	var RGX_WEEKDAY = /^(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|SH|easter))(,(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|SH|easter)))*$/;
-	var RGX_HOLIDAY = /^(PH|SH|easter)$/;
-	var RGX_WD = /^(Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?$/;
+	this.RGX_RULE_MODIFIER = /^(open|closed|off)$/i;
+	this.RGX_WEEK_KEY = /^week$/;
+	this.RGX_WEEK_VAL = /^([01234]?[0-9]|5[0123])(\-([01234]?[0-9]|5[0123]))?(,([01234]?[0-9]|5[0123])(\-([01234]?[0-9]|5[0123]))?)*\:?$/;
+	this.RGX_MONTH = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))?\:?$/;
+	this.RGX_MONTHDAY = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([012]?[0-9]|3[01])(\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) )?([012]?[0-9]|3[01]))?\:?$/;
+	this.RGX_TIME = /^((([01]?[0-9]|2[01234])\:[012345][0-9](\-([01]?[0-9]|2[01234])\:[012345][0-9])?(,([01]?[0-9]|2[01234])\:[012345][0-9](\-([01]?[0-9]|2[01234])\:[012345][0-9])?)*)|(24\/7))$/;
+	this.RGX_WEEKDAY = /^(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|SH|easter))(,(((Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?)|(PH|SH|easter)))*$/;
+	this.RGX_HOLIDAY = /^(PH|SH|easter)$/;
+	this.RGX_WD = /^(Mo|Tu|We|Th|Fr|Sa|Su)(\-(Mo|Tu|We|Th|Fr|Sa|Su))?$/;
+};
 
 //OTHER METHODS
 	/**
@@ -2073,7 +2002,7 @@ OpeningHoursParser: function() {
 	 * @param oh The opening_hours string
 	 * @return An array of date ranges
 	 */
-	this.parse = function(oh) {
+	OpeningHoursParser.prototype.parse = function(oh) {
 		var result = [];
 		
 		//Separate each block
@@ -2098,7 +2027,7 @@ OpeningHoursParser: function() {
 			
 			if(block.length == 0) { continue; } //Don't parse empty blocks
 			
-			tokens = _tokenize(block);
+			tokens = this._tokenize(block);
 			currentToken = tokens.length - 1;
 			ruleModifier = null;
 			timeSelector = null;
@@ -2110,7 +2039,7 @@ OpeningHoursParser: function() {
 			/*
 			 * Rule modifier (open, closed, off)
 			 */
-			if(currentToken >= 0 && _isRuleModifier(tokens[currentToken])) {
+			if(currentToken >= 0 && this._isRuleModifier(tokens[currentToken])) {
 				//console.log("rule modifier",tokens[currentToken]);
 				ruleModifier = tokens[currentToken].toLowerCase();
 				currentToken--;
@@ -2124,7 +2053,7 @@ OpeningHoursParser: function() {
 			times = []; //Time intervals in minutes
 			
 			//Time selector
-			if(currentToken >= 0 && _isTime(tokens[currentToken])) {
+			if(currentToken >= 0 && this._isTime(tokens[currentToken])) {
 				timeSelector = tokens[currentToken];
 				
 				if(timeSelector == "24/7") {
@@ -2136,9 +2065,9 @@ OpeningHoursParser: function() {
 					for(var ts=0, tsl = timeSelector.length; ts < tsl; ts++) {
 						//Separate start and end values
 						singleTime = timeSelector[ts].split('-');
-						from = _asMinutes(singleTime[0]);
+						from = this._asMinutes(singleTime[0]);
 						if(singleTime.length > 1) {
-							to = _asMinutes(singleTime[1]);
+							to = this._asMinutes(singleTime[1]);
 						}
 						else {
 							to = from;
@@ -2157,7 +2086,7 @@ OpeningHoursParser: function() {
 			if(timeSelector == "24/7") {
 				weekdays.push({from: 0, to: 6});
 			}
-			else if(currentToken >= 0 && _isWeekday(tokens[currentToken])) {
+			else if(currentToken >= 0 && this._isWeekday(tokens[currentToken])) {
 				weekdaySelector = tokens[currentToken];
 				
 				//Divide each weekday
@@ -2167,15 +2096,15 @@ OpeningHoursParser: function() {
 					singleWeekday = weekdaySelector[wds];
 					
 					//Holiday
-					if(RGX_HOLIDAY.test(singleWeekday)) {
+					if(this.RGX_HOLIDAY.test(singleWeekday)) {
 						holidays.push(singleWeekday);
 					}
 					//Weekday interval
-					else if(RGX_WD.test(singleWeekday)) {
+					else if(this.RGX_WD.test(singleWeekday)) {
 						singleWeekday = singleWeekday.split('-');
-						wdFrom = YoHours.model.OSM_DAYS.indexOf(singleWeekday[0]);
+						wdFrom = OSM_DAYS.indexOf(singleWeekday[0]);
 						if(singleWeekday.length > 1) {
-							wdTo = YoHours.model.OSM_DAYS.indexOf(singleWeekday[1]);
+							wdTo = OSM_DAYS.indexOf(singleWeekday[1]);
 						}
 						else {
 							wdTo = wdFrom;
@@ -2230,15 +2159,15 @@ OpeningHoursParser: function() {
 								months.push({holiday: "SH"});
 							}
 							//Month intervals
-							else if(RGX_MONTH.test(singleMonth)) {
+							else if(this.RGX_MONTH.test(singleMonth)) {
 								singleMonth = singleMonth.split('-');
-								monthFrom = YoHours.model.OSM_MONTHS.indexOf(singleMonth[0])+1;
+								monthFrom = OSM_MONTHS.indexOf(singleMonth[0])+1;
 								if(monthFrom < 1) {
 									throw new Error("Invalid month: "+singleMonth[0]);
 								}
 								
 								if(singleMonth.length > 1) {
-									monthTo = YoHours.model.OSM_MONTHS.indexOf(singleMonth[1])+1;
+									monthTo = OSM_MONTHS.indexOf(singleMonth[1])+1;
 									if(monthTo < 1) {
 										throw new Error("Invalid month: "+singleMonth[1]);
 									}
@@ -2249,12 +2178,12 @@ OpeningHoursParser: function() {
 								months.push({from: monthFrom, to: monthTo});
 							}
 							//Monthday intervals
-							else if(RGX_MONTHDAY.test(singleMonth)) {
+							else if(this.RGX_MONTHDAY.test(singleMonth)) {
 								singleMonth = singleMonth.replace(/\:/g, '').split('-');
 								
 								//Read monthday start
 								monthFrom = singleMonth[0].split(' ');
-								monthFrom = { day: parseInt(monthFrom[1]), month: YoHours.model.OSM_MONTHS.indexOf(monthFrom[0])+1 };
+								monthFrom = { day: parseInt(monthFrom[1]), month: OSM_MONTHS.indexOf(monthFrom[0])+1 };
 								if(monthFrom.month < 1) {
 									throw new Error("Invalid month: "+monthFrom[0]);
 								}
@@ -2268,7 +2197,7 @@ OpeningHoursParser: function() {
 									}
 									//Another month
 									else {
-										monthTo = { day: parseInt(monthTo[1]), month: YoHours.model.OSM_MONTHS.indexOf(monthTo[0])+1 };
+										monthTo = { day: parseInt(monthTo[1]), month: OSM_MONTHS.indexOf(monthTo[0])+1 };
 										if(monthTo.month < 1) {
 											throw new Error("Invalid month: "+monthTo[0]);
 										}
@@ -2372,7 +2301,7 @@ OpeningHoursParser: function() {
 			//Case of no weekday defined = all week
 			if(weekdays.length == 0) {
 				if(holidays.length == 0 || (holidays.length == 1 && holidays[0] == "SH")) {
-					weekdays.push({from: 0, to: YoHours.model.OSM_DAYS.length -1 });
+					weekdays.push({from: 0, to: OSM_DAYS.length -1 });
 				}
 				else {
 					weekdays.push({from: 0, to: 0 });
@@ -2406,7 +2335,7 @@ OpeningHoursParser: function() {
 					drObj = result[resDrId];
 				}
 				else {
-					drObj = new YoHours.model.DateRange(dateRanges[drId].start, dateRanges[drId].end);
+					drObj = new DateRange(dateRanges[drId].start, dateRanges[drId].end);
 					
 					//Find general date range that may be refined by this one
 					var general = -1;
@@ -2442,10 +2371,10 @@ OpeningHoursParser: function() {
 					//For each time interval
 					for(var tId=0, tl=times.length; tId < tl; tId++) {
 						if(ruleModifier == "closed" || ruleModifier == "off") {
-							_removeInterval(drObj.getTypical(), weekdays[wdId], times[tId]);
+							this._removeInterval(drObj.getTypical(), weekdays[wdId], times[tId]);
 						}
 						else {
-							_addInterval(drObj.getTypical(), weekdays[wdId], times[tId]);
+							this._addInterval(drObj.getTypical(), weekdays[wdId], times[tId]);
 						}
 					}
 				}
@@ -2461,12 +2390,12 @@ OpeningHoursParser: function() {
 	 * @param weekdays The concerned weekdays
 	 * @param times The concerned times
 	 */
-	function _removeInterval(typical, weekdays, times) {
+	OpeningHoursParser.prototype._removeInterval = function(typical, weekdays, times) {
 		for(var wd=weekdays.from; wd <= weekdays.to; wd++) {
 			//Interval during day
 			if(times.to >= times.from) {
 				typical.removeInterval(
-					new YoHours.model.Interval(wd, wd, times.from, times.to)
+					new Interval(wd, wd, times.from, times.to)
 				);
 			}
 			//Interval during night
@@ -2474,16 +2403,16 @@ OpeningHoursParser: function() {
 				//Everyday except sunday
 				if(wd < 6) {
 					typical.removeInterval(
-						new YoHours.model.Interval(wd, wd+1, times.from, times.to)
+						new Interval(wd, wd+1, times.from, times.to)
 					);
 				}
 				//Sunday
 				else {
 					typical.removeInterval(
-						new YoHours.model.Interval(wd, wd, times.from, 24*60)
+						new Interval(wd, wd, times.from, 24*60)
 					);
 					typical.removeInterval(
-						new YoHours.model.Interval(0, 0, 0, times.to)
+						new Interval(0, 0, 0, times.to)
 					);
 				}
 			}
@@ -2496,12 +2425,12 @@ OpeningHoursParser: function() {
 	 * @param weekdays The concerned weekdays
 	 * @param times The concerned times
 	 */
-	function _addInterval(typical, weekdays, times) {
+	OpeningHoursParser.prototype._addInterval = function(typical, weekdays, times) {
 		for(var wd=weekdays.from; wd <= weekdays.to; wd++) {
 			//Interval during day
 			if(times.to >= times.from) {
 				typical.addInterval(
-					new YoHours.model.Interval(wd, wd, times.from, times.to)
+					new Interval(wd, wd, times.from, times.to)
 				);
 			}
 			//Interval during night
@@ -2509,16 +2438,16 @@ OpeningHoursParser: function() {
 				//Everyday except sunday
 				if(wd < 6) {
 					typical.addInterval(
-						new YoHours.model.Interval(wd, wd+1, times.from, times.to)
+						new Interval(wd, wd+1, times.from, times.to)
 					);
 				}
 				//Sunday
 				else {
 					typical.addInterval(
-						new YoHours.model.Interval(wd, wd, times.from, 24*60)
+						new Interval(wd, wd, times.from, 24*60)
 					);
 					typical.addInterval(
-						new YoHours.model.Interval(0, 0, 0, times.to)
+						new Interval(0, 0, 0, times.to)
 					);
 				}
 			}
@@ -2530,7 +2459,7 @@ OpeningHoursParser: function() {
 	 * @param time The time string
 	 * @return The amount of minutes since midnight
 	 */
-	function _asMinutes(time) {
+	OpeningHoursParser.prototype._asMinutes = function(time) {
 		var values = time.split(':');
 		return parseInt(values[0]) * 60 + parseInt(values[1]);
 	};
@@ -2538,28 +2467,28 @@ OpeningHoursParser: function() {
 	/**
 	 * Is the given token a weekday selector ?
 	 */
-	function _isWeekday(token) {
-		return RGX_WEEKDAY.test(token);
+	OpeningHoursParser.prototype._isWeekday = function(token) {
+		return this.RGX_WEEKDAY.test(token);
 	};
 	
 	/**
 	 * Is the given token a time selector ?
 	 */
-	function _isTime(token) {
-		return RGX_TIME.test(token);
+	OpeningHoursParser.prototype._isTime = function(token) {
+		return this.RGX_TIME.test(token);
 	};
 	
 	/**
 	 * Is the given token a rule modifier ?
 	 */
-	function _isRuleModifier(token) {
-		return RGX_RULE_MODIFIER.test(token);
+	OpeningHoursParser.prototype._isRuleModifier = function(token) {
+		return this.RGX_RULE_MODIFIER.test(token);
 	};
 	
 	/**
 	 * Create tokens for a given block
 	 */
-	function _tokenize(block) {
+	OpeningHoursParser.prototype._tokenize = function(block) {
 		var result = block.trim().split(' ');
 		var position = $.inArray("", result);
 		while( ~position ) {
@@ -2569,7 +2498,7 @@ OpeningHoursParser: function() {
 		return result;
 	};
 	
-	function _printIntervals(from, intervals) {
+	OpeningHoursParser.prototype._printIntervals = function(from, intervals) {
 		console.log("From: "+from);
 		if(intervals.length > 0) {
 			console.log("-------------------------");
@@ -2587,18 +2516,16 @@ OpeningHoursParser: function() {
 			console.log("Empty intervals");
 		}
 	};
-}
-
-};
 
 
 /**
  * Check compatibility of opening_hours string with YoHours
  */
-YoHoursChecker = function() {
+var YoHoursChecker = function() {
 //ATTRIBUTES
 	/** The OpeningHoursParser **/
-	var _parser = new YoHours.model.OpeningHoursParser();
+	this._parser = new OpeningHoursParser();
+};
 
 //OTHER METHODS
 	/**
@@ -2606,11 +2533,11 @@ YoHoursChecker = function() {
 	 * @param oh The opening_hours string
 	 * @return True if YoHours can read it and display it
 	 */
-	this.canRead = function(oh) {
+	YoHoursChecker.prototype.canRead = function(oh) {
 		var result = false;
 		
 		try {
-			var parsed = _parser.parse(oh);
+			var parsed = this._parser.parse(oh);
 			if(parsed != null) {
 				result = true;
 			}
@@ -2619,4 +2546,3 @@ YoHoursChecker = function() {
 		
 		return result;
 	};
-};

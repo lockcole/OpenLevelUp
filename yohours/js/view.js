@@ -22,39 +22,32 @@
  *
  * View JS classes
  */
-YoHours.view = {
-/*
- * ========== CLASSES ==========
- */
 
 /**
  * The date range modal component
  */
-DateRangeView: function(main) {
+var DateRangeView = function(main) {
 //ATTRIBUTES
 	/** Is the modal shown to edit some date range ? True = edit, false = add */
-	var _editMode = false;
+	this._editMode = false;
 	
 	/** Date range type **/
-	var _rangeType = null;
+	this._rangeType = null;
 	
 	/** The main view **/
-	var _mainView = main;
-
-	var _self = this;
+	this._mainView = main;
 
 //CONSTRUCTOR
-	function _init() {
-		$("#modal-range-valid").click(_self.valid);
-	};
+	$("#modal-range-valid").click(this.valid.bind(this));
+};
 
 //MODIFIERS
 	/**
 	 * Shows the modal
 	 * @param edit Edit mode ? (optional)
 	 */
-	this.show = function(edit) {
-		_editMode = edit || false;
+	DateRangeView.prototype.show = function(edit) {
+		this._editMode = edit || false;
 		
 		//Reset navigation
 		$("#modal-range-nav li").removeClass("active");
@@ -75,9 +68,9 @@ DateRangeView: function(main) {
 		$("#range-copy-box").attr("checked", true);
 		
 		//Edit interval
-		if(_editMode) {
+		if(this._editMode) {
 			//Show modes that defines week or day only, depending of previous typical
-			if(_mainView.getCalendarView().getDateRange().definesTypicalWeek()) {
+			if(this._mainView.getCalendarView().getDateRange().definesTypicalWeek()) {
 				$("#modal-range-nav-always").show();
 				$("#modal-range-nav-month").show();
 				$("#modal-range-nav-week").show();
@@ -98,9 +91,9 @@ DateRangeView: function(main) {
 				$("#range-holiday-easter").show();
 			}
 			
-			var start = _mainView.getCalendarView().getDateRange().getStart();
-			var end = _mainView.getCalendarView().getDateRange().getEnd();
-			var type = _mainView.getCalendarView().getDateRange().getType();
+			var start = this._mainView.getCalendarView().getDateRange().getStart();
+			var end = this._mainView.getCalendarView().getDateRange().getEnd();
+			var type = this._mainView.getCalendarView().getDateRange().getType();
 			
 			switch(type) {
 				case "day":
@@ -160,9 +153,9 @@ DateRangeView: function(main) {
 			
 			//Set first tab as active
 			$("#modal-range-nav li:first").addClass("active");
-			_rangeType = $("#modal-range-nav li:first").attr("id").substr("modal-range-nav-".length);
+			this._rangeType = $("#modal-range-nav li:first").attr("id").substr("modal-range-nav-".length);
 			
-			if(_rangeType != "always") {
+			if(this._rangeType != "always") {
 				$("#range-copy").show();
 			}
 			
@@ -176,15 +169,15 @@ DateRangeView: function(main) {
 	/**
 	 * Changes the currently shown tab
 	 */
-	this.tab = function(type) {
+	DateRangeView.prototype.tab = function(type) {
 		$("#modal-range-nav li.active").removeClass("active");
 		$("#modal-range-nav-"+type).addClass("active");
 		$("#modal-range-form > div:visible").hide();
 		$("#range-"+type).show();
 		$("#modal-range-alert").hide();
-		_rangeType = type;
+		this._rangeType = type;
 		
-		if(_rangeType != "always" && !_editMode) {
+		if(this._rangeType != "always" && !this._editMode) {
 			$("#range-copy").show();
 		}
 		else {
@@ -195,12 +188,12 @@ DateRangeView: function(main) {
 	/**
 	 * Actions to perform when the modal was validated
 	 */
-	this.valid = function() {
+	DateRangeView.prototype.valid = function() {
 		//Create start and end objects
 		var start, end = null, startVal, endVal, startVal2, endVal2;
 		
 		try {
-			switch(_rangeType) {
+			switch(this._rangeType) {
 				case "month":
 					//Start
 					startVal = parseInt($("#range-month-start").val());
@@ -241,7 +234,7 @@ DateRangeView: function(main) {
 					if(!isNaN(endVal) && endVal > 0 && !isNaN(endVal2) && endVal2 > 0) {
 						end = { day: endVal, month: endVal2 };
 					}
-					else if(_editMode && _mainView.getCalendarView().getDateRange().definesTypicalWeek()) {
+					else if(this._editMode && this._mainView.getCalendarView().getDateRange().definesTypicalWeek()) {
 						throw new Error("Missing end day");
 					}
 					
@@ -260,7 +253,7 @@ DateRangeView: function(main) {
 			
 			//Check if not overlapping another date range
 			var overlap = false;
-			var ranges = _mainView.getController().getDateRanges();
+			var ranges = this._mainView.getController().getDateRanges();
 			var l = ranges.length, i=0;
 			var generalRange = -1; //Wider date range which can be copied if needed
 			
@@ -277,19 +270,19 @@ DateRangeView: function(main) {
 			}
 			
 			//Edit currently shown calendar
-			if(_editMode) {
-				_mainView.getCalendarView().getDateRange().updateRange(start, end);
-				_mainView.getCalendarView().show(_mainView.getCalendarView().getDateRange());
-				_mainView.refresh();
+			if(this._editMode) {
+				this._mainView.getCalendarView().getDateRange().updateRange(start, end);
+				this._mainView.getCalendarView().show(this._mainView.getCalendarView().getDateRange());
+				this._mainView.refresh();
 			}
 			//Create new calendar
 			else {
 				//Copy wider date range intervals
 				if($("#range-copy-box").is(":checked") && generalRange >= 0) {
-					_mainView.getCalendarView().show(_mainView.getController().newRange(start, end, ranges[generalRange].getTypical().getIntervals()));
+					this._mainView.getCalendarView().show(this._mainView.getController().newRange(start, end, ranges[generalRange].getTypical().getIntervals()));
 				}
 				else {
-					_mainView.getCalendarView().show(_mainView.getController().newRange(start, end));
+					this._mainView.getCalendarView().show(this._mainView.getController().newRange(start, end));
 				}
 			}
 			$("#modal-range").modal("hide");
@@ -300,52 +293,47 @@ DateRangeView: function(main) {
 			console.error(e);
 		}
 	};
-	
-//INIT
-	_init();
-},
 
 
 
 /**
  * The calendar view, with its navigation bar
  */
-CalendarView: function(main) {
+var CalendarView = function(main) {
 //ATTRIBUTES
 	/** The main view **/
-	var _mainView = main;
+	this._mainView = main;
 	
 	/** The currently shown date range **/
-	var _dateRange = null;
+	this._dateRange = null;
 
 //CONSTRUCTOR
-	function _init() {
-		$("#range-edit").click(function() { _mainView.getDateRangeView().show(true); });
-		$("#range-delete").click(function() {
-			_mainView.getController().deleteCurrentRange();
-			_mainView.getCalendarView().show(_mainView.getController().getFirstDateRange());
-		});
-		$("#range-nav-new").click(function() { _mainView.getDateRangeView().show(false); })
-	};
+	$("#range-edit").click(function() { this._mainView.getDateRangeView().show(true); }.bind(this));
+	$("#range-delete").click(function() {
+		this._mainView.getController().deleteCurrentRange();
+		this._mainView.getCalendarView().show(this._mainView.getController().getFirstDateRange());
+	}.bind(this));
+	$("#range-nav-new").click(function() { this._mainView.getDateRangeView().show(false); }.bind(this))
+};
 
 //ACCESSORS
 	/**
 	 * @return The currently shown date range
 	 */
-	this.getDateRange = function() {
-		return _dateRange;
+	CalendarView.prototype.getDateRange = function() {
+		return this._dateRange;
 	};
 
 //MODIFIERS
 	/**
 	 * Updates the date range navigation bar
 	 */
-	this.updateRangeNavigationBar = function() {
+	CalendarView.prototype.updateRangeNavigationBar = function() {
 		//Remove previous tabs
 		$("#range-nav li.rnav").remove();
 		
 		//Create tabs
-		var dateRanges = _mainView.getController().getDateRanges();
+		var dateRanges = this._mainView.getController().getDateRanges();
 		var dateRange;
 		var navHtml = '';
 		for(var i=0, l=dateRanges.length; i < l; i++) {
@@ -354,7 +342,7 @@ CalendarView: function(main) {
 				timeName = dateRange.getTimeSelector();
 				if(timeName.length == 0) { timeName = "All year"; }
 				navHtml += '<li role="presentation" id="range-nav-'+i+'" class="rnav';
-				if(dateRange === _dateRange) { navHtml += ' active'; }
+				if(dateRange === this._dateRange) { navHtml += ' active'; }
 				navHtml += '"><a onClick="controller.getView().getCalendarView().tab(\''+i+'\')">'+timeName+'</a></li>';
 			}
 		}
@@ -366,16 +354,16 @@ CalendarView: function(main) {
 	/**
 	 * Updates the label showing the human readable date range
 	 */
-	this.updateDateRangeLabel = function() {
-		$("#range-txt-label").html(_dateRange.getTimeForHumans());
+	CalendarView.prototype.updateDateRangeLabel = function() {
+		$("#range-txt-label").html(this._dateRange.getTimeForHumans());
 	};
 	
 	/**
 	 * Click handler for navigation tabs
 	 * @param id The date range id to show
 	 */
-	this.tab = function(id) {
-		this.show(_mainView.getController().getDateRanges()[id]);
+	CalendarView.prototype.tab = function(id) {
+		this.show(this._mainView.getController().getDateRanges()[id]);
 		$("#range-nav li.active").removeClass("active");
 		$("#range-nav-"+id).addClass("active");
 	};
@@ -384,11 +372,11 @@ CalendarView: function(main) {
 	 * Displays the given typical week or day
 	 * @param dateRange The date range to display
 	 */
-	this.show = function(dateRange) {
-		_dateRange = dateRange;
+	CalendarView.prototype.show = function(dateRange) {
+		this._dateRange = dateRange;
 		$("#calendar").fullCalendar('destroy');
 		
-		var intervals = _dateRange.getTypical().getIntervals();
+		var intervals = this._dateRange.getTypical().getIntervals();
 		var events = [];
 		var interval, weekId, eventData, to, eventConstraint, defaultView, colFormat;
 		var fctSelect, fctResize, fctDrop;
@@ -397,7 +385,7 @@ CalendarView: function(main) {
 		 * Variables depending of the kind of typical day/week
 		 */
 		//Week
-		if(_dateRange.definesTypicalWeek()) {
+		if(this._dateRange.definesTypicalWeek()) {
 			//Create intervals array
 			for(var i = 0; i < intervals.length; i++) {
 				interval = intervals[i];
@@ -423,7 +411,7 @@ CalendarView: function(main) {
 			
 			eventConstraint = { start: moment().day("Monday").format("YYYY-MM-DD[T00:00:00]"), end: moment().day("Monday").add(7, "days").format("YYYY-MM-DD[T00:00:00]") };
 			defaultView = "agendaWeek";
-			colFormat = (_mainView.isMinimal()) ? "dd" : "dddd";
+			colFormat = (this._mainView.isMinimal()) ? "dd" : "dddd";
 			fctSelect = function(start, end) {
 				//Add event to week intervals
 				var minStart = parseInt(start.format("H")) * 60 + parseInt(start.format("m"));
@@ -433,12 +421,12 @@ CalendarView: function(main) {
 				
 				//All day interval
 				if(minStart == 0 && minEnd == 0 && dayEnd - dayStart >= 1) {
-					minEnd = YoHours.model.MINUTES_MAX;
+					minEnd = MINUTES_MAX;
 					dayEnd--;
 				}
 				
-				var weekId = _dateRange.getTypical().addInterval(
-					new YoHours.model.Interval(
+				var weekId = this._dateRange.getTypical().addInterval(
+					new Interval(
 						dayStart,
 						dayEnd,
 						minStart,
@@ -454,38 +442,38 @@ CalendarView: function(main) {
 				};
 				$('#calendar').fullCalendar('renderEvent', eventData, true);
 				
-				_mainView.refresh();
-			};
+				this._mainView.refresh();
+			}.bind(this);
 			
 			fctResize = function(event, delta, revertFunc, jsEvent, ui, view) {
 				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
 				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
-				_dateRange.getTypical().editInterval(
+				this._dateRange.getTypical().editInterval(
 					event.id,
-					new YoHours.model.Interval(
+					new Interval(
 						swDayToMwDay(event.start.format("d")),
 						swDayToMwDay(event.end.format("d")),
 						minStart,
 						minEnd
 					)
 				);
-				_mainView.refresh();
-			};
+				this._mainView.refresh();
+			}.bind(this);
 			
 			fctDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
 				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
 				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
-				_dateRange.getTypical().editInterval(
+				this._dateRange.getTypical().editInterval(
 					event.id,
-					new YoHours.model.Interval(
+					new Interval(
 						swDayToMwDay(event.start.format("d")),
 						swDayToMwDay(event.end.format("d")),
 						minStart,
 						minEnd
 					)
 				);
-				_mainView.refresh();
-			};
+				this._mainView.refresh();
+			}.bind(this);
 		}
 		//Day
 		else {
@@ -519,8 +507,8 @@ CalendarView: function(main) {
 				//Add event to week intervals
 				var minStart = parseInt(start.format("H")) * 60 + parseInt(start.format("m"));
 				var minEnd = parseInt(end.format("H")) * 60 + parseInt(end.format("m"));
-				var weekId = _dateRange.getTypical().addInterval(
-					new YoHours.model.Interval(
+				var weekId = this._dateRange.getTypical().addInterval(
+					new Interval(
 						0,
 						0,
 						minStart,
@@ -536,38 +524,38 @@ CalendarView: function(main) {
 				};
 				$('#calendar').fullCalendar('renderEvent', eventData, true);
 				
-				_mainView.refresh();
-			};
+				this._mainView.refresh();
+			}.bind(this);
 			
 			fctResize = function(event, delta, revertFunc, jsEvent, ui, view) {
 				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
 				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
-				_dateRange.getTypical().editInterval(
+				this._dateRange.getTypical().editInterval(
 					event.id,
-					new YoHours.model.Interval(
+					new Interval(
 						0,
 						0,
 						minStart,
 						minEnd
 					)
 				);
-				_mainView.refresh();
-			};
+				this._mainView.refresh();
+			}.bind(this);
 			
 			fctDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
 				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
 				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
-				_dateRange.getTypical().editInterval(
+				this._dateRange.getTypical().editInterval(
 					event.id,
-					new YoHours.model.Interval(
+					new Interval(
 						0,
 						0,
 						minStart,
 						minEnd
 					)
 				);
-				_mainView.refresh();
-			};
+				this._mainView.refresh();
+			}.bind(this);
 		}
 		
 		//Create calendar
@@ -594,10 +582,10 @@ CalendarView: function(main) {
 			selectOverlap: false,
 			select: fctSelect,
 			eventClick: function(calEvent, jsEvent, view) {
-				_dateRange.getTypical().removeInterval(calEvent._id);
+				this._dateRange.getTypical().removeInterval(calEvent._id);
 				$('#calendar').fullCalendar('removeEvents', calEvent._id);
-				_mainView.refresh();
-			},
+				this._mainView.refresh();
+			}.bind(this),
 			eventResize: fctResize,
 			eventDrop: fctDrop
 		});
@@ -606,29 +594,23 @@ CalendarView: function(main) {
 		this.updateRangeNavigationBar();
 	};
 
-//INIT
-	_init();
-},
-
 
 
 /**
  * The URL manager
  */
-URLView: function(main) {
+var URLView = function(main) {
 //ATTRIBUTES
 	/** The main view **/
-	var _mainView = main;
-
-	/** This object **/
-	var _self = this;
+	this._mainView = main;
+};
 	
 //ACCESSORS
 	/**
 	 * @return The opening_hours value in URL, or undefined
 	 */
-	this.getOpeningHours = function() {
-		return (_getParameters().oh != undefined) ? decodeURIComponent(_getParameters().oh) : "";
+	URLView.prototype.getOpeningHours = function() {
+		return (this._getParameters().oh != undefined) ? decodeURIComponent(this._getParameters().oh) : "";
 	};
 
 //MODIFIERS
@@ -636,7 +618,7 @@ URLView: function(main) {
 	 * Updates the URL with the given opening_hours value
 	 * @param oh The new value
 	 */
-	this.update = function(oh) {
+	URLView.prototype.update = function(oh) {
 		var params = (oh != undefined && oh.trim().length > 0) ? "oh="+oh.trim() : "";
 		var hash = this._getUrlHash();
 		
@@ -650,7 +632,7 @@ URLView: function(main) {
 	/**
 	 * @return The URL parameters as an object
 	 */
-	function _getParameters() {
+	URLView.prototype._getParameters = function() {
 		var sPageURL = window.location.search.substring(1);
 		var sURLVariables = sPageURL.split('&');
 		var params = new Object();
@@ -666,75 +648,70 @@ URLView: function(main) {
 	/**
 	 * @return The page base URL
 	 */
-	this._getUrl = function() {
+	URLView.prototype._getUrl = function() {
 		return $(location).attr('href').split('?')[0];
 	};
 	
 	/**
 	 * @return The URL hash
 	 */
-	this._getUrlHash = function() {
+	URLView.prototype._getUrlHash = function() {
 		var hash = $(location).attr('href').split('#')[1];
 		return (hash != undefined) ? hash : "";
 	};
-},
 
 
 
 /**
  * The opening hours text input field
  */
-HoursInputView: function(main) {
+var HoursInputView = function(main) {
 //ATTRIBUTES
 	/** The main view **/
-	var _mainView = main;
+	this._mainView = main;
 
 	/** The input field **/
-	var _field = $("#oh");
+	this._field = $("#oh");
 	
 	/** The delay to wait before trying to parse input **/
-	var _delay = 700;
+	this._delay = 700;
 	
 	/** The timer **/
-	var _timer;
+	this._timer;
 	
 	/** The URL view **/
-	var _vUrl = new YoHours.view.URLView(main);
+	this._vUrl = new URLView(main);
 	
-	/** This object **/
-	var _self = this;
-
 //CONSTRUCTOR
-	function _init() {
-		//Get opening_hours from URL
-		var urlOh = _vUrl.getOpeningHours();
-		if(urlOh != undefined) {
-			_self.setValue(urlOh);
-		}
-		else {
-			_self.setValue("");
-		}
-		
-		//Add triggers
-		_field.bind("input propertychange", _self.changed.bind(_self));
-	};
+	//Get opening_hours from URL
+	var urlOh = this._vUrl.getOpeningHours();
+	if(urlOh != undefined) {
+		this.setValue(urlOh);
+	}
+	else {
+		this.setValue("");
+	}
+	
+	//Add triggers
+	this._field.bind("input propertychange", this.changed.bind(this));
+};
 
 //ACCESSORS
 	/**
 	 * @return The opening_hours value
 	 */
-	this.getValue = function() {
-		return _field.val();
+	HoursInputView.prototype.getValue = function() {
+		return this._field.val();
 	};
 	
 //MODIFIERS
 	/**
 	 * Changes the input value
 	 */
-	this.setValue = function(val) {
-		if(val != _field.val()) {
-			_field.val(val);
-			_vUrl.update(val);
+	HoursInputView.prototype.setValue = function(val) {
+		if(val != this._field.val()) {
+			this._field.val(val);
+			this._vUrl.update(val);
 		}
 	};
 	
@@ -743,7 +720,7 @@ HoursInputView: function(main) {
 	 * @param valid Is the value valid
 	 * @param ohValid Is the value valid according to opening_hours.js
 	 */
-	this.setValid = function(valid, ohValid) {
+	HoursInputView.prototype.setValid = function(valid, ohValid) {
 		ohValid = ohValid || null;
 		
 		$("#oh-valid-alert").addClass("hide");
@@ -755,89 +732,84 @@ HoursInputView: function(main) {
 			$("#oh-form").addClass("has-error");
 			if(ohValid) {
 				$("#oh-valid-alert").removeClass("hide");
-				$("#oh-valid-alert a").attr("href", "http://openingh.openstreetmap.de/evaluation_tool/?EXP="+_field.val());
+				$("#oh-valid-alert a").attr("href", "http://openingh.openstreetmap.de/evaluation_tool/?EXP="+this._field.val());
 			}
 		}
 	};
 	
-	this.changed = function() {
-		window.clearTimeout(_timer);
-		_timer = window.setTimeout(
+	HoursInputView.prototype.changed = function() {
+		window.clearTimeout(this._timer);
+		this._timer = window.setTimeout(
 			function() {
-				_field.val(_field.val().replace(/␣/gi, ' ')); //Allow to paste directly from Taginfo
-				_vUrl.update(_field.val());
-				_mainView.getController().showHours(_field.val());
-			},
-			_delay
+				this._field.val(this._field.val().replace(/␣/gi, ' ')); //Allow to paste directly from Taginfo
+				this._vUrl.update(this._field.val());
+				this._mainView.getController().showHours(this._field.val());
+			}.bind(this),
+			this._delay
 		);
 	};
 
-//CONSTRUCTOR
-	_init();
-},
 
 
 /**
  * MainView, view class for the main page
  * @param ctrl The MainController
  */
-MainView: function(ctrl) {
+var MainView = function(ctrl) {
 //ATTRIBUTES
 	/** The application controller **/
-	var _ctrl = ctrl;
+	this._ctrl = ctrl;
 	
 	/** The week view **/
-	var _calendarView = new YoHours.view.CalendarView(this);
+	this._calendarView = new CalendarView(this);
 	
 	/** The hours input view **/
-	var _hoursInputView = new YoHours.view.HoursInputView(this);
+	this._hoursInputView = new HoursInputView(this);
 	
 	/** The date range modal **/
-	var _dateRangeView = new YoHours.view.DateRangeView(this);
+	this._dateRangeView = new DateRangeView(this);
 	
 	/** The help dialog **/
-	var _helpView;
+	this._helpView = null;
 	
 	/** Is the view in minimal mode ? **/
-	var _minimal = false;
-	
-	/** This object **/
-	var _self = this;
+	this._minimal = false;
+};
 
 //ACCESSORS
 	/**
 	 * @return The hours input view
 	 */
-	this.getHoursInputView = function() {
-		return _hoursInputView;
+	MainView.prototype.getHoursInputView = function() {
+		return this._hoursInputView;
 	};
 	
 	/**
 	 * @return The date range view
 	 */
-	this.getDateRangeView = function() {
-		return _dateRangeView;
+	MainView.prototype.getDateRangeView = function() {
+		return this._dateRangeView;
 	};
 	
 	/**
 	 * @return The calendar view
 	 */
-	this.getCalendarView = function() {
-		return _calendarView;
+	MainView.prototype.getCalendarView = function() {
+		return this._calendarView;
 	};
 	
 	/**
 	 * @return The controller
 	 */
-	this.getController = function() {
-		return _ctrl;
+	MainView.prototype.getController = function() {
+		return this._ctrl;
 	};
 	
 	/**
 	 * Minimal mode ?
 	 */
-	this.isMinimal = function() {
-		return _minimal;
+	MainView.prototype.isMinimal = function() {
+		return this._minimal;
 	};
 
 //OTHER METHODS
@@ -845,29 +817,26 @@ MainView: function(ctrl) {
 	 * Initializes the view
 	 * @param minimal Is the view in minimal mode (iframe) ?
 	 */
-	this.init = function(minimal) {
-		var ohInputVal = _hoursInputView.getValue();
-		_minimal = minimal || false;
+	MainView.prototype.init = function(minimal) {
+		var ohInputVal = this._hoursInputView.getValue();
+		this._minimal = minimal || false;
 		if(ohInputVal != undefined && ohInputVal.trim() != "") {
-			_ctrl.showHours(ohInputVal);
+			this._ctrl.showHours(ohInputVal);
 		}
 		else {
-			_calendarView.show(_ctrl.getFirstDateRange());
+			this._calendarView.show(this._ctrl.getFirstDateRange());
 		}
 		
 		//Init help dialog
-		_helpView = $("#modal-help");
-		$("#help-link").click(function() { _helpView.modal("show"); });
+		this._helpView = $("#modal-help");
+		$("#help-link").click(function() { this._helpView.modal("show"); }.bind(this));
 		
-		$("#oh-clear").click(function() { _ctrl.clear(); });
+		$("#oh-clear").click(function() { this._ctrl.clear(); }.bind(this));
 	};
 	
 	/**
 	 * Refreshes the view
 	 */
-	this.refresh = function() {
-		_hoursInputView.setValue(_ctrl.getOpeningHours());
+	MainView.prototype.refresh = function() {
+		this._hoursInputView.setValue(this._ctrl.getOpeningHours());
 	};
-}
-
-};

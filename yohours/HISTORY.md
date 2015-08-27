@@ -5,6 +5,7 @@ Changes history
 --------------
 * Bug fix for school holidays hours not applied all week
 * opening_hours.js update (supports null location to check values with holidays)
+* Rule simplification algorithm improved
 
 24 august 2015
 --------------

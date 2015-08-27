@@ -22,56 +22,54 @@
  *
  * Controller JS classes
  */
-YoHours.ctrl = {
-/*
- * ========== CLASSES ==========
+
+/**
+ * The main controller of YoHours
  */
-MainController: function() {
+var MainController = function() {
 //ATTRIBUTES
 	/** Main view object **/
-	var _view = new YoHours.view.MainView(this);
+	this._view = new MainView(this);
 
 	/** All the wide intervals defined **/
-	var _dateRanges = [ new YoHours.model.DateRange() ];
+	this._dateRanges = [ new DateRange() ];
 	
 	/** The opening hours builder **/
-	var _builder = new YoHours.model.OpeningHoursBuilder();
+	this._builder = new OpeningHoursBuilder();
 
 	/** The opening hours parser **/
-	var _parser = new YoHours.model.OpeningHoursParser();
-	
-	/** This object **/
-	var _self = this;
+	this._parser = new OpeningHoursParser();
+};
 
 //ACCESSORS
 	/**
 	 * @return The opening_hours value
 	 */
-	this.getOpeningHours = function() {
-		return _builder.build(_dateRanges);
+	MainController.prototype.getOpeningHours = function() {
+		return this._builder.build(this._dateRanges);
 	};
 	
 	/**
 	 * @return The main view
 	 */
-	this.getView = function() {
-		return _view;
+	MainController.prototype.getView = function() {
+		return this._view;
 	};
 	
 	/**
 	 * @return The date ranges array, some may be undefined
 	 */
-	this.getDateRanges = function() {
-		return _dateRanges;
+	MainController.prototype.getDateRanges = function() {
+		return this._dateRanges;
 	};
 	
 	/**
 	 * @return The first defined date range
 	 */
-	this.getFirstDateRange = function() {
+	MainController.prototype.getFirstDateRange = function() {
 		var i = 0, found = false;
-		while(i < _dateRanges.length && !found) {
-			if(_dateRanges[i] != undefined) {
+		while(i < this._dateRanges.length && !found) {
+			if(this._dateRanges[i] != undefined) {
 				found = true;
 			}
 			else {
@@ -81,35 +79,35 @@ MainController: function() {
 		
 		//If no date range found, create a new one
 		if(!found) {
-			_dateRanges = [ new YoHours.model.DateRange() ];
+			this._dateRanges = [ new DateRange() ];
 			i = 0;
 		}
 		
-		return _dateRanges[i];
+		return this._dateRanges[i];
 	};
 
 //OTHER METHODS
 	/**
 	 * Initializes the controller
 	 */
-	this.init = function() {
-		_view.init();
+	MainController.prototype.init = function() {
+		this._view.init();
 	};
 	
 	/**
 	 * Initializes the controller in minimal mode (iframe)
 	 */
-	this.initMinimal = function() {
-		_view.init(true);
+	MainController.prototype.initMinimal = function() {
+		this._view.init(true);
 	};
 
 	/**
 	 * Clear all defined data
 	 */
-	this.clear = function() {
-		_dateRanges = [ new YoHours.model.DateRange() ];
-		_view.getCalendarView().show(_dateRanges[0]);
-		_view.refresh();
+	MainController.prototype.clear = function() {
+		this._dateRanges = [ new DateRange() ];
+		this._view.getCalendarView().show(this._dateRanges[0]);
+		this._view.refresh();
 	};
 	
 	/**
@@ -119,30 +117,30 @@ MainController: function() {
 	 * @param copyIntervals The intervals to copy (or null if create new void range)
 	 * @return The created range
 	 */
-	this.newRange = function(start, end, copyIntervals) {
+	MainController.prototype.newRange = function(start, end, copyIntervals) {
 		copyIntervals = copyIntervals || null;
-		var range = new YoHours.model.DateRange(start, end);
+		var range = new DateRange(start, end);
 		
 		if(copyIntervals != null) {
 			range.getTypical().copyIntervals(copyIntervals);
 		}
 		
-		_dateRanges.push(range);
-		_view.refresh();
+		this._dateRanges.push(range);
+		this._view.refresh();
 		return range;
 	};
 	
 	/**
 	 * Deletes the currently shown date range
 	 */
-	this.deleteCurrentRange = function() {
-		var range = _view.getCalendarView().getDateRange();
-		var found = false, l = _dateRanges.length, i=0;
+	MainController.prototype.deleteCurrentRange = function() {
+		var range = this._view.getCalendarView().getDateRange();
+		var found = false, l = this._dateRanges.length, i=0;
 		
 		while(i < l && !found) {
-			if(_dateRanges[i] === range) {
+			if(this._dateRanges[i] === range) {
 				found = true;
-				_dateRanges[i] = undefined;
+				this._dateRanges[i] = undefined;
 			}
 			else {
 				i++;
@@ -150,25 +148,25 @@ MainController: function() {
 		}
 		
 		//Refresh calendar
-		_view.getCalendarView().show(this.getFirstDateRange());
-		_view.refresh();
+		this._view.getCalendarView().show(this.getFirstDateRange());
+		this._view.refresh();
 	};
 	
 	/**
 	 * Displays the given opening hours
 	 * @param str The opening hours to show
 	 */
-	this.showHours = function(str) {
+	MainController.prototype.showHours = function(str) {
 		if(str.length > 0) {
 			//Clear intervals
-			_week = new YoHours.model.Week();
+			this._week = new Week();
 			$('#calendar').fullCalendar('removeEvents');
 			
 			//Parse given string
 			try {
-				_dateRanges = _parser.parse(str.trim());
-				_view.getCalendarView().show(_dateRanges[0]);
-				_view.getHoursInputView().setValid(true);
+				this._dateRanges = this._parser.parse(str.trim());
+				this._view.getCalendarView().show(this._dateRanges[0]);
+				this._view.getHoursInputView().setValid(true);
 			}
 			catch(e) {
 				console.error(e);
@@ -184,12 +182,9 @@ MainController: function() {
 					ohTest = false;
 				}
 				
-				_view.getHoursInputView().setValid(false, ohTest);
+				this._view.getHoursInputView().setValid(false, ohTest);
 			}
 			
-			_view.getHoursInputView().setValue(str);
+			this._view.getHoursInputView().setValue(str);
 		}
 	};
-}
-
-};
