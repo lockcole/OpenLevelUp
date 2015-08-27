@@ -1750,6 +1750,23 @@
 			assert.equal(or.getDate()[0].getWeekdays(), "Mo,Tu,Sa");
 			assert.equal(or.getDate()[1].getWeekdays(), "Mo,Tu,Sa");
 		});
+		QUnit.test("Add overwritten weekday", function(assert) {
+			var or = new YoHours.model.OhRule();
+			assert.equal(or.getDate().length, 0);
+			
+			var od1 = new YoHours.model.OhDate("Mar", "month", [0,1]);
+			var od2 = new YoHours.model.OhDate("Jul-Oct", "month", [0,1]);
+			or.addDate(od1);
+			or.addDate(od2);
+			assert.equal(or.getDate().length, 2);
+			assert.equal(or.getDate()[0], od1);
+			assert.equal(or.getDate()[1], od2);
+			
+			or.addOverwrittenWeekday(5);
+			assert.equal(or.getDate().length, 2);
+			assert.equal(or.getDate()[0].getWeekdays(), "Mo,Tu,Sa");
+			assert.equal(or.getDate()[1].getWeekdays(), "Mo,Tu,Sa");
+		});
 		
 		/*
 		 * OpeningHoursBuilder
@@ -1920,6 +1937,19 @@
 			
 			assert.equal(builder.build(dateranges), "24/7; Jun 08:00-18:00; Jun We off");
 		});
+		QUnit.test("Build 08:00-18:00; We off", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [ new YoHours.model.DateRange({}) ];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(0, 0, 8*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(1, 1, 8*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(3, 3, 8*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(4, 4, 8*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(5, 5, 8*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(6, 6, 8*60, 18*60));
+			
+			assert.equal(builder.build(dateranges), "08:00-18:00; We off");
+		});
 		QUnit.test("Build 24/7; Jun Mo-We 08:00-18:00; Jun Th-Su off", function(assert) {
 			var builder = new YoHours.model.OpeningHoursBuilder();
 			var dateranges = [ new YoHours.model.DateRange({}), new YoHours.model.DateRange({ month: 6 }) ];
@@ -2029,6 +2059,22 @@
 			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(6, 6, 5*60, 7*60));
 			
 			assert.equal(builder.build(dateranges), "24/7; week 01-15 Mo-We,Fr-Su 05:00-07:00; PH off");
+		});
+		QUnit.test("Build 05:00-07:00; Th,Fr 00:00-24:00", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [
+				new YoHours.model.DateRange({})
+			];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(0, 0, 5*60, 7*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(1, 1, 5*60, 7*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(2, 2, 5*60, 7*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(3, 3, 0, 24*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(4, 4, 0, 24*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(5, 5, 5*60, 7*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(6, 6, 5*60, 7*60));
+			
+			assert.equal(builder.build(dateranges), "05:00-07:00; Th,Fr 00:00-24:00");
 		});
 		QUnit.test("Build Mo-Fr 01:00-02:00; We off; Jun We 02:00-03:00", function(assert) {
 			var builder = new YoHours.model.OpeningHoursBuilder();
@@ -2222,6 +2268,58 @@
 			dateranges[2].getTypical().addInterval(new YoHours.model.Interval(2, 2, 3*60, 5*60));
 			
 			assert.equal(builder.build(dateranges), "Mo-We 03:00-05:00; Jan 01-10,Feb 01-10 Tu off");
+		});
+		QUnit.test("Build Tu,Su 10:00-12:00; Jun Tu,Su off; Jun We,Sa 10:00-12:00 (off day factoring)", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [
+				new YoHours.model.DateRange(),
+				new YoHours.model.DateRange({ month: 6 })
+			];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(1, 1, 10*60, 12*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(6, 6, 10*60, 12*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(2, 2, 10*60, 12*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(5, 5, 10*60, 12*60));
+			
+			assert.equal(builder.build(dateranges), "Tu,Su 10:00-12:00; Jun Tu,Su off; Jun We,Sa 10:00-12:00");
+		});
+		QUnit.test("Build week 01-09 Mo 03:00-06:00 (week factoring)", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [
+				new YoHours.model.DateRange({ week: 1 }, { week: 2 }),
+				new YoHours.model.DateRange({ week: 3 }, { week: 9 })
+			];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(0, 0, 3*60, 6*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(0, 0, 3*60, 6*60));
+			
+			assert.equal(builder.build(dateranges), "week 01-09 Mo 03:00-06:00");
+		});
+		QUnit.test("Build week 01-03,10-15 Mo 03:00-06:00 (week factoring)", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [
+				new YoHours.model.DateRange({ week: 1 }, { week: 3 }),
+				new YoHours.model.DateRange({ week: 10 }, { week: 15 })
+			];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(0, 0, 3*60, 6*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(0, 0, 3*60, 6*60));
+			
+			assert.equal(builder.build(dateranges), "week 01-09 Mo 03:00-06:00");
+		});
+		QUnit.test("Build May-Jun,Sep Mo,Tu 14:00-18:00 (month factoring)", function(assert) {
+			var builder = new YoHours.model.OpeningHoursBuilder();
+			var dateranges = [
+				new YoHours.model.DateRange({ month: 5 }, { month: 6 }),
+				new YoHours.model.DateRange({ month: 9 })
+			];
+			
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(0, 0, 14*60, 18*60));
+			dateranges[0].getTypical().addInterval(new YoHours.model.Interval(1, 1, 14*60, 18*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(0, 0, 14*60, 18*60));
+			dateranges[1].getTypical().addInterval(new YoHours.model.Interval(1, 1, 14*60, 18*60));
+			
+			assert.equal(builder.build(dateranges), "May-Jun,Sep Mo,Tu 14:00-18:00");
 		});
 		
 		/*
