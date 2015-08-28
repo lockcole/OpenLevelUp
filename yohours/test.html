@@ -420,6 +420,139 @@
 			assert.notOk(new WideInterval().week(10).startsMonth());
 			assert.notOk(new WideInterval().holiday("PH").startsMonth());
 		});
+		QUnit.test("Ends month", function(assert) {
+			assert.ok(new WideInterval().day(15,10,31,12).endsMonth());
+			assert.notOk(new WideInterval().day(1,10,30,12).endsMonth());
+			assert.notOk(new WideInterval().day(3,10,29,10).endsMonth());
+			assert.notOk(new WideInterval().day(18,10).endsMonth());
+			assert.notOk(new WideInterval().day(30,10).endsMonth());
+			
+			assert.ok(new WideInterval().month(10).endsMonth());
+			assert.ok(new WideInterval().month(10,12).endsMonth());
+			
+			assert.ok(new WideInterval().always().endsMonth());
+			
+			assert.notOk(new WideInterval().week(10).endsMonth());
+			assert.notOk(new WideInterval().holiday("PH").endsMonth());
+		});
+		QUnit.test("Contains single day", function(assert) {
+			var wi1 = new WideInterval().day(28, 11);
+			assert.notOk(wi1.contains(new WideInterval().day(28, 11)));
+			assert.notOk(wi1.contains(new WideInterval().day(28, 11, 29, 11)));
+			assert.notOk(wi1.contains(new WideInterval().day(27, 11, 29, 11)));
+			assert.notOk(wi1.contains(new WideInterval().week(10)));
+			assert.notOk(wi1.contains(new WideInterval().month(11)));
+			assert.notOk(wi1.contains(new WideInterval().holiday("PH")));
+			assert.notOk(wi1.contains(new WideInterval().always()));
+		});
+		QUnit.test("Contains several days", function(assert) {
+			var wi2 = new WideInterval().day(28, 11, 3, 12);
+			assert.notOk(wi2.contains(new WideInterval().day(28, 11, 3, 12)));
+			assert.ok(wi2.contains(new WideInterval().day(29, 11, 3, 12)));
+			assert.ok(wi2.contains(new WideInterval().day(29, 11, 2, 12)));
+			assert.ok(wi2.contains(new WideInterval().day(29, 11, 30, 11)));
+			assert.ok(wi2.contains(new WideInterval().day(29, 11)));
+			assert.notOk(wi2.contains(new WideInterval().day(10, 11, 27, 11)));
+			assert.notOk(wi2.contains(new WideInterval().day(4, 12, 25, 12)));
+			assert.notOk(wi2.contains(new WideInterval().day(4, 11, 25, 12)));
+			assert.notOk(wi2.contains(new WideInterval().week(10)));
+			assert.notOk(wi2.contains(new WideInterval().month(11)));
+			assert.notOk(wi2.contains(new WideInterval().holiday("PH")));
+			assert.notOk(wi2.contains(new WideInterval().always()));
+		});
+		QUnit.test("Contains single week", function(assert) {
+			var wi4 = new WideInterval().week(10);
+			assert.notOk(wi4.contains(new WideInterval().week(10)));
+			assert.notOk(wi4.contains(new WideInterval().week(10, 15)));
+			assert.notOk(wi4.contains(new WideInterval().day(10, 4)));
+			assert.notOk(wi4.contains(new WideInterval().day(10, 4, 15, 5)));
+			assert.notOk(wi4.contains(new WideInterval().month(11)));
+			assert.notOk(wi4.contains(new WideInterval().holiday("PH")));
+			assert.notOk(wi4.contains(new WideInterval().always()));
+		});
+		QUnit.test("Contains several weeks", function(assert) {
+			var wi5 = new WideInterval().week(5, 15);
+			assert.notOk(wi5.contains(new WideInterval().week(5, 15)));
+			assert.ok(wi5.contains(new WideInterval().week(5, 14)));
+			assert.ok(wi5.contains(new WideInterval().week(6, 15)));
+			assert.ok(wi5.contains(new WideInterval().week(6, 14)));
+			assert.ok(wi5.contains(new WideInterval().week(6)));
+			assert.ok(wi5.contains(new WideInterval().week(6, 6)));
+			assert.notOk(wi5.contains(new WideInterval().day(10, 4)));
+			assert.notOk(wi5.contains(new WideInterval().day(10, 4, 15, 5)));
+			assert.notOk(wi5.contains(new WideInterval().month(11)));
+			assert.notOk(wi5.contains(new WideInterval().holiday("PH")));
+			assert.notOk(wi5.contains(new WideInterval().always()));
+		});
+		QUnit.test("Contains single month", function(assert) {
+			var wi7 = new WideInterval().month(11);
+			assert.notOk(wi7.contains(new WideInterval().month(11)));
+			assert.notOk(wi7.contains(new WideInterval().month(11, 11)));
+			assert.notOk(wi7.contains(new WideInterval().month(10, 12)));
+			assert.ok(wi7.contains(new WideInterval().day(2, 11, 8, 11)));
+			assert.notOk(wi7.contains(new WideInterval().day(1, 11, 30, 11)));
+			assert.notOk(wi7.contains(new WideInterval().day(5, 11, 15, 12)));
+			assert.ok(wi7.contains(new WideInterval().day(5, 11)));
+			assert.notOk(wi7.contains(new WideInterval().holiday("PH")));
+			assert.notOk(wi7.contains(new WideInterval().always()));
+		});
+		QUnit.test("Contains several months", function(assert) {
+			var wi8 = new WideInterval().month(11, 12);
+			assert.notOk(wi8.contains(new WideInterval().month(11, 12)));
+			assert.ok(wi8.contains(new WideInterval().month(11)));
+			assert.ok(wi8.contains(new WideInterval().month(11, 11)));
+			assert.ok(wi8.contains(new WideInterval().day(2, 11, 30, 12)));
+			assert.notOk(wi8.contains(new WideInterval().day(1, 11, 31, 12)));
+			assert.ok(wi8.contains(new WideInterval().day(5, 11)));
+			assert.ok(wi8.contains(new WideInterval().day(1, 11, 30, 12)));
+			assert.ok(wi8.contains(new WideInterval().day(2, 11, 31, 12)));
+			assert.notOk(wi8.contains(new WideInterval().week(10, 12)));
+			assert.notOk(wi8.contains(new WideInterval().month(10, 12)));
+			assert.notOk(wi8.contains(new WideInterval().holiday("PH")));
+			assert.notOk(wi8.contains(new WideInterval().always()));
+		});
+		QUnit.test("Contains school holidays", function(assert) {
+			var wi10 = new WideInterval().holiday("SH");
+			assert.notOk(wi10.contains(new WideInterval().holiday("SH")));
+			assert.notOk(wi10.contains(new WideInterval().week(10, 12)));
+			assert.notOk(wi10.contains(new WideInterval().month(10, 12)));
+			assert.notOk(wi10.contains(new WideInterval().month(11, 1, 12, 30)));
+			assert.notOk(wi10.contains(new WideInterval().month(11, 1)));
+			assert.notOk(wi10.contains(new WideInterval().holiday("PH")));
+			assert.notOk(wi10.contains(new WideInterval().always()));
+		});
+		QUnit.test("Contains public holidays", function(assert) {
+			var wi11 = new WideInterval().holiday("PH");
+			assert.notOk(wi11.contains(new WideInterval().holiday("PH")));
+			assert.notOk(wi11.contains(new WideInterval().week(10, 12)));
+			assert.notOk(wi11.contains(new WideInterval().month(10, 12)));
+			assert.notOk(wi11.contains(new WideInterval().day(1, 11, 30, 12)));
+			assert.notOk(wi11.contains(new WideInterval().day(1, 11)));
+			assert.notOk(wi11.contains(new WideInterval().holiday("SH")));
+			assert.notOk(wi11.contains(new WideInterval().always()));
+		});
+		QUnit.test("Contains easter", function(assert) {
+			var wi12 = new WideInterval().holiday("easter");
+			assert.notOk(wi12.contains(new WideInterval().holiday("easter")));
+			assert.notOk(wi12.contains(new WideInterval().week(10, 12)));
+			assert.notOk(wi12.contains(new WideInterval().month(10, 12)));
+			assert.notOk(wi12.contains(new WideInterval().day(1, 11, 30, 12)));
+			assert.notOk(wi12.contains(new WideInterval().day(1, 11)));
+			assert.notOk(wi12.contains(new WideInterval().holiday("PH")));
+			assert.notOk(wi12.contains(new WideInterval().holiday("SH")));
+			assert.notOk(wi12.contains(new WideInterval().always()));
+		});
+		QUnit.test("Contains all year", function(assert) {
+			var wi13 = new WideInterval().always();
+			assert.notOk(wi13.contains(new WideInterval().always()));
+			assert.ok(wi13.contains(new WideInterval().holiday("easter")));
+			assert.ok(wi13.contains(new WideInterval().week(10, 12)));
+			assert.ok(wi13.contains(new WideInterval().month(10, 12)));
+			assert.ok(wi13.contains(new WideInterval().day(1, 11, 30, 12)));
+			assert.ok(wi13.contains(new WideInterval().day(1, 11)));
+			assert.ok(wi13.contains(new WideInterval().holiday("PH")));
+			assert.ok(wi13.contains(new WideInterval().holiday("SH")));
+		});
 		
 		/*
 		 * Day
@@ -1101,484 +1234,234 @@
 		 */
 		QUnit.module("Model > DateRange");
 		QUnit.test("Constructor", function(assert) {
-			assert.ok(new DateRange({}, null));
-			assert.ok(new DateRange({ week: 15 }, { week: 16 }));
+			assert.ok(new DateRange(new WideInterval().always()));
+			assert.ok(new DateRange(new WideInterval().week(15,16)));
 		});
 		QUnit.test("Defines typical day/week", function(assert) {
 			//Single day
-			var dr1 = new DateRange({ day: 28, month: 11 }, null);
+			var dr1 = new DateRange(new WideInterval().day(28,11));
 			assert.ok(dr1.definesTypicalDay());
 			assert.notOk(dr1.definesTypicalWeek());
 			
 			//Several days
-			var dr2 = new DateRange({ day: 28, month: 11 }, { day: 3, month: 12 });
+			var dr2 = new DateRange(new WideInterval().day(28,11,3,12));
 			assert.notOk(dr2.definesTypicalDay());
 			assert.ok(dr2.definesTypicalWeek());
 			
 			//Same day as start and end
-			var dr3 = new DateRange({ day: 28, month: 11 }, { day: 28, month: 11 });
+			var dr3 = new DateRange(new WideInterval().day(28,11,28,11));
 			assert.ok(dr3.definesTypicalDay());
 			assert.notOk(dr3.definesTypicalWeek());
 			
 			//Single week
-			var dr4 = new DateRange({ week: 10 }, null);
+			var dr4 = new DateRange(new WideInterval().week(10));
 			assert.notOk(dr4.definesTypicalDay());
 			assert.ok(dr4.definesTypicalWeek());
 			
 			//Several weeks
-			var dr5 = new DateRange({ week: 10 }, { week: 15 });
+			var dr5 = new DateRange(new WideInterval().week(10,15));
 			assert.notOk(dr5.definesTypicalDay());
 			assert.ok(dr5.definesTypicalWeek());
 			
 			//Same week as start and end
-			var dr6 = new DateRange({ week: 10 }, { week: 10 });
+			var dr6 = new DateRange(new WideInterval().week(10,10));
 			assert.notOk(dr6.definesTypicalDay());
 			assert.ok(dr6.definesTypicalWeek());
 			
 			//Single month
-			var dr7 = new DateRange({ month: 11 }, null);
+			var dr7 = new DateRange(new WideInterval().month(11));
 			assert.notOk(dr7.definesTypicalDay());
 			assert.ok(dr7.definesTypicalWeek());
 			
 			//Several months
-			var dr8 = new DateRange({ month: 11 }, { month: 12 });
+			var dr8 = new DateRange(new WideInterval().month(11,12));
 			assert.notOk(dr8.definesTypicalDay());
 			assert.ok(dr8.definesTypicalWeek());
 			
 			//Same month as start and end
-			var dr9 = new DateRange({ month: 11 }, { month: 11 });
+			var dr9 = new DateRange(new WideInterval().month(11,11));
 			assert.notOk(dr9.definesTypicalDay());
 			assert.ok(dr9.definesTypicalWeek());
 			
 			//School holidays
-			var dr10 = new DateRange({ holiday: "SH" }, null);
+			var dr10 = new DateRange(new WideInterval().holiday("SH"));
 			assert.notOk(dr10.definesTypicalDay());
 			assert.ok(dr10.definesTypicalWeek());
 			
 			//Public holidays
-			var dr11 = new DateRange({ holiday: "PH" }, null);
+			var dr11 = new DateRange(new WideInterval().holiday("PH"));
 			assert.ok(dr11.definesTypicalDay());
 			assert.notOk(dr11.definesTypicalWeek());
 			
 			//Easter
-			var dr12 = new DateRange({ holiday: "easter" }, null);
+			var dr12 = new DateRange(new WideInterval().holiday("easter"));
 			assert.ok(dr12.definesTypicalDay());
 			assert.notOk(dr12.definesTypicalWeek());
 			
 			//All year
-			var dr13 = new DateRange({}, null);
+			var dr13 = new DateRange(new WideInterval().always());
 			assert.notOk(dr13.definesTypicalDay());
 			assert.ok(dr13.definesTypicalWeek());
 		});
 		QUnit.test("Get typical day/week", function(assert) {
 			//Typical day
-			var dr1 = new DateRange({ day: 28, month: 11 }, null);
+			var dr1 = new DateRange(new WideInterval().day(28,11));
 			var t1 = dr1.getTypical();
 			assert.ok(t1 instanceof Day);
 			
 			//Typical week
-			var dr2 = new DateRange({ holiday: "SH" }, null);
+			var dr2 = new DateRange(new WideInterval().holiday("SH"));
 			var t2 = dr2.getTypical();
 			assert.ok(t2 instanceof Week);
 		});
-		QUnit.test("Get start/end", function(assert) {
-			//Single day
-			var dr1 = new DateRange({ day: 28, month: 11 }, null);
-			var st1 = dr1.getStart();
-			assert.equal(st1.day, 28);
-			assert.equal(st1.month, 11);
-			var end1 = dr1.getEnd();
-			assert.equal(end1, null);
-			
-			//Several days
-			var dr2 = new DateRange({ day: 28, month: 11 }, { day: 3, month: 12 });
-			var st2 = dr2.getStart();
-			assert.equal(st2.day, 28);
-			assert.equal(st2.month, 11);
-			var end2 = dr2.getEnd();
-			assert.equal(end2.day, 3);
-			assert.equal(end2.month, 12);
-			
-			//Same day as start and end
-			var dr3 = new DateRange({ day: 28, month: 11 }, { day: 28, month: 11 });
-			var st3 = dr3.getStart();
-			assert.equal(st3.day, 28);
-			assert.equal(st3.month, 11);
-			var end3 = dr3.getEnd();
-			assert.equal(end3, null);
-		});
-		QUnit.test("Get type", function(assert) {
-			//Single day
-			var dr1 = new DateRange({ day: 28, month: 11 }, null);
-			assert.equal(dr1.getType(), "day");
-			
-			//Several days
-			var dr2 = new DateRange({ day: 28, month: 11 }, { day: 3, month: 12 });
-			assert.equal(dr2.getType(), "day");
-			
-			//Same day as start and end
-			var dr3 = new DateRange({ day: 28, month: 11 }, { day: 28, month: 11 });
-			assert.equal(dr3.getType(), "day");
-			
-			//Single week
-			var dr4 = new DateRange({ week: 10 }, null);
-			assert.equal(dr4.getType(), "week");
-			
-			//Several weeks
-			var dr5 = new DateRange({ week: 10 }, { week: 15 });
-			assert.equal(dr5.getType(), "week");
-			
-			//Same week as start and end
-			var dr6 = new DateRange({ week: 10 }, { week: 10 });
-			assert.equal(dr6.getType(), "week");
-			
-			//Single month
-			var dr7 = new DateRange({ month: 11 }, null);
-			assert.equal(dr7.getType(), "month");
-			
-			//Several months
-			var dr8 = new DateRange({ month: 11 }, { month: 12 });
-			assert.equal(dr8.getType(), "month");
-			
-			//Same month as start and end
-			var dr9 = new DateRange({ month: 11 }, { month: 11 });
-			assert.equal(dr9.getType(), "month");
-			
-			//School holidays
-			var dr10 = new DateRange({ holiday: "SH" }, null);
-			assert.equal(dr10.getType(), "holiday");
-			
-			//Public holidays
-			var dr11 = new DateRange({ holiday: "PH" }, null);
-			assert.equal(dr11.getType(), "holiday");
-			
-			//Easter
-			var dr12 = new DateRange({ holiday: "easter" }, null);
-			assert.equal(dr12.getType(), "holiday");
-			
-			//All year
-			var dr13 = new DateRange({}, null);
-			assert.equal(dr13.getType(), "always");
-		});
-		QUnit.test("Get time for humans", function(assert) {
-			//Single day
-			var dr1 = new DateRange({ day: 28, month: 11 }, null);
-			assert.equal(dr1.getTimeForHumans(), "day November 28");
-			
-			//Several days
-			var dr2 = new DateRange({ day: 28, month: 11 }, { day: 3, month: 12 });
-			assert.equal(dr2.getTimeForHumans(), "every week from November 28 to December 3");
-			
-			//Single week
-			var dr4 = new DateRange({ week: 10 }, null);
-			assert.equal(dr4.getTimeForHumans(), "week 10");
-			
-			//Several weeks
-			var dr5 = new DateRange({ week: 10 }, { week: 15 });
-			assert.equal(dr5.getTimeForHumans(), "every week from week 10 to 15");
-			
-			//Single month
-			var dr7 = new DateRange({ month: 11 }, null);
-			assert.equal(dr7.getTimeForHumans(), "every week in November");
-			
-			//Several months
-			var dr8 = new DateRange({ month: 11 }, { month: 12 });
-			assert.equal(dr8.getTimeForHumans(), "every week from November to December");
-			
-			//School holidays
-			var dr10 = new DateRange({ holiday: "SH" }, null);
-			assert.equal(dr10.getTimeForHumans(), "every week during school holidays");
-			
-			//Public holidays
-			var dr11 = new DateRange({ holiday: "PH" }, null);
-			assert.equal(dr11.getTimeForHumans(), "every public holidays");
-			
-			//Easter
-			var dr12 = new DateRange({ holiday: "easter" }, null);
-			assert.equal(dr12.getTimeForHumans(), "each easter day");
-			
-			//All year
-			var dr13 = new DateRange({}, null);
-			assert.equal(dr13.getTimeForHumans(), "every week of year");
-		});
-		QUnit.test("Get time selector", function(assert) {
-			//Single day
-			var dr1 = new DateRange({ day: 28, month: 11 }, null);
-			assert.equal(dr1.getTimeSelector(), "Nov 28");
-			
-			//Several days
-			var dr2 = new DateRange({ day: 28, month: 11 }, { day: 3, month: 12 });
-			assert.equal(dr2.getTimeSelector(), "Nov 28-Dec 03");
-			
-			//Single week
-			var dr4 = new DateRange({ week: 10 }, null);
-			assert.equal(dr4.getTimeSelector(), "week 10");
-			
-			//Several weeks
-			var dr5 = new DateRange({ week: 5 }, { week: 15 });
-			assert.equal(dr5.getTimeSelector(), "week 05-15");
-			
-			//Single month
-			var dr7 = new DateRange({ month: 11 }, null);
-			assert.equal(dr7.getTimeSelector(), "Nov");
-			
-			//Several months
-			var dr8 = new DateRange({ month: 11 }, { month: 12 });
-			assert.equal(dr8.getTimeSelector(), "Nov-Dec");
-			
-			//School holidays
-			var dr10 = new DateRange({ holiday: "SH" }, null);
-			assert.equal(dr10.getTimeSelector(), "SH");
-			
-			//Public holidays
-			var dr11 = new DateRange({ holiday: "PH" }, null);
-			assert.equal(dr11.getTimeSelector(), "PH");
-			
-			//Easter
-			var dr12 = new DateRange({ holiday: "easter" }, null);
-			assert.equal(dr12.getTimeSelector(), "easter");
-			
-			//All year
-			var dr13 = new DateRange({}, null);
-			assert.equal(dr13.getTimeSelector(), "");
+		QUnit.test("Get interval", function(assert) {
+			var wi1 = new WideInterval().day(28,11);
+			var dr1 = new DateRange(wi1);
+			assert.equal(dr1.getInterval(), wi1);
 		});
 		QUnit.test("Update range", function(assert) {
-			var dr1 = new DateRange({ day: 28, month: 11 }, null);
+			var dr1 = new DateRange(new WideInterval().day(28,11));
 			
 			//Check before
-			var st1 = dr1.getStart();
+			var st1 = dr1.getInterval().getStart();
 			assert.equal(st1.day, 28);
 			assert.equal(st1.month, 11);
-			var end1 = dr1.getEnd();
+			var end1 = dr1.getInterval().getEnd();
 			assert.equal(end1, null);
 			
-			dr1.updateRange({ week: 5 }, { week: 10 });
+			dr1.updateRange(new WideInterval().week(5,10));
 			
 			//Check after
-			var resSt1 = dr1.getStart();
+			var resSt1 = dr1.getInterval().getStart();
 			assert.equal(resSt1.week, 5);
 			assert.equal(resSt1.day, undefined);
 			assert.equal(resSt1.month, undefined);
-			var resEnd1 = dr1.getEnd();
+			var resEnd1 = dr1.getInterval().getEnd();
 			assert.equal(resEnd1.week, 10);
-		});
-		QUnit.test("Is full month", function(assert){
-			var dr1 = new DateRange(null, null);
-			
-			assert.ok(dr1.isFullMonth({ month: 10 }, null));
-			assert.ok(dr1.isFullMonth({ month: 10 }, { month: 10 }));
-			assert.notOk(dr1.isFullMonth({ month: 10 }, { month: 12 }));
-			
-			assert.ok(dr1.isFullMonth({ month: 10, day: 1 }, { month: 10, day: 31 }));
-			assert.ok(dr1.isFullMonth({ month: 11, day: 1 }, { month: 11, day: 30 }));
-			assert.notOk(dr1.isFullMonth({ month: 10, day: 1 }, { month: 10, day: 30 }));
-			assert.notOk(dr1.isFullMonth({ month: 10, day: 15 }, { month: 10, day: 31 }));
-			assert.notOk(dr1.isFullMonth({ month: 10, day: 1 }, { month: 12, day: 31 }));
-			assert.notOk(dr1.isFullMonth({ month: 10, day: 1 }, null));
-			
-			assert.notOk(dr1.isFullMonth({ week: 8 }, { week: 10 }));
-		});
-		QUnit.test("Is same range", function(assert) {
-			//Single day
-			var dr1 = new DateRange({ day: 28, month: 11 }, null);
-			assert.ok(dr1.isSameRange({ month: 11, day: 28 }, null));
-			assert.notOk(dr1.isSameRange({ month: 11, day: 28 }, { month: 12, day: 3 }));
-			assert.notOk(dr1.isSameRange({ week: 1 }, { week: 15 }));
-			
-			//Several days
-			var dr2 = new DateRange({ day: 28, month: 11 }, { day: 3, month: 12 });
-			assert.ok(dr2.isSameRange({ month: 11, day: 28 }, { month: 12, day: 3 }));
-			assert.notOk(dr2.isSameRange({ month: 11, day: 28 }, null));
-			assert.notOk(dr2.isSameRange({ week: 1 }, { week: 15 }));
-			
-			//Single week
-			var dr4 = new DateRange({ week: 10 }, null);
-			assert.ok(dr4.isSameRange({ week: 10 }, { week: 10 }));
-			assert.ok(dr4.isSameRange({ week: 10 }, null));
-			assert.notOk(dr4.isSameRange({ month: 11, day: 28 }, null));
-			assert.notOk(dr4.isSameRange({ week: 1 }, { week: 15 }));
-			
-			//Several weeks
-			var dr5 = new DateRange({ week: 10 }, { week: 15 });
-			assert.ok(dr5.isSameRange({ week: 10 }, { week: 15 }));
-			assert.notOk(dr5.isSameRange({ month: 11, day: 28 }, null));
-			assert.notOk(dr5.isSameRange({ week: 10 }, null));
-			
-			//Single month
-			var dr7 = new DateRange({ month: 11 }, null);
-			assert.ok(dr7.isSameRange({ month: 11 }, { month: 11 }));
-			assert.ok(dr7.isSameRange({ month: 11 }, null));
-			assert.ok(dr7.isSameRange({ month: 11, day: 1 }, { month: 11, day: 30 }));
-			assert.notOk(dr7.isSameRange({ month: 11, day: 28 }, null));
-			assert.notOk(dr7.isSameRange({ week: 1 }, { week: 15 }));
-			
-			//Several months
-			var dr8 = new DateRange({ month: 11 }, { month: 12 });
-			assert.ok(dr8.isSameRange({ month: 11 }, { month: 12 }));
-			assert.ok(dr8.isSameRange({ month: 11, day: 1 }, { month: 12, day: 31 }));
-			assert.notOk(dr8.isSameRange({ month: 11, day: 28 }, null));
-			assert.notOk(dr8.isSameRange({ week: 1 }, { week: 15 }));
-			assert.notOk(dr8.isSameRange({ month: 11 }, null));
-			assert.notOk(dr8.isSameRange({ month: 11, day: 2 }, { month: 12, day: 31 }));
-			assert.notOk(dr8.isSameRange({ month: 11, day: 1 }, { month: 12, day: 30 }));
-			
-			//School holidays
-			var dr10 = new DateRange({ holiday: "SH" }, null);
-			assert.ok(dr10.isSameRange({ holiday: "SH" }, null));
-			assert.notOk(dr10.isSameRange({ holiday: "PH" }, null));
-			assert.notOk(dr10.isSameRange({ week: 1 }, { week: 15 }));
-			assert.notOk(dr10.isSameRange({ month: 11 }, null));
-			
-			//Public holidays
-			var dr11 = new DateRange({ holiday: "PH" }, null);
-			assert.ok(dr11.isSameRange({ holiday: "PH" }, null));
-			assert.notOk(dr11.isSameRange({ holiday: "easter" }, null));
-			assert.notOk(dr11.isSameRange({ week: 1 }, { week: 15 }));
-			assert.notOk(dr11.isSameRange({ month: 11 }, null));
-
-			//All year
-			var dr13 = new DateRange({}, null);
-			assert.ok(dr13.isSameRange({}, null));
-			assert.ok(dr13.isSameRange({}, {}));
-			assert.ok(dr13.isSameRange(null, null));
-			assert.notOk(dr13.isSameRange({ holiday: "easter" }, null));
-			assert.notOk(dr13.isSameRange({ week: 1 }, { week: 15 }));
-			assert.notOk(dr13.isSameRange({ month: 11 }, null));
 		});
 		QUnit.test("Is general for", function(assert) {
 			//Single day
-			var dr1 = new DateRange({ day: 28, month: 11 }, null);
-			assert.notOk(dr1.isGeneralFor({ day: 28, month: 11 }, null));
-			assert.notOk(dr1.isGeneralFor({ day: 28, month: 11 }, { day: 29, month: 11 }));
-			assert.notOk(dr1.isGeneralFor({ day: 27, month: 11 }, { day: 29, month: 11 }));
-			assert.notOk(dr1.isGeneralFor({ week: 10 }, null));
-			assert.notOk(dr1.isGeneralFor({ month: 11 }, null));
-			assert.notOk(dr1.isGeneralFor({ holiday: "PH" }, null));
-			assert.notOk(dr1.isGeneralFor({}, null));
-			assert.notOk(dr1.isGeneralFor(null, null));
+			var dr1 = new DateRange(new WideInterval().day(28,11));
+			assert.notOk(dr1.isGeneralFor(new WideInterval().day(28,11)));
+			assert.notOk(dr1.isGeneralFor(new WideInterval().day(28,11,29,11)));
+			assert.notOk(dr1.isGeneralFor(new WideInterval().day(27,11,29,11)));
+			assert.notOk(dr1.isGeneralFor(new WideInterval().week(10)));
+			assert.notOk(dr1.isGeneralFor(new WideInterval().month(11)));
+			assert.notOk(dr1.isGeneralFor(new WideInterval().holiday("PH")));
+			assert.notOk(dr1.isGeneralFor(new WideInterval().always()));
 			
 			//Several days
-			var dr2 = new DateRange({ day: 28, month: 11 }, { day: 3, month: 12 });
-			assert.notOk(dr2.isGeneralFor({ day: 28, month: 11 }, { day: 3, month: 12 }));
-			assert.ok(dr2.isGeneralFor({ day: 29, month: 11 }, { day: 3, month: 12 }));
-			assert.ok(dr2.isGeneralFor({ day: 29, month: 11 }, { day: 2, month: 12 }));
-			assert.ok(dr2.isGeneralFor({ day: 29, month: 11 }, { day: 30, month: 11 }));
-			assert.notOk(dr2.isGeneralFor({ day: 29, month: 11 }, null));
-			assert.notOk(dr2.isGeneralFor({ day: 10, month: 11 }, { day: 27, month: 11 }));
-			assert.notOk(dr2.isGeneralFor({ day: 4, month: 12 }, { day: 25, month: 12 }));
-			assert.notOk(dr2.isGeneralFor({ day: 4, month: 11 }, { day: 25, month: 12 }));
-			assert.notOk(dr2.isGeneralFor({ week: 10 }, null));
-			assert.notOk(dr2.isGeneralFor({ month: 11 }, null));
-			assert.notOk(dr2.isGeneralFor({ holiday: "PH" }, null));
-			assert.notOk(dr2.isGeneralFor({}, null));
-			assert.notOk(dr2.isGeneralFor(null, null));
+			var dr2 = new DateRange(new WideInterval().day(28,11,3,12));
+			assert.notOk(dr2.isGeneralFor(new WideInterval().day(28,11,3,12)));
+			assert.ok(dr2.isGeneralFor(new WideInterval().day(29,11,3,12)));
+			assert.ok(dr2.isGeneralFor(new WideInterval().day(29,11,2,12)));
+			assert.ok(dr2.isGeneralFor(new WideInterval().day(29,11,30,11)));
+			assert.notOk(dr2.isGeneralFor(new WideInterval().day(29,11)));
+			assert.notOk(dr2.isGeneralFor(new WideInterval().day(10,11,27,11)));
+			assert.notOk(dr2.isGeneralFor(new WideInterval().day(4,12,25,12)));
+			assert.notOk(dr2.isGeneralFor(new WideInterval().day(4,11,25,12)));
+			assert.notOk(dr2.isGeneralFor(new WideInterval().week(10)));
+			assert.notOk(dr2.isGeneralFor(new WideInterval().month(11)));
+			assert.notOk(dr2.isGeneralFor(new WideInterval().holiday("PH")));
+			assert.notOk(dr2.isGeneralFor(new WideInterval().always()));
 			
 			//Single week
-			var dr4 = new DateRange({ week: 10 }, null);
-			assert.notOk(dr4.isGeneralFor({ week: 10 }, null));
-			assert.notOk(dr4.isGeneralFor({ week: 10 }, { week: 15}));
-			assert.notOk(dr4.isGeneralFor({ day: 10, month: 4 }, null));
-			assert.notOk(dr4.isGeneralFor({ day: 10, month: 4 }, { day: 15, month: 5}));
-			assert.notOk(dr4.isGeneralFor({ month: 11 }, null));
-			assert.notOk(dr4.isGeneralFor({ holiday: "PH" }, null));
-			assert.notOk(dr4.isGeneralFor({}, null));
-			assert.notOk(dr4.isGeneralFor(null, null));
+			var dr4 = new DateRange(new WideInterval().week(10));
+			assert.notOk(dr4.isGeneralFor(new WideInterval().week(10)));
+			assert.notOk(dr4.isGeneralFor(new WideInterval().week(10,15)));
+			assert.notOk(dr4.isGeneralFor(new WideInterval().day(4,10)));
+			assert.notOk(dr4.isGeneralFor(new WideInterval().day(4,10,15,5)));
+			assert.notOk(dr4.isGeneralFor(new WideInterval().month(11)));
+			assert.notOk(dr4.isGeneralFor(new WideInterval().holiday("PH")));
+			assert.notOk(dr4.isGeneralFor(new WideInterval().always()));
 			
 			//Several weeks
-			var dr5 = new DateRange({ week: 5 }, { week: 15 });
-			assert.notOk(dr5.isGeneralFor({ week: 5 }, { week: 15 }));
-			assert.ok(dr5.isGeneralFor({ week: 5 }, { week: 14 }));
-			assert.ok(dr5.isGeneralFor({ week: 6 }, { week: 15 }));
-			assert.ok(dr5.isGeneralFor({ week: 6 }, { week: 14 }));
-			assert.ok(dr5.isGeneralFor({ week: 6 }, null));
-			assert.ok(dr5.isGeneralFor({ week: 6 }, { week: 6 }));
-			assert.notOk(dr5.isGeneralFor({ day: 10, month: 4 }, null));
-			assert.notOk(dr5.isGeneralFor({ day: 10, month: 4 }, { day: 15, month: 5}));
-			assert.notOk(dr5.isGeneralFor({ month: 11 }, null));
-			assert.notOk(dr5.isGeneralFor({ holiday: "PH" }, null));
-			assert.notOk(dr5.isGeneralFor({}, null));
-			assert.notOk(dr5.isGeneralFor(null, null));
+			var dr5 = new DateRange(new WideInterval().week(5,15));
+			assert.notOk(dr5.isGeneralFor(new WideInterval().week(5,15)));
+			assert.ok(dr5.isGeneralFor(new WideInterval().week(5,14)));
+			assert.ok(dr5.isGeneralFor(new WideInterval().week(6,15)));
+			assert.ok(dr5.isGeneralFor(new WideInterval().week(6,14)));
+			assert.ok(dr5.isGeneralFor(new WideInterval().week(6)));
+			assert.ok(dr5.isGeneralFor(new WideInterval().week(6,6)));
+			assert.notOk(dr5.isGeneralFor(new WideInterval().day(4,10)));
+			assert.notOk(dr5.isGeneralFor(new WideInterval().day(4,10,15,5)));
+			assert.notOk(dr5.isGeneralFor(new WideInterval().month(11)));
+			assert.notOk(dr5.isGeneralFor(new WideInterval().holiday("PH")));
+			assert.notOk(dr5.isGeneralFor(new WideInterval().always()));
 			
 			//Single month
-			var dr7 = new DateRange({ month: 11 }, null);
-			assert.notOk(dr7.isGeneralFor({ month: 11 }, null));
-			assert.notOk(dr7.isGeneralFor({ month: 11 }, { month: 11 }));
-			assert.notOk(dr7.isGeneralFor({ month: 10 }, { month: 12 }));
-			assert.ok(dr7.isGeneralFor({ month: 11, day: 2 }, { month: 11, day: 8 }));
-			assert.notOk(dr7.isGeneralFor({ month: 11, day: 1 }, { month: 11, day: 30 }));
-			assert.notOk(dr7.isGeneralFor({ month: 11, day: 5 }, { month: 12, day: 15 }));
-			assert.notOk(dr7.isGeneralFor({ month: 11, day: 5 }, null));
-			assert.notOk(dr7.isGeneralFor({ holiday: "PH" }, null));
-			assert.notOk(dr7.isGeneralFor({}, null));
-			assert.notOk(dr7.isGeneralFor(null, null));
+			var dr7 = new DateRange(new WideInterval().month(11));
+			assert.notOk(dr7.isGeneralFor(new WideInterval().month(11)));
+			assert.notOk(dr7.isGeneralFor(new WideInterval().month(11,11)));
+			assert.notOk(dr7.isGeneralFor(new WideInterval().month(10,12)));
+			assert.ok(dr7.isGeneralFor(new WideInterval().day(2,11,8,11)));
+			assert.notOk(dr7.isGeneralFor(new WideInterval().day(1,11,30,11)));
+			assert.notOk(dr7.isGeneralFor(new WideInterval().day(5,11,15,12)));
+			assert.notOk(dr7.isGeneralFor(new WideInterval().day(5,11)));
+			assert.notOk(dr7.isGeneralFor(new WideInterval().holiday("PH")));
+			assert.notOk(dr7.isGeneralFor(new WideInterval().always()));
 			
 			//Several months
-			var dr8 = new DateRange({ month: 11 }, { month: 12 });
-			assert.notOk(dr8.isGeneralFor({ month: 11 }, { month: 12 }));
-			assert.ok(dr8.isGeneralFor({ month: 11 }, null));
-			assert.ok(dr8.isGeneralFor({ month: 11 }, { month: 11 }));
-			assert.ok(dr8.isGeneralFor({ month: 11, day: 2 }, { month: 12, day: 30 }));
-			assert.notOk(dr8.isGeneralFor({ month: 11, day: 1 }, { month: 12, day: 31 }));
-			assert.notOk(dr8.isGeneralFor({ month: 11, day: 5 }, null));
-			assert.ok(dr8.isGeneralFor({ month: 11, day: 1 }, { month: 12, day: 30 }));
-			assert.ok(dr8.isGeneralFor({ month: 11, day: 2 }, { month: 12, day: 31 }));
-			assert.notOk(dr8.isGeneralFor({ week: 10 }, { week: 12 }));
-			assert.notOk(dr8.isGeneralFor({ month: 10 }, { month: 12 }));
-			assert.notOk(dr8.isGeneralFor({ holiday: "PH" }, null));
-			assert.notOk(dr8.isGeneralFor({}, null));
-			assert.notOk(dr8.isGeneralFor(null, null));
+			var dr8 = new DateRange(new WideInterval().month(11,12));
+			assert.notOk(dr8.isGeneralFor(new WideInterval().month(11,12)));
+			assert.ok(dr8.isGeneralFor(new WideInterval().month(11)));
+			assert.ok(dr8.isGeneralFor(new WideInterval().month(11,11)));
+			assert.ok(dr8.isGeneralFor(new WideInterval().day(2,11,30,12)));
+			assert.notOk(dr8.isGeneralFor(new WideInterval().day(1,11,31,12)));
+			assert.notOk(dr8.isGeneralFor(new WideInterval().day(5,11)));
+			assert.ok(dr8.isGeneralFor(new WideInterval().day(1,11,30,12)));
+			assert.ok(dr8.isGeneralFor(new WideInterval().day(2,11,31,12)));
+			assert.notOk(dr8.isGeneralFor(new WideInterval().week(10,12)));
+			assert.notOk(dr8.isGeneralFor(new WideInterval().month(10,12)));
+			assert.notOk(dr8.isGeneralFor(new WideInterval().holiday("PH")));
+			assert.notOk(dr8.isGeneralFor(new WideInterval().always()));
 			
 			//School holidays
 			var dr10 = new DateRange({ holiday: "SH" }, null);
-			assert.notOk(dr10.isGeneralFor({ holiday: "SH" }, null));
-			assert.notOk(dr10.isGeneralFor({ week: 10 }, { week: 12 }));
-			assert.notOk(dr10.isGeneralFor({ month: 10 }, { month: 12 }));
-			assert.notOk(dr10.isGeneralFor({ month: 11, day: 1 }, { month: 12, day: 30 }));
-			assert.notOk(dr10.isGeneralFor({ month: 11, day: 1 }, null));
-			assert.notOk(dr10.isGeneralFor({ holiday: "PH" }, null));
-			assert.notOk(dr10.isGeneralFor({}, null));
-			assert.notOk(dr10.isGeneralFor(null, null));
+			assert.notOk(dr10.isGeneralFor(new WideInterval().holiday("SH")));
+			assert.notOk(dr10.isGeneralFor(new WideInterval().week(10,12)));
+			assert.notOk(dr10.isGeneralFor(new WideInterval().month(10,12)));
+			assert.notOk(dr10.isGeneralFor(new WideInterval().day(1,11,30,12)));
+			assert.notOk(dr10.isGeneralFor(new WideInterval().day(1,11)));
+			assert.notOk(dr10.isGeneralFor(new WideInterval().holiday("PH")));
+			assert.notOk(dr10.isGeneralFor(new WideInterval().always()));
 			
 			//Public holidays
-			var dr11 = new DateRange({ holiday: "PH" }, null);
-			assert.notOk(dr11.isGeneralFor({ holiday: "PH" }, null));
-			assert.notOk(dr11.isGeneralFor({ week: 10 }, { week: 12 }));
-			assert.notOk(dr11.isGeneralFor({ month: 10 }, { month: 12 }));
-			assert.notOk(dr11.isGeneralFor({ month: 11, day: 1 }, { month: 12, day: 30 }));
-			assert.notOk(dr11.isGeneralFor({ month: 11, day: 1 }, null));
-			assert.notOk(dr11.isGeneralFor({ holiday: "SH" }, null));
-			assert.notOk(dr11.isGeneralFor({}, null));
-			assert.notOk(dr11.isGeneralFor(null, null));
+			var dr11 = new DateRange(new WideInterval().holiday("PH"));
+			assert.notOk(dr11.isGeneralFor(new WideInterval().holiday("PH")));
+			assert.notOk(dr11.isGeneralFor(new WideInterval().week(10,12)));
+			assert.notOk(dr11.isGeneralFor(new WideInterval().month(10,12)));
+			assert.notOk(dr11.isGeneralFor(new WideInterval().day(1,11,30,12)));
+			assert.notOk(dr11.isGeneralFor(new WideInterval().day(1,11)));
+			assert.notOk(dr11.isGeneralFor(new WideInterval().holiday("PH")));
+			assert.notOk(dr11.isGeneralFor(new WideInterval().always()));
 			
 			//Easter
-			var dr12 = new DateRange({ holiday: "easter" }, null);
-			assert.notOk(dr12.isGeneralFor({ holiday: "easter" }, null));
-			assert.notOk(dr12.isGeneralFor({ week: 10 }, { week: 12 }));
-			assert.notOk(dr12.isGeneralFor({ month: 10 }, { month: 12 }));
-			assert.notOk(dr12.isGeneralFor({ month: 11, day: 1 }, { month: 12, day: 30 }));
-			assert.notOk(dr12.isGeneralFor({ month: 11, day: 1 }, null));
-			assert.notOk(dr12.isGeneralFor({ holiday: "PH" }, null));
-			assert.notOk(dr12.isGeneralFor({ holiday: "SH" }, null));
-			assert.notOk(dr12.isGeneralFor({}, null));
-			assert.notOk(dr12.isGeneralFor(null, null));
+			var dr12 = new DateRange(new WideInterval().holiday("easter"));
+			assert.notOk(dr12.isGeneralFor(new WideInterval().holiday("easter")));
+			assert.notOk(dr12.isGeneralFor(new WideInterval().week(10,12)));
+			assert.notOk(dr12.isGeneralFor(new WideInterval().month(10,12)));
+			assert.notOk(dr12.isGeneralFor(new WideInterval().day(1,11,30,12)));
+			assert.notOk(dr12.isGeneralFor(new WideInterval().day(1,11)));
+			assert.notOk(dr12.isGeneralFor(new WideInterval().holiday("PH")));
+			assert.notOk(dr12.isGeneralFor(new WideInterval().holiday("SH")));
+			assert.notOk(dr12.isGeneralFor(new WideInterval().always()));
 			
 			//All year
-			var dr13 = new DateRange({}, null);
-			assert.notOk(dr13.isGeneralFor({}, null));
-			assert.notOk(dr13.isGeneralFor({}, {}));
-			assert.notOk(dr13.isGeneralFor(null, null));
-			assert.ok(dr13.isGeneralFor({ holiday: "easter" }, null));
-			assert.ok(dr13.isGeneralFor({ week: 10 }, { week: 12 }));
-			assert.ok(dr13.isGeneralFor({ month: 10 }, { month: 12 }));
-			assert.ok(dr13.isGeneralFor({ month: 11, day: 1 }, { month: 12, day: 30 }));
-			assert.ok(dr13.isGeneralFor({ month: 11, day: 1 }, null));
-			assert.ok(dr13.isGeneralFor({ holiday: "PH" }, null));
-			assert.ok(dr13.isGeneralFor({ holiday: "SH" }, null));
+			var dr13 = new DateRange(new WideInterval().always());
+			assert.notOk(dr13.isGeneralFor(new WideInterval().always()));
+			assert.notOk(dr13.isGeneralFor(new WideInterval().holiday("easter")));
+			assert.notOk(dr13.isGeneralFor(new WideInterval().week(10,12)));
+			assert.notOk(dr13.isGeneralFor(new WideInterval().month(10,12)));
+			assert.notOk(dr13.isGeneralFor(new WideInterval().day(1,11,30,12)));
+			assert.notOk(dr13.isGeneralFor(new WideInterval().day(1,11)));
+			assert.notOk(dr13.isGeneralFor(new WideInterval().holiday("PH")));
+			assert.notOk(dr13.isGeneralFor(new WideInterval().holiday("SH")));
 		});
 		QUnit.test("Has same typical", function(assert) {
-			var dr1 = new DateRange({});
-			var dr2 = new DateRange({ month: 3 });
-			var dr3 = new DateRange({ month: 5 });
+			var dr1 = new DateRange(new WideInterval().always());
+			var dr2 = new DateRange(new WideInterval().month(3));
+			var dr3 = new DateRange(new WideInterval().month(5));
 			
 			dr1.getTypical().addInterval(new Interval(0, 1, 42, 60));
 			dr2.getTypical().addInterval(new Interval(0, 1, 42, 60));
@@ -2915,6 +2798,11 @@
 			assert.equal(dr1.getTypical().getIntervals()[6].getTo(), 18*60);
 			
 			assert.equal(builder.build(result), "SH 08:00-18:00");
+		});
+		QUnit.test("Parse Mo-Fr 12:00-14:00; Sa,Su,PH 12:00-16:00 (PH as weekday)", function(assert) {
+			var parser = new OpeningHoursParser();
+			var builder = new OpeningHoursBuilder();
+			assert.equal(builder.build(parser.parse("Mo-Fr 12:00-14:00; Sa,Su,PH 12:00-16:00")), "Mo-Fr 12:00-14:00; Sa,Su,PH 12:00-16:00");
 		});
 		
 		/*
