@@ -143,26 +143,276 @@ var Interval = function(dayStart, dayEnd, minStart, minEnd) {
  * A wide interval is an interval of one or more days, weeks, months, holidays.
  * Use WideInterval.days/weeks/months/holidays methods to construct one object.
  */
-// var WideInterval = function(start, end) {
-// //ATTRIBUTES
-	// /** The start of the interval **/
-	// var this._start = start;
+var WideInterval = function() {
+//ATTRIBUTES
+	/** The start of the interval **/
+	this._start = null;
 	
-	// /** The end of the interval **/
-	// var this._end = end || null;
+	/** The end of the interval **/
+	this._end = null;
 
-	// /** The kind of interval **/
-	// var this._type = null;
+	/** The kind of interval **/
+	this._type = null;
+};
 
-// //CONSTRUCTORS
-	// /**
-	 // * @return a day-based interval
-	 // */
-	// days = function(startDay, startMonth, endDay, endMonth) {
-		// var end = (endDay != null && endMonth != null) ? { day: endDay, month: endMonth } : null;
-		// return new WideInterval({ day: startDay, month: startMonth }, end);
-	// };
-// };
+//CONSTRUCTORS
+	/**
+	 * @return a day-based interval
+	 */
+	WideInterval.prototype.day = function(startDay, startMonth, endDay, endMonth) {
+		if(startDay == null || startMonth == null) {
+			throw Error("Start day and month can't be null");
+		}
+		this._start = { day: startDay, month: startMonth };
+		this._end = (endDay != null && endMonth != null && (endDay != startDay || endMonth != startMonth)) ? { day: endDay, month: endMonth } : null;
+		this._type = "day";
+		return this;
+	};
+	
+	/**
+	 * @return a week-based interval
+	 */
+	WideInterval.prototype.week = function(startWeek, endWeek) {
+		if(startWeek == null) {
+			throw Error("Start week can't be null");
+		}
+		this._start = { week: startWeek };
+		this._end = (endWeek != null && endWeek != startWeek) ? { week: endWeek } : null;
+		this._type = "week";
+		return this;
+	};
+	
+	/**
+	 * @return a month-based interval
+	 */
+	WideInterval.prototype.month = function(startMonth, endMonth) {
+		if(startMonth == null) {
+			throw Error("Start month can't be null");
+		}
+		this._start = { month: startMonth };
+		this._end = (endMonth != null && endMonth != startMonth) ? { month: endMonth } : null;
+		this._type = "month";
+		return this;
+	};
+	
+	/**
+	 * @return a holiday-based interval
+	 */
+	WideInterval.prototype.holiday = function(holiday) {
+		if(holiday == null || (holiday != "PH" && holiday != "SH" && holiday != "easter")) {
+			throw Error("Invalid holiday, must be PH, SH or easter");
+		}
+		this._start = { holiday: holiday };
+		this._end = null;
+		this._type = "holiday";
+		return this;
+	};
+	
+	/**
+	 * @return a holiday-based interval
+	 */
+	WideInterval.prototype.always = function() {
+		this._start = null;
+		this._end = null;
+		this._type = "always";
+		return this;
+	};
+
+//ACCESSORS
+	/**
+	 * @return The kind of wide interval (always, day, month, week, holiday)
+	 */
+	WideInterval.prototype.getType = function() {
+		return this._type;
+	};
+	
+	/**
+	 * @return True if the given object concerns the same interval as this one
+	 */
+	WideInterval.prototype.equals = function(o) {
+		if(!o instanceof WideInterval) { return false; }
+		if(this === o) { return true; }
+		if(o._type == "always") { return this._type == "always"; }
+		var result = false;
+		
+		switch(this._type) {
+			case "always":
+				result = o._start == null;
+				break;
+			case "day":
+				result =
+					(
+					o._type == "day"
+					&& o._start.day == this._start.day
+					&& o._start.month == this._start.month
+					&& (o._end == this._end || (this._end != null && o._end != null && o._end.day == this._end.day && o._end.month == this._end.month))
+					)
+					||
+					(
+					o._type == "month"
+					&& o._start.month == this._start.month
+					&& (this.isFullMonth() && o.isFullMonth())
+					);
+				break;
+
+			case "week":
+				result =
+					o._start.week == this._start.week
+					&& (o._end == this._end || (this._end != null && o._end != null && o._end.week == this._end.week));
+				break;
+
+			case "month":
+				result = 
+					(
+						o._type == "day"
+						&& o._start.month == this._start.month
+						&& this.isFullMonth() && o.isFullMonth()
+					)
+					||
+					(
+						o._type == "month"
+						&& o._start.month == this._start.month
+						&& ((o.isFullMonth() && this.isFullMonth()) || (o._end != null && this._end != null && o._end.month == this._end.month))
+					);
+				break;
+
+			case "holiday":
+				result = o._start.holiday == this._start.holiday;
+				break;
+			default:
+		}
+		
+		return result;
+	};
+	
+	/**
+	 * @return The human readable time
+	 */
+	WideInterval.prototype.getTimeForHumans = function() {
+		var result;
+		
+		switch(this._type) {
+			case "day":
+				if(this._end != null) {
+					result = "every week from "+IRL_MONTHS[this._start.month-1]+" "+this._start.day+" to ";
+					if(this._start.month != this._end.month) { result += IRL_MONTHS[this._end.month-1]+" "; }
+					result += this._end.day;
+				}
+				else {
+					result = "day "+IRL_MONTHS[this._start.month-1]+" "+this._start.day;
+				}
+				break;
+
+			case "week":
+				if(this._end != null) {
+					result = "every week from week "+this._start.week+" to "+this._end.week;
+				}
+				else {
+					result = "week "+this._start.week;
+				}
+				break;
+
+			case "month":
+				if(this._end != null) {
+					result = "every week from "+IRL_MONTHS[this._start.month-1]+" to "+IRL_MONTHS[this._end.month-1];
+				}
+				else {
+					result = "every week in "+IRL_MONTHS[this._start.month-1];
+				}
+				break;
+
+			case "holiday":
+				if(this._start.holiday == "SH") {
+					result = "every week during school holidays";
+				}
+				else if(this._start.holiday == "PH") {
+					result = "every public holidays";
+				}
+				else if(this._start.holiday == "easter") {
+					result = "each easter day";
+				}
+				else {
+					throw new Error("Invalid holiday type: "+this._start.holiday);
+				}
+				break;
+
+			case "always":
+				result = "every week of year";
+				break;
+			default:
+				result = "invalid time";
+		}
+		
+		return result;
+	};
+	
+	/**
+	 * @return The time selector for OSM opening_hours
+	 */
+	WideInterval.prototype.getTimeSelector = function() {
+		var result;
+		
+		switch(this._type) {
+			case "day":
+				result = OSM_MONTHS[this._start.month-1]+" "+((this._start.day < 10) ? "0" : "")+this._start.day;
+				if(this._end != null) {
+					//Same month as start ?
+					if(this._start.month == this._end.month) {
+						result += "-"+((this._end.day < 10) ? "0" : "")+this._end.day;
+					}
+					else {
+						result += "-"+OSM_MONTHS[this._end.month-1]+" "+((this._end.day < 10) ? "0" : "")+this._end.day;
+					}
+				}
+				break;
+
+			case "week":
+				result = "week "+((this._start.week < 10) ? "0" : "")+this._start.week;
+				if(this._end != null) {
+					result += "-"+((this._end.week < 10) ? "0" : "")+this._end.week;
+				}
+				break;
+
+			case "month":
+				result = OSM_MONTHS[this._start.month-1];
+				if(this._end != null) {
+					result += "-"+OSM_MONTHS[this._end.month-1];
+				}
+				break;
+
+			case "holiday":
+				result = this._start.holiday;
+				break;
+
+			case "always":
+			default:
+				result = "";
+		}
+		
+		return result;
+	};
+	
+	/**
+	 * Does this interval corresponds to a full month ?
+	 */
+	WideInterval.prototype.isFullMonth = function() {
+		if(this._type == "month" && this._end == null) {
+			return true;
+		}
+		else if(this._type == "day") {
+			return (this._start.day == 1 && this._end != null && this._end.month == this._start.month && this._end.day != undefined && this._end.day == MONTH_END_DAY[this._end.month-1]);
+		}
+		else {
+			return false;
+		}
+	};
+	
+	/**
+	 * Does this interval starts the first day of a month
+	 */
+	WideInterval.prototype.startsMonth = function() {
+		return this._type == "month" || this._type == "always" || (this._type == "day" && this._start.day == 1);
+	};
 
 
 
