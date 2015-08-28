@@ -41,7 +41,7 @@ function minToHourMin(m) {
  * @return The monday-starting week day
  */
 function swDayToMwDay(d) {
-	var day = parseInt(d);
+	var day = parseInt(d,10);
 	return (day == 0) ? 6 : day - 1;
 };
 

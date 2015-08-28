@@ -2433,7 +2433,7 @@ var OpeningHoursParser = function() {
 								
 								//Read monthday start
 								monthFrom = singleMonth[0].split(' ');
-								monthFrom = { day: parseInt(monthFrom[1]), month: OSM_MONTHS.indexOf(monthFrom[0])+1 };
+								monthFrom = { day: parseInt(monthFrom[1],10), month: OSM_MONTHS.indexOf(monthFrom[0])+1 };
 								if(monthFrom.month < 1) {
 									throw new Error("Invalid month: "+monthFrom[0]);
 								}
@@ -2443,11 +2443,11 @@ var OpeningHoursParser = function() {
 									
 									//Same month as start
 									if(monthTo.length == 1) {
-										monthTo = { day: parseInt(monthTo[0]), month: monthFrom.month };
+										monthTo = { day: parseInt(monthTo[0],10), month: monthFrom.month };
 									}
 									//Another month
 									else {
-										monthTo = { day: parseInt(monthTo[1]), month: OSM_MONTHS.indexOf(monthTo[0])+1 };
+										monthTo = { day: parseInt(monthTo[1],10), month: OSM_MONTHS.indexOf(monthTo[0])+1 };
 										if(monthTo.month < 1) {
 											throw new Error("Invalid month: "+monthTo[0]);
 										}
@@ -2470,9 +2470,9 @@ var OpeningHoursParser = function() {
 						
 						for(var ws=0, wsl = weekSelector.length; ws < wsl; ws++) {
 							singleWeek = weekSelector[ws].split('-');
-							weekFrom = parseInt(singleWeek[0]);
+							weekFrom = parseInt(singleWeek[0],10);
 							if(singleWeek.length > 1) {
-								weekTo = parseInt(singleWeek[1]);
+								weekTo = parseInt(singleWeek[1],10);
 							}
 							else {
 								weekTo = null;
@@ -2711,7 +2711,7 @@ var OpeningHoursParser = function() {
 	 */
 	OpeningHoursParser.prototype._asMinutes = function(time) {
 		var values = time.split(':');
-		return parseInt(values[0]) * 60 + parseInt(values[1]);
+		return parseInt(values[0],10) * 60 + parseInt(values[1],10);
 	};
 	
 	/**

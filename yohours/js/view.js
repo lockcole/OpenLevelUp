@@ -196,12 +196,12 @@ var DateRangeView = function(main) {
 			switch(this._rangeType) {
 				case "month":
 					//Start
-					startVal = parseInt($("#range-month-start").val());
+					startVal = parseInt($("#range-month-start").val(),10);
 					if(isNaN(startVal)) { throw new Error("Invalid start month"); }
 					start = { month: startVal };
 					
 					//End
-					endVal = parseInt($("#range-month-end").val());
+					endVal = parseInt($("#range-month-end").val(),10);
 					if(!isNaN(endVal) && endVal > 0) {
 						end = { month: endVal };
 					}
@@ -209,12 +209,12 @@ var DateRangeView = function(main) {
 					break;
 				case "week":
 					//Start
-					startVal = parseInt($("#range-week-start").val());
+					startVal = parseInt($("#range-week-start").val(),10);
 					if(isNaN(startVal) || startVal < 1) { throw new Error("Invalid start week"); }
 					start = { week: startVal };
 					
 					//End
-					endVal = parseInt($("#range-week-end").val());
+					endVal = parseInt($("#range-week-end").val(),10);
 					if(!isNaN(endVal) && endVal > 0) {
 						end = { week: endVal };
 					}
@@ -222,15 +222,15 @@ var DateRangeView = function(main) {
 					break;
 				case "day":
 					//Start
-					startVal = parseInt($("#range-day-startday").val());
+					startVal = parseInt($("#range-day-startday").val(),10);
 					if(isNaN(startVal) || startVal < 1) { throw new Error("Invalid start day"); }
-					startVal2 = parseInt($("#range-day-startmonth").val());
+					startVal2 = parseInt($("#range-day-startmonth").val(),10);
 					if(isNaN(startVal2) || startVal2 < 1) { throw new Error("Invalid start month"); }
 					start = { day: startVal, month: startVal2 };
 					
 					//End
-					endVal = parseInt($("#range-day-endday").val());
-					endVal2 = parseInt($("#range-day-endmonth").val());
+					endVal = parseInt($("#range-day-endday").val(),10);
+					endVal2 = parseInt($("#range-day-endmonth").val(),10);
 					if(!isNaN(endVal) && endVal > 0 && !isNaN(endVal2) && endVal2 > 0) {
 						end = { day: endVal, month: endVal2 };
 					}
@@ -414,8 +414,8 @@ var CalendarView = function(main) {
 			colFormat = (this._mainView.isMinimal()) ? "dd" : "dddd";
 			fctSelect = function(start, end) {
 				//Add event to week intervals
-				var minStart = parseInt(start.format("H")) * 60 + parseInt(start.format("m"));
-				var minEnd = parseInt(end.format("H")) * 60 + parseInt(end.format("m"));
+				var minStart = parseInt(start.format("H"),10) * 60 + parseInt(start.format("m"),10);
+				var minEnd = parseInt(end.format("H"),10) * 60 + parseInt(end.format("m"),10);
 				var dayStart = swDayToMwDay(start.format("d"));
 				var dayEnd = swDayToMwDay(end.format("d"));
 				
@@ -446,8 +446,8 @@ var CalendarView = function(main) {
 			}.bind(this);
 			
 			fctResize = function(event, delta, revertFunc, jsEvent, ui, view) {
-				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
-				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
+				var minStart = parseInt(event.start.format("H"),10) * 60 + parseInt(event.start.format("m"),10);
+				var minEnd = parseInt(event.end.format("H"),10) * 60 + parseInt(event.end.format("m"),10);
 				this._dateRange.getTypical().editInterval(
 					event.id,
 					new Interval(
@@ -461,8 +461,8 @@ var CalendarView = function(main) {
 			}.bind(this);
 			
 			fctDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
-				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
-				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
+				var minStart = parseInt(event.start.format("H"),10) * 60 + parseInt(event.start.format("m"),10);
+				var minEnd = parseInt(event.end.format("H"),10) * 60 + parseInt(event.end.format("m"),10);
 				this._dateRange.getTypical().editInterval(
 					event.id,
 					new Interval(
@@ -505,8 +505,8 @@ var CalendarView = function(main) {
 			colFormat = "[Day]";
 			fctSelect = function(start, end) {
 				//Add event to week intervals
-				var minStart = parseInt(start.format("H")) * 60 + parseInt(start.format("m"));
-				var minEnd = parseInt(end.format("H")) * 60 + parseInt(end.format("m"));
+				var minStart = parseInt(start.format("H",10)) * 60 + parseInt(start.format("m"),10);
+				var minEnd = parseInt(end.format("H"),10) * 60 + parseInt(end.format("m"),10);
 				var weekId = this._dateRange.getTypical().addInterval(
 					new Interval(
 						0,
@@ -528,8 +528,8 @@ var CalendarView = function(main) {
 			}.bind(this);
 			
 			fctResize = function(event, delta, revertFunc, jsEvent, ui, view) {
-				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
-				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
+				var minStart = parseInt(event.start.format("H"),10) * 60 + parseInt(event.start.format("m"),10);
+				var minEnd = parseInt(event.end.format("H"),10) * 60 + parseInt(event.end.format("m"),10);
 				this._dateRange.getTypical().editInterval(
 					event.id,
 					new Interval(
@@ -543,8 +543,8 @@ var CalendarView = function(main) {
 			}.bind(this);
 			
 			fctDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
-				var minStart = parseInt(event.start.format("H")) * 60 + parseInt(event.start.format("m"));
-				var minEnd = parseInt(event.end.format("H")) * 60 + parseInt(event.end.format("m"));
+				var minStart = parseInt(event.start.format("H"),10) * 60 + parseInt(event.start.format("m"),10);
+				var minEnd = parseInt(event.end.format("H"),10) * 60 + parseInt(event.end.format("m"),10);
 				this._dateRange.getTypical().editInterval(
 					event.id,
 					new Interval(
