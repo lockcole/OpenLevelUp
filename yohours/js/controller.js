@@ -117,9 +117,9 @@ var MainController = function() {
 	 * @param copyIntervals The intervals to copy (or null if create new void range)
 	 * @return The created range
 	 */
-	MainController.prototype.newRange = function(start, end, copyIntervals) {
+	MainController.prototype.newRange = function(wInterval, copyIntervals) {
 		copyIntervals = copyIntervals || null;
-		var range = new DateRange(start, end);
+		var range = new DateRange(wInterval);
 		
 		if(copyIntervals != null) {
 			range.getTypical().copyIntervals(copyIntervals);

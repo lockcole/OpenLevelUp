@@ -1106,19 +1106,19 @@ var DateRange = function(w) {
 	 * Changes the date range
 	 */
 	DateRange.prototype.updateRange = function(wide) {
-		this._wideInterval = wide;
+		this._wideInterval = (wide != null) ? wide : new WideInterval().always();
 
 		//Create typical week/day
 		if(this._typical == undefined) {
 			switch(this._wideInterval.getType()) {
 				case "day":
-					console.log(this._wideInterval.getEnd());
 					if(this._wideInterval.getEnd() == null) {
 						this._typical = new Day();
 					}
 					else {
 						this._typical = new Week();
 					}
+					break;
 				case "week":
 					this._typical = new Week();
 					break;
@@ -1132,6 +1132,7 @@ var DateRange = function(w) {
 					else {
 						this._typical = new Day();
 					}
+					break;
 				case "always":
 					this._typical = new Week();
 					break;
@@ -1538,11 +1539,11 @@ var OpeningHoursBuilder = function() {};
 				var rangeGenId=rangeId-1;
 				while(rangeGenId >= 0 && rangeGeneral == null) {
 					if(dateRanges[rangeGenId] != undefined) {
-						generalFor = dateRanges[rangeGenId].isGeneralFor(dateRange.getStart(), dateRange.getEnd());
+						generalFor = dateRanges[rangeGenId].isGeneralFor(dateRange);
 						if(
 							dateRanges[rangeGenId].hasSameTypical(dateRange)
 							&& (
-								dateRanges[rangeGenId].isSameRange(dateRange.getStart(), dateRange.getEnd())
+								dateRanges[rangeGenId].getInterval().equals(dateRange.getInterval())
 								|| generalFor
 							)
 						) {
@@ -1630,7 +1631,7 @@ var OpeningHoursBuilder = function() {};
 		
 		//Create rule
 		var rule = new OhRule();
-		var date = new OhDate(dateRange.getTimeSelector(), dateRange.getType(), [ -1 ]);
+		var date = new OhDate(dateRange.getInterval().getTimeSelector(), dateRange.getInterval().getType(), [ -1 ]);
 		rule.addDate(date);
 		
 		//Read time
@@ -1659,7 +1660,7 @@ var OpeningHoursBuilder = function() {};
 		/*
 		 * Create time intervals per day
 		 */
-		var timeIntervals = this._createTimeIntervals(dateRange.getTimeSelector(), dateRange.getType(), intervals);
+		var timeIntervals = this._createTimeIntervals(dateRange.getInterval().getTimeSelector(), dateRange.getInterval().getType(), intervals);
 		var monday0 = timeIntervals[0];
 		var sunday24 = timeIntervals[1];
 		var days = timeIntervals[2];
@@ -1759,7 +1760,7 @@ var OpeningHoursBuilder = function() {};
 		 * Create time intervals per day
 		 */
 		//Open
-		var timeIntervals = this._createTimeIntervals(dateRange.getTimeSelector(), dateRange.getType(), intervals.open);
+		var timeIntervals = this._createTimeIntervals(dateRange.getInterval().getTimeSelector(), dateRange.getInterval().getType(), intervals.open);
 		var monday0 = timeIntervals[0];
 		var sunday24 = timeIntervals[1];
 		var days = timeIntervals[2];
@@ -2291,19 +2292,23 @@ var OpeningHoursParser = function() {
 					singleMonth = months[mId];
 					
 					if(singleMonth.holiday != undefined) {
-						dateRanges.push({ start: { holiday: singleMonth.holiday }});
+						dateRanges.push(new WideInterval().holiday(singleMonth.holiday));
 					}
 					else if(singleMonth.fromDay != undefined) {
-						dateRange = { start: singleMonth.fromDay };
 						if(singleMonth.toDay != null) {
-							dateRange.end = singleMonth.toDay;
+							dateRange = new WideInterval().day(singleMonth.fromDay.day, singleMonth.fromDay.month, singleMonth.toDay.day, singleMonth.toDay.month);
+						}
+						else {
+							dateRange = new WideInterval().day(singleMonth.fromDay.day, singleMonth.fromDay.month);
 						}
 						dateRanges.push(dateRange);
 					}
 					else {
-						dateRange = { start: { month: singleMonth.from }};
 						if(singleMonth.to != null) {
-							dateRange.end = { month: singleMonth.to };
+							dateRange = new WideInterval().month(singleMonth.from, singleMonth.to);
+						}
+						else {
+							dateRange = new WideInterval().month(singleMonth.from);
 						}
 						dateRanges.push(dateRange);
 					}
@@ -2312,9 +2317,11 @@ var OpeningHoursParser = function() {
 			//Week range
 			else if(weeks.length > 0) {
 				for(var wId=0, wl = weeks.length; wId < wl; wId++) {
-					dateRange = { start: { week: weeks[wId].from } };
 					if(weeks[wId].to != null) {
-						dateRange.end = { week: weeks[wId].to };
+						dateRange = new WideInterval().week(weeks[wId].from, weeks[wId].to);
+					}
+					else {
+						dateRange = new WideInterval().week(weeks[wId].from);
 					}
 					dateRanges.push(dateRange);
 				}
@@ -2322,15 +2329,15 @@ var OpeningHoursParser = function() {
 			//Holiday range
 			else if(holidays.length > 0) {
 				for(var hId=0, hl = holidays.length; hId < hl; hId++) {
-					dateRanges.push({ start: { holiday: holidays[hId] } });
+					dateRanges.push(new WideInterval().holiday(holidays[hId]));
 					if(holidays[hId] == "PH" && weekdays.length > 0 && months.length == 0 && weeks.length == 0) {
-						dateRanges.push({ start: {}, end: null });
+						dateRanges.push(new WideInterval().always());
 					}
 				}
 			}
 			//Full year range
 			else {
-				dateRanges.push({ start: {}, end: null });
+				dateRanges.push(new WideInterval().always());
 			}
 			
 			//Case of no weekday defined = all week
@@ -2358,7 +2365,7 @@ var OpeningHoursParser = function() {
 				foundDateRange = false;
 				resDrId=0;
 				while(resDrId < result.length && !foundDateRange) {
-					if(result[resDrId].isSameRange(dateRanges[drId].start, dateRanges[drId].end)) {
+					if(result[resDrId].getInterval().equals(dateRanges[drId])) {
 						foundDateRange = true;
 					}
 					else {
@@ -2370,12 +2377,12 @@ var OpeningHoursParser = function() {
 					drObj = result[resDrId];
 				}
 				else {
-					drObj = new DateRange(dateRanges[drId].start, dateRanges[drId].end);
+					drObj = new DateRange(dateRanges[drId]);
 					
 					//Find general date range that may be refined by this one
 					var general = -1;
 					for(resDrId=0; resDrId < result.length; resDrId++) {
-						if(result[resDrId].isGeneralFor(dateRanges[drId].start, dateRanges[drId].end)) {
+						if(result[resDrId].isGeneralFor(new DateRange(dateRanges[drId]))) {
 							general = resDrId;
 						}
 					}

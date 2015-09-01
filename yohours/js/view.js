@@ -91,9 +91,9 @@ var DateRangeView = function(main) {
 				$("#range-holiday-easter").show();
 			}
 			
-			var start = this._mainView.getCalendarView().getDateRange().getStart();
-			var end = this._mainView.getCalendarView().getDateRange().getEnd();
-			var type = this._mainView.getCalendarView().getDateRange().getType();
+			var start = this._mainView.getCalendarView().getDateRange().getInterval().getStart();
+			var end = this._mainView.getCalendarView().getDateRange().getInterval().getEnd();
+			var type = this._mainView.getCalendarView().getDateRange().getInterval().getType();
 			
 			switch(type) {
 				case "day":
@@ -190,7 +190,7 @@ var DateRangeView = function(main) {
 	 */
 	DateRangeView.prototype.valid = function() {
 		//Create start and end objects
-		var start, end = null, startVal, endVal, startVal2, endVal2;
+		var wInterval, startVal, endVal, startVal2, endVal2;
 		
 		try {
 			switch(this._rangeType) {
@@ -198,12 +198,14 @@ var DateRangeView = function(main) {
 					//Start
 					startVal = parseInt($("#range-month-start").val(),10);
 					if(isNaN(startVal)) { throw new Error("Invalid start month"); }
-					start = { month: startVal };
 					
 					//End
 					endVal = parseInt($("#range-month-end").val(),10);
 					if(!isNaN(endVal) && endVal > 0) {
-						end = { month: endVal };
+						wInterval = new WideInterval().month(startVal, endVal);
+					}
+					else {
+						wInterval = new WideInterval().month(startVal);
 					}
 					
 					break;
@@ -211,12 +213,14 @@ var DateRangeView = function(main) {
 					//Start
 					startVal = parseInt($("#range-week-start").val(),10);
 					if(isNaN(startVal) || startVal < 1) { throw new Error("Invalid start week"); }
-					start = { week: startVal };
 					
 					//End
 					endVal = parseInt($("#range-week-end").val(),10);
 					if(!isNaN(endVal) && endVal > 0) {
-						end = { week: endVal };
+						wInterval = new WideInterval().week(startVal, endVal);
+					}
+					else {
+						wInterval = new WideInterval().week(startVal);
 					}
 					
 					break;
@@ -226,29 +230,31 @@ var DateRangeView = function(main) {
 					if(isNaN(startVal) || startVal < 1) { throw new Error("Invalid start day"); }
 					startVal2 = parseInt($("#range-day-startmonth").val(),10);
 					if(isNaN(startVal2) || startVal2 < 1) { throw new Error("Invalid start month"); }
-					start = { day: startVal, month: startVal2 };
 					
 					//End
 					endVal = parseInt($("#range-day-endday").val(),10);
 					endVal2 = parseInt($("#range-day-endmonth").val(),10);
 					if(!isNaN(endVal) && endVal > 0 && !isNaN(endVal2) && endVal2 > 0) {
-						end = { day: endVal, month: endVal2 };
+						wInterval = new WideInterval().day(startVal, startVal2, endVal, endVal2);
 					}
 					else if(this._editMode && this._mainView.getCalendarView().getDateRange().definesTypicalWeek()) {
 						throw new Error("Missing end day");
+					}
+					else {
+						wInterval = new WideInterval().day(startVal, startVal2);
 					}
 					
 					break;
 				case "holiday":
 					startVal = $("input[name=range-holiday-type]:checked").val();
 					if(startVal != "PH" && startVal != "SH" && startVal != "easter") { throw new Error("Invalid holiday type"); }
-					start = { holiday: startVal };
+					wInterval = new WideInterval().holiday(startVal);
 					
 					break;
 
 				case "always":
 				default:
-					start = {};
+					wInterval = new WideInterval().always();
 			}
 			
 			//Check if not overlapping another date range
@@ -258,11 +264,11 @@ var DateRangeView = function(main) {
 			var generalRange = -1; //Wider date range which can be copied if needed
 			
 			while(i < l) {
-				if(ranges[i] != undefined && ranges[i].isSameRange(start, end)) {
+				if(ranges[i] != undefined && ranges[i].getInterval().equals(wInterval)) {
 					throw new Error("This time range is identical to another one");
 				}
 				else {
-					if(ranges[i] != undefined && ranges[i].isGeneralFor(start, end)) {
+					if(ranges[i] != undefined && ranges[i].isGeneralFor(new DateRange(wInterval))) {
 						generalRange = i;
 					}
 					i++;
@@ -271,7 +277,7 @@ var DateRangeView = function(main) {
 			
 			//Edit currently shown calendar
 			if(this._editMode) {
-				this._mainView.getCalendarView().getDateRange().updateRange(start, end);
+				this._mainView.getCalendarView().getDateRange().updateRange(wInterval);
 				this._mainView.getCalendarView().show(this._mainView.getCalendarView().getDateRange());
 				this._mainView.refresh();
 			}
@@ -279,10 +285,10 @@ var DateRangeView = function(main) {
 			else {
 				//Copy wider date range intervals
 				if($("#range-copy-box").is(":checked") && generalRange >= 0) {
-					this._mainView.getCalendarView().show(this._mainView.getController().newRange(start, end, ranges[generalRange].getTypical().getIntervals()));
+					this._mainView.getCalendarView().show(this._mainView.getController().newRange(wInterval, ranges[generalRange].getTypical().getIntervals()));
 				}
 				else {
-					this._mainView.getCalendarView().show(this._mainView.getController().newRange(start, end));
+					this._mainView.getCalendarView().show(this._mainView.getController().newRange(wInterval));
 				}
 			}
 			$("#modal-range").modal("hide");
@@ -339,7 +345,7 @@ var CalendarView = function(main) {
 		for(var i=0, l=dateRanges.length; i < l; i++) {
 			dateRange = dateRanges[i];
 			if(dateRange != undefined) {
-				timeName = dateRange.getTimeSelector();
+				timeName = dateRange.getInterval().getTimeSelector();
 				if(timeName.length == 0) { timeName = "All year"; }
 				navHtml += '<li role="presentation" id="range-nav-'+i+'" class="rnav';
 				if(dateRange === this._dateRange) { navHtml += ' active'; }
@@ -355,7 +361,7 @@ var CalendarView = function(main) {
 	 * Updates the label showing the human readable date range
 	 */
 	CalendarView.prototype.updateDateRangeLabel = function() {
-		$("#range-txt-label").html(this._dateRange.getTimeForHumans());
+		$("#range-txt-label").html(this._dateRange.getInterval().getTimeForHumans());
 	};
 	
 	/**
