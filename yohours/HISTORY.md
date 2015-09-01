@@ -1,6 +1,12 @@
 Changes history
 ===============
 
+1 september 2015
+----------------
+* WideInterval class replaces old system
+* PH as weekday bug fix
+* Weekdays grouped when continous over week-end (ex: "Sa-Tu")
+
 27 august 2015
 --------------
 * Bug fix for school holidays hours not applied all week

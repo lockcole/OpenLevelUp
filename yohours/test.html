@@ -1572,8 +1572,8 @@
 			assert.notOk(od.sameWd([0,2,5]));
 		});
 		QUnit.test("Get weekdays 1", function(assert) {
-			var od = new OhDate("Apr 21-Aug 22", "day", [0,1,3,5,6]);
-			assert.equal(od.getWeekdays(), "Mo,Tu,Th,Sa,Su");
+			var od = new OhDate("Apr 21-Aug 22", "day", [0,1,3,5]);
+			assert.equal(od.getWeekdays(), "Mo,Tu,Th,Sa");
 		});
 		QUnit.test("Get weekdays 2", function(assert) {
 			var od = new OhDate("Apr 21-Aug 22", "day", [0,1,4,3,2,5]);
@@ -1583,13 +1583,29 @@
 			var od = new OhDate("Apr 21-Aug 22", "day", [0,6]);
 			assert.equal(od.getWeekdays(), "Mo,Su");
 		});
-		QUnit.test("Get weekdays 4", function(assert) {
+		QUnit.test("Get weekdays 4-1", function(assert) {
 			var od = new OhDate("Apr 21-Aug 22", "day", [6,0,1]);
 			assert.equal(od.getWeekdays(), "Su-Tu");
 		});
+		QUnit.test("Get weekdays 4-2", function(assert) {
+			var od = new OhDate("Apr 21-Aug 22", "day", [5,6,0,1,3]);
+			assert.equal(od.getWeekdays(), "Sa-Tu,Th");
+		});
+		QUnit.test("Get weekdays 4-3", function(assert) {
+			var od = new OhDate("Apr 21-Aug 22", "day", [0,3,6]);
+			assert.equal(od.getWeekdays(), "Mo,Th,Su");
+		});
+		QUnit.test("Get weekdays 4-3", function(assert) {
+			var od = new OhDate("Apr 21-Aug 22", "day", [0,1,2,3,4,5,6]);
+			assert.equal(od.getWeekdays(), "");
+		});
+		QUnit.test("Get weekdays 4-3", function(assert) {
+			var od = new OhDate("Apr 21-Aug 22", "day", [-2,0,1,5,6]);
+			assert.equal(od.getWeekdays(), "PH,Sa-Tu");
+		});
 		QUnit.test("Get weekdays 5", function(assert) {
 			var od = new OhDate("Apr 21-Aug 22", "day", [0,1,2,4,5,6]);
-			assert.equal(od.getWeekdays(), "Mo-We,Fr-Su");
+			assert.equal(od.getWeekdays(), "Fr-We");
 		});
 		QUnit.test("Get weekdays 6", function(assert) {
 			var od = new OhDate("Apr 21-Aug 22", "day", [0,1,2,3,4,5,6]);
@@ -1664,6 +1680,19 @@
 			od1.addOverwrittenWeekday(4);
 			assert.equal(od1.getWeekdays(), "Mo,We,Fr");
 		});
+		QUnit.test("Add PH weekday new", function(assert) {
+			var od1 = new OhDate("Apr 21-Aug 22", "day", [0]);
+			assert.equal(od1.getWeekdays(), "Mo");
+			od1.addPhWeekday();
+			assert.equal(od1.getWeekdays(), "PH,Mo");
+		});
+		QUnit.test("Add PH weekday existing wd", function(assert) {
+			var od1 = new OhDate("Apr 21-Aug 22", "day", [0,2]);
+			od1.addPhWeekday();
+			assert.equal(od1.getWeekdays(), "PH,Mo,We");
+			od1.addPhWeekday();
+			assert.equal(od1.getWeekdays(), "PH,Mo,We");
+		});
 		
 		/*
 		 * OhRule
@@ -1699,7 +1728,7 @@
 			var ot1 = new OhTime(10, 60);
 			or.addTime(ot1);
 			
-			assert.equal(or.get(), "Apr 21-Aug 22 Mo-We,Fr-Su 00:10-01:00");
+			assert.equal(or.get(), "Apr 21-Aug 22 Fr-We 00:10-01:00");
 		});
 		QUnit.test("Get several date/time", function(assert) {
 			var or = new OhRule();
@@ -1714,7 +1743,7 @@
 			or.addTime(ot1);
 			or.addTime(ot2);
 			
-			assert.equal(or.get(), "Mar,Jul-Oct Mo-We,Fr-Su 00:00-01:00,03:00-04:00");
+			assert.equal(or.get(), "Mar,Jul-Oct Fr-We 00:00-01:00,03:00-04:00");
 		});
 		QUnit.test("Get time null", function(assert) {
 			var or = new OhRule();
@@ -1727,7 +1756,7 @@
 			var ot1 = new OhTime();
 			or.addTime(ot1);
 			
-			assert.equal(or.get(), "Mar,Jul-Oct Mo-We,Fr-Su off");
+			assert.equal(or.get(), "Mar,Jul-Oct Fr-We off");
 		});
 		QUnit.test("Get time completely null", function(assert) {
 			var or = new OhRule();
@@ -1737,7 +1766,7 @@
 			or.addDate(od1);
 			or.addDate(od2);
 
-			assert.equal(or.get(), "Mar,Jul-Oct Mo-We,Fr-Su off");
+			assert.equal(or.get(), "Mar,Jul-Oct Fr-We off");
 		});
 		QUnit.test("Get date always", function(assert) {
 			var or = new OhRule();
@@ -1750,7 +1779,7 @@
 			or.addTime(ot1);
 			or.addTime(ot2);
 			
-			assert.equal(or.get(), "Mo-We,Fr-Su 00:00-01:00,03:00-04:00");
+			assert.equal(or.get(), "Fr-We 00:00-01:00,03:00-04:00");
 		});
 		QUnit.test("Same time equal 1", function(assert) {
 			var or1 = new OhRule();
@@ -1988,6 +2017,23 @@
 			assert.equal(or.getDate().length, 2);
 			assert.equal(or.getDate()[0].getWeekdays(), "Mo,Tu,Sa");
 			assert.equal(or.getDate()[1].getWeekdays(), "Mo,Tu,Sa");
+		});
+		QUnit.test("Add PH weekday", function(assert) {
+			var or = new OhRule();
+			assert.equal(or.getDate().length, 0);
+			
+			var od1 = new OhDate("Mar", "month", [0,1]);
+			var od2 = new OhDate("Jul-Oct", "month", [0,1]);
+			or.addDate(od1);
+			or.addDate(od2);
+			assert.equal(or.getDate().length, 2);
+			assert.equal(or.getDate()[0], od1);
+			assert.equal(or.getDate()[1], od2);
+			
+			or.addPhWeekday();
+			assert.equal(or.getDate().length, 2);
+			assert.equal(or.getDate()[0].getWeekdays(), "PH,Mo,Tu");
+			assert.equal(or.getDate()[1].getWeekdays(), "PH,Mo,Tu");
 		});
 		
 		/*
@@ -2232,7 +2278,7 @@
 			dateranges[1].getTypical().addInterval(new Interval(0, 0, 8*60, 18*60));
 			dateranges[3].getTypical().addInterval(new Interval(1, 1, 9*60, 17*60));
 			
-			assert.equal(builder.build(dateranges), "24/7; Jun Mo 08:00-18:00; Jun Tu-Su off; PH off; SH Mo,We-Su off; SH Tu 09:00-17:00");
+			assert.equal(builder.build(dateranges), "24/7; Jun Mo 08:00-18:00; Jun Tu-Su off; PH off; SH We-Mo off; SH Tu 09:00-17:00");
 		});
 		QUnit.test("Build Mo 08:00-18:00 grouping", function(assert) {
 			var builder = new OpeningHoursBuilder();
@@ -2263,7 +2309,7 @@
 			
 			assert.equal(builder.build(dateranges), "24/7; week 01-15 We 05:00-07:00; PH off");
 		});
-		QUnit.test("Build 24/7; week 01-15 Mo-We,Fr-Su 05:00-07:00; PH off", function(assert) {
+		QUnit.test("Build 24/7; week 01-15 Fr-We 05:00-07:00; PH off", function(assert) {
 			var builder = new OpeningHoursBuilder();
 			var dateranges = [
 				new DateRange(new WideInterval().always()),
@@ -2280,7 +2326,7 @@
 			dateranges[1].getTypical().addInterval(new Interval(5, 5, 5*60, 7*60));
 			dateranges[1].getTypical().addInterval(new Interval(6, 6, 5*60, 7*60));
 			
-			assert.equal(builder.build(dateranges), "24/7; week 01-15 Mo-We,Fr-Su 05:00-07:00; PH off");
+			assert.equal(builder.build(dateranges), "24/7; week 01-15 Fr-We 05:00-07:00; PH off");
 		});
 		QUnit.test("Build 05:00-07:00; Th,Fr 00:00-24:00", function(assert) {
 			var builder = new OpeningHoursBuilder();
@@ -2543,6 +2589,36 @@
 			
 			assert.equal(builder.build(dateranges), "May-Jun,Sep Mo,Tu 14:00-18:00");
 		});
+		QUnit.test("Build Mo-Fr 12:00-14:00; PH,Sa,Su 12:00-16:00 (PH as weekday)", function(assert) {
+			var builder = new OpeningHoursBuilder();
+			var dateranges = [
+				new DateRange(),
+				new DateRange(new WideInterval().holiday("PH"))
+			];
+			
+			dateranges[0].getTypical().addInterval(new Interval(0, 0, 12*60, 14*60));
+			dateranges[0].getTypical().addInterval(new Interval(1, 1, 12*60, 14*60));
+			dateranges[0].getTypical().addInterval(new Interval(2, 2, 12*60, 14*60));
+			dateranges[0].getTypical().addInterval(new Interval(3, 3, 12*60, 14*60));
+			dateranges[0].getTypical().addInterval(new Interval(4, 4, 12*60, 14*60));
+			dateranges[0].getTypical().addInterval(new Interval(5, 5, 12*60, 16*60));
+			dateranges[0].getTypical().addInterval(new Interval(6, 6, 12*60, 16*60));
+			dateranges[1].getTypical().addInterval(new Interval(0, 0, 12*60, 16*60));
+			
+			
+			assert.equal(builder.build(dateranges), "Mo-Fr 12:00-14:00; PH,Sa,Su 12:00-16:00");
+		});
+		QUnit.test("Build Su-Tu 12:00-14:00 (continuous week-end)", function(assert) {
+			var builder = new OpeningHoursBuilder();
+			var dateranges = [ new DateRange() ];
+			
+			dateranges[0].getTypical().addInterval(new Interval(0, 0, 12*60, 14*60));
+			dateranges[0].getTypical().addInterval(new Interval(1, 1, 12*60, 14*60));
+			dateranges[0].getTypical().addInterval(new Interval(6, 6, 12*60, 14*60));
+			
+			
+			assert.equal(builder.build(dateranges), "Su-Tu 12:00-14:00");
+		});
 		
 		/*
 		 * OpeningHoursParser
@@ -2799,7 +2875,12 @@
 		QUnit.test("Parse Mo-Fr 12:00-14:00; Sa,Su,PH 12:00-16:00 (PH as weekday)", function(assert) {
 			var parser = new OpeningHoursParser();
 			var builder = new OpeningHoursBuilder();
-			assert.equal(builder.build(parser.parse("Mo-Fr 12:00-14:00; Sa,Su,PH 12:00-16:00")), "Mo-Fr 12:00-14:00; Sa,Su,PH 12:00-16:00");
+			assert.equal(builder.build(parser.parse("Mo-Fr 12:00-14:00; Sa,Su,PH 12:00-16:00")), "Mo-Fr 12:00-14:00; PH,Sa,Su 12:00-16:00");
+		});
+		QUnit.test("Parse Su-Tu 12:00-14:00 (continous week-end)", function(assert) {
+			var parser = new OpeningHoursParser();
+			var builder = new OpeningHoursBuilder();
+			assert.equal(builder.build(parser.parse("Su-Tu 12:00-14:00")), "Su-Tu 12:00-14:00");
 		});
 		
 		/*

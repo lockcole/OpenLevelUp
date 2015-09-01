@@ -74,6 +74,10 @@ MINUTES_MAX = 1440;
  */
 DAYS_MAX = 6;
 
+/**
+ * The weekday ID for PH
+ */
+PH_WEEKDAY = -2;
 
 /*
  * ========== CLASSES ==========
@@ -1229,7 +1233,7 @@ var OhTime = function(start, end) {
  * An opening_hours date, such as "Apr 21", "week 1-15 Mo,Tu", "Apr-Dec Mo-Fr", "SH Su", ...
  * @param w The wide selector, as string
  * @param wt The wide selector type (month, week, day, holiday, always)
- * @param wd The weekdays, as integer array (-1 = single day date)
+ * @param wd The weekdays, as integer array (0 to 6 = Monday to Sunday, -1 = single day date, -2 = PH)
  */
 var OhDate = function(w, wt, wd) {
 //ATTRIBUTES
@@ -1288,9 +1292,65 @@ var OhDate = function(w, wt, wd) {
 		var result = "";
 		var wd = this._weekdays.concat(this._wdOver).sort();
 		
-		//Process only if not 
-		if(wd.length > 1 || wd[0] != -1) {
-			result = OSM_DAYS[wd[0]];
+		//PH as weekday
+		if(wd.length > 0 && wd[0] == PH_WEEKDAY) {
+			result = "PH";
+			wd.shift();
+		}
+		
+		//Check if we should create a continuous interval for week-end
+		if(wd.length > 0 && wd.contains(6) && wd.contains(0) && (wd.contains(5) || wd.contains(1))) {
+			//Find when the week-end starts
+			var startWE = 6;
+			var i=wd.length-2, stopLooking = false;
+			while(!stopLooking && i >= 0) {
+				if(wd[i] == wd[i+1] - 1) {
+					startWE = wd[i];
+					i--;
+				}
+				else {
+					stopLooking = true;
+				}
+			}
+			
+			//Find when it stops
+			i=1;
+			stopLooking = false;
+			var endWE = 0;
+			
+			while(!stopLooking && i < wd.length) {
+				if(wd[i-1] == wd[i] - 1) {
+					endWE = wd[i];
+					i++;
+				}
+				else {
+					stopLooking = true;
+				}
+			}
+			
+			//If long enough, add it as first weekday interval
+			var length = 7 - startWE + endWE + 1;
+
+			if(length >= 3 && startWE > endWE) {
+				if(result.length > 0) { result += ","; }
+				result += OSM_DAYS[startWE]+"-"+OSM_DAYS[endWE];
+				
+				//Remove processed days
+				var j=0;
+				while(j < wd.length) {
+					if(wd[j] <= endWE || wd[j] >= startWE) {
+						wd.splice(j, 1);
+					}
+					else {
+						j++;
+					}
+				}
+			}
+		}
+		
+		//Process only if not empty weekday list
+		if(wd.length > 1 || (wd.length == 1 && wd[0] != -1)) {
+			result += (result.length > 0) ? ","+OSM_DAYS[wd[0]] : OSM_DAYS[wd[0]];
 			var firstInRow = wd[0];
 			
 			for(var i=1; i < wd.length; i++) {
@@ -1351,6 +1411,13 @@ var OhDate = function(w, wt, wd) {
 			this._weekdays.push(wd);
 			this._weekdays = this._weekdays.sort();
 		}
+	};
+	
+	/**
+	 * Adds public holiday as a weekday of this date
+	 */
+	OhDate.prototype.addPhWeekday = function() {
+		this.addWeekday(PH_WEEKDAY);
 	};
 	
 	/**
@@ -1467,6 +1534,15 @@ var OhRule = function() {
 	OhRule.prototype.addWeekday = function(wd) {
 		for(var i=0; i < this._date.length; i++) {
 			this._date[i].addWeekday(wd);
+		}
+	};
+	
+	/**
+	 * Adds public holidays as weekday to all dates
+	 */
+	OhRule.prototype.addPhWeekday = function() {
+		for(var i=0; i < this._date.length; i++) {
+			this._date[i].addPhWeekday();
 		}
 	};
 	
@@ -1588,7 +1664,18 @@ var OpeningHoursBuilder = function() {};
 								}
 								//If first date not same kind as in found rule, continue
 								catch(e) {
-									ruleId++;
+									//But before, try to merge PH with always weekdays
+									if(
+										ohrule.getDate()[0].getWideType() == "holiday"
+										&& ohrule.getDate()[0].getWideValue() == "PH"
+										&& rules[ruleId].getDate()[0].getWideType() == "always"
+									) {
+										rules[ruleId].addPhWeekday();
+										ohruleAdded = true;
+									}
+									else {
+										ruleId++;
+									}
 								}
 							}
 							else {
@@ -2401,12 +2488,32 @@ var OpeningHoursParser = function() {
 				//For each weekday
 				for(var wdId=0, wdl=weekdays.length; wdId < wdl; wdId++) {
 					//Remove overlapping days
-					for(var wdRm=weekdays[wdId].from; wdRm <= weekdays[wdId].to; wdRm++) {
-						if(drObj.definesTypicalWeek()) {
-							drObj.getTypical().removeIntervalsDuringDay(wdRm);
+					if(weekdays[wdId].from <= weekdays[wdId].to) {
+						for(var wdRm=weekdays[wdId].from; wdRm <= weekdays[wdId].to; wdRm++) {
+							if(drObj.definesTypicalWeek()) {
+								drObj.getTypical().removeIntervalsDuringDay(wdRm);
+							}
+							else {
+								drObj.getTypical().clearIntervals();
+							}
 						}
-						else {
-							drObj.getTypical().clearIntervals();
+					}
+					else {
+						for(var wdRm=weekdays[wdId].from; wdRm <= 6; wdRm++) {
+							if(drObj.definesTypicalWeek()) {
+								drObj.getTypical().removeIntervalsDuringDay(wdRm);
+							}
+							else {
+								drObj.getTypical().clearIntervals();
+							}
+						}
+						for(var wdRm=0; wdRm <= weekdays[wdId].to; wdRm++) {
+							if(drObj.definesTypicalWeek()) {
+								drObj.getTypical().removeIntervalsDuringDay(wdRm);
+							}
+							else {
+								drObj.getTypical().clearIntervals();
+							}
 						}
 					}
 					
@@ -2433,30 +2540,50 @@ var OpeningHoursParser = function() {
 	 * @param times The concerned times
 	 */
 	OpeningHoursParser.prototype._removeInterval = function(typical, weekdays, times) {
-		for(var wd=weekdays.from; wd <= weekdays.to; wd++) {
-			//Interval during day
-			if(times.to >= times.from) {
+		if(weekdays.from <= weekdays.to) {
+			for(var wd=weekdays.from; wd <= weekdays.to; wd++) {
+				this._removeIntervalWd(typical, times, wd);
+			}
+		}
+		else {
+			for(var wd=weekdays.from; wd <= 6; wd++) {
+				this._removeIntervalWd(typical, times, wd);
+			}
+			for(var wd=0; wd <= weekdays.to; wd++) {
+				this._removeIntervalWd(typical, times, wd);
+			}
+		}
+	};
+	
+	/**
+	 * Remove intervals from given typical day/week for a given weekday
+	 * @param typical The typical day or week
+	 * @param times The concerned times
+	 * @param wd The concerned weekday
+	 */
+	OpeningHoursParser.prototype._removeIntervalWd = function(typical, times, wd) {
+		//Interval during day
+		if(times.to >= times.from) {
+			typical.removeInterval(
+				new Interval(wd, wd, times.from, times.to)
+			);
+		}
+		//Interval during night
+		else {
+			//Everyday except sunday
+			if(wd < 6) {
 				typical.removeInterval(
-					new Interval(wd, wd, times.from, times.to)
+					new Interval(wd, wd+1, times.from, times.to)
 				);
 			}
-			//Interval during night
+			//Sunday
 			else {
-				//Everyday except sunday
-				if(wd < 6) {
-					typical.removeInterval(
-						new Interval(wd, wd+1, times.from, times.to)
-					);
-				}
-				//Sunday
-				else {
-					typical.removeInterval(
-						new Interval(wd, wd, times.from, 24*60)
-					);
-					typical.removeInterval(
-						new Interval(0, 0, 0, times.to)
-					);
-				}
+				typical.removeInterval(
+					new Interval(wd, wd, times.from, 24*60)
+				);
+				typical.removeInterval(
+					new Interval(0, 0, 0, times.to)
+				);
 			}
 		}
 	};
@@ -2468,30 +2595,50 @@ var OpeningHoursParser = function() {
 	 * @param times The concerned times
 	 */
 	OpeningHoursParser.prototype._addInterval = function(typical, weekdays, times) {
-		for(var wd=weekdays.from; wd <= weekdays.to; wd++) {
-			//Interval during day
-			if(times.to >= times.from) {
+		if(weekdays.from <= weekdays.to) {
+			for(var wd=weekdays.from; wd <= weekdays.to; wd++) {
+				this._addIntervalWd(typical, times, wd);
+			}
+		}
+		else {
+			for(var wd=weekdays.from; wd <= 6; wd++) {
+				this._addIntervalWd(typical, times, wd);
+			}
+			for(var wd=0; wd <= weekdays.to; wd++) {
+				this._addIntervalWd(typical, times, wd);
+			}
+		}
+	};
+	
+	/**
+	 * Adds intervals from given typical day/week for a given weekday
+	 * @param typical The typical day or week
+	 * @param times The concerned times
+	 * @param wd The concerned weekday
+	 */
+	OpeningHoursParser.prototype._addIntervalWd = function(typical, times, wd) {
+		//Interval during day
+		if(times.to >= times.from) {
+			typical.addInterval(
+				new Interval(wd, wd, times.from, times.to)
+			);
+		}
+		//Interval during night
+		else {
+			//Everyday except sunday
+			if(wd < 6) {
 				typical.addInterval(
-					new Interval(wd, wd, times.from, times.to)
+					new Interval(wd, wd+1, times.from, times.to)
 				);
 			}
-			//Interval during night
+			//Sunday
 			else {
-				//Everyday except sunday
-				if(wd < 6) {
-					typical.addInterval(
-						new Interval(wd, wd+1, times.from, times.to)
-					);
-				}
-				//Sunday
-				else {
-					typical.addInterval(
-						new Interval(wd, wd, times.from, 24*60)
-					);
-					typical.addInterval(
-						new Interval(0, 0, 0, times.to)
-					);
-				}
+				typical.addInterval(
+					new Interval(wd, wd, times.from, 24*60)
+				);
+				typical.addInterval(
+					new Interval(0, 0, 0, times.to)
+				);
 			}
 		}
 	};
