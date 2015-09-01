@@ -2608,6 +2608,24 @@
 			
 			assert.equal(builder.build(dateranges), "Mo-Fr 12:00-14:00; PH,Sa,Su 12:00-16:00");
 		});
+		QUnit.test("Build PH,Mo-Sa 12:00-14:00 (PH as weekday defined first)", function(assert) {
+			var builder = new OpeningHoursBuilder();
+			var dateranges = [
+				new DateRange(new WideInterval().holiday("PH")),
+				new DateRange()
+			];
+			
+			dateranges[1].getTypical().addInterval(new Interval(0, 0, 12*60, 14*60));
+			dateranges[1].getTypical().addInterval(new Interval(1, 1, 12*60, 14*60));
+			dateranges[1].getTypical().addInterval(new Interval(2, 2, 12*60, 14*60));
+			dateranges[1].getTypical().addInterval(new Interval(3, 3, 12*60, 14*60));
+			dateranges[1].getTypical().addInterval(new Interval(4, 4, 12*60, 14*60));
+			dateranges[1].getTypical().addInterval(new Interval(5, 5, 12*60, 14*60));
+			dateranges[0].getTypical().addInterval(new Interval(0, 0, 12*60, 14*60));
+			
+			
+			assert.equal(builder.build(dateranges), "PH,Mo-Sa 12:00-14:00");
+		});
 		QUnit.test("Build Su-Tu 12:00-14:00 (continuous week-end)", function(assert) {
 			var builder = new OpeningHoursBuilder();
 			var dateranges = [ new DateRange() ];
@@ -2881,6 +2899,33 @@
 			var parser = new OpeningHoursParser();
 			var builder = new OpeningHoursBuilder();
 			assert.equal(builder.build(parser.parse("Su-Tu 12:00-14:00")), "Su-Tu 12:00-14:00");
+		});
+		QUnit.test("Parse Mo-Sa,PH 12:00-16:00", function(assert) {
+			var parser = new OpeningHoursParser();
+			var builder = new OpeningHoursBuilder();
+			
+			var result = parser.parse("Mo-Sa,PH 12:00-16:00");
+			assert.equal(result.length, 2);
+			
+			var dr1 = result[1];
+			assert.equal(dr1.getInterval().getTimeSelector(), "");
+			assert.equal(dr1.getTypical().getIntervals().length, 6);
+			
+			assert.equal(dr1.getTypical().getIntervals()[0].getStartDay(), 0);
+			assert.equal(dr1.getTypical().getIntervals()[0].getEndDay(), 0);
+			assert.equal(dr1.getTypical().getIntervals()[0].getFrom(), 12*60);
+			assert.equal(dr1.getTypical().getIntervals()[0].getTo(), 16*60);
+			
+			var dr2 = result[0];
+			assert.equal(dr2.getInterval().getTimeSelector(), "PH");
+			assert.equal(dr2.getTypical().getIntervals().length, 1);
+			
+			assert.equal(dr2.getTypical().getIntervals()[0].getStartDay(), 0);
+			assert.equal(dr2.getTypical().getIntervals()[0].getEndDay(), 0);
+			assert.equal(dr2.getTypical().getIntervals()[0].getFrom(), 12*60);
+			assert.equal(dr2.getTypical().getIntervals()[0].getTo(), 16*60);
+			
+			assert.equal(builder.build(result), "PH,Mo-Sa 12:00-16:00");
 		});
 		
 		/*

@@ -1673,6 +1673,15 @@ var OpeningHoursBuilder = function() {};
 										rules[ruleId].addPhWeekday();
 										ohruleAdded = true;
 									}
+									else if(
+										rules[ruleId].getDate()[0].getWideType() == "holiday"
+										&& rules[ruleId].getDate()[0].getWideValue() == "PH"
+										&& ohrule.getDate()[0].getWideType() == "always"
+									) {
+										ohrule.addPhWeekday();
+										rules[ruleId] = ohrule;
+										ohruleAdded = true;
+									}
 									else {
 										ruleId++;
 									}
@@ -2595,6 +2604,15 @@ var OpeningHoursParser = function() {
 	 * @param times The concerned times
 	 */
 	OpeningHoursParser.prototype._addInterval = function(typical, weekdays, times) {
+		//Check added interval are OK for days
+		if(typical instanceof Day) {
+			if(weekdays.from != 0 || (weekdays.to != 0 && times.from <= times.to)) {
+				weekdays = $.extend({}, weekdays);
+				weekdays.from = 0;
+				weekdays.to = (times.from <= times.to) ? 0 : 1;
+			}
+		}
+		
 		if(weekdays.from <= weekdays.to) {
 			for(var wd=weekdays.from; wd <= weekdays.to; wd++) {
 				this._addIntervalWd(typical, times, wd);
