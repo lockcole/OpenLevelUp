@@ -567,6 +567,7 @@ var Ctrl = function() {
 		this._nbExternalApiRequests++;
 		$.ajax({
 			url: url,
+			type: 'GET',
 			async: true,
 			dataType: 'xml',
 			success: this.setNotesData.bind(this)

@@ -502,6 +502,10 @@
 			"icons": "material_${v}.png",
 			"iconsAlias": { "steel": "metal", "reinforced_concrete": "concrete" }
 		},
+		"opening_hours": {
+			"img": "icon_clock.svg",
+			"values": "hours"
+		},
 		"operator": {
 			"name": "Operator",
 			"values": "text"

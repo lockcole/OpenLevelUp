@@ -193,7 +193,7 @@ var MainView = function(ctrl, mobile) {
 	 * @return The notes data from the controller
 	 */
 	MainView.prototype.getNotesData = function() {
-		return this._ctrl.getNotesData().get();
+		return (this._ctrl.getNotesData() != null) ? this._ctrl.getNotesData().get() : null;
 	};
 
 //OTHER METHODS
@@ -656,7 +656,7 @@ var MapView = function(main) {
 			iconUrl: 'img/icon_note_closed.png'
 		});
 		
-		if(notes.length > 0) {
+		if(notes != null && notes.length > 0) {
 			result = L.layerGroup();
 			var note, marker;
 			
@@ -1416,6 +1416,10 @@ var TagsView = function(main) {
 						}
 						break;
 
+					case "hours":
+						detailsTxt += '<a href="http://github.pavie.info/yohours/?oh='+encodeURIComponent(val)+'" target="_blank"><img src="'+CONFIG.view.icons.folder+'/icon_link.svg" alt="YoHours" /></a>';
+						break;
+					
 					case "text":
 					default:
 						detailsTxt += val;

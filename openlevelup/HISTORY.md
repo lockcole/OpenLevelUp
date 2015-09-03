@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+3 september 2015
+----------------
+* Link to YoHours in details panel for opening_hours tag
+
 21 august 2015
 --------------
 * OSM Notes are visible and new notes can be created
