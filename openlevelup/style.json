@@ -334,10 +334,13 @@
 				"style": { "icon": "map_type_${map_type}.png" }
 			},
 			{
-				"name": "Statue",
-				"description": "Statue icons",
-				"onTags": [ { "artwork_type": "statue|sculpture|stone|bust" } ],
-				"style": { "icon": "artwork_type_statue.png" }
+				"name": "${artwork_type} (artwork)",
+				"description": "Artwork icons",
+				"onTags": [ { "artwork_type": "sculpture|statue|stone|bust|mural" } ],
+				"style": {
+					"icon": "artwork_type_${artwork_type}.png",
+					"iconAlias": { "sculpture": "statue", "stone": "statue", "bust": "statue" }
+				}
 			}
 		],
 
@@ -607,6 +610,7 @@
 		"arrow_up_2.png",
 		"arrow_up_3.png",
 		"artwork_type_statue.png",
+		"artwork_type_mural.png",
 		"barrier_blocks.png",
 		"barrier_bollard.png",
 		"barrier_cattle_grid.png",

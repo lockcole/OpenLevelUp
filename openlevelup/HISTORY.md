@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+14 september 2015
+-----------------
+* Artwork_type=mural rendered
+
 3 september 2015
 ----------------
 * Link to YoHours in details panel for opening_hours tag
