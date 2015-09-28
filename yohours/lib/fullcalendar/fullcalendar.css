@@ -45,9 +45,9 @@ body .fc { /* extra precedence to overcome jqui */
 	color: #666;
 }
 
-.fc-unthemed .fc-today {
+/*.fc-unthemed .fc-today {
 	background: #fcf8e3;
-}
+}*/
 
 .fc-highlight { /* when user is selecting cells */
 	background: #bce8f1;
@@ -390,9 +390,9 @@ hr.fc-divider {
 	vertical-align: top;
 }
 
-.fc td.fc-today {
-	border-style: double; /* overcome neighboring borders */
-}
+/*.fc td.fc-today {
+	border-style: double;
+}*/
 
 
 /* Fake Table Rows
@@ -830,7 +830,7 @@ a.fc-more:hover {
 }
 
 .fc-agenda-view .fc-day-grid .fc-row {
-	min-height: 3em; /* all-day section will never get shorter than this */
+	min-height: 2.5em; /* all-day section will never get shorter than this */
 }
 
 .fc-agenda-view .fc-day-grid .fc-row .fc-content-skeleton {
@@ -843,7 +843,7 @@ a.fc-more:hover {
 --------------------------------------------------------------------------------------------------*/
 
 .fc .fc-axis { /* .fc to overcome default cell styles */
-	vertical-align: middle;
+	vertical-align: top;
 	padding: 0 4px;
 	white-space: nowrap;
 }
@@ -917,7 +917,7 @@ a.fc-more:hover {
 --------------------------------------------------------------------------------------------------*/
 
 .fc-time-grid .fc-slats td {
-	height: 1.5em;
+	height: 0.5em;
 	border-bottom: 0; /* each cell is responsible for its top border */
 }
 

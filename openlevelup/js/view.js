@@ -2,16 +2,16 @@
  * This file is part of OpenLevelUp!.
  * 
  * OpenLevelUp! is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  * 
  * OpenLevelUp! is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with OpenLevelUp!.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -71,6 +71,9 @@ var MainView = function(ctrl, mobile) {
 	/** The tags component **/
 	this._cTags = null;
 
+	/** The notes component **/
+	this._cNotes = null;
+	
 	/** The map component **/
 	this._cMap = null;
 
@@ -82,6 +85,7 @@ var MainView = function(ctrl, mobile) {
 	this._cLevel = new LevelView(this);
 	this._cExport = new ExportView(this);
 	this._cTags = new TagsView(this);
+	this._cNotes = new NotesView(this);
 	
 	this._cExport.hideButton();
 	this._cNames.hideButton();
@@ -165,6 +169,13 @@ var MainView = function(ctrl, mobile) {
 	};
 	
 	/**
+	 * @return The notes component
+	 */
+	MainView.prototype.getNotesView = function() {
+		return this._cNotes;
+	};
+	
+	/**
 	 * @return The map data from the controller
 	 */
 	MainView.prototype.getData = function() {
@@ -177,6 +188,13 @@ var MainView = function(ctrl, mobile) {
 	MainView.prototype.getClusterData = function() {
 		return this._ctrl.getClusterData();
 	};
+	
+	/**
+	 * @return The notes data from the controller
+	 */
+	MainView.prototype.getNotesData = function() {
+		return (this._ctrl.getNotesData() != null) ? this._ctrl.getNotesData().get() : null;
+	};
 
 //OTHER METHODS
 	/**
@@ -187,7 +205,20 @@ var MainView = function(ctrl, mobile) {
 		var oldZoom = this._cMap.getOldZoom();
 		
 		//Check new zoom value
-		if(zoom >= CONFIG.view.map.data_min_zoom) {
+		if(zoom >= CONFIG.view.map.full_data_min_zoom) {
+			//Update levels
+			this._cLevel.update();
+			
+			//Add names and export buttons if needed
+			if(oldZoom == null || oldZoom < CONFIG.view.map.full_data_min_zoom) {
+				this._cExport.showButton();
+				this._cNames.showButton();
+				this._cLevel.enable();
+				this._cOptions.enable();
+				this._cMap.update();
+			}
+		}
+		else if(zoom >= CONFIG.view.map.data_min_zoom) {
 			//Update levels
 			this._cLevel.update();
 			
@@ -197,6 +228,9 @@ var MainView = function(ctrl, mobile) {
 				this._cNames.showButton();
 				this._cLevel.enable();
 				this._cOptions.enable();
+				this._cMap.update();
+			}
+			else if(oldZoom >= CONFIG.view.map.full_data_min_zoom) {
 				this._cMap.update();
 			}
 		}
@@ -258,16 +292,28 @@ var MainView = function(ctrl, mobile) {
 	};
 	
 	/**
+	 * Updates the view when new note is added
+	 */
+	MainView.prototype.updateNoteAdded = function() {
+		this._cMap.update();
+	};
+	
+	/**
 	 * Displays the given central panel
 	 * @param id The panel ID
 	 */
 	MainView.prototype.showCentralPanel = function(id) {
 		if(!$("#"+id).is(":visible")) {
+			//Remove draggable marker if new note panel
+			if($("#note-add").is(":visible")) {
+				this._cMap.hideDraggableMarker();
+			}
+			
 			$("#central .part").hide();
 			$("#"+id).show();
 			$("#main-buttons").addClass("opened");
 			$("#central-close").show();
-			$("#central-close").click(controller.getView().hideCentralPanel);
+			$("#central-close").click(controller.getView().hideCentralPanel.bind(this));
 		}
 		else {
 			this.hideCentralPanel();
@@ -282,6 +328,8 @@ var MainView = function(ctrl, mobile) {
 		$("#central-close").hide();
 		$("#central-close").off("click");
 		$("#main-buttons").removeClass("opened");
+		
+		this._cMap.hideDraggableMarker();
 	};
 
 
@@ -311,6 +359,9 @@ var MapView = function(main) {
 	
 	/** The feature popups **/
 	this._dataPopups = {};
+	
+	/** The draggable marker **/
+	this._draggableMarker = null;
 	
 	/** The previous zoom value **/
 	this._oldZoom = null;
@@ -372,6 +423,11 @@ var MapView = function(main) {
 	
 	if(isMobile) {
 		L.control.zoom({ position: "topright" }).addTo(this._map);
+	}
+	
+	//New note button
+	if(!isMobile) {
+		var newNoteBtn = new NoteButton().addTo(this._map);
 	}
 	
 	//Create tile layers
@@ -476,7 +532,6 @@ var MapView = function(main) {
 			if(fullData != null) {
 				//Create data layer
 				this._dataLayer = L.layerGroup();
-				this._dataLayer.addTo(this._map);
 				
 				//Order layers
 				var featureLayersKeys = Object.keys(fullData).sort(function(a,b) { return parseInt(a) - parseInt(b); });
@@ -484,6 +539,16 @@ var MapView = function(main) {
 					var featureLayerGroup = fullData[featureLayersKeys[i]];
 					this._dataLayer.addLayer(featureLayerGroup);
 				}
+				
+				//Show OSM notes if needed
+				if(this._mainView.getOptionsView().showNotes()) {
+					var notesLayer = this._createNotesLayer();
+					if(notesLayer != null) {
+						this._dataLayer.addLayer(notesLayer);
+					}
+				}
+				
+				this._dataLayer.addTo(this._map);
 			}
 			else {
 				this._mainView.getMessagesView().displayMessage("There is no available data in this area", "alert");
@@ -506,7 +571,7 @@ var MapView = function(main) {
 		
 		this.changeTilesOpacity();
 		
-		console.log("[Time] View update: "+((new Date().getTime()) - timeStart));
+		//console.log("[Time] View update: "+((new Date().getTime()) - timeStart));
 	};
 	
 	/**
@@ -531,6 +596,7 @@ var MapView = function(main) {
 	MapView.prototype._createFullData = function() {
 		var features = this._mainView.getData().getFeatures();
 		var result = null;
+		var details = this._map.getZoom() >= CONFIG.view.map.full_data_min_zoom;
 		
 		if(features != null) {
 			var dispayableFeatures = 0;
@@ -540,7 +606,7 @@ var MapView = function(main) {
 			for(var featureId in features) {
 				try {
 					var feature = features[featureId];
-					var featureView = new FeatureView(this._mainView, feature);
+					var featureView = new FeatureView(this._mainView, feature, details);
 					
 					if(featureView.getLayer() != null) {
 						var relLayer = featureView.getRelativeLayer().toString();
@@ -587,6 +653,43 @@ var MapView = function(main) {
 				maxClusterRadius: 30
 			});
 			result.addLayer(L.geoJson(data));
+		}
+		
+		return result;
+	};
+	
+	/**
+	 * @return The notes layer, or null if no notes available
+	 */
+	MapView.prototype._createNotesLayer = function() {
+		var result = null;
+		var notes = this._mainView.getNotesData();
+		
+		//Create icons
+		var iconOpen = L.icon({
+			iconUrl: 'img/icon_note_open.png'
+		});
+		var iconClosed = L.icon({
+			iconUrl: 'img/icon_note_closed.png'
+		});
+		
+		if(notes != null && notes.length > 0) {
+			result = L.layerGroup();
+			var note, marker;
+			
+			for(var i=0, l=notes.length; i < l; i++) {
+				note = notes[i];
+				marker = L.marker(
+							[note.lat, note.lon],
+							{
+								id: i,
+								icon: (note.status == "closed") ? iconClosed : iconOpen,
+								zIndexOffset: (note.status == "closed") ? 999 : 1000,
+							}
+						);
+				marker.on("click", controller.getView().getNotesView().show.bind(controller.getView().getNotesView()));
+				result.addLayer(marker);
+			}
 		}
 		
 		return result;
@@ -674,13 +777,46 @@ var MapView = function(main) {
 		$(".leaflet-popup:visible #popup-tab-"+id).show();
 		$("#item-"+id).addClass("selected");
 	};
+	
+	/**
+	 * Shows a draggable marker on map (mainly for notes)
+	 */
+	MapView.prototype.showDraggableMarker = function() {
+		if(this._draggableMarker == null) {
+			var iconAdd = L.icon({
+				iconUrl: 'img/icon_note_new.png',
+				className: 'note-new-icon'
+			});
+			this._draggableMarker = new L.marker(this._map.getCenter(), { draggable: true, icon: iconAdd, zIndexOffset: 10000 }).addTo(this._map);
+		}
+		else {
+			this._draggableMarker.setLatLng(this._map.getCenter()).addTo(this._map);
+		}
+	};
+	
+	/**
+	 * Hides the draggable marker
+	 */
+	MapView.prototype.hideDraggableMarker = function() {
+		if(this._draggableMarker != null) {
+			this._map.removeLayer(this._draggableMarker);
+		}
+	};
+	
+	/**
+	 * Get the draggable marker coordinates
+	 * @return The LatLng, or null if draggable isn't visible
+	 */
+	MapView.prototype.getDraggableMarkerCoords = function() {
+		return (this._draggableMarker != null) ? this._draggableMarker.getLatLng() : null;
+	};
 
 
 
 /**
  * The component for a single feature
  */
-var FeatureView = function(main, feature) {
+var FeatureView = function(main, feature, details) {
 //ATTRIBUTES
 	/** The feature layer **/
 	this._layer = null;
@@ -693,6 +829,9 @@ var FeatureView = function(main, feature) {
 	
 	/** The feature **/
 	this._feature = feature;
+	
+	/** Are we in full details mode ? **/
+	this._showDetails = details;
 	
 	this._init();
 };
@@ -941,6 +1080,10 @@ var FeatureView = function(main, feature) {
 		var options = this._mainView.getOptionsView();
 		
 		var addObject = false;
+		
+		//Check if is this object should be shown only in details mode
+		var isDetail = this._feature.getStyle().isDetail();
+		if(isDetail && !this._showDetails) { return false; }
 		
 		//Object with levels defined
 		if(ftLevels.length > 0) {
@@ -1297,6 +1440,10 @@ var TagsView = function(main) {
 						}
 						break;
 
+					case "hours":
+						detailsTxt += '<a href="http://github.pavie.info/yohours/?oh='+encodeURIComponent(val)+'" target="_blank"><img src="'+CONFIG.view.icons.folder+'/icon_link.svg" alt="YoHours" /></a>';
+						break;
+					
 					case "text":
 					default:
 						detailsTxt += val;
@@ -1528,6 +1675,9 @@ var OptionsView = function() {
 	
 	/** Show photos markers **/
 	this._photos = false;
+	
+	/** Show OSM notes **/
+	this._notes = false;
 
 //CONSTRUCTOR
 	//Init checkboxes
@@ -1535,6 +1685,7 @@ var OptionsView = function() {
 	$("#show-unrendered").prop("checked", this._unrendered);
 	$("#show-buildings-only").prop("checked", this._buildings);
 	$("#show-photos").prop("checked", this._photos);
+	$("#show-notes").prop("checked", this._notes);
 	
 	//Add triggers
 	$("#button-settings").click(function() {
@@ -1554,6 +1705,10 @@ var OptionsView = function() {
 	}.bind(this));
 	$("#show-photos").change(function() {
 		this.changePhotos();
+		controller.getView().updateOptionChanged();
+	}.bind(this));
+	$("#show-notes").change(function() {
+		this.changeNotes();
 		controller.getView().updateOptionChanged();
 	}.bind(this));
 	
@@ -1588,6 +1743,13 @@ var OptionsView = function() {
 	OptionsView.prototype.showPhotos = function() {
 		return this._photos;
 	};
+	
+	/**
+	 * @return Must we show notes markers ?
+	 */
+	OptionsView.prototype.showNotes = function() {
+		return this._notes;
+	};
 
 //MODIFIERS
 	/**
@@ -1616,6 +1778,13 @@ var OptionsView = function() {
 	 */
 	OptionsView.prototype.changePhotos = function() {
 		this._photos = !this._photos;
+	};
+	
+	/**
+	 * Must we show OSM notes ?
+	 */
+	OptionsView.prototype.changeNotes = function() {
+		this._notes = !this._notes;
 	};
 	
 	/**
@@ -1651,6 +1820,14 @@ var OptionsView = function() {
 	};
 	
 	/**
+	 * Must we show notes markers ?
+	 */
+	OptionsView.prototype.setNotes = function(p) {
+		this._notes = p;
+		$("#show-notes").prop("checked", this._notes);
+	};
+	
+	/**
 	 * Disable options buttons
 	 */
 	OptionsView.prototype.disable = function() {
@@ -1658,6 +1835,7 @@ var OptionsView = function() {
 		$("#show-unrendered").prop("disabled", true);
 		$("#show-transcendent").prop("disabled", true);
 		$("#show-photos").prop("disabled", true);
+		$("#show-notes").prop("disabled", true);
 	};
 	
 	/**
@@ -1668,6 +1846,7 @@ var OptionsView = function() {
 		$("#show-unrendered").prop("disabled", false);
 		$("#show-transcendent").prop("disabled", false);
 		$("#show-photos").prop("disabled", false);
+		$("#show-notes").prop("disabled", false);
 	};
 
 
@@ -1857,12 +2036,13 @@ var URLView = function(main) {
 				this._zoom = letterToInt(shortRes[7]);
 				
 				var options = intToBitArray(base62toDec(shortRes[8]));
-				while(options.length < 5) { options = "0" + options; }
+				while(options.length < 6) { options = "0" + options; }
 				optionsView.setUnrendered(options[options.length - 1] == 1);
 				//optionsView.setLegacy(options[options.length - 2] == 1); //Deprecated option
 				optionsView.setTranscendent(options[options.length - 3] == 1);
 				optionsView.setBuildingsOnly(options[options.length - 4] == 1);
 				optionsView.setPhotos(options[options.length - 5] == 1);
+				optionsView.setNotes(options[options.length - 6] == 1);
 				
 				//Get level if available
 				if(shortRes[10] != undefined && shortRes[11] != undefined) {
@@ -1889,6 +2069,7 @@ var URLView = function(main) {
 			if(parameters.unrendered != undefined) { optionsView.setUnrendered(parameters.unrendered == "1"); }
 			if(parameters.buildings != undefined) { optionsView.setBuildingsOnly(parameters.buildings == "1"); }
 			if(parameters.photos != undefined) { optionsView.setPhotos(parameters.photos == "1"); }
+			if(parameters.notes != undefined) { optionsView.setNotes(parameters.notes == "1"); }
 			this._level = parameters.level;
 			this._tiles = parameters.tiles;
 		}
@@ -1907,6 +2088,7 @@ var URLView = function(main) {
 			params += "&unrendered="+((optionsView.showUnrendered()) ? "1" : "0");
 			params += "&buildings="+((optionsView.showBuildingsOnly()) ? "1" : "0");
 			params += "&photos="+((optionsView.showPhotos()) ? "1" : "0");
+			params += "&notes="+((optionsView.showNotes()) ? "1" : "0");
 		}
 		
 		var hash = this._getUrlHash();
@@ -1949,6 +2131,7 @@ var URLView = function(main) {
 		}
 		
 		var shortOptions = bitArrayToBase62([
+					((optionsView.showNotes()) ? "1" : "0"),
 					((optionsView.showPhotos()) ? "1" : "0"),
 					((optionsView.showBuildingsOnly()) ? "1" : "0"),
 					((optionsView.showTranscendent()) ? "1" : "0"),
@@ -2678,3 +2861,115 @@ var MessagesView = function() {
 		$("#infobox-list li").remove();
 		this._nbMessages = 0;
 	};
+
+
+
+/**
+ * The notes overlay panel
+ */
+var NotesView = function(main) {
+//ATTRIBUTES
+	this._mainView = main;
+
+//CONSTRUCTOR
+	$("#notes-close").click(function() {
+		$("#op-notes").removeClass("show");
+		$("#op-notes").addClass("hide");
+	});
+	$("#note-send").click(controller.newNote.bind(controller));
+};
+
+//ACCESSORS
+	/**
+	 * @return The notes textarea content
+	 */
+	NotesView.prototype.getNewNoteText = function() {
+		return $("#note-txt").val();
+	};
+	
+//MODIFIERS
+	/**
+	 * Shows a given note in panel
+	 * @param e The leaflet event
+	 */
+	NotesView.prototype.show = function(e) {
+		var note = this._mainView.getNotesData()[e.target.options.id];
+		
+		if(note != undefined) {
+			//Change title
+			$("#op-notes h2").html("Note #"+note.id);
+			$("#notes-status-txt").html(note.status);
+			$("#notes-status-icon").removeClass("ok bad").addClass((note.status == "closed") ? "ok" : "bad");
+			$("#notes-link").attr("href", "http://www.openstreetmap.org/note/"+note.id);
+			
+			//Add comments
+			var commentsHtml = "", comment, user;
+			for(var i=0, l=note.comments.length; i < l; i++) {
+				comment = note.comments[i];
+				user = (comment.user != "") ? "User "+comment.user : "Anonymous";
+				commentsHtml += '<div class="op-notes-comment">'
+								+'<p class="desc">'+user+', '+comment.date+'</p>'
+								+'<p class="txt">'+comment.text+'</p>'
+								+'</div>';
+			}
+			
+			$("#op-notes-comments").html(commentsHtml);
+			$("#op-notes").addClass("show");
+		}
+		else {
+			console.error("[Notes] Invalid ID: "+e.target.options.id);
+		}
+	};
+
+//OTHER METHODS
+	/**
+	 * Starts or stops to edit a new note
+	 */
+	NotesView.prototype.editNote = function() {
+		if(!$("#note-add").is(":visible")) {
+			var dataZoom = this._mainView.getMapView().get().getZoom() >= CONFIG.view.map.data_min_zoom;
+			if(dataZoom) {
+				this._mainView.showCentralPanel("note-add");
+				this._mainView.getMapView().showDraggableMarker();
+				$("#note-txt").val("Level "+this._mainView.getLevelView().get()+": ");
+			}
+			else {
+				this._mainView.getMessagesView().displayMessage("You have to zoom in to add a note", "alert");
+			}
+		}
+		else {
+			this._mainView.hideCentralPanel();
+			this._mainView.getMapView().hideDraggableMarker();
+		}
+	};
+
+
+
+/**
+ * New note button for leaflet
+ * @see https://gist.github.com/ns-1m/2935530
+ */
+var NoteButton = L.Control.extend({
+	options: {
+		position: 'topright'
+	},
+
+	onAdd: function (map) {
+		//Button
+		var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-note');
+		container.style.backgroundColor = 'white';
+		container.style.width = '26px';
+		container.style.height = '26px';
+		
+		//Image
+		var image = L.DomUtil.create('img', '', container);
+		image.src = 'img/icon_note_add.png';
+		image.title = 'Add a comment on map';
+
+		container.onclick = function(){
+			controller.getView().getNotesView().editNote();
+		}
+
+		return container;
+	}
+});

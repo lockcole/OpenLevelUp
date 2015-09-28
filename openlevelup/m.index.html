@@ -4,16 +4,16 @@
 	This file is part of OpenLevelUp!.
 
 	OpenLevelUp! is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
+	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	any later version.
 
 	OpenLevelUp! is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+	GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
+	You should have received a copy of the GNU Affero General Public License
 	along with OpenLevelUp!.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <!--
@@ -41,7 +41,7 @@
 	<meta name="description" content="See inside buildings with OpenLevelUp! Based on OpenStreetMap indoor data." />
 	<meta name="keywords" content="openlevelup, openstreetmap, osm, building, indoor, level, floor, map, viewer" />
 	<meta name="author" content="Adrien PAVIE (PanierAvide)" />
-	<meta name="copyright" content="&copy; Adrien PAVIE 2015, under GPL v3" />
+	<meta name="copyright" content="&copy; Adrien PAVIE 2015, under AGPL v3" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
 	<link rel="icon" type="image/jpg" href="img/favicon.jpg" />
 	
@@ -56,8 +56,8 @@
 	<script src="lib/azimuth.js"></script>
 	
 	<!-- jQuery includes -->
-	<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
-	<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 	
 	<!-- Galleria includes -->
 	<script src="lib/galleria/galleria-1.4.2.min.js"></script>
@@ -150,7 +150,7 @@
 				<h2>About</h2>
 				<p>See <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project.
 				<br />Navigate through the building levels with the up and down buttons.
-				<br /><a href="mailto:panieravide@riseup.net">Contact</a> | Under <a href="https://www.gnu.org/licenses/gpl.html">GPL v3 license</a>.</p>
+				<br /><a href="mailto:panieravide@riseup.net">Contact</a> | Under <a href="https://www.gnu.org/licenses/agpl.html">AGPL v3 license</a>.</p>
 				<p class="overlay-close"><a id="about-close" href="#">Close</a></p>
 			</div>
 		</div>
@@ -200,6 +200,22 @@
 						<img src="img/icon_flickr.svg" alt="Flickr" title="Flickr" /> <a id="status-flickr"><span class="status">&#x25CF;</span></a>
 					</p>
 					<p class="overlay-close"><a id="images-close" href="#">Close</a></p>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Notes panel -->
+		<div class="overlay-panel hide" id="op-notes">
+			<div class="centered">
+				<h2>Note</h2>
+				<div id="op-notes-comments">
+					<div class="op-notes-comment">
+						<p class="desc">User x, 2015-08-15 16h00</p>
+						<p class="txt">Here is the real location of 52 rue belle épine</p>
+					</div>
+				</div>
+				<div id="op-notes-footer">
+					Status: <span id="notes-status-txt"></span> | <a id="notes-link" href="">See on OSM.org</a> | <a id="notes-close" href="#">Close</a>
 				</div>
 			</div>
 		</div>

@@ -1,6 +1,22 @@
 Changes history
 ===============
 
+28 september 2015
+-----------------
+* Added "details" option in style, to render small object only after a given zoom
+
+14 september 2015
+-----------------
+* Artwork_type=mural rendered
+
+3 september 2015
+----------------
+* Link to YoHours in details panel for opening_hours tag
+
+21 august 2015
+--------------
+* OSM Notes are visible and new notes can be created
+
 5 august 2015
 -------------
 * Icon for charging bike and luggage locker added

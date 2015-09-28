@@ -2,16 +2,16 @@
  * This file is part of OpenLevelUp!.
  * 
  * OpenLevelUp! is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  * 
  * OpenLevelUp! is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with OpenLevelUp!.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -79,11 +79,14 @@ var Ctrl = function() {
 	/** The mapillary data **/
 	this._mapillaryData = new MapillaryData();
 	
+	/** The OSM notes data **/
+	this._notesData = null;
+	
 	/** The download start time **/
 	this._downloadStart = null;
 	
-	/** The amount of requested pictures metadata via Ajax **/
-	this._nbPhotoRequests = null;
+	/** The amount of requested external metadata via Ajax **/
+	this._nbExternalApiRequests = null;
 	
 	/** The current HTML view **/
 	this._view = null;
@@ -116,6 +119,13 @@ var Ctrl = function() {
 	 */
 	Ctrl.prototype.getMapillaryData = function() {
 		return this._mapillaryData;
+	};
+	
+	/**
+	 * @return The OSM notes data
+	 */
+	Ctrl.prototype.getNotesData = function() {
+		return this._notesData;
 	};
 
 //OTHER METHODS
@@ -320,9 +330,9 @@ var Ctrl = function() {
 		//Download data
 		$(document).ajaxError(function( event, jqxhr, settings, thrownError ) { console.log("Error: "+thrownError+"\nURL: "+settings.url); });
 		$.get(
-			CONFIG.osm.api+encodeURIComponent(oapiRequest),
+			CONFIG.osm.oapi+encodeURIComponent(oapiRequest),
 			function(data) {
-				console.log("[Time] Overpass download: "+((new Date()).getTime() - this._downloadStart));
+				//console.log("[Time] Overpass download: "+((new Date()).getTime() - this._downloadStart));
 				this.getView().getLoadingView().addLoadingInfo("Process received data");
 				
 				if(type == "cluster") {
@@ -335,7 +345,10 @@ var Ctrl = function() {
 					this.getView().getMapView().resetVars();
 
 					this.getView().getLoadingView().addLoadingInfo("Download photos metadata");
-					this._nbPhotoRequests = 0;
+					this._nbExternalApiRequests = 0;
+					
+					//Download OSM notes
+					this.downloadNotes(bbox);
 					
 					//Download Flickr data
 					this.downloadFlickr(bbox);
@@ -351,7 +364,7 @@ var Ctrl = function() {
 						}
 					}
 
-					this.checkPhotosRequestsDone();
+					this.checkExternalRequestsDone();
 				}
 			}.bind(this),
 			"json")
@@ -367,25 +380,25 @@ var Ctrl = function() {
 	};
 	
 	/**
-	 * Checks if all metadata for pictures have been retrieved, and if so ends map update.
+	 * Checks if all metadata for external data have been retrieved, and if so ends map update.
 	 */
-	Ctrl.prototype.checkPhotosRequestsDone = function(almost) {
+	Ctrl.prototype.checkExternalRequestsDone = function(almost) {
 		almost = almost || false;
 		
-		if(this._nbPhotoRequests == 0) {
+		if(this._nbExternalApiRequests == 0) {
 			if(almost) {
 				this.endMapUpdate();
 			}
 			else {
 				setTimeout(
-					function() { this.checkPhotosRequestsDone(true); }.bind(this),
+					function() { this.checkExternalRequestsDone(true); }.bind(this),
 					1000
 				);
 			}
 		}
 		else {
 			setTimeout(
-				this.checkPhotosRequestsDone.bind(this),
+				this.checkExternalRequestsDone.bind(this),
 				1000
 			);
 		}
@@ -403,13 +416,13 @@ var Ctrl = function() {
 		var url = CONFIG.images.flickr.api+params;
 		
 		//Download
-		this._nbPhotoRequests++;
+		this._nbExternalApiRequests++;
 		$.ajax({
 			url: url,
 			async: true,
 			dataType: 'json',
 			success: this.setFlickrData.bind(this)
-		}).fail(this.onFlickrDownloadFail);
+		}).fail(this.onFlickrDownloadFail.bind(this));
 	};
 	
 	/**
@@ -472,13 +485,14 @@ var Ctrl = function() {
 		catch(e) {
 			console.error("[Flickr] Error during data process: "+e);
 		}
-		this._nbPhotoRequests--;
+		this._nbExternalApiRequests--;
 	};
 	
 	/**
 	 * This function is called when data download fails
 	 */
 	Ctrl.prototype.onFlickrDownloadFail = function() {
+		this._nbExternalApiRequests--;
 		console.error("[Flickr] An error occured");
 	};
 
@@ -496,19 +510,12 @@ var Ctrl = function() {
 		var url = CONFIG.images.mapillary.api+params;
 		
 		//Download
-		this._nbPhotoRequests++;
+		this._nbExternalApiRequests++;
 		$.get(
 			url,
-			function(data) {
-				this.setMapillaryData(data);
-				this._nbMapillaryRequests--;
-				if(this._nbMapillaryRequests == 0) {
-					console.log("[Mapillary] Done processing images");
-					this.endMapUpdate();
-				}
-			}.bind(this),
+			this.setMapillaryData.bind(this),
 			'json'
-		).fail(controller.onMapillaryDownloadFail);
+		).fail(controller.onMapillaryDownloadFail.bind(this));
 	};
 	
 	/**
@@ -534,12 +541,113 @@ var Ctrl = function() {
 		catch(e) {
 			console.error("[Mapillary] Error during data process: "+e);
 		}
-		this._nbPhotoRequests--;
+		this._nbExternalApiRequests--;
 	};
 	
 	/**
 	 * This function is called when data download fails
 	 */
 	Ctrl.prototype.onMapillaryDownloadFail = function() {
+		this._nbExternalApiRequests--;
 		console.error("[Mapillary] An error occured");
+	};
+
+/************************
+ * OSM Notes management *
+ ************************/
+	/**
+	 * Retrieve OSM notes
+	 * @param bbox The bounding box
+	 */
+	Ctrl.prototype.downloadNotes = function(bbox) {
+		var params = 'notes?bbox='+bbox.toBBoxString();
+		var url = CONFIG.osm.api+params;
+		
+		//Download
+		this._nbExternalApiRequests++;
+		$.ajax({
+			url: url,
+			type: 'GET',
+			async: true,
+			dataType: 'xml',
+			success: this.setNotesData.bind(this)
+		}).fail(this.onNotesDownloadFail.bind(this));
+	};
+	
+	/**
+	 * Processes the received Notes data
+	 * @param data The OSM notes data, as JSON
+	 */
+	Ctrl.prototype.setNotesData = function(data) {
+		try {
+			this._notesData = new NotesData(data);
+		}
+		catch(e) {
+			console.error("[Notes] Error during data process: "+e);
+		}
+		this._nbExternalApiRequests--;
+	};
+	
+	/**
+	 * This function is called when notes data download fails
+	 */
+	Ctrl.prototype.onNotesDownloadFail = function() {
+		this._nbExternalApiRequests--;
+		console.error("[Notes] An error occured");
+	};
+
+	/**
+	 * Send new note to OSM
+	 */
+	Ctrl.prototype.newNote = function() {
+		//Retrieve note data
+		var text = this._view.getNotesView().getNewNoteText().trim();
+		
+		//Check if not empty
+		var textCheck = text.split(':');
+		if(text.length > 0 && (textCheck.length == 1 || textCheck[1].trim().length > 0)) {
+			//Check coordinates
+			var coords = this._view.getMapView().getDraggableMarkerCoords();
+			
+			if(coords != null) {
+				//Create URL
+				var url = CONFIG.osm.api+"notes?lat="+coords.lat+"&lon="+coords.lng+"&text="+text;
+				
+				//Send note to OSM
+				$.post(
+					url,
+					null,
+					this.newNoteSent.bind(this),
+					"xml"
+				).fail(this.newNoteFailed.bind(this));
+			}
+			else {
+				this._view.getMessagesView().displayMessage("Invalid coordinates for your note", "error");
+			}
+		}
+		else {
+			this._view.getMessagesView().displayMessage("Your note is empty", "alert");
+		}
+	};
+	
+	/**
+	 * Success function for note sending
+	 */
+	Ctrl.prototype.newNoteSent = function(data) {
+		this._view.getMessagesView().displayMessage("Your note was successfully sent", "info");
+		this._view.hideCentralPanel();
+		
+		//Add given data to NotesData
+		this._notesData.parse(data);
+		
+		//Refresh map
+		this._view.updateNoteAdded();
+	};
+	
+	/**
+	 * Fail function for note sending
+	 */
+	Ctrl.prototype.newNoteFailed = function() {
+		this._view.getMessagesView().displayMessage("An error occurred during note sending", "error");
+		this._view.hideCentralPanel();
 	};
