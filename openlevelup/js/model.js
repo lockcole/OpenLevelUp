@@ -805,6 +805,9 @@ var FeatureStyle = function(feature) {
 	/** The style name **/
 	this._name = "Object";
 
+	/** Is this style describing a detailed object ? **/
+	this._isDetail = false;
+	
 	/** The feature **/
 	this._feature = feature;
 	
@@ -854,6 +857,9 @@ var FeatureStyle = function(feature) {
 						if(style.name != undefined) {
 							this._name = style.name;
 						}
+						if(style.isDetail != undefined) {
+							this._isDetail = style.isDetail;
+						}
 						
 						for(param in style.style) {
 							if(style.style[param] != undefined && (param != "icon" || this._createIconUrl(style.style) != null)) {
@@ -891,6 +897,13 @@ var FeatureStyle = function(feature) {
 		return this._icon != undefined;
 	};
 
+	/**
+	 * Is this style applied to detailed objects ?
+	 */
+	FeatureStyle.prototype.isDetail = function() {
+		return this._isDetail;
+	};
+	
 	/**
 	 * Get the complete icon name, in particular when style contains a tag variable.
 	 * @return The icon URL

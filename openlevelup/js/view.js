@@ -205,7 +205,20 @@ var MainView = function(ctrl, mobile) {
 		var oldZoom = this._cMap.getOldZoom();
 		
 		//Check new zoom value
-		if(zoom >= CONFIG.view.map.data_min_zoom) {
+		if(zoom >= CONFIG.view.map.full_data_min_zoom) {
+			//Update levels
+			this._cLevel.update();
+			
+			//Add names and export buttons if needed
+			if(oldZoom == null || oldZoom < CONFIG.view.map.full_data_min_zoom) {
+				this._cExport.showButton();
+				this._cNames.showButton();
+				this._cLevel.enable();
+				this._cOptions.enable();
+				this._cMap.update();
+			}
+		}
+		else if(zoom >= CONFIG.view.map.data_min_zoom) {
 			//Update levels
 			this._cLevel.update();
 			
@@ -215,6 +228,9 @@ var MainView = function(ctrl, mobile) {
 				this._cNames.showButton();
 				this._cLevel.enable();
 				this._cOptions.enable();
+				this._cMap.update();
+			}
+			else if(oldZoom >= CONFIG.view.map.full_data_min_zoom) {
 				this._cMap.update();
 			}
 		}
@@ -580,6 +596,7 @@ var MapView = function(main) {
 	MapView.prototype._createFullData = function() {
 		var features = this._mainView.getData().getFeatures();
 		var result = null;
+		var details = this._map.getZoom() >= CONFIG.view.map.full_data_min_zoom;
 		
 		if(features != null) {
 			var dispayableFeatures = 0;
@@ -589,7 +606,7 @@ var MapView = function(main) {
 			for(var featureId in features) {
 				try {
 					var feature = features[featureId];
-					var featureView = new FeatureView(this._mainView, feature);
+					var featureView = new FeatureView(this._mainView, feature, details);
 					
 					if(featureView.getLayer() != null) {
 						var relLayer = featureView.getRelativeLayer().toString();
@@ -799,7 +816,7 @@ var MapView = function(main) {
 /**
  * The component for a single feature
  */
-var FeatureView = function(main, feature) {
+var FeatureView = function(main, feature, details) {
 //ATTRIBUTES
 	/** The feature layer **/
 	this._layer = null;
@@ -812,6 +829,9 @@ var FeatureView = function(main, feature) {
 	
 	/** The feature **/
 	this._feature = feature;
+	
+	/** Are we in full details mode ? **/
+	this._showDetails = details;
 	
 	this._init();
 };
@@ -1060,6 +1080,10 @@ var FeatureView = function(main, feature) {
 		var options = this._mainView.getOptionsView();
 		
 		var addObject = false;
+		
+		//Check if is this object should be shown only in details mode
+		var isDetail = this._feature.getStyle().isDetail();
+		if(isDetail && !this._showDetails) { return false; }
 		
 		//Object with levels defined
 		if(ftLevels.length > 0) {

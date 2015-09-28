@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+28 september 2015
+-----------------
+* Added "details" option in style, to render small object only after a given zoom
+
 14 september 2015
 -----------------
 * Artwork_type=mural rendered

@@ -75,12 +75,14 @@
 				"name": "Glass cabinet",
 				"description": "Glass cabinet",
 				"onTags": [ { "indoor": "glass_cabinet" } ],
+				"isDetail": true,
 				"style": { "color": "#A2CCC8", "fillColor": "#E3F3F5", "opacity": 1, "fillOpacity": 1, "lineJoin": "miter", "weight": 3, "layer": -1 }
 			},
 			{
 				"name": "Door",
 				"description": "Default door",
 				"onTags": [ { "buildingpart": "door" }, { "indoor": "door" } ],
+				"isDetail": true,
 				"style": { "icon": "door.png", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" }
 			}
 		],
@@ -125,7 +127,8 @@
 				"name": "Door",
 				"description": "Default door",
 				"onTags": [ { "door": "*" }, { "entrance": "*" } ],
-				"style": { "icon": "door.png", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" }
+				"style": { "icon": "door.png", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" },
+				"isDetail": true
 			},
 			{
 				"name": "Passage",
@@ -217,6 +220,11 @@
 				"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2", "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
 			},
 			{
+				"description": "Small amenities",
+				"onTags": [ { "amenity": "bbq|drinking_water|atm|bench|clock|photo_booth|post_box|recycling|vending_machine|waste_basket|ticket_validator|piano|telephone" } ],
+				"isDetail": true
+			},
+			{
 				"description": "Set layer for amenities which are kind of landuses",
 				"onTags": [ { "amenity": "school|college|university|hospital" } ],
 				"style": { "layer": -9 }
@@ -225,6 +233,7 @@
 				"name": "${vending} (vending)",
 				"description": "Vending",
 				"onTags": [ { "vending": "*" } ],
+				"isDetail": true,
 				"style": {
 					"icon": "vending_${vending}.png",
 					"iconAlias": { "news_papers": "newspapers" }
@@ -258,6 +267,7 @@
 			{
 				"name": "${emergency}",
 				"description": "Emergency",
+				"isDetail": true,
 				"onTags": [ { "emergency": "*" } ],
 				"style": { "icon": "emergency_${emergency}.png" }
 			}
@@ -274,6 +284,7 @@
 				"name": "CCTV",
 				"description": "Surveillance",
 				"onTags": [ { "man_made": "surveillance" } ],
+				"isDetail": true,
 				"style": { "icon": "man_made_surveillance.png" }
 			}
 		],
@@ -325,7 +336,13 @@
 				"name": "${information} (information)",
 				"description": "Information icons",
 				"onTags": [ { "information": "*" } ],
+				"isDetail": true,
 				"style": { "icon": "information_${information}.png" }
+			},
+			{
+				"description": "Show large information objects",
+				"onTags": [ { "information": "office" } ],
+				"isDetail": false
 			},
 			{
 				"name": "Street map",
@@ -351,6 +368,7 @@
 				"name": "${advertising}",
 				"description": "Advertising icons",
 				"onTags": [ { "advertising": "*" } ],
+				"isDetail": true,
 				"style": {
 					"icon": "pub_${advertising}.png",
 					"iconAlias": { "sign": "poster_box", "wall_painting": "poster_box" }
@@ -372,6 +390,7 @@
 				"name": "Historic",
 				"description": "Historic element",
 				"onTags": [ { "historic": "*" } ],
+				"isDetail": true,
 				"style": { "color": "#C0B0A2", "opacity": 0.5, "weight": 0.5, "fillColor": "#C0B0A2", "fillOpacity": 0.5, "layer": -1 }
 			},
 			{
@@ -396,6 +415,7 @@
 				"name": "Landmark sign",
 				"description": "Landmark sign",
 				"onTags": [ { "pole": "landmark_sign" } ],
+				"isDetail": true,
 				"style": { "icon": "pole_landmark_sign.png", "label": "ref" }
 			}
 		],
@@ -405,6 +425,7 @@
 				"name": "Charging bike",
 				"description": "Charging bike icon",
 				"onTags": [ { "generator:type": "bicycle" } ],
+				"isDetail": true,
 				"style": { "icon": "generator_type_bicycle.png" }
 			}
 		]

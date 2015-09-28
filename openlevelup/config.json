@@ -10,6 +10,7 @@
 		"map": {
 			"cluster_min_zoom": 5,
 			"data_min_zoom": 18,
+			"full_data_min_zoom": 20,
 			"max_zoom": 24,
 			"tiles_min_opacity": 0.1,
 			"tiles_max_opacity": 0.3
