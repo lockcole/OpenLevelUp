@@ -252,6 +252,12 @@
 				"style": { "icon": "amenity_toilets_men.png" }
 			},
 			{
+				"name": "Toilets",
+				"description": "Toilets for women",
+				"onTags": [ { "amenity": "toilets", "female": "yes", "male": "yes" } ],
+				"style": { "icon": "amenity_toilets.png" }
+			},
+			{
 				"name": "Toilets (disabled)",
 				"description": "Toilets for disabled people",
 				"onTags": [ { "amenity": "toilets", "wheelchair": "yes|only|designated" } ],
