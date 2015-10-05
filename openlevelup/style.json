@@ -38,7 +38,7 @@
 			{
 				"name": "Vertical passage",
 				"description": "Elevetor, stairs (as polygons)",
-				"onTags": [ { "buildingpart": "verticalpassage" }, { "room": "stairs|escalator" }, { "indoor": "elevator" } ],
+				"onTags": [ { "buildingpart": "verticalpassage" }, { "room": "stairs|escalator" }, { "indoor": "elevator" }, { "stairs": "yes" } ],
 				"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "level": -1 }
 			},
 			{
@@ -50,7 +50,7 @@
 			{
 				"name": "Stairs",
 				"description": "Stairs (verticalpassage)",
-				"onTags": [ { "buildingpart:verticalpassage": "stairway" }, { "room": "stairs" } ],
+				"onTags": [ { "buildingpart:verticalpassage": "stairway" }, { "room": "stairs" }, { "stairs": "yes" } ],
 				"style": { "icon": "passage_stairs.png" }
 			},
 			{
@@ -62,7 +62,7 @@
 			{
 				"name": "Emergency stairs",
 				"description": "Stairs for emergency only (as polygons)",
-				"onTags": [ { "buildingpart": "verticalpassage", "access": "emergency" }, { "room": "stairs", "access": "emergency" } ],
+				"onTags": [ { "buildingpart": "verticalpassage", "access": "emergency" }, { "room": "stairs", "access": "emergency" }, { "stairs": "yes", "access": "emergency" } ],
 				"style": { "color": "#009262", "fillColor": "#C0FFCB", "icon": "emergency_stairs.png" }
 			},
 			{
