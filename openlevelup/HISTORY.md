@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+5 october 2015
+--------------
+* Distinct icons for toilets (men, women, disabled)
+
 28 september 2015
 -----------------
 * Added "details" option in style, to render small object only after a given zoom

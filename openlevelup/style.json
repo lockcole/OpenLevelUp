@@ -238,6 +238,24 @@
 					"icon": "vending_${vending}.png",
 					"iconAlias": { "news_papers": "newspapers" }
 				}
+			},
+			{
+				"name": "Toilets (women)",
+				"description": "Toilets for women",
+				"onTags": [ { "amenity": "toilets", "female": "yes|only|designated" } ],
+				"style": { "icon": "amenity_toilets_women.png" }
+			},
+			{
+				"name": "Toilets (men)",
+				"description": "Toilets for men",
+				"onTags": [ { "amenity": "toilets", "male": "yes|only|designated" } ],
+				"style": { "icon": "amenity_toilets_men.png" }
+			},
+			{
+				"name": "Toilets (disabled)",
+				"description": "Toilets for disabled people",
+				"onTags": [ { "amenity": "toilets", "wheelchair": "yes|only|designated" } ],
+				"style": { "icon": "amenity_toilets_disabled.png" }
 			}
 		],
 		
