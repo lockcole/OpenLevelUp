@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+6 october 2015
+--------------
+* Escalator and stairs rendered over walls
+
 5 october 2015
 --------------
 * Distinct icons for toilets (men, women, disabled)

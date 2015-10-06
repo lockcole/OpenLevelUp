@@ -532,6 +532,7 @@ var MapView = function(main) {
 			if(fullData != null) {
 				//Create data layer
 				this._dataLayer = L.layerGroup();
+				this._dataLayer.addTo(this._map);
 				
 				//Order layers
 				var featureLayersKeys = Object.keys(fullData).sort(function(a,b) { return parseInt(a) - parseInt(b); });
@@ -547,8 +548,6 @@ var MapView = function(main) {
 						this._dataLayer.addLayer(notesLayer);
 					}
 				}
-				
-				this._dataLayer.addTo(this._map);
 			}
 			else {
 				this._mainView.getMessagesView().displayMessage("There is no available data in this area", "alert");
@@ -1452,6 +1451,8 @@ var TagsView = function(main) {
 				detailsTxt += '</span></span>';
 			}
 		}
+		
+		console.log("layer",ft.getStyle().get().layer);
 		
 		$("#op-tags-list").html(tagList);
 		

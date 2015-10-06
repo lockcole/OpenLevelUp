@@ -27,7 +27,7 @@
 				"name": "Wall",
 				"description": "Indoor walls",
 				"onTags": [ { "indoor": "wall" }, { "buildingpart": "wall" } ],
-				"style": { "color": "#999999", "opacity": 1, "weight": 2, "fillColor": "red", "fillOpacity": 1, "popup": "yes" }
+				"style": { "color": "#999999", "opacity": 1, "weight": 2, "fillColor": "#999999", "fillOpacity": 1, "popup": "yes", "layer": -2 }
 			},
 			{
 				"name": "Area",
@@ -39,7 +39,7 @@
 				"name": "Vertical passage",
 				"description": "Elevetor, stairs (as polygons)",
 				"onTags": [ { "buildingpart": "verticalpassage" }, { "room": "stairs|escalator" }, { "indoor": "elevator" }, { "stairs": "yes" } ],
-				"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "level": -1 }
+				"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1 }
 			},
 			{
 				"name": "Elevator",
@@ -103,7 +103,7 @@
 				"name": "Stairs",
 				"description": "Fix for room=stairs|escalator layer",
 				"onTags": [ { "room": "stairs|escalator" } ],
-				"style": { "layer": -1 }
+				"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1 }
 			},
 			{
 				"name": "Area",
