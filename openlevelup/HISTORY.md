@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+9 october 2015
+--------------
+* Icons for entrance=main, service, exit, emergency
+
 6 october 2015
 --------------
 * Escalator and stairs rendered over walls

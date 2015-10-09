@@ -143,10 +143,10 @@
 				"style": { "icon": "door_sliding.png" }
 			},
 			{
-				"name": "Emergency exit",
-				"description": "Emergency exit",
-				"onTags": [ { "entrance": "emergency" } ],
-				"style": { "icon": "emergency_door.png" }
+				"name": "${entrance} (entrance)",
+				"description": "Entrance doors",
+				"onTags": [ { "entrance": "service|emergency|exit|main" } ],
+				"style": { "icon": "entrance_${entrance}.png" }
 			}
 		],
 		
@@ -673,12 +673,15 @@
 		"door_sliding.png",
 		"door.png",
 		"emergency_assembly_point.png",
-		"emergency_door.png",
 		"emergency_defibrillator.png",
 		"emergency_fire_extinguisher.png",
 		"emergency_phone.png",
 		"emergency_siren.png",
 		"emergency_stairs.png",
+		"entrance_emergency.png",
+		"entrance_exit.png",
+		"entrance_main.png",
+		"entrance_service.png",
 		"generator_type_bicycle.png",
 		"guide_strips.png",
 		"highway_bus_stop.png",
