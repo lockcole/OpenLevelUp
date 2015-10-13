@@ -1,20 +1,5 @@
 {
 	"styles": {
-
-		"building|building:part": [
-			{
-				"name": "Building",
-				"description": "Building",
-				"onTags": [ { "building": "*" } ],
-				"style": { "color": "#ADA5A5", "opacity": 1, "weight": 1, "fillColor": "#D4CACA", "fillOpacity": 1, "layer": -10, "popup": "no" }
-			},
-			{
-				"name": "Pillar",
-				"description": "Pillar",
-				"onTags": [ { "building:part": "column" } ],
-				"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
-			}
-		],
 		
 		"buildingpart|indoor": [
 			{
@@ -458,6 +443,22 @@
 				"onTags": [ { "generator:type": "bicycle" } ],
 				"isDetail": true,
 				"style": { "icon": "generator_type_bicycle.png" }
+			}
+		],
+		
+		
+		"building|building:part": [
+			{
+				"name": "Building",
+				"description": "Building",
+				"onTags": [ { "building": "*" }, { "building:part": "floor" } ],
+				"style": { "color": "#ADA5A5", "opacity": 1, "weight": 1, "fillColor": "#D4CACA", "fillOpacity": 1, "layer": -10, "popup": "yes" }
+			},
+			{
+				"name": "Pillar",
+				"description": "Pillar",
+				"onTags": [ { "building:part": "column" } ],
+				"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
 			}
 		]
 	},
