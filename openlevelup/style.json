@@ -310,6 +310,13 @@
 				"onTags": [ { "man_made": "surveillance" } ],
 				"isDetail": true,
 				"style": { "icon": "man_made_surveillance.png" }
+			},
+			{
+				"name": "Lamp",
+				"description": "Lamp",
+				"onTags": [ { "man_made": "lamp|street_lamp" } ],
+				"isDetail": true,
+				"style": { "icon": "man_made_lamp.png" }
 			}
 		],
 		
@@ -696,6 +703,7 @@
 		"laboratory_computer.png",
 		"laboratory_electronics.png",
 		"laboratory_physics.png",
+		"man_made_lamp.png",
 		"man_made_surveillance.png",
 		"man_made_survey_point.png",
 		"map_type_scheme.png",
