@@ -464,6 +464,9 @@ var MapView = function(main) {
 	}
 	L.control.layers(tileLayers).addTo(this._map);
 	
+	//Init sidebar
+	L.control.sidebar("sidebar").addTo(this._map);
+	
 	//Trigger for map events
 	this._map.on('moveend', function(e) { controller.onMapUpdate(); });
 	this._map.on("baselayerchange", controller.onMapLayerChange);

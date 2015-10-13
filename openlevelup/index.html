@@ -33,12 +33,6 @@
 		* Shortcuts for changing levels
 		* Path finding in a building
 	-->
-	<!-- Redirect for small screens -->
-	<script type="text/javascript">
-		if (window.screen.width < 1000) {
-			window.location = 'm.index.html'+window.location.search;
-		}
-	</script>
 	
 	<!-- General definitions -->
 	<title>OpenLevelUp!</title>
@@ -47,6 +41,7 @@
 	<meta name="keywords" content="openlevelup, openstreetmap, osm, building, indoor, level, floor, map, viewer" />
 	<meta name="author" content="Adrien PAVIE (PanierAvide)" />
 	<meta name="copyright" content="&copy; Adrien PAVIE 2015, under AGPL v3" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<link rel="icon" type="image/jpg" href="img/favicon.jpg" />
 	
 	<!-- Leaflet includes -->
@@ -55,10 +50,7 @@
 
 	<!-- OSMtoGeoJSON include -->
 	<script src="lib/osmtogeojson.js"></script>
-	
-	<!-- FileSaver include -->
-	<!--script src="lib/FileSaver.js"></script-->
-	
+
 	<!-- Azimuth include -->
 	<script src="lib/azimuth.js"></script>
 	
@@ -79,18 +71,13 @@
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.css" />
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.Default.css" />
 	<script src="lib/markercluster/leaflet.markercluster-src.js"></script>
-	<!--script src="lib/polylinedecorator/L.LineUtil.PolylineDecorator.js"></script-->
 	<script src="lib/polylinedecorator/L.RotatedMarker.js"></script>
-	<!--script src="lib/polylinedecorator/L.Symbol.js"></script>
-	<script src="lib/polylinedecorator/L.PolylineDecorator.js"></script>
-	<script src="lib/polylinedecorator/leaflet.polylineDecorator.min.js"></script-->
 	<link rel="stylesheet" href="css/Control.Geocoder.css" />
 	<script src="lib/Control.Geocoder.js"></script>
-	
-	<!-- SVG.js includes -->
-	<!--script src="lib/svg.min.js"></script>
-	<script src="lib/svg.export.min.js"></script-->
-	
+	<link rel="stylesheet" href="lib/sidebar2/leaflet-sidebar.min.css" />
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" />
+	<script src="lib/sidebar2/leaflet-sidebar.min.js"></script>
+
 	<!-- OpenLevelUp includes -->
 	<script src="js/utils.js" type="text/javascript"></script>
 	<script src="js/controller.js" type="text/javascript"></script>
@@ -99,116 +86,79 @@
 	
 	<!-- CSS style -->
 	<link rel="stylesheet" href="css/common.css" />
-	<link rel="stylesheet" href="css/desktop.css" />
+	<!--link rel="stylesheet" href="css/desktop.css" /-->
 	<link rel="stylesheet" href="css/labels.css" />
 </head>
 <body>
-	<!--
-	Map area
-	-->
-	<div id="map"></div>
-
-	<div id="over-map">
-	<!--
-	Main panels
-	-->
-	<div id="main-panel">
-		<div class="row">
-			<!-- Header -->
-			<header>
-				<div id="header-table">
-					<div id="header-content">
-						<div id="header-title" class="cell">
-							<h1><a id="logo-link" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a></h1>
-							<p>See inside buildings<br />with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
-						</div>
-						<div id="header-levels" class="cell">
-							<p>
-								<a class="button-level" id="levelUp"><img src="img/arrow_up_2.png" alt="&uarr;" /></a><br />
-								<select id="level" disabled="true"></select><br />
-								<a class="button-level" id="levelDown"><img src="img/arrow_down_2.png" alt="&darr;" /></a>
-							</p>
-						</div>
-					</div>
-				</div>
-			</header>
+	<!-- Side bar -->
+	<div id="sidebar" class="sidebar">
+		<!-- Nav tabs -->
+		<div class="sidebar-tabs">
+			<ul role="tablist">
+				<li class="active"><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
+				<li class="level"><a id="levelUp"><img src="img/arrow_up_2.png" alt="↑" /></a></li>
+				<li class="level"><a><select id="level" disabled="true"></select></a></li>
+				<li class="level"><a id="levelDown"><img src="img/arrow_down_2.png" alt="↓" /></a></li>
+			</ul>
+			
+			<ul role="tablist">
+				<li><a href="#roomlist" role="tab"><img src="img/icon_rooms.svg" /></a></li>
+				<li><a href="#notes" role="tab"><img src="img/icon_note.svg" /></a></li>
+				<li><a href="#settings" role="tab"><img src="img/icon_settings.svg" /></a></li>
+			</ul>
 		</div>
-		
-		<div class="row" id="row-central">
-			<div id="central">
-				<div id="central-close">x</div>
+
+		<!-- Tab panes -->
+		<div class="sidebar-content">
+			<div class="sidebar-pane active" id="home">
+				<h1 class="sidebar-header">
+					OpenLevelUp
+					<div class="sidebar-close"><i class="fa fa-caret-left"></i></div>
+				</h1>
+
+				<header>
+					<a id="logo-link" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!"></a>
+					<p>See inside buildings<br>with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
+				</header>
 				
-				<!-- General settings -->
-				<div class="part" id="settings">
-					<h2><img src="img/icon_settings.svg" /> Settings</h2>
-					<ul>
-						<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
-						<li><label><input type="checkbox" id="show-buildings-only" disabled="true" /> Show <a class="help" title="Hides all objects that aren't buildings (no building=* tag)">buildings only</a></label></li>
-						<li><label><input type="checkbox" id="show-photos" disabled="true" /> Show <a class="help" title="Adds markers on objects which have an associated photo">pictures</a></label></li>
-						<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> Show <a class="help" title="Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.">unrendered objects</a></label></li>
-						<li><label><input type="checkbox" id="show-notes" disabled="true" /> Show <a class="help" title="OpenStreetMap notes allow other users to know that there is some edits to do in data.">OpenStreetMap notes</a></label></li>
-					</ul>
-				</div>
-				
-				<!-- Room names -->
-				<div class="part" id="room-names">
-					<h2><img src="img/icon_rooms.svg" /> Rooms</h2>
-					<p class="input-max"><span class="text"><input type="text" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
-					<div id="rooms-container">
-						<div id="rooms">
-						</div>
+				<footer>
+					<p><a id="osm-link" title="See this area on OpenStreetMap" href="http://openstreetmap.org">OSM.org</a> | <a id="shortlink" href="">Shortlink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
+				</footer>
+			</div>
+
+			<div class="sidebar-pane" id="roomlist">
+				<h1 class="sidebar-header"><img src="img/icon_rooms.svg" /> Rooms<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
+				<p class="input-max"><span class="text"><input type="text" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
+				<div id="rooms-container">
+					<div id="rooms">
 					</div>
-				</div>
-				
-				<!-- Export -->
-				<div class="part" id="export">
-					<h2><img src="img/icon_export.svg" /> Export level</h2>
-					<p>Coming back soon !</p>
-					<!--p><a id="export-link" href="#">As GeoJSON</a> | <a id="export-link-img" href="#">As an image</a></p-->
-				</div>
-				
-				<!-- New note -->
-				<div class="part" id="note-add">
-					<h2><img src="img/icon_note.svg" /> New note</h2>
-					<p>Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here.</p>
-					<textarea id="note-txt" rows="5"></textarea>
-					<button id="note-send">Add a new note</button>
 				</div>
 			</div>
-		</div>
 
-		<div class="row">
-			<!-- Footer -->
-			<footer>
-				<p><a id="osm-link" title="See this area on OpenStreetMap" href="http://openstreetmap.org">OSM.org</a> | <a id="shortlink" href="">Shortlink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
-			</footer>
+			<div class="sidebar-pane" id="notes">
+				<h1 class="sidebar-header"><img src="img/icon_note.svg" /> New note<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
+				<p>Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here.</p>
+				<textarea id="note-txt" rows="5"></textarea>
+				<button id="note-send">Add a new note</button>
+			</div>
+
+			<div class="sidebar-pane" id="settings">
+				<h1 class="sidebar-header"><img src="img/icon_settings.svg" /> Settings<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
+				<ul>
+					<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
+					<li><label><input type="checkbox" id="show-buildings-only" disabled="true" /> Show <a class="help" title="Hides all objects that aren't buildings (no building=* tag)">buildings only</a></label></li>
+					<li><label><input type="checkbox" id="show-photos" disabled="true" /> Show <a class="help" title="Adds markers on objects which have an associated photo">pictures</a></label></li>
+					<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> Show <a class="help" title="Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.">unrendered objects</a></label></li>
+					<li><label><input type="checkbox" id="show-notes" disabled="true" /> Show <a class="help" title="OpenStreetMap notes allow other users to know that there is some edits to do in data.">OpenStreetMap notes</a></label></li>
+				</ul>
+			</div>
 		</div>
 	</div>
 	
-	<!-- Buttons for main panel settings -->
-	<div id="main-buttons">
-		<div class="row">
-			<div id="button-settings" class="button">
-				<p><img src="img/icon_settings.svg" title="Settings" alt="Settings" /></p>
-			</div>
-		</div>
-		<div class="row">
-			<div id="button-rooms" class="button">
-				<p><img src="img/icon_rooms.svg" title="Rooms" alt="Rooms" /></p>
-			</div>
-		</div>
-		<div class="row">
-			<div id="button-export" class="button">
-				<p><img src="img/icon_export.svg" title="Export" alt="Export" /></p>
-			</div>
-		</div>
-	</div>
-	</div>
+	<!-- Map area -->
+	<div id="map" class="sidebar-map"></div>
 
-
-	<!--
-	Overlay panels
-	-->
+	<!-- Overlay panels -->
 	<div class="overlay-panels">
 		<!-- Loading panel -->
 		<div class="overlay-panel hide" id="op-loading">
@@ -283,8 +233,8 @@
 				<h2>Note</h2>
 				<div id="op-notes-comments">
 					<div class="op-notes-comment">
-						<p class="desc">User x, 2015-08-15 16h00</p>
-						<p class="txt">Here is the real location of 52 rue belle épine</p>
+						<p class="desc"></p>
+						<p class="txt"></p>
 					</div>
 				</div>
 				<div id="op-notes-footer">
@@ -299,13 +249,6 @@
 		<ul id="infobox-list">
 		</ul>
 	</div>
-
-
-	<!--
-	SVG area (hidden)
-	-->
-	<!--div id="svg-area">
-	</div-->
 
 	<!--
 	JS init code

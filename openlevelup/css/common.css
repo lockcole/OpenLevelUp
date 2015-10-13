@@ -71,23 +71,30 @@ h1 {
 header {
 	width: 100%;
 }
- 
-#header-table {
-	display: table;
-	width: 100%;
-}
-
-#header-content {
-	display: table-row;
-}
-
-#header-content .cell {
-	display: table-cell;
-	vertical-align: middle;
-}
 
 #logo-link {
 	cursor: pointer;
+}
+
+/***********
+ * Sidebar *
+ ***********/
+
+.sidebar-tabs {
+	background-color: #81ADFF;
+}
+
+.sidebar-tabs > ul > li > a > img {
+	width: 24px;
+}
+
+.sidebar-tabs > ul > li.level {
+	text-align: center;
+	cursor: pointer;
+}
+
+.sidebar-tabs > ul > li:hover {
+	background-color: #B8D1FF;
 }
 
 /***************************
