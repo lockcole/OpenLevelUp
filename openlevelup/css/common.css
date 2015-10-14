@@ -57,6 +57,10 @@ h1 {
 	padding: 0;
 }
 
+.center {
+	text-align: center;
+}
+
 /*******
  * Map *
  *******/
@@ -95,6 +99,22 @@ header {
 
 .sidebar-tabs > ul > li:hover {
 	background-color: #B8D1FF;
+}
+
+.sidebar-content {
+	background-color: #E1EBFF;
+	color: #444;
+}
+
+#sidebar-pane-home-content {
+	margin-top: 15px;
+}
+
+footer {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
 }
 
 /***************************
