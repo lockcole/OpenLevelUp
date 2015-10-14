@@ -69,6 +69,12 @@
 				"onTags": [ { "buildingpart": "door" }, { "indoor": "door" } ],
 				"isDetail": true,
 				"style": { "icon": "door.png", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" }
+			},
+			{
+				"name": "Restricted area",
+				"description": "Area/room only for a limited amount of people",
+				"onTags": [ { "indoor": "room|area|corridor", "access": "private|no" }, { "buildingpart": "verticalpassage|hall|room|area|corridor", "access": "private|no" } ],
+				"style": { "fillColor": "#A2A2A2" }
 			}
 		],
 		
