@@ -1,7 +1,7 @@
 {
 	"styles": {
 		
-		"buildingpart|indoor": [
+		"buildingpart|indoor|room": [
 			{
 				"name": "Room",
 				"description": "Indoor rooms",
@@ -17,14 +17,24 @@
 			{
 				"name": "Area",
 				"description": "Indoor areas",
-				"onTags": [ { "indoor": "area|corridor" }, { "buildingpart": "corridor|hall" } ],
+				"onTags": [ { "indoor": "area|corridor" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|entrance|hall|entry|gallery|collection" } ],
 				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6, "label": "name", "labelStyle": "area" }
+			},
+			{
+				"name": "${room}",
+				"description": "Rooms",
+				"onTags": [ { "room": "*" } ],
+				"style": {
+					"icon": "room_${room}.png",
+					"iconAlias": { "amphitheatre": "auditorium", "reception": "administration", "refectory": "restaurant", "checkroom": "locker" },
+					"showMissingIcon": false
+				}
 			},
 			{
 				"name": "Vertical passage",
 				"description": "Elevetor, stairs (as polygons)",
 				"onTags": [ { "buildingpart": "verticalpassage" }, { "room": "stairs|escalator" }, { "indoor": "elevator" }, { "stairs": "yes" } ],
-				"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1 }
+				"style": { "color": "#7495DA", "fillColor": "#AEBDDA", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1 }
 			},
 			{
 				"name": "Elevator",
@@ -71,38 +81,6 @@
 				"style": { "icon": "door.png", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" }
 			},
 			{
-				"name": "Restricted area",
-				"description": "Area/room only for a limited amount of people",
-				"onTags": [ { "indoor": "room|area|corridor", "access": "private|no" }, { "buildingpart": "verticalpassage|hall|room|area|corridor", "access": "private|no" } ],
-				"style": { "fillColor": "#A2A2A2" }
-			}
-		],
-		
-		"room": [
-			{
-				"name": "${room}",
-				"description": "Rooms",
-				"onTags": [ { "room": "*" } ],
-				"style": {
-					"color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes",
-					"icon": "room_${room}.png",
-					"iconAlias": { "amphitheatre": "auditorium", "reception": "administration", "refectory": "restaurant", "checkroom": "locker" },
-					"showMissingIcon": false
-				}
-			},
-			{
-				"name": "Stairs",
-				"description": "Fix for room=stairs|escalator layer",
-				"onTags": [ { "room": "stairs|escalator" } ],
-				"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1 }
-			},
-			{
-				"name": "Area",
-				"description": "Indoor areas",
-				"onTags": [ { "room": "corridor|entrance|hall|entry|gallery|collection" } ],
-				"style": { "fillColor": "#EEEEEE", "layer": -6, "label": "name", "labelStyle": "area" }
-			},
-			{
 				"name": "${laboratory} lab",
 				"description": "Laboratory icons",
 				"onTags": [ { "laboratory": "*" } ],
@@ -110,6 +88,12 @@
 					"icon": "laboratory_${laboratory}.png",
 					"iconAlias": { "biological": "biology", "physical": "physics", "electronic": "electronics" }
 				}
+			},
+			{
+				"name": "Restricted area",
+				"description": "Area/room only for a limited amount of people",
+				"onTags": [ { "indoor": "room|area|corridor", "access": "private|no" }, { "buildingpart": "verticalpassage|hall|room|area|corridor", "access": "private|no" }, { "room": "technical" } ],
+				"style": { "fillColor": "#A2A2A2" }
 			}
 		],
 		
@@ -187,7 +171,7 @@
 				"name": "Vertical passage",
 				"description": "Elevetor, stairs (as polygons)",
 				"onTags": [ { "highway": "elevator|lift" } ],
-				"style": { "icon": "passage_elevator.png", "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "level": -1 }
+				"style": { "icon": "passage_elevator.png", "color": "#7495DA", "fillColor": "#AEBDDA", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "level": -1 }
 			},
 			{
 				"description": "Oneway path",
