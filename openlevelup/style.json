@@ -6,7 +6,7 @@
 				"name": "Room",
 				"description": "Indoor rooms",
 				"onTags": [ { "indoor": "room" }, { "buildingpart": "room" } ],
-				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes" }
+				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 2, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes" }
 			},
 			{
 				"name": "Wall",
@@ -261,6 +261,14 @@
 			}
 		],
 		
+		"amenity|public_transport|room": [
+			{
+				"description": "Comfort amenities",
+				"onTags": [ { "amenity": "toilets" }, { "public_transport": "waiting_area" }, { "room": "waiting" } ],
+				"style": { "fillColor": "#E3C8E3" }
+			}
+		],
+		
 		
 		"emergency": [
 			{
@@ -336,7 +344,7 @@
 				"name": "${tourism} (tourism)",
 				"description": "Tourism icons",
 				"onTags": [ { "tourism": "*" } ],
-				"style": { "icon": "tourism_${tourism}.png", "color": "#ECC7A6", "fillColor": "#ECC7A6", "opacity": 1, "fillOpacity": 1, "weight": 3, "label": "name", "labelStyle": "tourism" }
+				"style": { "icon": "tourism_${tourism}.png", "fillColor": "#ECC7A6", "opacity": 1, "fillOpacity": 1, "label": "name", "labelStyle": "tourism" }
 			},
 			{
 				"name": "${information} (information)",
