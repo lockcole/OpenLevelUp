@@ -192,7 +192,7 @@
 				"name": "${amenity} (amenity)",
 				"description": "Amenities",
 				"onTags": [ { "amenity": "*" } ],
-				"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2", "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
+				"style": { "color": "#AAAAAA", "fillColor": "#FFDAAD", "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
 			},
 			{
 				"description": "Small amenities",
@@ -329,7 +329,7 @@
 				"name": "${shop} (shop)",
 				"description": "Shops",
 				"onTags": [ { "shop": "*" } ],
-				"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2", "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
+				"style": { "color": "#AAAAAA", "fillColor": "#FFDAAD", "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
 			},
 			{
 				"name": "Mall",
@@ -344,7 +344,7 @@
 				"name": "${tourism} (tourism)",
 				"description": "Tourism icons",
 				"onTags": [ { "tourism": "*" } ],
-				"style": { "icon": "tourism_${tourism}.png", "fillColor": "#ECC7A6", "opacity": 1, "fillOpacity": 1, "label": "name", "labelStyle": "tourism" }
+				"style": { "icon": "tourism_${tourism}.png", "fillColor": "#FFF6AD", "opacity": 1, "fillOpacity": 1, "label": "name", "labelStyle": "tourism" }
 			},
 			{
 				"name": "${information} (information)",
