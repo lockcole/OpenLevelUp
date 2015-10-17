@@ -159,12 +159,12 @@
 			{
 				"name": "Conveying path",
 				"description": "Conveying path",
-				"onTags": [ { "conveying": "yes|forward|backward" } ],
+				"onTags": [ { "conveying": "yes|forward|backward|reversible" } ],
 				"style": { "color": "#848484", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "3,1", "levelup": true }
 			},
 			{
 				"description": "Conveying path",
-				"onTags": [ { "highway": "footway", "conveying": "yes|forward|backward" } ],
+				"onTags": [ { "highway": "footway", "conveying": "yes|forward|backward|reversible" } ],
 				"style": { "dashArray": "3,2" }
 			},
 			{
@@ -188,7 +188,7 @@
 			{
 				"name": "Escalator",
 				"description": "Escalator (verticalpassage)",
-				"onTags": [ { "conveying": "*" } ],
+				"onTags": [ { "conveying": "yes|forward|backward|reversible" } ],
 				"style": { "icon": "passage_escalator.png" }
 			},
 			{
