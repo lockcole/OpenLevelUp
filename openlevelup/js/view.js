@@ -880,31 +880,34 @@ var FeatureView = function(main, feature, details) {
 			var ftLevels = this._feature.onLevels();
 			var levelUp = false, levelDown = false, lvlUpIcon, lvlDownIcon;
 			if(style.levelup && ftLevels.length > 0 && !this._mainView.isMobile()) {
-				//Able to go up ?
+				//Levels
 				var levelId = ftLevels.indexOf(this._mainView.getLevelView().get());
 				levelUp = levelId < ftLevels.length -1;
+				var iconX = (hasIcon) ? -CONFIG.view.icons.size/2 : CONFIG.view.icons.size/4;
 				
+				//Up
 				if(levelUp) {
 					lvlUpIcon = L.icon({
 						iconUrl: CONFIG.view.icons.folder+'/arrow_up_3.png',
 						iconSize: [CONFIG.view.icons.size/2-1, CONFIG.view.icons.size/2-1],
-						iconAnchor: [-CONFIG.view.icons.size/2, CONFIG.view.icons.size/2],
+						iconAnchor: [iconX, CONFIG.view.icons.size/2],
 						popupAnchor: [0, -CONFIG.view.icons.size/2]
 					});
 				}
 				
+				//Down
 				levelDown = levelId > 0;
 				if(levelDown) {
 					lvlDownIcon = L.icon({
 						iconUrl: CONFIG.view.icons.folder+'/arrow_down_3.png',
 						iconSize: [CONFIG.view.icons.size/2-1, CONFIG.view.icons.size/2-1],
-						iconAnchor: [-CONFIG.view.icons.size/2, 0],
+						iconAnchor: [iconX, 0],
 						popupAnchor: [0, -CONFIG.view.icons.size/2]
 					});
 				}
 			}
 			
-			if(hasIcon || labelizable || hasPhoto) {
+			if(hasIcon || labelizable || hasPhoto || levelUp || levelDown) {
 				switch(geomType) {
 					case "Point":
 						//Labels
