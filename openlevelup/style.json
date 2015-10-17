@@ -180,6 +180,18 @@
 				"style": { "icon": "passage_elevator.png" }
 			},
 			{
+				"name": "Stairs",
+				"description": "Stairs (verticalpassage)",
+				"onTags": [ { "area": "yes", "highway": "steps" } ],
+				"style": { "icon": "passage_stairs.png" }
+			},
+			{
+				"name": "Escalator",
+				"description": "Escalator (verticalpassage)",
+				"onTags": [ { "area": "yes", "conveying": "yes|forward|backward|reversible" } ],
+				"style": { "icon": "passage_escalator.png" }
+			},
+			{
 				"description": "Oneway path",
 				"onTags": [ { "oneway": "yes" }, { "conveying": "forward" } ],
 				"style": { "icon": "arrow_up_1.png", "rotateIcon": true }
