@@ -6,13 +6,13 @@
 				"name": "Room",
 				"description": "Indoor rooms",
 				"onTags": [ { "indoor": "room" }, { "buildingpart": "room" } ],
-				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 2, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes" }
+				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 2.5, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes" }
 			},
 			{
 				"name": "Wall",
 				"description": "Indoor walls",
 				"onTags": [ { "indoor": "wall" }, { "buildingpart": "wall" } ],
-				"style": { "color": "#999999", "opacity": 1, "weight": 2, "fillColor": "#999999", "fillOpacity": 1, "popup": "yes", "layer": -2 }
+				"style": { "color": "#999999", "opacity": 1, "weight": 2.5, "fillColor": "#999999", "fillOpacity": 1, "popup": "yes", "layer": -2 }
 			},
 			{
 				"name": "Area",
@@ -64,14 +64,14 @@
 				"name": "Pillar",
 				"description": "Pillar",
 				"onTags": [ { "indoor": "column" } ],
-				"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
+				"style": { "color": "#656565", "opacity": 1, "weight": 2.5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
 			},
 			{
 				"name": "Glass cabinet",
 				"description": "Glass cabinet",
 				"onTags": [ { "indoor": "glass_cabinet" } ],
 				"isDetail": true,
-				"style": { "color": "#A2CCC8", "fillColor": "#E3F3F5", "opacity": 1, "fillOpacity": 1, "lineJoin": "miter", "weight": 3, "layer": -1 }
+				"style": { "color": "#A2CCC8", "fillColor": "#E3F3F5", "opacity": 1, "fillOpacity": 1, "lineJoin": "miter", "weight": 2, "layer": -1 }
 			},
 			{
 				"name": "Door",
@@ -169,9 +169,27 @@
 			},
 			{
 				"name": "Vertical passage",
-				"description": "Elevetor, stairs (as polygons)",
+				"description": "Elevetor, stairs",
+				"onTags": [ { "highway": "elevator|lift" }, { "highway": "steps", "area": "yes" } ],
+				"style": { "color": "#7495DA", "fillColor": "#AEBDDA", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1, "dashArray": "null" }
+			},
+			{
+				"name": "Elevator",
+				"description": "Elevator",
 				"onTags": [ { "highway": "elevator|lift" } ],
-				"style": { "icon": "passage_elevator.png", "color": "#7495DA", "fillColor": "#AEBDDA", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "level": -1 }
+				"style": { "icon": "passage_elevator.png" }
+			},
+			{
+				"name": "Stairs",
+				"description": "Stairs (verticalpassage)",
+				"onTags": [ { "highway": "steps" } ],
+				"style": { "icon": "passage_stairs.png" }
+			},
+			{
+				"name": "Escalator",
+				"description": "Escalator (verticalpassage)",
+				"onTags": [ { "conveying": "*" } ],
+				"style": { "icon": "passage_escalator.png" }
 			},
 			{
 				"description": "Oneway path",
@@ -245,7 +263,7 @@
 				"name": "${barrier} (barrier)",
 				"description": "Barrier icons",
 				"onTags": [ { "barrier": "*" } ],
-				"style": { "icon": "barrier_${barrier}.png", "opacity": 1, "weight": 5, "lineCap": "butt", "showMissingIcon": false }
+				"style": { "icon": "barrier_${barrier}.png", "opacity": 1, "weight": 2, "lineCap": "butt", "showMissingIcon": false }
 			},
 			{
 				"name": "Fence",
@@ -285,7 +303,7 @@
 				"name": "Pillar",
 				"description": "Pillar",
 				"onTags": [ { "man_made": "pillar" } ],
-				"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
+				"style": { "color": "#656565", "opacity": 1, "weight": 2.5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
 			},
 			{
 				"name": "CCTV",
@@ -456,7 +474,7 @@
 				"name": "Pillar",
 				"description": "Pillar",
 				"onTags": [ { "building:part": "column" } ],
-				"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
+				"style": { "color": "#656565", "opacity": 1, "weight": 2.5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
 			}
 		]
 	},
@@ -570,6 +588,10 @@
 		},
 		"seats": {
 			"img": "icon_seats.svg",
+			"values": "text"
+		},
+		"stairs:orientation": {
+			"img": "icon_compass.svg",
 			"values": "text"
 		},
 		"website": {
