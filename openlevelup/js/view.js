@@ -27,13 +27,10 @@
  * The main view class.
  * It handles the index page, and contains links to sub-components.
  */
-var MainView = function(ctrl, mobile) {
+var MainView = function(ctrl) {
 //ATTRIBUTES
 	/** The main controller **/
 	this._ctrl = ctrl;
-	
-	/** Is the user using a mobile device ? **/
-	this._isMobile = mobile || false;
 	
 	/** Is the user using a WebGL capable browser ? **/
 	this._hasWebGL = Detector.webgl;
@@ -57,7 +54,7 @@ var MainView = function(ctrl, mobile) {
 	this._cOptions = new OptionsView();
 	
 	/** The export component **/
-	this._cExport = null;
+// 	this._cExport = null;
 	
 	/** The names component **/
 	this._cNames = null;
@@ -83,11 +80,11 @@ var MainView = function(ctrl, mobile) {
 	this._cNames = new NamesView(this);
 	this._cImages = new ImagesView(this);
 	this._cLevel = new LevelView(this);
-	this._cExport = new ExportView(this);
+// 	this._cExport = new ExportView(this);
 	this._cTags = new TagsView(this);
 	this._cNotes = new NotesView(this);
 	
-	this._cExport.hideButton();
+// 	this._cExport.hideButton();
 	this._cNames.hideButton();
 	this._cLevel.disable();
 	
@@ -95,6 +92,12 @@ var MainView = function(ctrl, mobile) {
 	$("#logo-link").click(function() {
 		controller.getView().getMapView().resetView();
 	});
+	
+	//Collapse sidebar if is mobile
+	if($(window).width() < 768) {
+		$("#sidebar").addClass("collapsed");
+		$("#sidebar li.active").removeClass("active");
+	}
 };
 
 //ACCESSORS
@@ -102,7 +105,7 @@ var MainView = function(ctrl, mobile) {
 	 * @return True if the application is viewed in a mobile device
 	 */
 	MainView.prototype.isMobile = function() {
-		return this._isMobile;
+		return $(window).width() < 768;
 	};
 	
 	/**
@@ -211,8 +214,9 @@ var MainView = function(ctrl, mobile) {
 			
 			//Add names and export buttons if needed
 			if(oldZoom == null || oldZoom < CONFIG.view.map.full_data_min_zoom) {
-				this._cExport.showButton();
+// 				this._cExport.showButton();
 				this._cNames.showButton();
+				this._cNotes.showButton();
 				this._cLevel.enable();
 				this._cOptions.enable();
 				this._cMap.update();
@@ -224,8 +228,9 @@ var MainView = function(ctrl, mobile) {
 			
 			//Add names and export buttons if needed
 			if(oldZoom == null || oldZoom < CONFIG.view.map.data_min_zoom) {
-				this._cExport.showButton();
+// 				this._cExport.showButton();
 				this._cNames.showButton();
+				this._cNotes.showButton();
 				this._cLevel.enable();
 				this._cOptions.enable();
 				this._cMap.update();
@@ -237,8 +242,9 @@ var MainView = function(ctrl, mobile) {
 		else if(zoom >= CONFIG.view.map.cluster_min_zoom) {
 			//Remove names and export buttons if needed
 			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
-				this._cExport.hideButton();
+// 				this._cExport.hideButton();
 				this._cNames.hideButton();
+				this._cNotes.hideButton();
 				this._cLevel.disable();
 				this._cOptions.disable();
 			}
@@ -252,8 +258,9 @@ var MainView = function(ctrl, mobile) {
 			
 			//Remove names and export buttons if needed
 			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
-				this._cExport.hideButton();
+// 				this._cExport.hideButton();
 				this._cNames.hideButton();
+				this._cNotes.hideButton();
 				this._cLevel.disable();
 				this._cOptions.disable();
 			}
@@ -423,11 +430,6 @@ var MapView = function(main) {
 	
 	if(isMobile) {
 		L.control.zoom({ position: "topright" }).addTo(this._map);
-	}
-	
-	//New note button
-	if(!isMobile) {
-		var newNoteBtn = new NoteButton().addTo(this._map);
 	}
 	
 	//Create tile layers
@@ -758,26 +760,25 @@ var MapView = function(main) {
 		setTimeout(function() {
 			if(this._mainView.getLoadingView().isLoading()) {
 				$(document).bind("loading_done", function() {
-					this._dataPopups[ftId].openPopup(centroidLatLng);
+					if(this._dataPopups[ftId] != undefined) {
+						this._dataPopups[ftId].openPopup(centroidLatLng);
+					}
+					else {
+						console.error("[Rooms] Undefined popup for "+ftId);
+					}
 					$(document).unbind("loading_done");
 				}.bind(this));
 			}
 			else {
-				this._dataPopups[ftId].openPopup(centroidLatLng);
+				if(this._dataPopups[ftId] != undefined) {
+					this._dataPopups[ftId].openPopup(centroidLatLng);
+				}
+				else {
+					console.error("[Rooms] Undefined popup for "+ftId);
+				}
 			}
 		}.bind(this),
 		300);
-	};
-
-	/**
- 	 * Changes the currently shown popup tab
-	 * @param id The ID of the tab to show (for exemple "general")
-	 */
-	MapView.prototype.changePopupTab = function(id) {
-		$(".popup-nav .item:visible").removeClass("selected");
-		$(".popup-tab:visible").hide();
-		$(".leaflet-popup:visible #popup-tab-"+id).show();
-		$("#item-"+id).addClass("selected");
 	};
 	
 	/**
@@ -1858,34 +1859,34 @@ var OptionsView = function() {
 /**
  * The export component
  */
-var ExportView = function(main) {
-//ATTRIBUTES
-	/** The main view **/
-	this._mainView = main;
-
-//CONSTRUCTOR
-	$("#button-export").click(function() {
-		controller.getView().showCentralPanel("export");
-	});
-	//$("#export-link").click(controller.onExportLevel);
-	//$("#export-link-img").click(controller.onExportLevelImage);
-};
-	
-//OTHER METHODS
-	/**
-	 * Shows the export button
-	 */
-	ExportView.prototype.showButton = function() {
-		$("#button-export").show();
-	};
-	
-	/**
-	 * Hides the export button
-	 */
-	ExportView.prototype.hideButton = function() {
-		$("#button-export").hide();
-		this._mainView.hideCentralPanel();
-	};
+// var ExportView = function(main) {
+// //ATTRIBUTES
+// 	/** The main view **/
+// 	this._mainView = main;
+// 
+// //CONSTRUCTOR
+// 	$("#button-export").click(function() {
+// 		controller.getView().showCentralPanel("export");
+// 	});
+// 	//$("#export-link").click(controller.onExportLevel);
+// 	//$("#export-link-img").click(controller.onExportLevelImage);
+// };
+// 	
+// //OTHER METHODS
+// 	/**
+// 	 * Shows the export button
+// 	 */
+// 	ExportView.prototype.showButton = function() {
+// 		$("#button-export").show();
+// 	};
+// 	
+// 	/**
+// 	 * Hides the export button
+// 	 */
+// 	ExportView.prototype.hideButton = function() {
+// 		$("#button-export").hide();
+// 		this._mainView.hideCentralPanel();
+// 	};
 
 
 
@@ -2175,9 +2176,6 @@ var NamesView = function(main) {
 	this._mainView = main;
 
 //CONSTRUCTOR
-	$("#button-rooms").click(function() {
-		this._mainView.showCentralPanel("room-names");
-	}.bind(this));
 	$("#search-room").click(this.searchFocus.bind(this));
 	$("#search-room").focus(this.searchFocus.bind(this));
 	$("#search-room").focusout(this.searchFocus.bind(this));
@@ -2191,14 +2189,14 @@ var NamesView = function(main) {
 	 * Shows the export button
 	 */
 	NamesView.prototype.showButton = function() {
-		$("#button-rooms").show();
+		$("#sidebar-tab-roomlist").removeClass("disabled");
 	};
 	
 	/**
 	 * Hides the export button
 	 */
 	NamesView.prototype.hideButton = function() {
-		$("#button-rooms").hide();
+		$("#sidebar-tab-roomlist").addClass("disabled");
 		this._mainView.hideCentralPanel();
 	};
 	
@@ -2876,6 +2874,7 @@ var NotesView = function(main) {
 	this._mainView = main;
 
 //CONSTRUCTOR
+	$("#sidebar-tab-notes").click(this.editNote.bind(this));
 	$("#notes-close").click(function() {
 		$("#op-notes").removeClass("show");
 		$("#op-notes").addClass("hide");
@@ -2892,6 +2891,22 @@ var NotesView = function(main) {
 	};
 	
 //MODIFIERS
+	/**
+	 * Shows the export button
+	 */
+	NotesView.prototype.showButton = function() {
+		$("#sidebar-tab-notes").removeClass("disabled");
+	};
+	
+	/**
+	 * Hides the export button
+	 */
+	NotesView.prototype.hideButton = function() {
+		$("#sidebar-tab-notes").addClass("disabled");
+		this._mainView.hideCentralPanel();
+		this._mainView.getMapView().hideDraggableMarker();
+	};
+	
 	/**
 	 * Shows a given note in panel
 	 * @param e The leaflet event
@@ -2930,7 +2945,7 @@ var NotesView = function(main) {
 	 * Starts or stops to edit a new note
 	 */
 	NotesView.prototype.editNote = function() {
-		if(!$("#note-add").is(":visible")) {
+		if(!$("#notes").hasClass("active")) {
 			var dataZoom = this._mainView.getMapView().get().getZoom() >= CONFIG.view.map.data_min_zoom;
 			if(dataZoom) {
 				this._mainView.showCentralPanel("note-add");
@@ -2946,34 +2961,3 @@ var NotesView = function(main) {
 			this._mainView.getMapView().hideDraggableMarker();
 		}
 	};
-
-
-
-/**
- * New note button for leaflet
- * @see https://gist.github.com/ns-1m/2935530
- */
-var NoteButton = L.Control.extend({
-	options: {
-		position: 'topright'
-	},
-
-	onAdd: function (map) {
-		//Button
-		var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-note');
-		container.style.backgroundColor = 'white';
-		container.style.width = '26px';
-		container.style.height = '26px';
-		
-		//Image
-		var image = L.DomUtil.create('img', '', container);
-		image.src = 'img/icon_note_add.png';
-		image.title = 'Add a comment on map';
-
-		container.onclick = function(){
-			controller.getView().getNotesView().editNote();
-		}
-
-		return container;
-	}
-});

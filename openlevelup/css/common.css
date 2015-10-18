@@ -61,28 +61,38 @@ h1 {
 	text-align: center;
 }
 
+a.help {
+	font-weight: normal;
+	cursor: help;
+	text-decoration: underline;
+	text-decoration-style: dotted;
+}
+
 /*******
  * Map *
  *******/
+
 #map {
-	width: 100%;
 	height: 100%;
 }
 
 /**********
  * Header *
  **********/
-header {
-	width: 100%;
-}
 
 #logo-link {
 	cursor: pointer;
 }
 
+#logo-link img {
+	margin-top: 15px;
+}
+
 /***********
  * Sidebar *
  ***********/
+
+/* Tabs */
 
 .sidebar-tabs {
 	background-color: #81ADFF;
@@ -97,25 +107,130 @@ header {
 	cursor: pointer;
 }
 
+.sidebar-tabs > ul > li.disabled img {
+	filter: invert(40%);
+	-moz-filter: grayscale(40%);
+}
+
 .sidebar-tabs > ul > li:hover {
 	background-color: #B8D1FF;
 }
+
+/* Level control */
+
+#level-control {
+	text-align: center;
+	position: absolute;
+	top: 42px;
+	right: 0px;
+	left: 0px;
+}
+
+#level-control select {
+	width: 100%;
+	max-width: 100%;
+}
+
+/* Content */
 
 .sidebar-content {
 	background-color: #E1EBFF;
 	color: #444;
 }
 
-#sidebar-pane-home-content {
-	margin-top: 15px;
+h1.sidebar-header img {
+	height: 32px;
+	vertical-align: middle;
 }
 
-footer {
-	position: absolute;
-	bottom: 0px;
-	right: 0px;
-	left: 0px;
+/* Home sidebar */
+
+#home.active {
+	height: 100%;
+	width: 100%;
+	display: table;
 }
+
+header, footer, #home > div {
+	display: table-row;
+	text-align: center;
+}
+
+#home > div {
+	height: 100%;
+}
+
+/* Settings sidebar */
+
+#settings {
+	padding-left: 10px;
+}
+
+#settings ul {
+	list-style: none;
+	list-style-type: none;
+	padding-left: 10px;
+	text-align: left;
+}
+
+/* Room list sidebar */
+#roomlist {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+#rooms {
+	color: #333;
+	display: table;
+	border-collapse: separate;
+	border-spacing: 10px;
+	width: 100%;
+}
+
+#rooms a {
+	color: #007BFE;
+	text-decoration: none;
+}
+
+#rooms a:hover {
+	color: #51A5FE;
+}
+
+/* Level row */
+.lvl-row {
+	display: table-row;
+}
+
+.lvl-name, .lvl-rooms {
+	display: table-cell;
+}
+
+.lvl-name {
+	vertical-align: top;
+	border-right: 1px solid #2A75FF;
+	font-weight: bold;
+}
+
+.lvl-rooms {
+	vertical-align: middle;
+	width: 100%;
+}
+
+.lvl-rooms ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+.lvl-rooms li {
+	text-align: left;
+	padding-bottom: 2px;
+}
+
+.lvl-rooms li img {
+	vertical-align: middle;
+}
+
 
 /***************************
  * Overlay optional panels *

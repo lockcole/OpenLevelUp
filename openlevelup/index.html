@@ -95,17 +95,20 @@
 		<!-- Nav tabs -->
 		<div class="sidebar-tabs">
 			<ul role="tablist">
-				<li class="active"><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
-				<li class="level"><a id="levelUp"><img src="img/arrow_up_2.png" alt="↑" /></a></li>
-				<li class="level"><a><select id="level" disabled="true"></select></a></li>
-				<li class="level"><a id="levelDown"><img src="img/arrow_down_2.png" alt="↓" /></a></li>
+				<li class="active"><a href="#home" role="tab"><img src="img/favicon.jpg" /></i></a></li>
 			</ul>
 			
 			<ul role="tablist">
-				<li><a href="#roomlist" role="tab"><img src="img/icon_rooms.svg" /></a></li>
-				<li><a href="#notes" role="tab"><img src="img/icon_note.svg" /></a></li>
+				<li id="sidebar-tab-roomlist" class="disabled"><a href="#roomlist" role="tab"><img src="img/icon_rooms.svg" /></a></li>
+				<li id="sidebar-tab-notes" class="disabled"><a href="#notes" role="tab"><img src="img/icon_note.svg" /></a></li>
 				<li><a href="#settings" role="tab"><img src="img/icon_settings.svg" /></a></li>
 			</ul>
+			
+			<div id="level-control">
+				<a id="levelUp"><img src="img/arrow_up_2.png" alt="↑" /></a><br />
+				<a><select id="level" disabled="true"></select></a><br />
+				<a id="levelDown"><img src="img/arrow_down_2.png" alt="↓" /></a>
+			</div>
 		</div>
 
 		<!-- Tab panes -->
@@ -116,24 +119,23 @@
 					<div class="sidebar-close"><i class="fa fa-caret-left"></i></div>
 				</h1>
 
-				<div id="sidebar-pane-home-content" class="center">
-					<header>
-						<a id="logo-link" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!"></a>
-						<p>See inside buildings<br>with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
-					</header>
-					
-					<footer>
-						<p><a id="osm-link" title="See this area on OpenStreetMap" href="http://openstreetmap.org">OSM.org</a> | <a id="shortlink" href="">Shortlink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
-					</footer>
+				<header>
+					<a id="logo-link" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!"></a>
+					<p>See inside buildings<br>with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
+				</header>
+				
+				<div>
 				</div>
+				
+				<footer>
+					<p><a id="osm-link" title="See this area on OpenStreetMap" href="http://openstreetmap.org">OSM.org</a> | <a id="shortlink" href="">Shortlink</a> | <a href="#" id="about-link">About</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
+				</footer>
 			</div>
 
 			<div class="sidebar-pane" id="roomlist">
 				<h1 class="sidebar-header"><img src="img/icon_rooms.svg" /> Rooms<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
 				<p class="input-max"><span class="text"><input type="text" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
-				<div id="rooms-container">
-					<div id="rooms">
-					</div>
+				<div id="rooms">
 				</div>
 			</div>
 
