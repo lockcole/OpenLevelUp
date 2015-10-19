@@ -1264,12 +1264,6 @@ var TagsView = function(main) {
 //ATTRIBUTES
 	/** The main view **/
 	this._mainView = main;
-
-//CONSTRUCTOR
-	$("#tags-close").click(function() {
-		$("#op-tags").removeClass("show");
-		$("#op-tags").addClass("hide");
-	});
 };
 
 //OTHER METHODS
@@ -1436,19 +1430,23 @@ var TagsView = function(main) {
 		
 		console.log("layer",ft.getStyle().get().layer);
 		
-		$("#op-tags-list").html(tagList);
+		var content = '<p id="op-tags-list">'+tagList+'</p>';
 		
 		if(detailsTxt != '') {
-			$("#op-tags-details").show();
-			$("#op-tags-details").html(detailsTxt);
+			content = '<p id="op-tags-details">'+detailsTxt+'</p>' + content;
 		}
-		else {
-			$("#op-tags-details").hide();
-		}
-
-		//Show panel
-		$("#op-tags").removeClass("hide");
-		$("#op-tags").addClass("show");
+		
+		//Create window
+		L.control.window(
+			this._mainView.getMapView().get(),
+			{
+				title: 'Details',
+				content: content,
+				modal: true,
+				position: 'center',
+				visible: true
+			}
+		);
 	};
 
 	/**
