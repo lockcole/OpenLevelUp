@@ -334,17 +334,8 @@ header, footer, #home > div {
 }
 
 /* Loading panel */
-#op-loading {
-	visibility: visible;
-}
-
-#op-loading ul {
-	margin-left: 30px;
-	margin-top: 10px;
-}
-
-#op-loading ul li {
-	margin-bottom: 5px;
+#spinner {
+	margin-right: 10px;
 }
 
 /* About panel */

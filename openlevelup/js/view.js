@@ -39,7 +39,7 @@ var MainView = function(ctrl) {
 	 * The view components
 	 */
 	/** The loading component **/
-	this._cLoading = new LoadingView();
+	this._cLoading = null;
 	
 	/** The about component **/
 	this._cAbout = new AboutView();
@@ -77,6 +77,7 @@ var MainView = function(ctrl) {
 //CONSTRUCTOR
 	this._cUrl = new URLView(this);
 	this._cMap = new MapView(this);
+	this._cLoading = new LoadingView(this);
 	this._cNames = new NamesView(this);
 	this._cImages = new ImagesView(this);
 	this._cLevel = new LevelView(this);
@@ -2662,13 +2663,31 @@ var ImagesView = function(main) {
 /**
  * The loading overlay panel component
  */
-var LoadingView = function() {
+var LoadingView = function(main) {
 //ATTRIBUTES
+	/** The main view **/
+	this._mainView = main;
+	
+	/** Leaflet window **/
+	this._window = null;
+	
 	/** Is loading ? **/
 	this._loading = false;
 	
 	/** The last timestamp **/
 	this._lastTime = 0;
+
+//CONSTRUCTOR
+	this._window = L.control.window(
+						this._mainView.getMapView().get(),
+						{
+							title: '<img id="spinner" src="img/icon_spinner.gif" height="32" />Loading',
+							content: '',
+							modal: true,
+							position: 'center',
+							closeButton: false
+						}
+					);
 };
 	
 //ACCESSORS
@@ -2687,14 +2706,12 @@ var LoadingView = function() {
 	LoadingView.prototype.setLoading = function(loading) {
 		this._loading = loading;
 		if(loading) {
-			$("#op-loading-info li").remove();
-			$("#op-loading").removeClass("hide");
-			$("#op-loading").addClass("show");
+			this._window.show('center');
+			this._window.content('');
 			this._lastTime = (new Date()).getTime();
 		}
 		else {
-			$("#op-loading").removeClass("show");
-			$("#op-loading").addClass("hide");
+			this._window.close();
 			$(document).trigger("loading_done");
 		}
 	};
@@ -2706,15 +2723,13 @@ var LoadingView = function() {
 	LoadingView.prototype.addLoadingInfo = function(info) {
 		//Timestamp
 		var currentTime = (new Date()).getTime();
-		$("#op-loading-info li:last").append(' <small>'+(currentTime-this._lastTime)+' ms</small>');
+
+		//Change content
+		var content = this._window.content();
+		if(content.length > 0) { content += ' <small>'+(currentTime-this._lastTime)+' ms</small><br />'; }
+		this._window.content(content+'- '+info);
 		
-		//Add a new child in list, corresponding to the given message
-		var newLi = document.createElement("li");
-		$("#op-loading-info").append(newLi);
-		
-		//Add text to the added child
-		$("#op-loading-info li:last-child").html(info);
-		
+		//Update time
 		this._lastTime = currentTime;
 	};
 

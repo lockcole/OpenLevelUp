@@ -77,6 +77,8 @@
 	<link rel="stylesheet" href="lib/sidebar2/leaflet-sidebar.min.css" />
 	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" />
 	<script src="lib/sidebar2/leaflet-sidebar.min.js"></script>
+	<link rel="stylesheet" href="lib/controlwindow/L.Control.Window.custom.css" />
+	<script src="lib/controlwindow/L.Control.Window.js"></script>
 
 	<!-- OpenLevelUp includes -->
 	<script src="js/utils.js" type="text/javascript"></script>
@@ -115,6 +117,7 @@
 			<div class="sidebar-pane active" id="home">
 				<h1 class="sidebar-header">OpenLevelUp <div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
 
+				
 				<header>
 					<a id="logo-link" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a>
 					<p>See inside buildings<br>with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
@@ -146,7 +149,7 @@
 				<h1 class="sidebar-header"><img src="img/icon_note.svg" /> New note<div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
 				<p>Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here.</p>
 				<textarea id="note-txt" rows="5"></textarea>
-				<div class="buttons"><button id="note-send">Add a new note</button><button id="note-cancel">Cancel</button></div>
+				<div class="buttons"><button id="note-send">New note</button><button id="note-cancel">Cancel</button></div>
 			</div>
 		</div>
 	</div>
@@ -156,15 +159,6 @@
 
 	<!-- Overlay panels -->
 	<div class="overlay-panels">
-		<!-- Loading panel -->
-		<div class="overlay-panel hide" id="op-loading">
-			<div>
-				<h2><img src="img/icon_spinner.gif" height="32" />Loading</h2>
-				<ul id="op-loading-info">
-				</ul>
-			</div>
-		</div>
-		
 		<!-- About panel -->
 		<div class="overlay-panel hide" id="op-about">
 			<div class="centered">
