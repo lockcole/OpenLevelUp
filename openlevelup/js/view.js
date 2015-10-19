@@ -42,7 +42,7 @@ var MainView = function(ctrl) {
 	this._cLoading = null;
 	
 	/** The about component **/
-	this._cAbout = new AboutView();
+	this._cAbout = null;
 	
 	/** The messages stack component **/
 	this._cMessages = new MessagesView();
@@ -78,6 +78,7 @@ var MainView = function(ctrl) {
 	this._cUrl = new URLView(this);
 	this._cMap = new MapView(this);
 	this._cLoading = new LoadingView(this);
+	this._cAbout = new AboutView(this);
 	this._cNames = new NamesView(this);
 	this._cImages = new ImagesView(this);
 	this._cLevel = new LevelView(this);
@@ -2738,16 +2739,24 @@ var LoadingView = function(main) {
 /**
  * The about view
  */
-var AboutView = function() {
+var AboutView = function(main) {
+//ATTRIBUTES
+	/** The main view **/
+	this._mainView = main;
+
 //CONSTRUCTOR
-	//$("#op-about").hide();
 	$("#about-link").click(function() {
-		$("#op-about").toggleClass("hide show");
-	});
-	$("#about-close").click(function() {
-		$("#op-about").removeClass("show");
-		$("#op-about").addClass("hide");
-	});
+		L.control.window(
+			this._mainView.getMapView().get(),
+			{
+				title: 'About OpenLevelUp!',
+				content: 'This website allows you to see <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project. You can navigate through the building levels with the buttons on the left panel.<br />Want to know more about the project ? Look at the <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup">GitHub repository</a>. Want to contact the author ? <a href="mailto:panieravide@riseup.net">Here you go</a>.<br />This website is licensed under <a href="https://www.gnu.org/licenses/agpl.html">AGPL v3</a>.',
+				modal: true,
+				position: 'center',
+				visible: true
+			}
+		);
+	}.bind(this));
 }
 
 

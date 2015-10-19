@@ -98,6 +98,14 @@
     overflow: auto;
 }
 
+.leaflet-control-window .content a {
+    color: #D2E2FF;
+}
+
+.leaflet-control-window .content a:hover {
+    color: #B3CEFF;
+}
+
 .leaflet-control-window .promptButtons{
     text-align: right;
     /*padding: 16px;*/
