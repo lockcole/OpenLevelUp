@@ -635,6 +635,7 @@ var Ctrl = function() {
 	 */
 	Ctrl.prototype.newNoteSent = function(data) {
 		this._view.getMessagesView().displayMessage("Your note was successfully sent", "info");
+		this._view.getMapView().hideDraggableMarker();
 		this._view.hideCentralPanel();
 		
 		//Add given data to NotesData
@@ -649,5 +650,6 @@ var Ctrl = function() {
 	 */
 	Ctrl.prototype.newNoteFailed = function() {
 		this._view.getMessagesView().displayMessage("An error occurred during note sending", "error");
+		this._view.getMapView().hideDraggableMarker();
 		this._view.hideCentralPanel();
 	};

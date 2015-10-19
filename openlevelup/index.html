@@ -101,7 +101,6 @@
 			<ul role="tablist">
 				<li id="sidebar-tab-roomlist" class="disabled"><a href="#roomlist" role="tab"><img src="img/icon_rooms.svg" /></a></li>
 				<li id="sidebar-tab-notes" class="disabled"><a href="#notes" role="tab"><img src="img/icon_note.svg" /></a></li>
-				<li><a href="#settings" role="tab"><img src="img/icon_settings.svg" /></a></li>
 			</ul>
 			
 			<div id="level-control">
@@ -114,17 +113,21 @@
 		<!-- Tab panes -->
 		<div class="sidebar-content">
 			<div class="sidebar-pane active" id="home">
-				<h1 class="sidebar-header">
-					OpenLevelUp
-					<div class="sidebar-close"><i class="fa fa-caret-left"></i></div>
-				</h1>
+				<h1 class="sidebar-header">OpenLevelUp <div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
 
 				<header>
-					<a id="logo-link" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!"></a>
+					<a id="logo-link" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a>
 					<p>See inside buildings<br>with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
 				</header>
 				
-				<div>
+				<div id="settings">
+					<ul>
+						<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
+						<li><label><input type="checkbox" id="show-buildings-only" disabled="true" /> Show <a class="help" title="Hides all objects that aren't buildings (no building=* tag)">buildings only</a></label></li>
+						<li><label><input type="checkbox" id="show-photos" disabled="true" /> Show <a class="help" title="Adds markers on objects which have an associated photo">pictures</a></label></li>
+						<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> Show <a class="help" title="Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.">unrendered objects</a></label></li>
+						<li><label><input type="checkbox" id="show-notes" disabled="true" /> Show <a class="help" title="OpenStreetMap notes allow other users to know that there is some edits to do in data.">OpenStreetMap notes</a></label></li>
+					</ul>
 				</div>
 				
 				<footer>
@@ -133,28 +136,17 @@
 			</div>
 
 			<div class="sidebar-pane" id="roomlist">
-				<h1 class="sidebar-header"><img src="img/icon_rooms.svg" /> Rooms<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
+				<h1 class="sidebar-header"><img src="img/icon_rooms.svg" /> Rooms<div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
 				<p class="input-max"><span class="text"><input type="text" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
 				<div id="rooms">
 				</div>
 			</div>
 
 			<div class="sidebar-pane" id="notes">
-				<h1 class="sidebar-header"><img src="img/icon_note.svg" /> New note<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
+				<h1 class="sidebar-header"><img src="img/icon_note.svg" /> New note<div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
 				<p>Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here.</p>
 				<textarea id="note-txt" rows="5"></textarea>
-				<button id="note-send">Add a new note</button>
-			</div>
-
-			<div class="sidebar-pane" id="settings">
-				<h1 class="sidebar-header"><img src="img/icon_settings.svg" /> Settings<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
-				<ul>
-					<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
-					<li><label><input type="checkbox" id="show-buildings-only" disabled="true" /> Show <a class="help" title="Hides all objects that aren't buildings (no building=* tag)">buildings only</a></label></li>
-					<li><label><input type="checkbox" id="show-photos" disabled="true" /> Show <a class="help" title="Adds markers on objects which have an associated photo">pictures</a></label></li>
-					<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> Show <a class="help" title="Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.">unrendered objects</a></label></li>
-					<li><label><input type="checkbox" id="show-notes" disabled="true" /> Show <a class="help" title="OpenStreetMap notes allow other users to know that there is some edits to do in data.">OpenStreetMap notes</a></label></li>
-				</ul>
+				<div class="buttons"><button id="note-send">Add a new note</button><button id="note-cancel">Cancel</button></div>
 			</div>
 		</div>
 	</div>

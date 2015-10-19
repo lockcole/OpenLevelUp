@@ -98,8 +98,9 @@ a.help {
 	background-color: #81ADFF;
 }
 
-.sidebar-tabs > ul > li > a > img {
-	width: 24px;
+.sidebar-tabs > ul > li > a > img, h1.sidebar-header .sidebar-close img {
+	height: 24px;
+	margin: 8px;
 }
 
 .sidebar-tabs > ul > li.level {
@@ -231,6 +232,35 @@ header, footer, #home > div {
 	vertical-align: middle;
 }
 
+/* Search field */
+.input-max {
+	display: table;
+}
+
+.input-max .text {
+	display: table-cell;
+	width: 100%;
+}
+
+.input-max .text input {
+	width: 100%;
+}
+
+/* Notes pane */
+
+#notes textarea {
+	width: 100%;
+}
+
+#notes .buttons {
+	display: table;
+	width: 100%;
+}
+
+#notes .buttons button {
+	display: table-cell;
+	width: 50%;
+}
 
 /***************************
  * Overlay optional panels *

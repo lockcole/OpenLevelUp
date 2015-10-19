@@ -306,37 +306,12 @@ var MainView = function(ctrl) {
 	};
 	
 	/**
-	 * Displays the given central panel
-	 * @param id The panel ID
-	 */
-	MainView.prototype.showCentralPanel = function(id) {
-		if(!$("#"+id).is(":visible")) {
-			//Remove draggable marker if new note panel
-			if($("#note-add").is(":visible")) {
-				this._cMap.hideDraggableMarker();
-			}
-			
-			$("#central .part").hide();
-			$("#"+id).show();
-			$("#main-buttons").addClass("opened");
-			$("#central-close").show();
-			$("#central-close").click(controller.getView().hideCentralPanel.bind(this));
-		}
-		else {
-			this.hideCentralPanel();
-		}
-	};
-	
-	/**
 	 * Hides the central panel
 	 */
 	MainView.prototype.hideCentralPanel = function() {
-		$("#central .part").hide();
-		$("#central-close").hide();
-		$("#central-close").off("click");
-		$("#main-buttons").removeClass("opened");
-		
-		this._cMap.hideDraggableMarker();
+		$(".sidebar-tabs li").removeClass("active");
+		$("#sidebar .sidebar-pane").removeClass("active");
+		$("#sidebar").addClass("collapsed");
 	};
 
 
@@ -803,6 +778,7 @@ var MapView = function(main) {
 	MapView.prototype.hideDraggableMarker = function() {
 		if(this._draggableMarker != null) {
 			this._map.removeLayer(this._draggableMarker);
+			this._draggableMarker = null;
 		}
 	};
 	
@@ -1693,9 +1669,6 @@ var OptionsView = function() {
 	$("#show-notes").prop("checked", this._notes);
 	
 	//Add triggers
-	$("#button-settings").click(function() {
-		controller.getView().showCentralPanel("settings");
-	});
 	$("#show-transcendent").change(function() {
 		this.changeTranscendent();
 		controller.getView().updateOptionChanged();
@@ -1853,40 +1826,6 @@ var OptionsView = function() {
 		$("#show-photos").prop("disabled", false);
 		$("#show-notes").prop("disabled", false);
 	};
-
-
-
-/**
- * The export component
- */
-// var ExportView = function(main) {
-// //ATTRIBUTES
-// 	/** The main view **/
-// 	this._mainView = main;
-// 
-// //CONSTRUCTOR
-// 	$("#button-export").click(function() {
-// 		controller.getView().showCentralPanel("export");
-// 	});
-// 	//$("#export-link").click(controller.onExportLevel);
-// 	//$("#export-link-img").click(controller.onExportLevelImage);
-// };
-// 	
-// //OTHER METHODS
-// 	/**
-// 	 * Shows the export button
-// 	 */
-// 	ExportView.prototype.showButton = function() {
-// 		$("#button-export").show();
-// 	};
-// 	
-// 	/**
-// 	 * Hides the export button
-// 	 */
-// 	ExportView.prototype.hideButton = function() {
-// 		$("#button-export").hide();
-// 		this._mainView.hideCentralPanel();
-// 	};
 
 
 
@@ -2197,7 +2136,6 @@ var NamesView = function(main) {
 	 */
 	NamesView.prototype.hideButton = function() {
 		$("#sidebar-tab-roomlist").addClass("disabled");
-		this._mainView.hideCentralPanel();
 	};
 	
 	/**
@@ -2212,15 +2150,15 @@ var NamesView = function(main) {
 			var roomNamesFiltered = null;
 			
 			if(roomNames != null) {
-				roomNamesFiltered = new Object();
+				roomNamesFiltered = {};
 				
 				for(var lvl in roomNames) {
-					roomNamesFiltered[lvl] = new Object();
+					roomNamesFiltered[lvl] = {};
 					
 					for(var room in roomNames[lvl]) {
 						var ftGeomRoom = roomNames[lvl][room].getGeometry();
 						
-						if((filter == null || contains(room.toLowerCase(), filter.toLowerCase()))
+						if((filter == null || room.toLowerCase().indexOf(filter.toLowerCase()) > -1)
 							&& (roomNames[lvl][room].getStyle().get().popup == undefined
 							|| roomNames[lvl][room].getStyle().get().popup == "yes")
 							&& this._mainView.getData().getBBox().intersects(ftGeomRoom.getBounds())) {
@@ -2237,8 +2175,6 @@ var NamesView = function(main) {
 			}
 			
 			if(roomNames != null && roomNamesFiltered != null) {
-				//$("#rooms").empty();
-				
 				var levelsKeys = Object.keys(roomNamesFiltered);
 				levelsKeys.sort(function (a,b) { return parseFloat(a)-parseFloat(b);});
 				
@@ -2875,11 +2811,8 @@ var NotesView = function(main) {
 
 //CONSTRUCTOR
 	$("#sidebar-tab-notes").click(this.editNote.bind(this));
-	$("#notes-close").click(function() {
-		$("#op-notes").removeClass("show");
-		$("#op-notes").addClass("hide");
-	});
 	$("#note-send").click(controller.newNote.bind(controller));
+	$("#note-cancel").click(this.cancelNote.bind(this));
 };
 
 //ACCESSORS
@@ -2903,8 +2836,6 @@ var NotesView = function(main) {
 	 */
 	NotesView.prototype.hideButton = function() {
 		$("#sidebar-tab-notes").addClass("disabled");
-		this._mainView.hideCentralPanel();
-		this._mainView.getMapView().hideDraggableMarker();
 	};
 	
 	/**
@@ -2945,19 +2876,26 @@ var NotesView = function(main) {
 	 * Starts or stops to edit a new note
 	 */
 	NotesView.prototype.editNote = function() {
-		if(!$("#notes").hasClass("active")) {
+		if(
+			$("#sidebar-tab-notes").hasClass("active")
+			&& this._mainView.getMapView().getDraggableMarkerCoords() == null
+		) {
 			var dataZoom = this._mainView.getMapView().get().getZoom() >= CONFIG.view.map.data_min_zoom;
 			if(dataZoom) {
-				this._mainView.showCentralPanel("note-add");
 				this._mainView.getMapView().showDraggableMarker();
 				$("#note-txt").val("Level "+this._mainView.getLevelView().get()+": ");
 			}
 			else {
+				this._mainView.hideCentralPanel();
 				this._mainView.getMessagesView().displayMessage("You have to zoom in to add a note", "alert");
 			}
 		}
-		else {
-			this._mainView.hideCentralPanel();
-			this._mainView.getMapView().hideDraggableMarker();
-		}
+	};
+	
+	/**
+	 * Cancels a note
+	 */
+	NotesView.prototype.cancelNote = function() {
+		this._mainView.hideCentralPanel();
+		this._mainView.getMapView().hideDraggableMarker();
 	};
