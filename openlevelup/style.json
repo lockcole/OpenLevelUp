@@ -255,6 +255,12 @@
 				"description": "Toilets for disabled people",
 				"onTags": [ { "amenity": "toilets", "wheelchair": "yes|only|designated" } ],
 				"style": { "icon": "amenity_toilets_disabled.png" }
+			},
+			{
+				"name": "Stand-up bench",
+				"description": "Stand-up bench icon",
+				"onTags": [ { "bench:type": "stand_up" } ],
+				"style": { "icon": "bench_type_stand_up.png" }
 			}
 		],
 		
@@ -697,6 +703,7 @@
 		"barrier_stile.png",
 		"barrier_toll_booth.png",
 		"barrier_turnstile.png",
+		"bench_type_stand_up.png",
 		"door_no.png",
 		"door_sliding.png",
 		"door.png",
