@@ -857,7 +857,7 @@ var FeatureView = function(main, feature, details) {
 			
 			//Look for an icon or a label
 			var labelizable = this._labelizable();
-			var hasPhoto = this._mainView.getOptionsView().showPhotos() && (this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && !this._mainView.isMobile() && this._feature.getImages().hasValidSpherical()));
+			var hasPhoto = this._mainView.getOptionsView().showPhotos() && (this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && this._feature.getImages().hasValidSpherical()));
 			
 			if(hasIcon || labelizable || hasPhoto) {
 				switch(geomType) {
@@ -1200,16 +1200,14 @@ var FeatureView = function(main, feature, details) {
 		text += '</h1><div class="popup-footer">';
 		
 		//Picture link
-		if(this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && !this._mainView.isMobile() && this._feature.getImages().hasValidSpherical())) {
+		if(this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && this._feature.getImages().hasValidSpherical())) {
 			text += '<a href="#" id="images-open" title="Related pictures" onclick="controller.getView().getImagesView().open(\''+this._feature.getId()+'\')"><img src="img/icon_picture_2.svg" alt="Pictures" /></a> ';
 		}
 		
 		//Tags and OSM links
 		text += '<a href="#" id="tags-open" title="Tags" onclick="controller.getView().getTagsView().open(\''+this._feature.getId()+'\')"><img src="img/icon_tags.svg" alt="Tags" /></a><a href="http://www.openstreetmap.org/'+this._feature.getId()+'" title="See this on OSM.org" target="_blank"><img src="img/icon_osm.svg" alt="OSM.org" /></a></div>';
 		
-		var options = (isMobile) ? { autoPan: false } : { };
-		
-		return L.popup(options).setContent(text);
+		return L.popup({ autoPan: false }).setContent(text);
 	}
 	
 	/**
@@ -1442,7 +1440,6 @@ var TagsView = function(main) {
 			{
 				title: 'Details',
 				content: content,
-				modal: true,
 				position: 'center',
 				visible: true
 			}
@@ -2218,7 +2215,7 @@ var NamesView = function(main) {
 	 */
 	NamesView.prototype.searchOK = function() {
 		var search = $("#search-room").val();
-		return !this._mainView.isMobile() && search != "Search" && search.length >= 3;
+		return search != "Search" && search.length >= 3;
 	};
 	
 	/**
@@ -2247,6 +2244,9 @@ var ImagesView = function(main) {
 	/** The currently shown spherical image **/
 	this._currentSpherical = -1;
 	
+	/** The leaflet window **/
+	this._window = null;
+	
 	/** The available spherical images **/
 	this._sphericalImages = null;
 	
@@ -2268,13 +2268,42 @@ var ImagesView = function(main) {
 	this._theta = null;
 	this._firstClick = null;
 	this._mesh = null;
-	
+
 //CONSTRUCTOR
-	//$("#op-images").hide();
-	$("#images-close").click(function() {
-		$("#op-images").removeClass("show");
-		$("#op-images").addClass("hide");
-	});
+	this._window = L.control.window(
+		this._mainView.getMapView().get(),
+		{
+			title: '<div id="op-images-tabs-links"><a id="tab-imgs-a" href="#tab-imgs"><img src="img/icon_picture.svg" alt="Simple" /></a><a id="tab-spheric-a" href="#tab-spheric"><img src="img/icon_spherical_picture.svg" alt="Sphere" /></a></div>',
+			content: '<div id="op-images-tabs-content">'
+				+'	<div class="op-images-tab galleria" id="tab-imgs">'
+				+'	</div>'
+				+'	<div class="op-images-tab" id="tab-spheric">'
+				+'		<div id="spherical-content"></div>'
+				+'		<div id="spherical-legend">'
+				+'			<div id="spherical-legend-title"></div>'
+				+'			<div id="spherical-legend-text"></div>'
+				+'		</div>'
+				+'		<div id="spherical-nav">'
+				+'			<div id="spherical-nav-left">&lt;</div>'
+				+'			<div id="spherical-nav-right">&gt;</div>'
+				+'		</div>'
+				+'		<div id="spherical-counter">'
+				+'			<span>- / -</span>'
+				+'		</div>'
+				+'	</div>'
+				+'</div>'
+				+'<div id="op-images-status">'
+				+'	<img src="img/icon_web.svg" alt="Web" title="Web" /> <a id="status-web"><span class="status">&#x25CF;</span></a>'
+				+'	<img src="img/icon_mapillary.svg" alt="Mapillary" title="Mapillary" /> <a id="status-mapillary"><span class="status">&#x25CF;</span></a>'
+				+'	<img src="img/icon_flickr.svg" alt="Flickr" title="Flickr" /> <a id="status-flickr"><span class="status">&#x25CF;</span></a>'
+				+'</div>',
+			position: 'center',
+			className: 'control-window control-window-wide',
+			modal: true,
+			hideWhenClosed: true
+		}
+	);
+	
 	$("#tab-imgs-a").click(function() { controller.getView().getImagesView().changeTab("tab-imgs"); });
 	$("#tab-spheric-a").click(function() { controller.getView().getImagesView().changeTab("tab-spheric"); });
 	$("#spherical-nav-left").click(function() { controller.getView().getImagesView().previousSpherical(); });
@@ -2310,12 +2339,13 @@ var ImagesView = function(main) {
 		 * Set images tab
 		 */
 		var hasCommon = imagesData.length > 0;
-		var hasSpherical = this._sphericalImages.length > 0 && this._mainView.hasWebGL() && !this._mainView.isMobile();
+		var hasSpherical = this._sphericalImages.length > 0 && this._mainView.hasWebGL();
 		
 		//Common images
 		if(hasCommon) {
-			//Load base images
 			$("#tab-imgs-a").show();
+			
+			//Load base images
 			Galleria.run('.galleria', { dataSource: imagesData, popupLinks: true, _toggleInfo: false });
 		}
 		else {
@@ -2365,8 +2395,13 @@ var ImagesView = function(main) {
 		this.updateStatus("mapillary", status.mapillary, ft.getTag("mapillary"));
 		this.updateStatus("flickr", status.flickr);
 		
-		$("#op-images").removeClass("hide");
-		$("#op-images").addClass("show");
+		//Show window
+		this._window.show();
+		
+		if(hasSpherical) {
+			this._onWindowResize();
+			this._onWindowResize(); //Poor fix to set sphere size correctly
+		}
 	};
 	
  	/**
@@ -2378,6 +2413,10 @@ var ImagesView = function(main) {
  		$("#"+tab+"-a").addClass("selected");
 		$(".op-images-tab").hide();
  		$("#"+tab).show();
+		if(tab == "tab-spheric") {
+			this._onWindowResize();
+			this._onWindowResize();
+		}
  	};
 	
 	/**
@@ -2446,13 +2485,12 @@ var ImagesView = function(main) {
 	 */
 	
 	ImagesView.prototype._getSphereWidth = function() {
-		var w = $("#op-images > div").width();
+		var w = $("#spherical-content").width();
 		return (w > 0) ? w : CONFIG.view.images.spherical.width;
 	};
 	
 	ImagesView.prototype._getSphereHeight = function() {
-		var h = window.innerHeight * 0.8;
-		h = (h > 800) ? 700 : h - 100;
+		var h = $("#spherical-content").height();
 		return (h > 0) ? h : CONFIG.view.images.spherical.height;
 	};
 	
@@ -2502,11 +2540,11 @@ var ImagesView = function(main) {
 		this._container.appendChild(this._renderer.domElement);
 		
 		//Events
-		document.addEventListener('mousedown', this._onDocumentMouseDown.bind(this), false);
-		document.addEventListener('mousemove', this._onDocumentMouseMove.bind(this), false);
-		document.addEventListener('mouseup', this._onDocumentMouseUp.bind(this), false);
-		document.addEventListener('mousewheel', this._onDocumentMouseWheel.bind(this), false);
-		document.addEventListener('DOMMouseScroll', this._onDocumentMouseWheel.bind(this), false);
+		$("#spherical-content canvas").mousedown(this._onDocumentMouseDown.bind(this));
+		$("#spherical-content canvas").mousemove(this._onDocumentMouseMove.bind(this));
+		$("#spherical-content canvas").mouseup(this._onDocumentMouseUp.bind(this));
+		$("#spherical-content canvas").bind("mousewheel DOMMouseScroll", this._onDocumentMouseWheel.bind(this));
+		//document.addEventListener('DOMMouseScroll', this._onDocumentMouseWheel.bind(this), false);
 		document.addEventListener('dragover', function ( event ) {
 			event.preventDefault();
 			event.dataTransfer.dropEffect = 'copy';
@@ -2614,6 +2652,7 @@ var ImagesView = function(main) {
 	};
 
 	ImagesView.prototype._onDocumentMouseWheel = function( event ) {
+		event = event.originalEvent;
 		var prevFov = this._camera.fov;
 		// WebKit
 		if ( event.wheelDeltaY ) {
@@ -2678,15 +2717,15 @@ var LoadingView = function(main) {
 
 //CONSTRUCTOR
 	this._window = L.control.window(
-						this._mainView.getMapView().get(),
-						{
-							title: '<img id="spinner" src="img/icon_spinner.gif" height="32" />Loading',
-							content: '',
-							modal: true,
-							position: 'center',
-							closeButton: false
-						}
-					);
+		this._mainView.getMapView().get(),
+		{
+			title: '<img id="spinner" src="img/icon_spinner.gif" height="32" />Loading',
+			content: '',
+			modal: true,
+			position: 'center',
+			closeButton: false
+		}
+	);
 };
 	
 //ACCESSORS
@@ -2710,7 +2749,7 @@ var LoadingView = function(main) {
 			this._lastTime = (new Date()).getTime();
 		}
 		else {
-			this._window.close();
+			this._window.hide();
 			$(document).trigger("loading_done");
 		}
 	};
@@ -2727,6 +2766,7 @@ var LoadingView = function(main) {
 		var content = this._window.content();
 		if(content.length > 0) { content += ' <small>'+(currentTime-this._lastTime)+' ms</small><br />'; }
 		this._window.content(content+'- '+info);
+		this._window.show('center');
 		
 		//Update time
 		this._lastTime = currentTime;
@@ -2868,6 +2908,20 @@ var NotesView = function(main) {
 		var note = this._mainView.getNotesData()[e.target.options.id];
 		
 		if(note != undefined) {
+			//Create window
+			var lWindow = L.control.window(
+				this._mainView.getMapView().get(),
+				{
+					title: 'Note',
+					content: '<div id="op-notes-comments">'
+						+'</div>'
+						+'<div id="op-notes-footer">'
+						+'Status: <span id="notes-status-txt"></span> | <a id="notes-link" href="">See on OSM.org</a>'
+						+'</div>',
+					position: 'center'
+				}
+			);
+			
 			//Change title
 			$("#op-notes h2").html("Note #"+note.id);
 			$("#notes-status-txt").html(note.status);
@@ -2886,7 +2940,7 @@ var NotesView = function(main) {
 			}
 			
 			$("#op-notes-comments").html(commentsHtml);
-			$("#op-notes").addClass("show");
+			lWindow.show();
 		}
 		else {
 			console.error("[Notes] Invalid ID: "+e.target.options.id);

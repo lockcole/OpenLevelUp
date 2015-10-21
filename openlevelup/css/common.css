@@ -338,15 +338,6 @@ header, footer, #home > div {
 	margin-right: 10px;
 }
 
-/* About panel */
-#op-about a {
-	color: #D2E2FF;
-}
-
-#op-about a:hover {
-	color: #B3CEFF;
-}
-
 /*******************
  * Leaflet pop-ups *
  *******************/
@@ -432,34 +423,35 @@ h2.popup {
  * Images overlay panel *
  ************************/
 
-#op-images > div {
-	position: relative;
-	padding: 0;
+.control-window-wide {
+	width: 80%;
 	height: 80%;
-	max-height: 800px;
+	overflow: hidden;
 }
 
-#op-images > div > div {
-	display: block;
+.control-window-wide .content {
 	position: absolute;
-	width: 100%;
-}
-
-#op-images .small-row {
-	height: 50px;
-}
-
-#op-images-tabs-links {
-	top: 0;
+	bottom: 0;
+	top: 58px;
+	right: 0;
+	left: 0;
 }
 
 #op-images-tabs-content {
-	top: 50px;
-	bottom: 50px;
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+	bottom: 40px;
 }
 
-#op-images-footer {
+#op-images-status {
+	position: absolute;
+	right: 0;
+	left: 0;
 	bottom: 0;
+	height: 30px;
+	padding: 0;
 }
 
 #op-images-tabs-links a {
@@ -483,7 +475,6 @@ h2.popup {
 }
 
 #op-images-tabs-content > div {
-	position: absolute;
 	width: 100%;
 	height: 100%;
 }
@@ -498,6 +489,11 @@ h2.popup {
 	vertical-align: middle;
 	text-align: center;
 	background-color: black;
+	position: absolute;
+	right: 0;
+	left: 0;
+	top: 0;
+	bottom: 0;
 }
 
 #spherical-legend {
@@ -525,8 +521,6 @@ h2.popup {
 #spherical-content canvas {
 	width: 100%;
 	height: 100%;
-	/*max-height: 350px;
-	max-width: 600px;*/
 	cursor: pointer;
 }
 
@@ -575,31 +569,19 @@ h2.popup {
 }
 
 /* Images status */
-#op-images-footer > p {
-	display: inline-block;
-	position: absolute;
-	bottom: 5px;
-}
-
-#op-images-status {
-	left: 10px;
-}
-
-#op-images-footer .overlay-close {
-	right: 10px;
-}
-
 #op-images-status a {
 	color: white;
 	cursor: help;
+	margin: 0;
+	padding: 0;
 }
 
 #op-images-status img {
 	height: 24px;
+	vertical-align: middle;
 }
 
 .status {
-	font-size: 2.7em;
 	margin-right: 20px;
 	color: orange;
 }
@@ -629,10 +611,12 @@ h2.popup {
 	border-bottom: 1px solid #ddd;
 	margin-bottom: 10px;
 	padding: 5px 0;
+	margin-top: 0;
+	text-align: center;
 }
 
 /* Human readable details */
-.overlay-panel > div .detail {
+.detail {
 	display: inline-block;
 	margin: 0 20px;
 }
@@ -660,7 +644,7 @@ h2.popup {
 	font-size: 85%;
 }
 
-a.osm-key, a.osm-val {
+a.osm-key, a.osm-val, .leaflet-control-window .content a.osm-key, .leaflet-control-window .content a.osm-val {
 	text-decoration: none;
 	color: #0645AD;
 }
@@ -674,41 +658,30 @@ span.osm-key, span.osm-val {
  * Notes overlay panel *
  ***********************/
 
-#op-notes > div {
-	position: relative;
-}
-
 /* Comments */
 #op-notes-comments {
 	text-align: left;
 	margin: 10px;
 }
 
-.overlay-panel > div .op-notes-comment {
+.op-notes-comment {
 	margin-bottom: 15px;
 }
 
-#op-notes .desc {
+.op-notes-comment .desc {
 	font-size: 90%;
 	color: #eee;
 }
 
-#op-notes .txt {
+.op-notes-comment .txt {
 	margin-left: 20px;
-}
-
-/* Links */
-#op-notes a {
-	color: #D2E2FF;
-}
-
-#op-notes a:hover {
-	color: #B3CEFF;
 }
 
 /* Footer */
 #op-notes-footer {
 	text-align: right;
+	border-top: 1px solid white;
+	padding-top: 5px;
 }
 
 /* Leaflet control */

@@ -88,7 +88,6 @@
 	
 	<!-- CSS style -->
 	<link rel="stylesheet" href="css/common.css" />
-	<!--link rel="stylesheet" href="css/desktop.css" /-->
 	<link rel="stylesheet" href="css/labels.css" />
 </head>
 <body>
@@ -156,64 +155,6 @@
 	
 	<!-- Map area -->
 	<div id="map" class="sidebar-map"></div>
-
-	<!-- Overlay panels -->
-	<div class="overlay-panels">
-		<!-- Images panel -->
-		<div class="overlay-panel hide" id="op-images">
-			<div class="wide">
-				<div class="small-row" id="op-images-tabs-links">
-					<a id="tab-imgs-a" href="#tab-imgs"><img src="img/icon_picture.svg" alt="Simple" /></a>
-					<a id="tab-spheric-a" href="#tab-spheric"><img src="img/icon_spherical_picture.svg" alt="Sphere" /></a>
-				</div>
-				<div id="op-images-tabs-content">
-					<div class="op-images-tab galleria" id="tab-imgs">
-					</div>
-					<div class="op-images-tab" id="tab-spheric">
-						<div id="spherical-content"></div>
-						<div id="spherical-legend">
-							<div id="spherical-legend-title"></div>
-							<div id="spherical-legend-text"></div>
-						</div>
-						<div id="spherical-nav">
-							<div id="spherical-nav-left">&lt;</div>
-							<div id="spherical-nav-right">&gt;</div>
-						</div>
-						<div id="spherical-counter">
-							<span>- / -</span>
-						</div>
-						<!--div id="spherical-direction">
-							<span>0°</span>
-						</div-->
-					</div>
-				</div>
-				<div class="small-row" id="op-images-footer">
-					<p id="op-images-status">
-						<img src="img/icon_web.svg" alt="Web" title="Web" /> <a id="status-web"><span class="status">&#x25CF;</span></a>
-						<img src="img/icon_mapillary.svg" alt="Mapillary" title="Mapillary" /> <a id="status-mapillary"><span class="status">&#x25CF;</span></a>
-						<img src="img/icon_flickr.svg" alt="Flickr" title="Flickr" /> <a id="status-flickr"><span class="status">&#x25CF;</span></a>
-					</p>
-					<p class="overlay-close"><a id="images-close" href="#">Close</a></p>
-				</div>
-			</div>
-		</div>
-		
-		<!-- Notes panel -->
-		<div class="overlay-panel hide" id="op-notes">
-			<div class="centered">
-				<h2>Note</h2>
-				<div id="op-notes-comments">
-					<div class="op-notes-comment">
-						<p class="desc"></p>
-						<p class="txt"></p>
-					</div>
-				</div>
-				<div id="op-notes-footer">
-					Status: <span id="notes-status-txt"></span> | <a id="notes-link" href="">See on OSM.org</a> | <a id="notes-close" href="#">Close</a>
-				</div>
-			</div>
-		</div>
-	</div>
 	
 	<!-- Message/info box list -->
 	<div id="infobox">

@@ -12,7 +12,8 @@ L.Control.Window = L.Control.extend({
         prompt: undefined,
         maxWidth: 600,
         modal: false,
-        position: 'center'
+        position: 'center',
+	hideWhenClosed: false
     },
     initialize: function (container, options) {
         var self = this;
@@ -58,7 +59,12 @@ L.Control.Window = L.Control.extend({
         // Attach event to close button
         if (this.options.closeButton) {
             var close = this._closeButton;
-            L.DomEvent.on(close, 'click', this.close, this);
+	    if(this.options.hideWhenClosed) {
+		L.DomEvent.on(close, 'click', this.hide, this);
+	    }
+	    else {
+		L.DomEvent.on(close, 'click', this.close, this);
+	    }
         }
         if (this.options.title){
             this.title(this.options.title);
@@ -131,13 +137,13 @@ L.Control.Window = L.Control.extend({
         var height = rect.bottom -rect.top ||  Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
         var top = rect.top;
-        var left = rect.left;
+        var left = 0; //rect.left;
         var offset =0;
 
         // SET POSITION OF WINDOW
         if (this.options.position == 'topLeft'){
             this.showOn([left,top+offset])
-            } else if (this.options.position == 'left') {
+	} else if (this.options.position == 'left') {
             this.showOn([left, top+height/2-thisHeight/2-margin+offset])
         } else if (this.options.position == 'bottomLeft') {
             this.showOn([left, top+height-thisHeight-margin*2-offset])
