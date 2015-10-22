@@ -1,30 +1,40 @@
 {
 	"styles": {
 		
-		"buildingpart|indoor": [
+		"buildingpart|indoor|room": [
 			{
 				"name": "Room",
 				"description": "Indoor rooms",
 				"onTags": [ { "indoor": "room" }, { "buildingpart": "room" } ],
-				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes" }
+				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 2.5, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes" }
 			},
 			{
 				"name": "Wall",
 				"description": "Indoor walls",
 				"onTags": [ { "indoor": "wall" }, { "buildingpart": "wall" } ],
-				"style": { "color": "#999999", "opacity": 1, "weight": 2, "fillColor": "#999999", "fillOpacity": 1, "popup": "yes", "layer": -2 }
+				"style": { "color": "#999999", "opacity": 1, "weight": 2.5, "fillColor": "#999999", "fillOpacity": 1, "popup": "yes", "layer": -2 }
 			},
 			{
 				"name": "Area",
 				"description": "Indoor areas",
-				"onTags": [ { "indoor": "area|corridor" }, { "buildingpart": "corridor|hall" } ],
+				"onTags": [ { "indoor": "area|corridor" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|entrance|hall|entry|gallery|collection" } ],
 				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6, "label": "name", "labelStyle": "area" }
+			},
+			{
+				"name": "${room}",
+				"description": "Rooms",
+				"onTags": [ { "room": "*" } ],
+				"style": {
+					"icon": "room_${room}.png",
+					"iconAlias": { "amphitheatre": "auditorium", "reception": "administration", "refectory": "restaurant", "checkroom": "locker" },
+					"showMissingIcon": false
+				}
 			},
 			{
 				"name": "Vertical passage",
 				"description": "Elevetor, stairs (as polygons)",
 				"onTags": [ { "buildingpart": "verticalpassage" }, { "room": "stairs|escalator" }, { "indoor": "elevator" }, { "stairs": "yes" } ],
-				"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1 }
+				"style": { "color": "#7495DA", "fillColor": "#AEBDDA", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1 }
 			},
 			{
 				"name": "Elevator",
@@ -54,14 +64,14 @@
 				"name": "Pillar",
 				"description": "Pillar",
 				"onTags": [ { "indoor": "column" } ],
-				"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
+				"style": { "color": "#656565", "opacity": 1, "weight": 2.5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
 			},
 			{
 				"name": "Glass cabinet",
 				"description": "Glass cabinet",
 				"onTags": [ { "indoor": "glass_cabinet" } ],
 				"isDetail": true,
-				"style": { "color": "#A2CCC8", "fillColor": "#E3F3F5", "opacity": 1, "fillOpacity": 1, "lineJoin": "miter", "weight": 3, "layer": -1 }
+				"style": { "color": "#A2CCC8", "fillColor": "#E3F3F5", "opacity": 1, "fillOpacity": 1, "lineJoin": "miter", "weight": 2, "layer": -1 }
 			},
 			{
 				"name": "Door",
@@ -71,38 +81,6 @@
 				"style": { "icon": "door.png", "color": "#888888", "opacity": 1, "weight": 2, "lineCap": "butt", "dashArray": "5,5" }
 			},
 			{
-				"name": "Restricted area",
-				"description": "Area/room only for a limited amount of people",
-				"onTags": [ { "indoor": "room|area|corridor", "access": "private|no" }, { "buildingpart": "verticalpassage|hall|room|area|corridor", "access": "private|no" } ],
-				"style": { "fillColor": "#A2A2A2" }
-			}
-		],
-		
-		"room": [
-			{
-				"name": "${room}",
-				"description": "Rooms",
-				"onTags": [ { "room": "*" } ],
-				"style": {
-					"color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#E0E0E0", "fillOpacity": 1, "layer": -5, "popup": "yes",
-					"icon": "room_${room}.png",
-					"iconAlias": { "amphitheatre": "auditorium", "reception": "administration", "refectory": "restaurant", "checkroom": "locker" },
-					"showMissingIcon": false
-				}
-			},
-			{
-				"name": "Stairs",
-				"description": "Fix for room=stairs|escalator layer",
-				"onTags": [ { "room": "stairs|escalator" } ],
-				"style": { "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1 }
-			},
-			{
-				"name": "Area",
-				"description": "Indoor areas",
-				"onTags": [ { "room": "corridor|entrance|hall|entry|gallery|collection" } ],
-				"style": { "fillColor": "#EEEEEE", "layer": -6, "label": "name", "labelStyle": "area" }
-			},
-			{
 				"name": "${laboratory} lab",
 				"description": "Laboratory icons",
 				"onTags": [ { "laboratory": "*" } ],
@@ -110,6 +88,12 @@
 					"icon": "laboratory_${laboratory}.png",
 					"iconAlias": { "biological": "biology", "physical": "physics", "electronic": "electronics" }
 				}
+			},
+			{
+				"name": "Restricted area",
+				"description": "Area/room only for a limited amount of people",
+				"onTags": [ { "indoor": "room|area|corridor", "access": "private|no" }, { "buildingpart": "verticalpassage|hall|room|area|corridor", "access": "private|no" }, { "room": "technical" } ],
+				"style": { "fillColor": "#A2A2A2" }
 			}
 		],
 		
@@ -175,19 +159,37 @@
 			{
 				"name": "Conveying path",
 				"description": "Conveying path",
-				"onTags": [ { "conveying": "yes|forward|backward" } ],
+				"onTags": [ { "conveying": "yes|forward|backward|reversible" } ],
 				"style": { "color": "#848484", "opacity": 1, "weight": 10, "lineCap": "butt", "dashArray": "3,1", "levelup": true }
 			},
 			{
 				"description": "Conveying path",
-				"onTags": [ { "highway": "footway", "conveying": "yes|forward|backward" } ],
+				"onTags": [ { "highway": "footway", "conveying": "yes|forward|backward|reversible" } ],
 				"style": { "dashArray": "3,2" }
 			},
 			{
 				"name": "Vertical passage",
-				"description": "Elevetor, stairs (as polygons)",
+				"description": "Elevetor, stairs",
+				"onTags": [ { "highway": "elevator|lift" }, { "highway": "steps", "area": "yes" } ],
+				"style": { "color": "#7495DA", "fillColor": "#AEBDDA", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1, "dashArray": "null" }
+			},
+			{
+				"name": "Elevator",
+				"description": "Elevator",
 				"onTags": [ { "highway": "elevator|lift" } ],
-				"style": { "icon": "passage_elevator.png", "color": "#B3986C", "fillColor": "#EFCB90", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "level": -1 }
+				"style": { "icon": "passage_elevator.png" }
+			},
+			{
+				"name": "Stairs",
+				"description": "Stairs (verticalpassage)",
+				"onTags": [ { "area": "yes", "highway": "steps" } ],
+				"style": { "icon": "passage_stairs.png" }
+			},
+			{
+				"name": "Escalator",
+				"description": "Escalator (verticalpassage)",
+				"onTags": [ { "area": "yes", "conveying": "yes|forward|backward|reversible" } ],
+				"style": { "icon": "passage_escalator.png" }
 			},
 			{
 				"description": "Oneway path",
@@ -208,7 +210,7 @@
 				"name": "${amenity} (amenity)",
 				"description": "Amenities",
 				"onTags": [ { "amenity": "*" } ],
-				"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2", "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
+				"style": { "color": "#AAAAAA", "fillColor": "#FFDAAD", "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
 			},
 			{
 				"description": "Small amenities",
@@ -253,6 +255,12 @@
 				"description": "Toilets for disabled people",
 				"onTags": [ { "amenity": "toilets", "wheelchair": "yes|only|designated" } ],
 				"style": { "icon": "amenity_toilets_disabled.png" }
+			},
+			{
+				"name": "Stand-up bench",
+				"description": "Stand-up bench icon",
+				"onTags": [ { "bench:type": "stand_up" } ],
+				"style": { "icon": "bench_type_stand_up.png" }
 			}
 		],
 		
@@ -261,7 +269,7 @@
 				"name": "${barrier} (barrier)",
 				"description": "Barrier icons",
 				"onTags": [ { "barrier": "*" } ],
-				"style": { "icon": "barrier_${barrier}.png", "opacity": 1, "weight": 5, "lineCap": "butt", "showMissingIcon": false }
+				"style": { "icon": "barrier_${barrier}.png", "opacity": 1, "weight": 2, "lineCap": "butt", "showMissingIcon": false }
 			},
 			{
 				"name": "Fence",
@@ -274,6 +282,14 @@
 				"description": "Hedge",
 				"onTags": [ { "barrier": "hedge" } ],
 				"style": { "color": "#8CD16E", "icon": "none" }
+			}
+		],
+		
+		"amenity|public_transport|room": [
+			{
+				"description": "Comfort amenities",
+				"onTags": [ { "amenity": "toilets" }, { "public_transport": "waiting_area" }, { "room": "waiting" } ],
+				"style": { "fillColor": "#E3C8E3" }
 			}
 		],
 		
@@ -293,7 +309,7 @@
 				"name": "Pillar",
 				"description": "Pillar",
 				"onTags": [ { "man_made": "pillar" } ],
-				"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
+				"style": { "color": "#656565", "opacity": 1, "weight": 2.5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
 			},
 			{
 				"name": "CCTV",
@@ -337,7 +353,7 @@
 				"name": "${shop} (shop)",
 				"description": "Shops",
 				"onTags": [ { "shop": "*" } ],
-				"style": { "color": "#AAAAAA", "fillColor": "#FFDDC2", "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
+				"style": { "color": "#AAAAAA", "fillColor": "#FFDAAD", "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
 			},
 			{
 				"name": "Mall",
@@ -352,7 +368,7 @@
 				"name": "${tourism} (tourism)",
 				"description": "Tourism icons",
 				"onTags": [ { "tourism": "*" } ],
-				"style": { "icon": "tourism_${tourism}.png", "color": "#ECC7A6", "fillColor": "#ECC7A6", "opacity": 1, "fillOpacity": 1, "weight": 3, "label": "name", "labelStyle": "tourism" }
+				"style": { "icon": "tourism_${tourism}.png", "fillColor": "#FFF6AD", "opacity": 1, "fillOpacity": 1, "label": "name", "labelStyle": "tourism" }
 			},
 			{
 				"name": "${information} (information)",
@@ -464,7 +480,7 @@
 				"name": "Pillar",
 				"description": "Pillar",
 				"onTags": [ { "building:part": "column" } ],
-				"style": { "color": "#656565", "opacity": 1, "weight": 5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
+				"style": { "color": "#656565", "opacity": 1, "weight": 2.5, "lineCap": "butt", "fillColor": "#656565", "fillOpacity": 1, "radius": 4, "layer": 0 }
 			}
 		]
 	},
@@ -580,6 +596,10 @@
 			"img": "icon_seats.svg",
 			"values": "text"
 		},
+		"stairs:orientation": {
+			"img": "icon_compass.svg",
+			"values": "text"
+		},
 		"website": {
 			"img": "icon_web.svg",
 			"values": "link"
@@ -683,15 +703,18 @@
 		"barrier_stile.png",
 		"barrier_toll_booth.png",
 		"barrier_turnstile.png",
+		"bench_type_stand_up.png",
 		"door_no.png",
 		"door_sliding.png",
 		"door.png",
 		"emergency_assembly_point.png",
 		"emergency_defibrillator.png",
 		"emergency_fire_extinguisher.png",
+		"emergency_fire_hydrant.png",
 		"emergency_phone.png",
 		"emergency_siren.png",
 		"emergency_stairs.png",
+		"emergency_stop_button.png",
 		"entrance_emergency.png",
 		"entrance_exit.png",
 		"entrance_main.png",

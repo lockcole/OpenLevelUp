@@ -860,7 +860,37 @@ var FeatureView = function(main, feature, details) {
 			var labelizable = this._labelizable();
 			var hasPhoto = this._mainView.getOptionsView().showPhotos() && (this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && this._feature.getImages().hasValidSpherical()));
 			
-			if(hasIcon || labelizable || hasPhoto) {
+			var ftLevels = this._feature.onLevels();
+			var levelUp = false, levelDown = false, lvlUpIcon, lvlDownIcon;
+			if(style.levelup && ftLevels.length > 0 && !this._mainView.isMobile()) {
+				//Levels
+				var levelId = ftLevels.indexOf(this._mainView.getLevelView().get());
+				levelUp = levelId < ftLevels.length -1;
+				var iconX = (hasIcon) ? -CONFIG.view.icons.size/2 : CONFIG.view.icons.size/4;
+				
+				//Up
+				if(levelUp) {
+					lvlUpIcon = L.icon({
+						iconUrl: CONFIG.view.icons.folder+'/arrow_up_3.png',
+						iconSize: [CONFIG.view.icons.size/2-1, CONFIG.view.icons.size/2-1],
+						iconAnchor: [iconX, CONFIG.view.icons.size/2],
+						popupAnchor: [0, -CONFIG.view.icons.size/2]
+					});
+				}
+				
+				//Down
+				levelDown = levelId > 0;
+				if(levelDown) {
+					lvlDownIcon = L.icon({
+						iconUrl: CONFIG.view.icons.folder+'/arrow_down_3.png',
+						iconSize: [CONFIG.view.icons.size/2-1, CONFIG.view.icons.size/2-1],
+						iconAnchor: [iconX, 0],
+						popupAnchor: [0, -CONFIG.view.icons.size/2]
+					});
+				}
+			}
+			
+			if(hasIcon || labelizable || hasPhoto || levelUp || levelDown) {
 				switch(geomType) {
 					case "Point":
 						//Labels
@@ -871,6 +901,15 @@ var FeatureView = function(main, feature, details) {
 						if(hasPhoto) {
 							this._layer.addLayer(this._createPhotoIcon(geomLatLng));
 						}
+						
+						if(levelUp) {
+							this._layer.addLayer(L.marker(geomLatLng, {icon: lvlUpIcon}));
+						}
+						
+						if(levelDown) {
+							this._layer.addLayer(L.marker(geomLatLng, {icon: lvlDownIcon}));
+						}
+						
 						break;
 						
 					case "LineString":
@@ -909,6 +948,14 @@ var FeatureView = function(main, feature, details) {
 							if(hasPhoto) {
 								this._layer.addLayer(this._createPhotoIcon(coord));
 							}
+							
+							if(levelUp) {
+								this._layer.addLayer(L.marker(coord, {icon: lvlUpIcon}));
+							}
+							
+							if(levelDown) {
+								this._layer.addLayer(L.marker(coord, {icon: lvlDownIcon}));
+							}
 						}
 						
 						//Clear tmp objects
@@ -940,6 +987,14 @@ var FeatureView = function(main, feature, details) {
 						
 						if(hasPhoto) {
 							this._layer.addLayer(this._createPhotoIcon(coord));
+						}
+						
+						if(levelUp) {
+							this._layer.addLayer(L.marker(coord, {icon: lvlUpIcon}));
+						}
+						
+						if(levelDown) {
+							this._layer.addLayer(L.marker(coord, {icon: lvlDownIcon}));
 						}
 						
 						//Clear tmp objects
@@ -982,6 +1037,14 @@ var FeatureView = function(main, feature, details) {
 							
 							if(hasPhoto) {
 								this._layer.addLayer(this._createPhotoIcon(coord));
+							}
+							
+							if(levelUp) {
+								this._layer.addLayer(L.marker(coord, {icon: lvlUpIcon}));
+							}
+							
+							if(levelDown) {
+								this._layer.addLayer(L.marker(coord, {icon: lvlDownIcon}));
 							}
 						}
 						
