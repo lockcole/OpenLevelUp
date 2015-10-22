@@ -144,6 +144,11 @@ h1.sidebar-header img {
 	vertical-align: middle;
 }
 
+
+/*******************
+ * Sidebar content *
+ *******************/
+
 /* Home sidebar */
 
 #home.active {
@@ -175,6 +180,7 @@ header, footer, #home > div {
 }
 
 /* Room list sidebar */
+
 #roomlist {
 	padding-left: 10px;
 	padding-right: 10px;
@@ -262,81 +268,6 @@ header, footer, #home > div {
 	width: 50%;
 }
 
-/***************************
- * Overlay optional panels *
- ***************************/
-
-/* General definition */
-.overlay-panels {
-	width: 100%;
-	height: 100%;
-	z-index: 1000;
-	visibility: hidden;
-	position: fixed;
-	left: 0;
-	top: 0;
-	display: table;
-}
-
-.overlay-panel {
-	position: relative;
-	vertical-align: middle;
-}
-
-.overlay-panel.hide {
-	display: none;
-}
-
-.overlay-panel.show {
-	display: table-cell;
-}
-
-.overlay-panel > div {
-	background-color: rgba(128,128,128,0.8);
-	padding: 5px;
-	color: white;
-	margin: 0 auto;
-	visibility: visible;
-}
-
-.overlay-panel > div.centered {
-	text-align: center;
-}
-
-.overlay-panel > div * {
-	margin: 0;
-	padding: 0;
-}
-
-.overlay-panel > div > h2 {
-	background-color: #ddd;
-	color: #444;
-	padding: 5px;
-	margin-bottom: 5px;
-}
-
-.overlay-panel > div > h2 > img {
-	vertical-align: middle;
-	margin-right: 10px;
-}
-
-.overlay-close {
-	text-align: right;
-	margin: 0.2em;
-}
-
-.overlay-close a {
-	color: #D2E2FF;
-}
-
-.overlay-close a:hover {
-	color: #B3CEFF;
-}
-
-/* Loading panel */
-#spinner {
-	margin-right: 10px;
-}
 
 /*******************
  * Leaflet pop-ups *
@@ -363,11 +294,6 @@ h1.popup img.icon {
 
 h2.popup {
 	font-size: 100%;
-}
-
-/* Popup content */
-.popup-content {
-	text-align: left;
 }
 
 /* Popup footer */
@@ -603,12 +529,12 @@ h2.popup {
  * Tags overlay panel *
  **********************/
 
-#op-tags-list {
+.op-tags-list {
 	margin: 10px 0;
 	overflow: auto;
 }
 
-#op-tags-details {
+.op-tags-details {
 	border-bottom: 1px solid #ddd;
 	margin-bottom: 10px;
 	padding: 5px 0;
@@ -660,13 +586,8 @@ span.osm-key, span.osm-val {
  ***********************/
 
 /* Comments */
-#op-notes-comments {
-	text-align: left;
-	margin: 10px;
-}
-
 .op-notes-comment {
-	margin-bottom: 15px;
+	margin: 10px 10px 15px 10px;
 }
 
 .op-notes-comment .desc {
@@ -679,7 +600,7 @@ span.osm-key, span.osm-val {
 }
 
 /* Footer */
-#op-notes-footer {
+.op-notes-footer {
 	text-align: right;
 	border-top: 1px solid white;
 	padding-top: 5px;
@@ -699,4 +620,9 @@ span.osm-key, span.osm-val {
 
 .note-new-icon {
 	cursor: move;
+}
+
+/* Loading panel */
+#spinner {
+	margin-right: 10px;
 }

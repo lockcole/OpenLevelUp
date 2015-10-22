@@ -53,9 +53,6 @@ var MainView = function(ctrl) {
 	/** The options component **/
 	this._cOptions = new OptionsView();
 	
-	/** The export component **/
-// 	this._cExport = null;
-	
 	/** The names component **/
 	this._cNames = null;
 	
@@ -83,11 +80,9 @@ var MainView = function(ctrl) {
 	this._cNames = new NamesView(this);
 	this._cImages = new ImagesView(this);
 	this._cLevel = new LevelView(this);
-// 	this._cExport = new ExportView(this);
 	this._cTags = new TagsView(this);
 	this._cNotes = new NotesView(this);
 	
-// 	this._cExport.hideButton();
 	this._cNames.hideButton();
 	this._cLevel.disable();
 	
@@ -217,7 +212,6 @@ var MainView = function(ctrl) {
 			
 			//Add names and export buttons if needed
 			if(oldZoom == null || oldZoom < CONFIG.view.map.full_data_min_zoom) {
-// 				this._cExport.showButton();
 				this._cNames.showButton();
 				this._cNotes.showButton();
 				this._cLevel.enable();
@@ -231,7 +225,6 @@ var MainView = function(ctrl) {
 			
 			//Add names and export buttons if needed
 			if(oldZoom == null || oldZoom < CONFIG.view.map.data_min_zoom) {
-// 				this._cExport.showButton();
 				this._cNames.showButton();
 				this._cNotes.showButton();
 				this._cLevel.enable();
@@ -245,7 +238,6 @@ var MainView = function(ctrl) {
 		else if(zoom >= CONFIG.view.map.cluster_min_zoom) {
 			//Remove names and export buttons if needed
 			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
-// 				this._cExport.hideButton();
 				this._cNames.hideButton();
 				this._cNotes.hideButton();
 				this._cLevel.disable();
@@ -261,7 +253,6 @@ var MainView = function(ctrl) {
 			
 			//Remove names and export buttons if needed
 			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
-// 				this._cExport.hideButton();
 				this._cNames.hideButton();
 				this._cNotes.hideButton();
 				this._cLevel.disable();
@@ -311,7 +302,7 @@ var MainView = function(ctrl) {
 	/**
 	 * Hides the central panel
 	 */
-	MainView.prototype.hideCentralPanel = function() {
+	MainView.prototype.collapseSidebar = function() {
 		$(".sidebar-tabs li").removeClass("active");
 		$("#sidebar .sidebar-pane").removeClass("active");
 		$("#sidebar").addClass("collapsed");
@@ -352,8 +343,6 @@ var MapView = function(main) {
 	this._oldZoom = null;
 
 //CONSTRUCTOR
-	var isMobile = this._mainView.isMobile();
-	
 	//Get URL values to restore
 	var url = this._mainView.getUrlView();
 	var lat = (url.getLatitude() != undefined) ? url.getLatitude() : 47;
@@ -383,32 +372,23 @@ var MapView = function(main) {
 		this._map.setView([lat, lon], zoom);
 	}
 	
-	if(!isMobile) {
-		L.control.zoom({ position: "topright" }).addTo(this._map);
-	}
+	L.control.zoom({ position: "topright" }).addTo(this._map);
 	
 	//Add search bar
-	//TODO Remove mobile condition, only to get to time to solve search bar bug
-	if(!isMobile) {
-		var search = L.Control.geocoder({ position: "topright" });
-		//Limit max zoom in order to avoid having no tiles in background for small objects
-		var minimalMaxZoom = CONFIG.tiles[0].maxZoom;
-		for(var i=0; i < CONFIG.tiles.length; i++) {
-			if(CONFIG.tiles[i].maxZoom < minimalMaxZoom) {
-				minimalMaxZoom = CONFIG.tiles[i].maxZoom;
-			}
+	var search = L.Control.geocoder({ position: "topright" });
+	//Limit max zoom in order to avoid having no tiles in background for small objects
+	var minimalMaxZoom = CONFIG.tiles[0].maxZoom;
+	for(var i=0; i < CONFIG.tiles.length; i++) {
+		if(CONFIG.tiles[i].maxZoom < minimalMaxZoom) {
+			minimalMaxZoom = CONFIG.tiles[i].maxZoom;
 		}
-		//Redefine markGeocode to avoid having an icon for the result
-		search.markGeocode = function (result) {
-			this._map.fitBounds(result.bbox, { maxZoom: minimalMaxZoom });
-			return this;
-		};
-		search.addTo(this._map);
 	}
-	
-	if(isMobile) {
-		L.control.zoom({ position: "topright" }).addTo(this._map);
-	}
+	//Redefine markGeocode to avoid having an icon for the result
+	search.markGeocode = function (result) {
+		this._map.fitBounds(result.bbox, { maxZoom: minimalMaxZoom });
+		return this;
+	};
+	search.addTo(this._map);
 	
 	//Create tile layers
 	this._tileLayers = [];
@@ -1492,10 +1472,10 @@ var TagsView = function(main) {
 		
 		console.log("layer",ft.getStyle().get().layer);
 		
-		var content = '<p id="op-tags-list">'+tagList+'</p>';
+		var content = '<p class="op-tags-list">'+tagList+'</p>';
 		
 		if(detailsTxt != '') {
-			content = '<p id="op-tags-details">'+detailsTxt+'</p>' + content;
+			content = '<p class="op-tags-details">'+detailsTxt+'</p>' + content;
 		}
 		
 		//Create window
@@ -2992,26 +2972,6 @@ var NotesView = function(main) {
 		var note = this._mainView.getNotesData()[e.target.options.id];
 		
 		if(note != undefined) {
-			//Create window
-			var lWindow = L.control.window(
-				this._mainView.getMapView().get(),
-				{
-					title: 'Note',
-					content: '<div id="op-notes-comments">'
-						+'</div>'
-						+'<div id="op-notes-footer">'
-						+'Status: <span id="notes-status-txt"></span> | <a id="notes-link" href="">See on OSM.org</a>'
-						+'</div>',
-					position: 'center'
-				}
-			);
-			
-			//Change title
-			$("#op-notes h2").html("Note #"+note.id);
-			$("#notes-status-txt").html(note.status);
-			$("#notes-status-icon").removeClass("ok bad").addClass((note.status == "closed") ? "ok" : "bad");
-			$("#notes-link").attr("href", "http://www.openstreetmap.org/note/"+note.id);
-			
 			//Add comments
 			var commentsHtml = "", comment, user;
 			for(var i=0, l=note.comments.length; i < l; i++) {
@@ -3023,8 +2983,18 @@ var NotesView = function(main) {
 								+'</div>';
 			}
 			
-			$("#op-notes-comments").html(commentsHtml);
-			lWindow.show();
+			var lWindow = L.control.window(
+				this._mainView.getMapView().get(),
+				{
+					title: 'Note #'+note.id,
+					content: '<div class="op-notes-comments">'+commentsHtml+'</div>'
+					+'<div class="op-notes-footer">'
+					+'Status: <span class="notes-status-txt">'+note.status+'</span> | <a id="notes-link" href="http://www.openstreetmap.org/note/'+note.id+'">See on OSM.org</a>'
+					+'</div>',
+					position: 'center',
+					visible: true
+				}
+			);
 		}
 		else {
 			console.error("[Notes] Invalid ID: "+e.target.options.id);
@@ -3046,7 +3016,7 @@ var NotesView = function(main) {
 				$("#note-txt").val("Level "+this._mainView.getLevelView().get()+": ");
 			}
 			else {
-				this._mainView.hideCentralPanel();
+				this._mainView.collapseSidebar();
 				this._mainView.getMessagesView().displayMessage("You have to zoom in to add a note", "alert");
 			}
 		}
@@ -3056,6 +3026,6 @@ var NotesView = function(main) {
 	 * Cancels a note
 	 */
 	NotesView.prototype.cancelNote = function() {
-		this._mainView.hideCentralPanel();
+		this._mainView.collapseSidebar();
 		this._mainView.getMapView().hideDraggableMarker();
 	};

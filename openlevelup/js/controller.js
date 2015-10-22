@@ -132,10 +132,8 @@ var Ctrl = function() {
 	/**
 	 * This function initializes the controller
 	 */
-	Ctrl.prototype.init = function(mobile) {
-		mobile = mobile || false;
-		
-		this._view = new MainView(this, mobile);
+	Ctrl.prototype.init = function() {
+		this._view = new MainView(this);
 		
 		//Init leaflet map
  		this.onMapUpdate();
@@ -636,7 +634,7 @@ var Ctrl = function() {
 	Ctrl.prototype.newNoteSent = function(data) {
 		this._view.getMessagesView().displayMessage("Your note was successfully sent", "info");
 		this._view.getMapView().hideDraggableMarker();
-		this._view.hideCentralPanel();
+		this._view.collapseSidebar();
 		
 		//Add given data to NotesData
 		this._notesData.parse(data);
@@ -651,5 +649,5 @@ var Ctrl = function() {
 	Ctrl.prototype.newNoteFailed = function() {
 		this._view.getMessagesView().displayMessage("An error occurred during note sending", "error");
 		this._view.getMapView().hideDraggableMarker();
-		this._view.hideCentralPanel();
+		this._view.collapseSidebar();
 	};

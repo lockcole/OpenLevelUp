@@ -1,6 +1,13 @@
 Changes history
 ===============
 
+22 october 2015
+---------------
+* New overlay panels, based on Leaflet Control Window
+* New left panel, based on Leaflet Sidebar v2
+* OpenLevelUp now fully responsive
+* Code clean-up of mobile version
+
 9 october 2015
 --------------
 * Icons for entrance=main, service, exit, emergency
