@@ -45,7 +45,7 @@ var MainView = function(ctrl) {
 	this._cAbout = null;
 	
 	/** The messages stack component **/
-	this._cMessages = new MessagesView();
+	this._cMessages = null;
 	
 	/** The URL component **/
 	this._cUrl = null;
@@ -78,6 +78,7 @@ var MainView = function(ctrl) {
 	this._cUrl = new URLView(this);
 	this._cMap = new MapView(this);
 	this._cLoading = new LoadingView(this);
+	this._cMessages = new MessagesView(this);
 	this._cAbout = new AboutView(this);
 	this._cNames = new NamesView(this);
 	this._cImages = new ImagesView(this);
@@ -2802,10 +2803,27 @@ var AboutView = function(main) {
 /**
  * The messages stack component
  */
-var MessagesView = function() {
+var MessagesView = function(main) {
 //ATTRIBUTES
+	/** The main view **/
+	this._mainView = main;
+	
 	/** The amount of currently shown messages **/
 	this._nbMessages = 0;
+	
+	/** The leaflet window **/
+	this._window = null;
+
+//CONSTRUCTOR
+	this._window = L.control.window(
+		this._mainView.getMapView().get(),
+		{
+			className: 'control-window control-window-notitle',
+			content: '<ul id="infobox-list"></ul>',
+			position: 'bottomRight',
+			closeButton: false
+		}
+	);
 };
 
 //ACCESSORS
@@ -2835,13 +2853,13 @@ var MessagesView = function() {
 		var line = '<li class="'+type+'">'+msg+'</li>';
 		
 		if(this._nbMessages == 0) {
-			$("#infobox").show();
 			$("#infobox-list").append(line);
 		}
 		else {
 			$("#infobox-list li:first-child").before(line);
 		}
 		
+		this._window.show();
 		this._nbMessages++;
 		
 		//Remove that child after a delay
@@ -2849,7 +2867,10 @@ var MessagesView = function() {
 			$("#infobox-list li").last().remove();
 			this.decreaseNbMessages();
 			if(this.getNbMessages() == 0) {
-				$("#infobox").hide();
+				this._window.hide();
+			}
+			else {
+				this._window.show();
 			}
 		}.bind(this), 5000);
 	};

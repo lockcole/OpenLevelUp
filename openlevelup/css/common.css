@@ -384,15 +384,6 @@ h2.popup {
 /****************
  * Infobox area *
  ****************/
-#infobox {
-	display: none;
-	font-weight: bold;
-	font-size: 1.1em;
-	padding: 0 10px;
-	text-align: center;
-	padding: 0;
-	margin: 0;
-}
 
 #infobox-list {
 	list-style: none;
@@ -400,21 +391,22 @@ h2.popup {
 	margin: 0;
 }
 
-#infobox li {
+#infobox-list li {
 	padding: 5px;
+	margin-top: 5px;
 }
 
-#infobox li.info {
+#infobox-list li.info {
 	background-color: #D2E6FF;
 	color: #2A86FF;
 }
 
-#infobox li.alert {
+#infobox-list li.alert {
 	background-color: #FEFFAA;
 	color: #FF862F;
 }
 
-#infobox li.error {
+#infobox-list li.error {
 	background-color: #FFD9D9;
 	color: #FF2A2A;
 }

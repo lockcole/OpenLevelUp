@@ -55,6 +55,10 @@
 	color: #444;
 }
 
+.control-window-notitle .titlebar {
+	display: none;
+}
+
 .leaflet-control-window .titlebar h2 {
 	margin: 0;
 	padding: 0;
