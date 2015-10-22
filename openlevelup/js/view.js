@@ -2347,7 +2347,7 @@ var ImagesView = function(main) {
 			$("#tab-imgs-a").show();
 			
 			//Load base images
-			Galleria.run('.galleria', { dataSource: imagesData, popupLinks: true, _toggleInfo: false });
+			Galleria.run('.galleria', { dataSource: imagesData, popupLinks: true, _toggleInfo: false, carousel: false, thumbnails: false });
 		}
 		else {
 			$("#tab-imgs-a").hide();

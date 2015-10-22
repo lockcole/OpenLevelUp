@@ -560,6 +560,15 @@ h2.popup {
 	padding: 12px;
 }
 
+/* Galleria */
+.galleria-thumbnails-container {
+	display: none;
+}
+
+.galleria-theme-classic .galleria-stage {
+	bottom: 10px !important;
+}
+
 /* Images status */
 #op-images-status a {
 	color: white;
