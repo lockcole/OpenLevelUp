@@ -2070,7 +2070,7 @@ var URLView = function(main) {
 	
 	URLView.prototype._updateUrl = function() {
 		var optionsView = this._mainView.getOptionsView();
-		var params = "lat="+this._lat.toFixed(4)+"&lon="+this._lon.toFixed(4)+"&z="+this._zoom+"&t="+this._tiles;
+		var params = "lat="+this._lat.toFixed(6)+"&lon="+this._lon.toFixed(6)+"&z="+this._zoom+"&t="+this._tiles;
 		
 		if(this._zoom >= CONFIG.view.map.data_min_zoom) {
 			if(this._level != null) {
