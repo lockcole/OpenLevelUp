@@ -2049,31 +2049,39 @@ var URLView = function(main) {
 			this._bbox = parameters.bbox;
 			this._lat = parameters.lat;
 			this._lon = parameters.lon;
-			this._zoom = parameters.zoom;
-			if(parameters.transcend != undefined) { optionsView.setTranscendent(parameters.transcend == "1"); }
-			if(parameters.unrendered != undefined) { optionsView.setUnrendered(parameters.unrendered == "1"); }
-			if(parameters.buildings != undefined) { optionsView.setBuildingsOnly(parameters.buildings == "1"); }
-			if(parameters.photos != undefined) { optionsView.setPhotos(parameters.photos == "1"); }
-			if(parameters.notes != undefined) { optionsView.setNotes(parameters.notes == "1"); }
-			this._level = parameters.level;
-			this._tiles = parameters.tiles;
+			this._zoom = parameters.z || parameters.zoom;
+			
+			//Convert old URL parameters names
+			if(parameters.transcend != undefined) { parameters.tcd = parameters.transcend; }
+			if(parameters.unrendered != undefined) { parameters.urd = parameters.unrendered; }
+			if(parameters.buildings != undefined) { parameters.bdg = parameters.buildings; }
+			if(parameters.photos != undefined) { parameters.pic = parameters.photos; }
+			if(parameters.notes != undefined) { parameters.nte = parameters.notes; }
+			
+			if(parameters.tcd != undefined) { optionsView.setTranscendent(parameters.tcd == "1"); }
+			if(parameters.urd != undefined) { optionsView.setUnrendered(parameters.urd == "1"); }
+			if(parameters.bdg != undefined) { optionsView.setBuildingsOnly(parameters.bdg == "1"); }
+			if(parameters.pic != undefined) { optionsView.setPhotos(parameters.pic == "1"); }
+			if(parameters.nte != undefined) { optionsView.setNotes(parameters.nte == "1"); }
+			this._level = parameters.lvl || parameters.level;
+			this._tiles = parameters.t || parameters.tiles;
 		}
 	};
 	
 	URLView.prototype._updateUrl = function() {
 		var optionsView = this._mainView.getOptionsView();
-		var params = "lat="+this._lat.toFixed(4)+"&lon="+this._lon.toFixed(4)+"&zoom="+this._zoom+"&tiles="+this._tiles;
+		var params = "lat="+this._lat.toFixed(4)+"&lon="+this._lon.toFixed(4)+"&z="+this._zoom+"&t="+this._tiles;
 		
 		if(this._zoom >= CONFIG.view.map.data_min_zoom) {
 			if(this._level != null) {
-				params += "&level="+this._level;
+				params += "&lvl="+this._level;
 			}
 			
-			params += "&transcend="+((optionsView.showTranscendent()) ? "1" : "0");
-			params += "&unrendered="+((optionsView.showUnrendered()) ? "1" : "0");
-			params += "&buildings="+((optionsView.showBuildingsOnly()) ? "1" : "0");
-			params += "&photos="+((optionsView.showPhotos()) ? "1" : "0");
-			params += "&notes="+((optionsView.showNotes()) ? "1" : "0");
+			params += "&tcd="+((optionsView.showTranscendent()) ? "1" : "0");
+			params += "&urd="+((optionsView.showUnrendered()) ? "1" : "0");
+			params += "&bdg="+((optionsView.showBuildingsOnly()) ? "1" : "0");
+			params += "&pic="+((optionsView.showPhotos()) ? "1" : "0");
+			params += "&nte="+((optionsView.showNotes()) ? "1" : "0");
 		}
 		
 		var hash = this._getUrlHash();
