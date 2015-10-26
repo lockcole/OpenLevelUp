@@ -622,7 +622,29 @@ span.osm-key, span.osm-val {
 	cursor: move;
 }
 
+/******************
+ * Various styles *
+ ******************/
+
 /* Loading panel */
 #spinner {
 	margin-right: 10px;
+}
+
+/* Images in about window */
+.laureate {
+	text-align: center;
+	border-top: 1px solid white;
+}
+
+.laureate > span {
+	display: block;
+	margin: 5px 0;
+}
+
+.laureate .images img {
+	height: 30px;
+}
+
+.laureate .desc {
 }

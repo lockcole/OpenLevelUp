@@ -2062,7 +2062,7 @@ var URLView = function(main) {
 	
 	URLView.prototype._updateUrl = function() {
 		var optionsView = this._mainView.getOptionsView();
-		var params = "lat="+this._lat+"&lon="+this._lon+"&zoom="+this._zoom+"&tiles="+this._tiles;
+		var params = "lat="+this._lat.toFixed(4)+"&lon="+this._lon.toFixed(4)+"&zoom="+this._zoom+"&tiles="+this._tiles;
 		
 		if(this._zoom >= CONFIG.view.map.data_min_zoom) {
 			if(this._level != null) {
@@ -2832,7 +2832,7 @@ var AboutView = function(main) {
 			this._mainView.getMapView().get(),
 			{
 				title: 'About OpenLevelUp!',
-				content: 'This website allows you to see <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project. You can navigate through the building levels with the buttons on the left panel.<br />Want to know more about the project ? Look at the <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup">GitHub repository</a>. Want to contact the author ? <a href="mailto:panieravide@riseup.net">Here you go</a>.<br />This website is licensed under <a href="https://www.gnu.org/licenses/agpl.html">AGPL v3</a>.',
+				content: 'This website allows you to see <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project. Licensed under <a href="https://www.gnu.org/licenses/agpl.html">AGPL v3</a>.<br /><p style="text-align: center;"><a href="mailto:panieravide@riseup.net">Contact</a> | <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup">GitHub repository</a></p><p class="laureate"><span class="images"><a href="http://opendata.regionpaca.fr"><img src="img/logo_paca.jpg" /></a></span><span class="desc">This project was laureate of the <a href="http://opendata.regionpaca.fr/concours-regional-open-paca.html">OpenPACA</a> contest (2015 edition), organized by the french region <a href="http://opendata.regionpaca.fr">Provence-Alpes-Côte d\'Azur</a>.</span></p>',
 				modal: true,
 				position: 'center',
 				visible: true
