@@ -1,6 +1,11 @@
 Changes history
 ===============
 
+30 october 2015
+---------------
+* QR Codes linking to a given map area added
+* Billboard icon changed
+
 22 october 2015
 ---------------
 * New overlay panels, based on Leaflet Control Window

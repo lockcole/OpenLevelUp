@@ -1891,6 +1891,8 @@ var URLView = function(main) {
 //CONSTRUCTOR
 	this._readUrl();
 	this._setShortlink();
+	//QR Code link
+	$("#qrcode-link").click(this.showQRCode.bind(this));
 };
 
 //ACCESSORS
@@ -1982,6 +1984,28 @@ var URLView = function(main) {
 		//Update DOM
 		this._updateUrl();
 		this._setShortlink();
+	};
+	
+	/**
+	 * Shows a QR Code in a window directing to the current view
+	 */
+	URLView.prototype.showQRCode = function() {
+		//Create window
+		var lwindow = L.control.window(
+			this._mainView.getMapView().get(),
+			{
+				title: 'QR Code',
+				content: '<div id="qrcode"></div>',
+				position: 'center',
+				modal: true
+			}
+		);
+		
+		//Create QR Code in div
+		$("#qrcode").qrcode($("#shortlink").attr('href'));
+		
+		//Show window
+		lwindow.show();
 	};
 	
 	/**
