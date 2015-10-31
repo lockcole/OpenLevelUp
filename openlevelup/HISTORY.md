@@ -1,6 +1,10 @@
 Changes history
 ===============
 
+31 october 2015
+---------------
+* Style added for store_section=*
+
 30 october 2015
 ---------------
 * QR Codes linking to a given map area added

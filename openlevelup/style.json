@@ -468,6 +468,19 @@
 			}
 		],
 		
+		"store_section": [
+			{
+				"name": "Store section: ${vending}",
+				"description": "Part of a large shop",
+				"onTags": [ { "store_section": "*" } ],
+				"style": {
+					"fillColor": "#FFCFCC", "color": "#D29494", "fillOpacity": 1, "layer": -4, "opacity": 1, "weight": 0.5, "label": "name", "labelStyle": "area",
+					"icon": "vending_${vending}.png",
+					"iconAlias": { "news_papers": "newspapers" }
+				}
+			}
+		],
+		
 		
 		"building|building:part": [
 			{
@@ -830,7 +843,15 @@
 		"tourism_picnic_site.png",
 		"tourism_viewpoint.png",
 		"tourism_zoo.png",
+		"vending_bakery.png",
+		"vending_books.png",
+		"vending_clothes.png",
+		"vending_doityourself.png",
+		"vending_drink.png",
+		"vending_electronics.png",
+		"vending_meat.png",
 		"vending_newspapers.png",
-		"vending_public_transport_tickets.png"
+		"vending_public_transport_tickets.png",
+		"vending_seafood.png"
 	]
 }
