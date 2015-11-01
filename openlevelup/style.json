@@ -269,13 +269,7 @@
 				"name": "${barrier} (barrier)",
 				"description": "Barrier icons",
 				"onTags": [ { "barrier": "*" } ],
-				"style": { "icon": "barrier_${barrier}.png", "opacity": 1, "weight": 2, "lineCap": "butt", "showMissingIcon": false }
-			},
-			{
-				"name": "Fence",
-				"description": "Fence",
-				"onTags": [ { "barrier": "fence" } ],
-				"style": { "color": "#5B5B5B", "icon": "none" }
+				"style": { "color": "#5B5B5B", "icon": "barrier_${barrier}.png", "opacity": 1, "weight": 2, "lineCap": "butt", "showMissingIcon": false }
 			},
 			{
 				"name": "Hedge",
@@ -706,6 +700,7 @@
 		"barrier_blocks.png",
 		"barrier_bollard.png",
 		"barrier_cattle_grid.png",
+		"barrier_checkout.png",
 		"barrier_cycle_barrier.png",
 		"barrier_entrance.png",
 		"barrier_exit.png",
