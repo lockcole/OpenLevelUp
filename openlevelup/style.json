@@ -859,13 +859,20 @@
 		"tourism_zoo.png",
 		"vending_bakery.png",
 		"vending_books.png",
+		"vending_candies.png",
+		"vending_canned.png",
+		"vending_cheese.png",
 		"vending_clothes.png",
+		"vending_cosmetics.png",
 		"vending_doityourself.png",
 		"vending_drink.png",
 		"vending_electronics.png",
+		"vending_frozen_food.png",
 		"vending_meat.png",
 		"vending_newspapers.png",
 		"vending_public_transport_tickets.png",
-		"vending_seafood.png"
+		"vending_seafood.png",
+		"vending_toys.png",
+		"vending_vegetable.png"
 	]
 }
