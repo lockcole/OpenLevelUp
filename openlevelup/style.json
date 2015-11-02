@@ -269,13 +269,17 @@
 				"name": "${barrier} (barrier)",
 				"description": "Barrier icons",
 				"onTags": [ { "barrier": "*" } ],
-				"style": { "color": "#5B5B5B", "icon": "barrier_${barrier}.png", "opacity": 1, "weight": 2, "lineCap": "butt", "showMissingIcon": false }
+				"style": { "color": "#5B5B5B", "icon": "barrier_${barrier}.png", "opacity": 1, "fillOpacity": 1, "weight": 2, "lineCap": "butt", "showMissingIcon": false }
 			},
 			{
 				"name": "Hedge",
 				"description": "Hedge",
 				"onTags": [ { "barrier": "hedge" } ],
 				"style": { "color": "#8CD16E", "icon": "none" }
+			},
+			{
+				"onTags": [ { "barrier": "shelf" } ],
+				"style": { "color": "#DBA0A0", "fillColor": "#DBA0A0" }
 			}
 		],
 		
