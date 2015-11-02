@@ -449,6 +449,9 @@ var CalendarView = function(main) {
 				$('#calendar').fullCalendar('renderEvent', eventData, true);
 				
 				this._mainView.refresh();
+				
+				//Simulate click event to display resizer
+				this.simulateClick();
 			}.bind(this);
 			
 			fctResize = function(event, delta, revertFunc, jsEvent, ui, view) {
@@ -531,6 +534,9 @@ var CalendarView = function(main) {
 				$('#calendar').fullCalendar('renderEvent', eventData, true);
 				
 				this._mainView.refresh();
+				
+				//Simulate click event to display resizer
+				this.simulateClick();
 			}.bind(this);
 			
 			fctResize = function(event, delta, revertFunc, jsEvent, ui, view) {
@@ -599,6 +605,20 @@ var CalendarView = function(main) {
 		
 		this.updateDateRangeLabel();
 		this.updateRangeNavigationBar();
+	};
+	
+	/**
+	 * Simulates a mouse click over the calendar
+	 */
+	CalendarView.prototype.simulateClick = function() {
+		var $el = $("#calendar");
+		var offset = $el.offset();
+		var event = jQuery.Event("mousedown", {
+			which: 1,
+			pageX: offset.left,
+			pageY: offset.top
+		});
+		$el.trigger(event);
 	};
 
 
