@@ -578,6 +578,7 @@ var CalendarView = function(main) {
 			timeFormat: 'HH:mm',
 			axisFormat: 'HH:mm',
 			allDayText: '24/24',
+			allDaySlot: false,
 			slotDuration: '00:15:00',
 			firstDay: 1,
 			eventOverlap: false,
