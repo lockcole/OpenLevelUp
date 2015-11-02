@@ -3,7 +3,7 @@ Changes history
 
 31 october 2015
 ---------------
-* Style added for store_section=*
+* Style added for store sections
 
 30 october 2015
 ---------------

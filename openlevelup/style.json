@@ -466,13 +466,17 @@
 			}
 		],
 		
-		"store_section": [
+		"department": [
 			{
-				"name": "Store section: ${vending}",
-				"description": "Part of a large shop",
-				"onTags": [ { "store_section": "*" } ],
+				"name": "${department} (department)",
+				"description": "Part of a large amenity",
+				"onTags": [ { "department": "*" } ],
+				"style": { "fillColor": "#FFCFCC", "color": "#D29494", "fillOpacity": 1, "layer": -4, "opacity": 1, "weight": 0.5, "label": "name", "labelStyle": "area" }
+			},
+			{
+				"name": "${vending} (store departement)",
+				"onTags": [ { "department": "store_section", "vending": "*" } ],
 				"style": {
-					"fillColor": "#FFCFCC", "color": "#D29494", "fillOpacity": 1, "layer": -4, "opacity": 1, "weight": 0.5, "label": "name", "labelStyle": "area",
 					"icon": "vending_${vending}.png",
 					"iconAlias": { "news_papers": "newspapers" }
 				}
