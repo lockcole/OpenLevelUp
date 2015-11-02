@@ -280,6 +280,11 @@
 			{
 				"onTags": [ { "barrier": "shelf" } ],
 				"style": { "color": "#DBA0A0", "fillColor": "#DBA0A0" }
+			},
+			{
+				"description": "Checkouts",
+				"onTags": [ { "barrier": "self_checkout|checkout" } ],
+				"style": { "fillColor": "#EEEEEE", "icon": "barrier_${barrier}.png" }
 			}
 		],
 		
@@ -615,6 +620,11 @@
 			"img": "icon_compass.svg",
 			"values": "text"
 		},
+		"vendor": {
+			"name": "With vendor",
+			"values": "icons",
+			"icons": "icon_status_${v}.png"
+		},
 		"website": {
 			"img": "icon_web.svg",
 			"values": "link"
@@ -715,6 +725,7 @@
 		"barrier_gate.png",
 		"barrier_kissing_gate.png",
 		"barrier_lift_gate.png",
+		"barrier_self_checkout.png",
 		"barrier_steps.png",
 		"barrier_stile.png",
 		"barrier_toll_booth.png",
