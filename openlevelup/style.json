@@ -141,7 +141,7 @@
 			{
 				"name": "Area",
 				"description": "Pedestrian areas",
-				"onTags": [ { "highway": "pedestrian|footway", "area": "yes" } ],
+				"onTags": [ { "highway": "pedestrian|footway|corridor", "area": "yes" } ],
 				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6, "label": "name", "labelStyle": "area" }
 			},
 			{
