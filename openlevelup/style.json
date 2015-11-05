@@ -210,11 +210,14 @@
 				"name": "${amenity} (amenity)",
 				"description": "Amenities",
 				"onTags": [ { "amenity": "*" } ],
-				"style": { "color": "#AAAAAA", "fillColor": "#FFDAAD", "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity" }
+				"style": {
+					"color": "#AAAAAA", "fillColor": "#FFDAAD", "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity",
+					"iconAlias": { "seat": "bench" }
+				}
 			},
 			{
 				"description": "Small amenities",
-				"onTags": [ { "amenity": "bbq|drinking_water|atm|bench|clock|photo_booth|post_box|recycling|vending_machine|waste_basket|ticket_validator|piano|telephone" } ],
+				"onTags": [ { "amenity": "bbq|drinking_water|atm|bench|seat|clock|photo_booth|post_box|recycling|vending_machine|waste_basket|ticket_validator|piano|telephone" } ],
 				"isDetail": true
 			},
 			{
@@ -737,6 +740,7 @@
 		"emergency_assembly_point.png",
 		"emergency_defibrillator.png",
 		"emergency_fire_extinguisher.png",
+		"emergency_fire_hose.png",
 		"emergency_fire_hydrant.png",
 		"emergency_phone.png",
 		"emergency_siren.png",
@@ -872,6 +876,8 @@
 		"vending_newspapers.png",
 		"vending_public_transport_tickets.png",
 		"vending_seafood.png",
+		"vending_stationery.png",
+		"vending_tableware.png",
 		"vending_toys.png",
 		"vending_vegetable.png"
 	]
