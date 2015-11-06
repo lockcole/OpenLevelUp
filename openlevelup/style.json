@@ -377,6 +377,18 @@
 				"style": { "icon": "tourism_${tourism}.png", "fillColor": "#FFF6AD", "opacity": 1, "fillOpacity": 1, "label": "name", "labelStyle": "tourism" }
 			},
 			{
+				"name": "${artwork_type} (artwork)",
+				"description": "Artwork icons",
+				"onTags": [ { "artwork_type": "sculpture|statue|stone|bust|mural" } ],
+				"style": {
+					"icon": "artwork_type_${artwork_type}.png",
+					"iconAlias": { "sculpture": "statue", "stone": "statue", "bust": "statue" }
+				}
+			}
+		],
+		
+		"information": [
+			{
 				"name": "${information} (information)",
 				"description": "Information icons",
 				"onTags": [ { "information": "*" } ],
@@ -393,15 +405,6 @@
 				"description": "Map",
 				"onTags": [ { "map_type": "street|scheme" } ],
 				"style": { "icon": "map_type_${map_type}.png" }
-			},
-			{
-				"name": "${artwork_type} (artwork)",
-				"description": "Artwork icons",
-				"onTags": [ { "artwork_type": "sculpture|statue|stone|bust|mural" } ],
-				"style": {
-					"icon": "artwork_type_${artwork_type}.png",
-					"iconAlias": { "sculpture": "statue", "stone": "statue", "bust": "statue" }
-				}
 			}
 		],
 
@@ -760,6 +763,7 @@
 		"information_audioguide.png",
 		"information_guidepost.png",
 		"information_map.png",
+		"information_price_checker.png",
 		"laboratory_biology.png",
 		"laboratory_computer.png",
 		"laboratory_electronics.png",
@@ -868,6 +872,7 @@
 		"vending_cheese.png",
 		"vending_clothes.png",
 		"vending_cosmetics.png",
+		"vending_discount.png",
 		"vending_doityourself.png",
 		"vending_drink.png",
 		"vending_electronics.png",
