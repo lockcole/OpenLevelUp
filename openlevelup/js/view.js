@@ -2379,7 +2379,8 @@ var ImagesView = function(main) {
 			position: 'center',
 			className: 'control-window control-window-wide',
 			modal: true,
-			hideWhenClosed: true
+			hideWhenClosed: true,
+			maxWidth: $(window).width() * 0.8
 		}
 	);
 	
