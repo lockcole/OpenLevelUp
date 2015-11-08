@@ -420,6 +420,13 @@
 					"icon": "pub_${advertising}.png",
 					"iconAlias": { "sign": "poster_box", "wall_painting": "poster_box" }
 				}
+			},
+			{
+				"description": "Advertising icons with specific support",
+				"onTags": [ { "advertising": "billboard", "support": "pole" } ],
+				"style": {
+					"icon": "pub_${advertising}_${support}.png"
+				}
 			}
 		],
 		
@@ -783,6 +790,7 @@
 		"passage_stairs.png",
 		"pole_landmark_sign.png",
 		"pub_billboard.png",
+		"pub_billboard_pole.png",
 		"pub_flag.png",
 		"pub_poster_box.png",
 		"pub_screen.png",
