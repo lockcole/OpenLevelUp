@@ -424,6 +424,9 @@ var MapView = function(main) {
 	}
 	L.control.layers(tileLayers).addTo(this._map);
 	
+	//Add scale bar
+	L.control.scale({ position: "bottomright" }).addTo(this._map);
+	
 	//Init sidebar
 	L.control.sidebar("sidebar").addTo(this._map);
 	
