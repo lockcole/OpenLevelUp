@@ -1210,3 +1210,21 @@ var FeatureImages = function(feature) {
 		return b.date - a.date;
 	};
 
+
+
+/**
+ * A* search class
+ * Creates the graph for the given OSM Data, and allows to search shortest path in it
+ */
+var AStar = function(osmData) {
+//ATTRIBUTES
+	/** The graph **/
+	this._graph = null;
+
+//CONSTRUCTOR
+	//TODO Create graph from OSM Data
+};
+
+//OTHER METHODS
+	AStar.prototype.findShortestPath = function() {
+	};
