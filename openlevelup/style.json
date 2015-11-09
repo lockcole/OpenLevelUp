@@ -211,14 +211,15 @@
 				"description": "Amenities",
 				"onTags": [ { "amenity": "*" } ],
 				"style": {
-					"color": "#AAAAAA", "fillColor": "#FFDAAD", "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity",
+					"fillColor": "#FFDAAD", "opacity": 1, "fillOpacity": 1, "icon": "amenity_${amenity}.png", "label": "name", "labelStyle": "amenity",
 					"iconAlias": { "seat": "bench" }
 				}
 			},
 			{
 				"description": "Small amenities",
 				"onTags": [ { "amenity": "bbq|drinking_water|atm|bench|seat|clock|photo_booth|post_box|recycling|vending_machine|waste_basket|ticket_validator|piano|telephone" } ],
-				"isDetail": true
+				"isDetail": true,
+				"style": { "color": "#FFBA66" }
 			},
 			{
 				"description": "Set layer for amenities which are kind of landuses",
@@ -359,7 +360,7 @@
 				"name": "${shop} (shop)",
 				"description": "Shops",
 				"onTags": [ { "shop": "*" } ],
-				"style": { "color": "#AAAAAA", "fillColor": "#FFDAAD", "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
+				"style": { "color": "#AAAAAA", "fillColor": "#FFDAAD", "opacity": 1, "fillOpacity": 1, "icon": "shopping_${shop}.png", "label": "name", "labelStyle": "shop" }
 			},
 			{
 				"name": "Mall",
@@ -417,6 +418,7 @@
 				"onTags": [ { "advertising": "*" } ],
 				"isDetail": true,
 				"style": {
+					"color": "#5B5B5B", "opacity": 1,
 					"icon": "pub_${advertising}.png",
 					"iconAlias": { "sign": "poster_box", "wall_painting": "poster_box" }
 				}
