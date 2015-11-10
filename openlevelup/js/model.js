@@ -1216,14 +1216,26 @@ var FeatureImages = function(feature) {
  * A* search class
  * Creates the graph for the given OSM Data, and allows to search shortest path in it
  */
-var AStar = function(osmData) {
+var AStar = function() {
 //ATTRIBUTES
 	/** The graph **/
 	this._graph = null;
-
-//CONSTRUCTOR
-	//TODO Create graph from OSM Data
 };
+
+//CONSTRUCTORS
+	/**
+	 * Initializes the graph from OSM data
+	 */
+	AStar.prototype.createFromOSMData = function(osmData) {
+		//TODO
+	};
+	
+	/**
+	 * Initializes the graph from given nodes
+	 */
+	AStar.prototype.createFromNodes = function(nodes) {
+		this._graph = nodes;
+	};
 
 //OTHER METHODS
 	/**
@@ -1265,14 +1277,14 @@ var AStar = function(osmData) {
 			current = frontier.dequeue().node;
 			
 			//Stop if current node is the final one
-			if(current == end) { break; }
+			if(current.equals(end)) { break; }
 			
 			//Look for current node's neighbors
-			neighbors = current.getNeighbors();
+			neighbors = current.getNeighbours();
 			for(var i=0, l=neighbors.length; i < l; i++) {
 				next = neighbors[i];
-				newCost = costSoFar[current] + this._graph.cost(current, next);
-				if(!contains(costSoFar, next) or newCost < costSoFar[next]) {
+				newCost = costSoFar[current] + current.getCost(next);
+				if(!contains(costSoFar, next) || newCost < costSoFar[next]) {
 					costSoFar[next] = newCost;
 					priority = newCost + this._heuristic(end, next);
 					frontier.queue({ node: next, priority: priority });
@@ -1284,7 +1296,7 @@ var AStar = function(osmData) {
 		//Reconstruct path
 		current = end;
 		var path = [ current ];
-		while(current != start) {
+		while(!current.equals(start)) {
 			current = cameFrom[current];
 			path.push(current);
 		}
@@ -1300,5 +1312,91 @@ var AStar = function(osmData) {
 	 * @return The fly-distance
 	 */
 	AStar.prototype._heuristic = function(n1, n2) {
-		return sqrt(pow(n1.getLatLng().distanceTo(n2.getLatLng()), 2) + pow(abs(n1.getLevel() - n2.getLevel())*2.5, 2));
+		return Math.sqrt(Math.pow(n1.getLatLng().distanceTo(n2.getLatLng()), 2) + Math.pow(Math.abs(n1.getLevel() - n2.getLevel())*2.5, 2));
+	};
+
+
+
+/**
+ * A node is the main component of a graph
+ * Transition between nodes have a cost
+ * As the graph is oriented, you should set neighbours on two concerned nodes to make the link bidirectionnal.
+ */
+var Node = function(latlng, level) {
+//ATTRIBUTES
+	/** The coordinates of the node **/
+	this._latLng = latlng;
+	
+	/** The level where the node can be found **/
+	this._level = level;
+	
+	/** The neighbours of the node **/
+	this._neighbours = [];
+	
+	/** The costs to go to a neighbour **/
+	this._costs = [];
+
+//CONSTRUCTOR
+	if(latlng == null || isNaN(level)) {
+		throw Exception("Missing parameter");
+	}
+};
+
+//ACCESSORS
+	/**
+	 * @return The coordinates
+	 */
+	Node.prototype.getLatLng = function() {
+		return this._latLng;
+	};
+	
+	/**
+	 * @return The level
+	 */
+	Node.prototype.getLevel = function() {
+		return this._level;
+	};
+	
+	/**
+	 * @return The neighbours
+	 */
+	Node.prototype.getNeighbours = function() {
+		return this._neighbours;
+	};
+	
+	/**
+	 * @return The cost to travel to the given node
+	 */
+	Node.prototype.getCost = function(n) {
+		var id = this._neighbours.indexOf(n);
+		return this._costs[id];
+	};
+	
+	/**
+	 * @return True if the given node is the same as the current one
+	 */
+	Node.prototype.equals = function(n) {
+		if(this === n) { return true; }
+		if(this._level != n._level) return false;
+		if(!this._latLng.equals(n._latLng)) return false;
+		if(this._neighbours.length != n._neighbours.length) return false;
+		
+		//Check each neighbour
+		for(var i=0, l=this._neighbours.length; i<l; i++) {
+			if(n._neighbours[i] != this._neighbours[i]) return false;
+			if(n._costs[i] != this._costs[i]) return false;
+		}
+		
+		return true;
+	};
+
+//MODIFIERS
+	/**
+	 * Add a neighbour to this node
+	 * @param n The node to add
+	 * @param w The cost to go from this node to the given one
+	 */
+	Node.prototype.addNeighbour = function(n, w) {
+		this._neighbours.push(n);
+		this._costs.push(w);
 	};

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>OpenLevelUp - Tests</title>
+	<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-1.20.0.css" />
+	
+	<!-- Library includes -->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+	<script type="text/javascript" src="lib/priority-queue.min.js"></script>
+	
+	<!-- OpenLevelUp includes -->
+	<script src="js/utils.js"></script>
+	<script src="js/model.js"></script>
+</head>
+<body>
+	<div id="qunit"></div>
+	<div id="qunit-fixture"></div>
+	<script src="https://code.jquery.com/qunit/qunit-1.20.0.js"></script>
+	<script type="text/javascript">
+		/*********
+		 * Model *
+		 *********/
+		
+		/*
+		 * Node
+		 */
+		QUnit.module("Model > Node");
+		
+		//Constructor
+		QUnit.test("Constructor with missing parameters", function(assert) {
+			try {
+				var n1 = new Node();
+				assert.ok(false);
+			}
+			catch(e) {
+				assert.ok(true);
+			}
+		});
+		QUnit.test("Constructor with invalid parameters", function(assert) {
+			try {
+				var n1 = new Node(null, "lalala");
+				assert.ok(false);
+			}
+			catch(e) {
+				assert.ok(true);
+			}
+		});
+		QUnit.test("Constructor with valid parameters", function(assert) {
+			var n1 = new Node(L.latLng(1, 1), 12);
+			assert.ok(n1 instanceof Node);
+		});
+		
+		//Accessors
+		QUnit.test("Get level", function(assert) {
+			var n1 = new Node(L.latLng(1, 1), 12);
+			assert.equal(n1.getLevel(), 12);
+		});
+		QUnit.test("Get latlng", function(assert) {
+			var n1 = new Node(L.latLng(1, 2), 12);
+			assert.equal(n1.getLatLng().lat, 1);
+			assert.equal(n1.getLatLng().lng, 2);
+		});
+		QUnit.test("Get neighbours", function(assert) {
+			var n1 = new Node(L.latLng(1, 2), 12);
+			var n2 = new Node(L.latLng(3, 4), 10);
+			var n3 = new Node(L.latLng(5, 6), 12);
+			
+			n1.addNeighbour(n2, 2);
+			n1.addNeighbour(n3, 3);
+			
+			var neighbours = n1.getNeighbours();
+			assert.equal(neighbours.length, 2);
+			assert.ok(neighbours[0].equals(n2));
+			assert.ok(neighbours[1].equals(n3));
+			
+			assert.equal(n2.getNeighbours().length, 0);
+		});
+		QUnit.test("Get cost", function(assert) {
+			var n1 = new Node(L.latLng(1, 2), 12);
+			var n2 = new Node(L.latLng(3, 4), 10);
+			var n3 = new Node(L.latLng(5, 6), 12);
+			
+			n1.addNeighbour(n2, 2);
+			n1.addNeighbour(n3, 3);
+			
+			assert.equal(n1.getCost(n2), 2);
+			assert.equal(n1.getCost(n3), 3);
+		});
+		QUnit.test("Equals", function(assert) {
+			var n1 = new Node(L.latLng(1, 2), 12);
+			var n1bis = new Node(L.latLng(1, 2), 12);
+			var n2 = new Node(L.latLng(3, 4), 10);
+			var n3 = new Node(L.latLng(5, 6), 12);
+			
+			assert.ok(n1.equals(n1));
+			assert.ok(n1.equals(n1bis));
+			assert.notOk(n1.equals(n2));
+			assert.notOk(n2.equals(n3));
+		});
+		
+		//Modifiers
+		QUnit.test("Add neighbour", function(assert) {
+			var n1 = new Node(L.latLng(1, 2), 12);
+			var n2 = new Node(L.latLng(3, 4), 10);
+			var n3 = new Node(L.latLng(5, 6), 12);
+			
+			assert.equal(n1.getNeighbours().length, 0);
+			
+			n1.addNeighbour(n2, 2);
+			n1.addNeighbour(n3, 3);
+			
+			var neighbours = n1.getNeighbours();
+			assert.equal(neighbours.length, 2);
+			assert.ok(neighbours[0].equals(n2));
+			assert.ok(neighbours[1].equals(n3));
+		});
+		
+		/*
+		 * AStar
+		 */
+		QUnit.module("Model > AStar");
+		
+		//Constructors
+		QUnit.test("Create from OSM Data", function(assert) {
+		});
+		
+		QUnit.test("Create from nodes", function(assert) {
+			//Create nodes
+			var n1 = new Node(L.latLng(0, 0), 0);
+			var n2 = new Node(L.latLng(1, 0), 0);
+			var n3 = new Node(L.latLng(1, 1), 0);
+			var n4 = new Node(L.latLng(0, 1), 0);
+			
+			//Build graph
+			n1.addNeighbour(n2, 1);
+			n1.addNeighbour(n3, 2);
+			n1.addNeighbour(n4, 3);
+			n2.addNeighbour(n3, 1);
+			n4.addNeighbour(n3, 1);
+			
+			var graph = [ n1, n2, n3, n4 ];
+			
+			//Create A*
+			var as1 = new AStar();
+			as1.createFromNodes(graph);
+			assert.ok(true);
+		});
+		
+		//Other methods
+		QUnit.test("Find shortest path", function(assert) {
+		});
+		
+		QUnit.test("Process", function(assert) {
+			//Create nodes
+			var n1 = new Node(L.latLng(0, 0), 0);
+			var n2 = new Node(L.latLng(1, 0), 0);
+			var n3 = new Node(L.latLng(1, 1), 0);
+			var n4 = new Node(L.latLng(0, 1), 0);
+			
+			//Build graph
+			n1.addNeighbour(n2, 1);
+			n1.addNeighbour(n3, 2);
+			n1.addNeighbour(n4, 3);
+			n2.addNeighbour(n3, 1);
+			n4.addNeighbour(n3, 1);
+			
+			var graph = [ n1, n2, n3, n4 ];
+			
+			//Create A*
+			var as1 = new AStar();
+			as1.createFromNodes(graph);
+			
+			//Process
+			var path = as1._process(n1, n4);
+			
+			//Check
+			assert.ok(path[0].equals(n1));
+			assert.ok(path[0].equals(n2));
+			assert.ok(path[0].equals(n4));
+		});
+	</script>
+	</body>
+</html>
