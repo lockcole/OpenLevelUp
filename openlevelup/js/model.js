@@ -1226,5 +1226,79 @@ var AStar = function(osmData) {
 };
 
 //OTHER METHODS
-	AStar.prototype.findShortestPath = function() {
+	/**
+	 * Finds the shortest path in the graph
+	 * @param startPt The start coordinates
+	 * @param startLvl The start level
+	 * @param endPt The end coordinates
+	 * @param endLvl The end level
+	 * @return The path to follow (as an array of nodes)
+	 */
+	AStar.prototype.findShortestPath = function(startPt, startLvl, endPt, endLvl) {
+		//Find start and end nodes near given coordinates
+		var start = null;
+		var end = null;
+		
+		return this._process(start, end);
+	};
+	
+	/**
+	 * The algorithm of A*
+	 * @param start The start node
+	 * @param end The end node
+	 * @return The path to follow (as an array of nodes)
+	 */
+	AStar.prototype._process = function(start, end) {
+		//Init A*
+		var frontier = new PriorityQueue({ comparator: function(a, b) { return b.priority - a.priority } });
+		var cameFrom = {};
+		var costSoFar = {};
+		var current = null, neighbors = null, next = null, newCost = null, priority = null;
+		
+		//Add start node
+		frontier.queue({ node: start, priority: 0 });
+		cameFrom[start] = null;
+		costSoFar[start] = 0;
+		
+		//Find path
+		while(frontier.length > 0) {
+			current = frontier.dequeue().node;
+			
+			//Stop if current node is the final one
+			if(current == end) { break; }
+			
+			//Look for current node's neighbors
+			neighbors = current.getNeighbors();
+			for(var i=0, l=neighbors.length; i < l; i++) {
+				next = neighbors[i];
+				newCost = costSoFar[current] + this._graph.cost(current, next);
+				if(!contains(costSoFar, next) or newCost < costSoFar[next]) {
+					costSoFar[next] = newCost;
+					priority = newCost + this._heuristic(end, next);
+					frontier.queue({ node: next, priority: priority });
+					cameFrom[next] = current;
+				}
+			}
+		}
+		
+		//Reconstruct path
+		current = end;
+		var path = [ current ];
+		while(current != start) {
+			current = cameFrom[current];
+			path.push(current);
+		}
+		path.reverse();
+		
+		return path;
+	};
+	
+	/**
+	 * The fly-distance between two nodes in graph
+	 * @param n1 The first node
+	 * @param n2 The second node
+	 * @return The fly-distance
+	 */
+	AStar.prototype._heuristic = function(n1, n2) {
+		return sqrt(pow(n1.getLatLng().distanceTo(n2.getLatLng()), 2) + pow(abs(n1.getLevel() - n2.getLevel())*2.5, 2));
 	};
