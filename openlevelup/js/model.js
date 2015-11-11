@@ -1269,8 +1269,8 @@ var AStar = function() {
 		
 		//Add start node
 		frontier.queue({ node: start, priority: 0 });
-		cameFrom[start] = null;
-		costSoFar[start] = 0;
+		cameFrom[this._graph.indexOf(start)] = null;
+		costSoFar[this._graph.indexOf(start)] = 0;
 		
 		//Find path
 		while(frontier.length > 0) {
@@ -1283,12 +1283,12 @@ var AStar = function() {
 			neighbors = current.getNeighbours();
 			for(var i=0, l=neighbors.length; i < l; i++) {
 				next = neighbors[i];
-				newCost = costSoFar[current] + current.getCost(next);
-				if(!contains(costSoFar, next) || newCost < costSoFar[next]) {
-					costSoFar[next] = newCost;
+				newCost = costSoFar[this._graph.indexOf(current)] + current.getCost(next);
+				if(!contains(costSoFar, this._graph.indexOf(next)) || newCost < costSoFar[this._graph.indexOf(next)]) {
+					costSoFar[this._graph.indexOf(next)] = newCost;
 					priority = newCost + this._heuristic(end, next);
 					frontier.queue({ node: next, priority: priority });
-					cameFrom[next] = current;
+					cameFrom[this._graph.indexOf(next)] = current;
 				}
 			}
 		}
@@ -1297,7 +1297,7 @@ var AStar = function() {
 		current = end;
 		var path = [ current ];
 		while(!current.equals(start)) {
-			current = cameFrom[current];
+			current = cameFrom[this._graph.indexOf(current)];
 			path.push(current);
 		}
 		path.reverse();

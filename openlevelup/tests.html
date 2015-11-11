@@ -172,12 +172,14 @@
 			as1.createFromNodes(graph);
 			
 			//Process
-			var path = as1._process(n1, n4);
+			var path = as1._process(n1, n3);
 			
 			//Check
+			console.log(path);
+			assert.equal(path.length, 3);
 			assert.ok(path[0].equals(n1));
-			assert.ok(path[0].equals(n2));
-			assert.ok(path[0].equals(n4));
+			assert.ok(path[1].equals(n2));
+			assert.ok(path[2].equals(n3));
 		});
 	</script>
 	</body>
