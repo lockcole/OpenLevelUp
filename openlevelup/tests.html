@@ -5,13 +5,52 @@
 	<title>OpenLevelUp - Tests</title>
 	<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-1.20.0.css" />
 	
-	<!-- Library includes -->
+		<!-- Leaflet includes -->
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
-	<script type="text/javascript" src="lib/priority-queue.min.js"></script>
+
+	<!-- OSMtoGeoJSON include -->
+	<script src="lib/osmtogeojson.js"></script>
+
+	<!-- Azimuth include -->
+	<script src="lib/azimuth.js"></script>
 	
+	<!-- jQuery includes -->
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+	
+	<!-- Galleria includes -->
+	<script src="lib/galleria/galleria-1.4.2.min.js"></script>
+	<link rel="stylesheet" href="lib/galleria/themes/classic/galleria.classic.css">
+	<script src="lib/galleria/themes/classic/galleria.classic.min.js"></script>
+	
+	<!-- Three JS includes -->
+	<script src="lib/Detector.js"></script>
+	<script src="lib/three.min.js"></script>
+	
+	<!-- jQuery-QRCode includes -->
+	<script type="text/javascript" src="lib/jquery.qrcode.min.js"></script>
+	
+	<!-- JS Priority Queue includes -->
+	<script type="text/javascript" src="lib/priority-queue.min.js"></script>
+
+	<!-- Leaflet plugin includes -->
+	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.css" />
+	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.Default.css" />
+	<script src="lib/markercluster/leaflet.markercluster-src.js"></script>
+	<script src="lib/polylinedecorator/L.RotatedMarker.js"></script>
+	<link rel="stylesheet" href="css/Control.Geocoder.css" />
+	<script src="lib/Control.Geocoder.js"></script>
+	<link rel="stylesheet" href="lib/sidebar2/leaflet-sidebar.min.css" />
+	<script src="lib/sidebar2/leaflet-sidebar.min.js"></script>
+	<link rel="stylesheet" href="lib/controlwindow/L.Control.Window.custom.css" />
+	<script src="lib/controlwindow/L.Control.Window.js"></script>
+
 	<!-- OpenLevelUp includes -->
-	<script src="js/utils.js"></script>
-	<script src="js/model.js"></script>
+	<script src="js/utils.js" type="text/javascript"></script>
+	<script src="js/controller.js" type="text/javascript"></script>
+	<script src="js/model.js" type="text/javascript"></script>
+	<script src="js/view.js" type="text/javascript"></script>
 </head>
 <body>
 	<div id="qunit"></div>
@@ -26,26 +65,7 @@
 		 * Node
 		 */
 		QUnit.module("Model > Node");
-		
-		//Constructor
-		QUnit.test("Constructor with missing parameters", function(assert) {
-			try {
-				var n1 = new Node();
-				assert.ok(false);
-			}
-			catch(e) {
-				assert.ok(true);
-			}
-		});
-		QUnit.test("Constructor with invalid parameters", function(assert) {
-			try {
-				var n1 = new Node(null, "lalala");
-				assert.ok(false);
-			}
-			catch(e) {
-				assert.ok(true);
-			}
-		});
+
 		QUnit.test("Constructor with valid parameters", function(assert) {
 			var n1 = new Node(L.latLng(1, 1), 12);
 			assert.ok(n1 instanceof Node);
@@ -90,11 +110,21 @@
 		QUnit.test("Equals", function(assert) {
 			var n1 = new Node(L.latLng(1, 2), 12);
 			var n1bis = new Node(L.latLng(1, 2), 12);
+			var n1ter = new Node(L.latLng(1, 2), 12);
+			var n1quater = new Node(L.latLng(1, 2), 12);
 			var n2 = new Node(L.latLng(3, 4), 10);
+			var n2bis = new Node(L.latLng(3, 4), 10);
 			var n3 = new Node(L.latLng(5, 6), 12);
+			
+			n1.addNeighbour(n2, 1.3);
+			n1bis.addNeighbour(n2, 1.3);
+			n1ter.addNeighbour(n2, 2);
+			n1quater.addNeighbour(n2bis, 2);
 			
 			assert.ok(n1.equals(n1));
 			assert.ok(n1.equals(n1bis));
+			assert.notOk(n1.equals(n1ter));
+			assert.ok(n1ter.equals(n1quater));
 			assert.notOk(n1.equals(n2));
 			assert.notOk(n2.equals(n3));
 		});
@@ -117,12 +147,105 @@
 		});
 		
 		/*
-		 * AStar
+		 * Graph
 		 */
-		QUnit.module("Model > AStar");
+		QUnit.module("Model > Graph");
 		
 		//Constructors
-		QUnit.test("Create from OSM Data", function(assert) {
+		QUnit.test("Create from OSM Data (ways on one level)", function(assert) {
+			var data = new OSMData(null, { "elements": [
+				{"type": "way","id": 1,"nodes": [1,2],"tags": {"highway": "footway","level": "1"}},
+				{"type": "way","id": 2,"nodes": [2,3],"tags": {"highway": "footway","level": "1"}},
+				{"type": "way","id": 3,"nodes": [2,4],"tags": {"highway": "footway","level": "1"}},
+				{"type": "way","id": 4,"nodes": [2,4],"tags": {"trash": "yes","level": "1"}},
+				{"type": "node","id": 1,"lat": 48.8450691,"lon": 2.3740886},
+				{"type": "node","id": 2,"lat": 48.8451673,"lon": 2.3742123},
+				{"type": "node","id": 3,"lat": 48.8452128,"lon": 2.3743246},
+				{"type": "node","id": 4,"lat": 48.8452412,"lon": 2.3742728}
+			] });
+			
+			var g1 = new Graph();
+			g1.createFromOSMData(data);
+			
+			//Create result graph
+			var n1 = new Node(L.latLng(48.8450691, 2.3740886), 1);
+			var n2 = new Node(L.latLng(48.8451673, 2.3742123), 1);
+			var n3 = new Node(L.latLng(48.8452128, 2.3743246), 1);
+			var n4 = new Node(L.latLng(48.8452412, 2.3742728), 1);
+			n1.addNeighbour(n2, n1.getLatLng().distanceTo(n2.getLatLng()));
+			n2.addNeighbour(n3, n2.getLatLng().distanceTo(n3.getLatLng()));
+			n2.addNeighbour(n4, n2.getLatLng().distanceTo(n4.getLatLng()));
+			
+			
+			//Check
+			assert.equal(g1._graph.length, 4);
+			assert.ok(g1._graph[0].equals(n1));
+			assert.ok(g1._graph[1].equals(n2));
+			assert.ok(g1._graph[2].equals(n3));
+			assert.ok(g1._graph[3].equals(n4));
+		});
+		
+		QUnit.test("Create from OSM Data (stairs)", function(assert) {
+			var data = new OSMData(null, { "elements": [
+				{"type": "way","id": 1,"nodes": [1,2],"tags": {"highway": "footway","level": "0"}},
+				{"type": "way","id": 2,"nodes": [2,3],"tags": {"highway": "steps","level": "0;1"}},
+				{"type": "way","id": 3,"nodes": [3,4],"tags": {"highway": "footway","level": "1"}},
+				{"type": "node","id": 1,"lat": 48.8450691,"lon": 2.3740886},
+				{"type": "node","id": 2,"lat": 48.8451673,"lon": 2.3742123,"tags":{"door":"no","level":"0"}},
+				{"type": "node","id": 3,"lat": 48.8452128,"lon": 2.3743246,"tags":{"door":"no","level":"1"}},
+				{"type": "node","id": 4,"lat": 48.8452412,"lon": 2.3742728}
+			] });
+			
+			var g1 = new Graph();
+			g1.createFromOSMData(data);
+			
+			//Create result graph
+			var n1 = new Node(L.latLng(48.8450691, 2.3740886), 0);
+			var n2 = new Node(L.latLng(48.8451673, 2.3742123), 0);
+			var n3 = new Node(L.latLng(48.8452128, 2.3743246), 1);
+			var n4 = new Node(L.latLng(48.8452412, 2.3742728), 1);
+			n1.addNeighbour(n2, distanceLevels(n1.getLatLng(), 0, n2.getLatLng(), 0));
+			n2.addNeighbour(n3, distanceLevels(n2.getLatLng(), 0, n3.getLatLng(), 1));
+			n3.addNeighbour(n4, distanceLevels(n3.getLatLng(), 1, n4.getLatLng(), 1));
+			
+			
+			//Check
+			assert.equal(g1._graph.length, 4);
+			assert.ok(g1._graph[0].equals(n1));
+			assert.ok(g1._graph[1].equals(n2));
+			assert.ok(g1._graph[2].equals(n3));
+			assert.ok(g1._graph[3].equals(n4));
+		});
+		
+		QUnit.test("Create from OSM Data (invalid stairs)", function(assert) {
+			var data = new OSMData(null, { "elements": [
+				{"type": "way","id": 1,"nodes": [1,2],"tags": {"highway": "footway","level": "0"}},
+				{"type": "way","id": 2,"nodes": [2,3],"tags": {"highway": "steps","level": "0;1"}},
+				{"type": "way","id": 3,"nodes": [3,4],"tags": {"highway": "footway","level": "1"}},
+				{"type": "node","id": 1,"lat": 48.8450691,"lon": 2.3740886},
+				{"type": "node","id": 2,"lat": 48.8451673,"lon": 2.3742123},
+				{"type": "node","id": 3,"lat": 48.8452128,"lon": 2.3743246},
+				{"type": "node","id": 4,"lat": 48.8452412,"lon": 2.3742728}
+			] });
+			
+			var g1 = new Graph();
+			g1.createFromOSMData(data);
+			
+			//Create result graph
+			var n1 = new Node(L.latLng(48.8450691, 2.3740886), 0);
+			var n2 = new Node(L.latLng(48.8451673, 2.3742123), 0);
+			var n3 = new Node(L.latLng(48.8452128, 2.3743246), 1);
+			var n4 = new Node(L.latLng(48.8452412, 2.3742728), 1);
+			n1.addNeighbour(n2, distanceLevels(n1.getLatLng(), 0, n2.getLatLng(), 0));
+			n3.addNeighbour(n4, distanceLevels(n3.getLatLng(), 1, n4.getLatLng(), 1));
+			
+			
+			//Check
+			assert.equal(g1._graph.length, 4);
+			assert.ok(g1._graph[0].equals(n1));
+			assert.ok(g1._graph[1].equals(n2));
+			assert.ok(g1._graph[2].equals(n3));
+			assert.ok(g1._graph[3].equals(n4));
 		});
 		
 		QUnit.test("Create from nodes", function(assert) {
@@ -142,7 +265,7 @@
 			var graph = [ n1, n2, n3, n4 ];
 			
 			//Create A*
-			var as1 = new AStar();
+			var as1 = new Graph();
 			as1.createFromNodes(graph);
 			assert.ok(true);
 		});
@@ -168,14 +291,13 @@
 			var graph = [ n1, n2, n3, n4 ];
 			
 			//Create A*
-			var as1 = new AStar();
+			var as1 = new Graph();
 			as1.createFromNodes(graph);
 			
 			//Process
 			var path = as1._process(n1, n3);
 			
 			//Check
-			console.log(path);
 			assert.equal(path.length, 3);
 			assert.ok(path[0].equals(n1));
 			assert.ok(path[1].equals(n2));

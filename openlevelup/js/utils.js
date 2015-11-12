@@ -282,6 +282,28 @@ function correctWebLink(url) {
 }
 
 /**
+ * Calculates the distance between two points through levels
+ * @param c1 The first node coordinates
+ * @param l1 The first node level
+ * @param c2 The second node coordinates
+ * @param l2 The second node level
+ * @return The estimated distance in meters
+ */
+function distanceLevels(c1, l1, c2, l2) {
+	return Math.sqrt(Math.pow(c1.distanceTo(c2), 2) + Math.pow((l2-l1)*2.5, 2));
+}
+
+/**
+ * More strict parseFloat function
+ */
+function filterFloat(value) {
+	if(/^(\-|\+)?([0-9]+(\.[0-9]+)?|Infinity)$/
+		.test(value))
+		return Number(value);
+	return NaN;
+}
+
+/**
  * Contains characters used in base 62
  */
 var base62 = [ "0","1","2","3","4","5","6","7","8","9",

@@ -40,6 +40,9 @@ var OSMData = function(bbox, data) {
 	
 	/** The names of objects, by level **/
 	this._names = new Object();
+	
+	/** The original data **/
+	this._data = data;
 
 //CONSTRUCTOR
 	var timeStart = new Date().getTime();
@@ -126,6 +129,13 @@ var OSMData = function(bbox, data) {
 	 */
 	OSMData.prototype.getNames = function() {
 		return this._names;
+	};
+	
+	/**
+	 * @return The original data
+	 */
+	OSMData.prototype.getData = function() {
+		return this._data;
 	};
 	
 	/**
@@ -1213,10 +1223,10 @@ var FeatureImages = function(feature) {
 
 
 /**
- * A* search class
+ * Graph class
  * Creates the graph for the given OSM Data, and allows to search shortest path in it
  */
-var AStar = function() {
+var Graph = function() {
 //ATTRIBUTES
 	/** The graph **/
 	this._graph = null;
@@ -1226,14 +1236,71 @@ var AStar = function() {
 	/**
 	 * Initializes the graph from OSM data
 	 */
-	AStar.prototype.createFromOSMData = function(osmData) {
-		//TODO
+	Graph.prototype.createFromOSMData = function(osmData) {
+		var data = osmData.getData();
+		var nodes = {};
+		
+		//Parse nodes
+		var currentElement = null;
+		for(var i=0, l=data.elements.length; i < l; i++) {
+			currentElement = data.elements[i];
+			if(currentElement.type == "node") {
+				nodes[currentElement.id] = new Node(L.latLng(currentElement.lat, currentElement.lon));
+				if(currentElement.tags != undefined && currentElement.tags.level != undefined) {
+					nodes[currentElement.id]._level = filterFloat(currentElement.tags.level);
+				}
+			}
+		}
+		
+		//Parse ways
+		var node, nodeNext;
+		for(var i=0, l=data.elements.length; i < l; i++) {
+			currentElement = data.elements[i];
+			if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
+				for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
+					node = currentElement.nodes[j];
+					//Set level for each node
+					if(currentElement.tags != undefined && currentElement.tags.level != undefined && isNaN(nodes[node]._level)) {
+						nodes[node]._level = filterFloat(currentElement.tags.level);
+					}
+					
+					//Link node to next one
+					if(j > 0 && !isNaN(nodes[node]._level)) {
+						nodePrev = currentElement.nodes[j-1];
+						if(!isNaN(nodes[nodePrev]._level)) {
+							nodes[nodePrev].addNeighbour(
+								nodes[node],
+								distanceLevels(
+									nodes[nodePrev].getLatLng(),
+									nodes[nodePrev].getLevel(),
+									nodes[node].getLatLng(),
+									nodes[node].getLevel()
+								)
+							);
+						}
+					}
+				}
+			}
+		}
+		
+		//Store final graph
+		this._graph = [];
+		for(var i in nodes) {
+			this._graph.push(nodes[i]);
+		}
+	};
+	
+	/**
+	 * @return True if the object can be walked on
+	 */
+	Graph.prototype._isWalkable = function(tags) {
+		return tags.highway != undefined;
 	};
 	
 	/**
 	 * Initializes the graph from given nodes
 	 */
-	AStar.prototype.createFromNodes = function(nodes) {
+	Graph.prototype.createFromNodes = function(nodes) {
 		this._graph = nodes;
 	};
 
@@ -1246,7 +1313,7 @@ var AStar = function() {
 	 * @param endLvl The end level
 	 * @return The path to follow (as an array of nodes)
 	 */
-	AStar.prototype.findShortestPath = function(startPt, startLvl, endPt, endLvl) {
+	Graph.prototype.findShortestPath = function(startPt, startLvl, endPt, endLvl) {
 		//Find start and end nodes near given coordinates
 		var start = null;
 		var end = null;
@@ -1260,7 +1327,7 @@ var AStar = function() {
 	 * @param end The end node
 	 * @return The path to follow (as an array of nodes)
 	 */
-	AStar.prototype._process = function(start, end) {
+	Graph.prototype._process = function(start, end) {
 		//Init A*
 		var frontier = new PriorityQueue({ comparator: function(a, b) { return b.priority - a.priority } });
 		var cameFrom = {};
@@ -1311,7 +1378,7 @@ var AStar = function() {
 	 * @param n2 The second node
 	 * @return The fly-distance
 	 */
-	AStar.prototype._heuristic = function(n1, n2) {
+	Graph.prototype._heuristic = function(n1, n2) {
 		return Math.sqrt(Math.pow(n1.getLatLng().distanceTo(n2.getLatLng()), 2) + Math.pow(Math.abs(n1.getLevel() - n2.getLevel())*2.5, 2));
 	};
 
@@ -1335,11 +1402,6 @@ var Node = function(latlng, level) {
 	
 	/** The costs to go to a neighbour **/
 	this._costs = [];
-
-//CONSTRUCTOR
-	if(latlng == null || isNaN(level)) {
-		throw Exception("Missing parameter");
-	}
 };
 
 //ACCESSORS
@@ -1383,7 +1445,7 @@ var Node = function(latlng, level) {
 		
 		//Check each neighbour
 		for(var i=0, l=this._neighbours.length; i<l; i++) {
-			if(n._neighbours[i] != this._neighbours[i]) return false;
+			if(!n._neighbours[i].equals(this._neighbours[i])) return false;
 			if(n._costs[i] != this._costs[i]) return false;
 		}
 		
