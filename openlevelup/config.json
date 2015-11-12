@@ -39,7 +39,7 @@
 		
 		"mapillary": {
 			"api": "https://a.mapillary.com/v2/",
-			"key": "NzNRM2otQkR2SHJzaXJmNmdQWVQ0dzplMWU2NDQ5NDNmZjM5M2Iw"
+			"clientId": "eDhQTTdnRmZJNXdYZWUwRDQxc1NwdzpmYjE3YWE3MWM5ZjcyMTdm"
 		}
 	},
 	

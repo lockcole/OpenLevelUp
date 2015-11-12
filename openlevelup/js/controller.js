@@ -504,7 +504,7 @@ var Ctrl = function() {
 	 */
 	Ctrl.prototype.requestMapillaryData = function(id, isLast) {
 		isLast = isLast || false;
-		var params = 'g/'+id+'?client_id='+CONFIG.images.mapillary.key;
+		var params = 'g/'+id+'?client_id='+CONFIG.images.mapillary.clientId;
 		var url = CONFIG.images.mapillary.api+params;
 		
 		//Download
