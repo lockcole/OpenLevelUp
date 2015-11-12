@@ -68,6 +68,9 @@ var MainView = function(ctrl) {
 	/** The notes component **/
 	this._cNotes = null;
 	
+	/** The routing component **/
+	this._cRouting = null;
+	
 	/** The map component **/
 	this._cMap = null;
 
@@ -78,6 +81,7 @@ var MainView = function(ctrl) {
 	this._cMessages = new MessagesView(this);
 	this._cAbout = new AboutView(this);
 	this._cNames = new NamesView(this);
+	this._cRouting = new RoutingView(this);
 	this._cImages = new ImagesView(this);
 	this._cLevel = new LevelView(this);
 	this._cTags = new TagsView(this);
@@ -214,6 +218,7 @@ var MainView = function(ctrl) {
 			if(oldZoom == null || oldZoom < CONFIG.view.map.full_data_min_zoom) {
 				this._cNames.showButton();
 				this._cNotes.showButton();
+				this._cRouting.showButton();
 				this._cLevel.enable();
 				this._cOptions.enable();
 				this._cMap.update();
@@ -227,6 +232,7 @@ var MainView = function(ctrl) {
 			if(oldZoom == null || oldZoom < CONFIG.view.map.data_min_zoom) {
 				this._cNames.showButton();
 				this._cNotes.showButton();
+				this._cRouting.showButton();
 				this._cLevel.enable();
 				this._cOptions.enable();
 				this._cMap.update();
@@ -240,6 +246,7 @@ var MainView = function(ctrl) {
 			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
 				this._cNames.hideButton();
 				this._cNotes.hideButton();
+				this._cRouting.hideButton();
 				this._cLevel.disable();
 				this._cOptions.disable();
 			}
@@ -255,6 +262,7 @@ var MainView = function(ctrl) {
 			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
 				this._cNames.hideButton();
 				this._cNotes.hideButton();
+				this._cRouting.hideButton();
 				this._cLevel.disable();
 				this._cOptions.disable();
 			}
@@ -3064,4 +3072,30 @@ var NotesView = function(main) {
 	NotesView.prototype.cancelNote = function() {
 		this._mainView.collapseSidebar();
 		this._mainView.getMapView().hideDraggableMarker();
+	};
+
+
+
+/**
+ * The routing view
+ */
+var RoutingView = function(main) {
+//ATTRIBUTES
+	/** The main view **/
+	this._mainView = main;
+};
+
+//MODIFIERS
+	/**
+	* Shows the button
+	*/
+	RoutingView.prototype.showButton = function() {
+		$("#sidebar-tab-routing").removeClass("disabled");
+	};
+
+	/**
+	* Hides the button
+	*/
+	RoutingView.prototype.hideButton = function() {
+		$("#sidebar-tab-routing").addClass("disabled");
 	};
