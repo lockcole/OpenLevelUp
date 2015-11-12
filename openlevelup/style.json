@@ -17,8 +17,13 @@
 			{
 				"name": "Area",
 				"description": "Indoor areas",
-				"onTags": [ { "indoor": "area|corridor" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|entrance|hall|entry|gallery|collection" } ],
+				"onTags": [ { "indoor": "area|corridor" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|hall|entry|gallery|collection" } ],
 				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6, "label": "name", "labelStyle": "area" }
+			},
+			{
+				"name": "Entrance",
+				"onTags": [ { "room": "entrance" } ],
+				"style": { "fillColor": "#EEEEEE" }
 			},
 			{
 				"name": "${room}",
@@ -217,13 +222,13 @@
 			},
 			{
 				"description": "Small amenities",
-				"onTags": [ { "amenity": "bbq|drinking_water|atm|bench|seat|clock|photo_booth|post_box|recycling|vending_machine|waste_basket|ticket_validator|piano|telephone" } ],
+				"onTags": [ { "amenity": "bbq|drinking_water|atm|bench|seat|clock|photo_booth|post_box|recycling|vending_machine|waste_basket|ticket_validator|piano|telephone|parking_space" } ],
 				"isDetail": true,
 				"style": { "color": "#FFBA66" }
 			},
 			{
 				"description": "Set layer for amenities which are kind of landuses",
-				"onTags": [ { "amenity": "school|college|university|hospital" } ],
+				"onTags": [ { "amenity": "school|college|university|hospital|parking" } ],
 				"style": { "layer": -9 }
 			},
 			{
