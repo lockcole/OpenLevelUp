@@ -151,6 +151,46 @@
 			
 			<div class="sidebar-pane" id="routing">
 				<h1 class="sidebar-header"><img src="img/icon_routing.svg" /> Navigation<div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
+				
+				<div class="routing-destinations">
+					<div class="routing-destination">
+						<div><img src="img/icon_marker_start.png" /></div>
+						<div id="routing-start">Quai 2</div>
+						<div><select id="routing-start-level"></select></div>
+						<div><button>x</button></div>
+					</div>
+					<div class="routing-destination">
+						<div><img src="img/icon_marker_end.png" /></div>
+						<div id="routing-end">Quai 2</div>
+						<div><select id="routing-end-level"></select></div>
+						<div><button>x</button></div>
+					</div>
+				</div>
+				
+				<div class="routing-buttons">
+					<select id="routing-mode"></select>
+					<button>OK</button>
+				</div>
+				
+				<div class="routing-instructions">
+					<div class="routing-instructions-general">
+						<span class="rtg-instr-title">Length:</span> <span id="rtg-instr-length">500</span> m | <span class="rtg-instr-title">Time:</span> <span id="rtg-instr-time">5</span> min
+					</div>
+					<div id="rtg-instr-list">
+						<div class="routing-instruction">
+							<span class="routing-instr-img"><img src="img/icon_rtg_forward.svg" /></span>
+							<span class="routing-instr-ref">1.</span>
+							<span class="routing-instr-txt">Go forward</span>
+							<span class="routing-instr-time">10 m</span>
+						</div>
+						<div class="routing-instruction">
+							<span class="routing-instr-img"><img src="img/icon_rtg_stairs_up.svg" /></span>
+							<span class="routing-instr-ref">2.</span>
+							<span class="routing-instr-txt">You're done</span>
+							<span class="routing-instr-time">12 m</span>
+						</div>
+					</div>
+				</div>
 			</div>
 
 			<div class="sidebar-pane" id="notes">
