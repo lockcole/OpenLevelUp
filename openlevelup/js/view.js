@@ -181,6 +181,13 @@ var MainView = function(ctrl) {
 	};
 	
 	/**
+	 * @return The routing component
+	 */
+	MainView.prototype.getRoutingView = function() {
+		return this._cRouting;
+	};
+	
+	/**
 	 * @return The map data from the controller
 	 */
 	MainView.prototype.getData = function() {
@@ -275,6 +282,7 @@ var MainView = function(ctrl) {
 		
 		this._cUrl.mapUpdated();
 		this._cNames.update();
+		this._cRouting.updateLevels();
 	};
 	
 	/**
@@ -283,6 +291,7 @@ var MainView = function(ctrl) {
 	MainView.prototype.updateLevelChanged = function() {
 		this._cMap.update();
 		this._cUrl.levelChanged();
+		this._cRouting.updateLevels();
 	};
 	
 	/**
@@ -346,6 +355,12 @@ var MapView = function(main) {
 	
 	/** The draggable marker **/
 	this._draggableMarker = null;
+	
+	/** The layer containing routing data **/
+	this._routingLayer = null;
+	
+	/** The routing markers **/
+	this._routingMarkers = { start: null, end: null, inter: [] };
 	
 	/** The previous zoom value **/
 	this._oldZoom = null;
@@ -432,6 +447,10 @@ var MapView = function(main) {
 	}
 	L.control.layers(tileLayers).addTo(this._map);
 	
+	//Routing layer
+	this._routingLayer = L.layerGroup();
+	this._routingLayer.addTo(this._map);
+	
 	//Add scale bar
 	L.control.scale({ position: "bottomright" }).addTo(this._map);
 	
@@ -496,6 +515,11 @@ var MapView = function(main) {
 			this._dataPopups = {};
 		}
 		
+		//Remove routing layer
+		if(this._map.hasLayer(this._routingLayer)) {
+			this._map.removeLayer(this._routingLayer);
+		}
+		
 		//Create data (specific to level)
 		var zoom = this._map.getZoom();
 		
@@ -522,6 +546,9 @@ var MapView = function(main) {
 						this._dataLayer.addLayer(notesLayer);
 					}
 				}
+				
+				//Routing layer
+				this._updateRoutingLayer();
 			}
 			else {
 				this._mainView.getMessagesView().displayMessage("There is no available data in this area", "alert");
@@ -669,6 +696,27 @@ var MapView = function(main) {
 	};
 	
 	/**
+	 * Updates the routing layer according to level
+	 */
+	MapView.prototype._updateRoutingLayer = function() {
+		//Clear layer
+		this._routingLayer.clearLayers();
+		
+		//Check start marker
+		if(this._routingMarkers.start != null && this._mainView.getRoutingView().getStartLevel() == this._mainView.getLevelView().get()) {
+			this._routingLayer.addLayer(this._routingMarkers.start);
+		}
+		
+		//Check end marker
+		if(this._routingMarkers.end != null && this._mainView.getRoutingView().getEndLevel() == this._mainView.getLevelView().get()) {
+			this._routingLayer.addLayer(this._routingMarkers.end);
+		}
+		
+		//Add to map
+		this._map.addLayer(this._routingLayer);
+	};
+	
+	/**
 	 * Changes the tiles opacity, depending of shown level
 	 */
 	MapView.prototype.changeTilesOpacity = function() {
@@ -782,6 +830,26 @@ var MapView = function(main) {
 	 */
 	MapView.prototype.getDraggableMarkerCoords = function() {
 		return (this._draggableMarker != null) ? this._draggableMarker.getLatLng() : null;
+	};
+	
+	/**
+	 * Adds a routing marker on map
+	 * @param type The kind of marker (start or end)
+	 */
+	MapView.prototype.addRoutingMarker = function(type) {
+		if(this._routingMarkers[type] != null) {
+			this._routingMarkers[type].setLatLng(this._map.getCenter());
+			this._updateRoutingLayer();
+		}
+		else {
+			var icon = L.icon({
+				iconUrl: 'img/icon_marker_'+type+'.png',
+				className: 'marker-routing-drag marker-routing-'+type
+			});
+			var marker = L.marker(this._map.getCenter(), { draggable: true, icon: icon, zIndexOffset: 10000 });
+			this._routingMarkers[type] = marker;
+			this._routingLayer.addLayer(marker);
+		}
 	};
 
 
@@ -3083,7 +3151,33 @@ var RoutingView = function(main) {
 //ATTRIBUTES
 	/** The main view **/
 	this._mainView = main;
+
+//CONSTRUCTOR
+	//Markers buttons
+	$("#rtg-marker-start").click(this.addStartMarker.bind(this));
+	$("#rtg-marker-end").click(this.addEndMarker.bind(this));
+	
+	//Level selectors for markers
+	$("#routing-start-level").change(this.startLevelChanged.bind(this));
+	$("#routing-end-level").change(this.endLevelChanged.bind(this));
 };
+
+//ACCESSORS
+	/**
+	 * @return The start level
+	 */
+	RoutingView.prototype.getStartLevel = function() {
+		var lvl = $("#routing-start-level").val();
+		return (lvl == "null") ? null : parseFloat(lvl);
+	};
+	
+	/**
+	 * @return The end level
+	 */
+	RoutingView.prototype.getEndLevel = function() {
+		var lvl = $("#routing-end-level").val();
+		return (lvl == "null") ? null : parseFloat(lvl);
+	};
 
 //MODIFIERS
 	/**
@@ -3098,4 +3192,64 @@ var RoutingView = function(main) {
 	*/
 	RoutingView.prototype.hideButton = function() {
 		$("#sidebar-tab-routing").addClass("disabled");
+	};
+
+	/**
+	 * Adds the start marker on map
+	 */
+	RoutingView.prototype.addStartMarker = function() {
+		$("#routing-start-level option[value="+this._mainView.getLevelView().get()+"]").attr("selected", "selected");
+		this._mainView.getMapView().addRoutingMarker("start");
+	};
+	
+	/**
+	 * Adds the end marker on map
+	 */
+	RoutingView.prototype.addEndMarker = function() {
+		$("#routing-end-level option[value="+this._mainView.getLevelView().get()+"]").attr("selected", "selected");
+		this._mainView.getMapView().addRoutingMarker("end");
+	};
+	
+	RoutingView.prototype.updateLevels = function() {
+		var selectStart = $("#routing-start-level");
+		var selectEnd = $("#routing-end-level");
+		
+		var levels = this._mainView.getData().getLevels();
+		var option = '<option value="null"></option>';
+
+		//Create options list
+		for(var i=0; i < levels.length; i++) {
+			var lvl = levels[i];
+			option += '<option value="'+ lvl + '">' + lvl + '</option>';
+		}
+		
+		//Keep old values
+		var oldStartLvl = selectStart.val();
+		var oldEndLvl = selectEnd.val();
+		
+		//Update levels
+		selectStart.html(option);
+		selectEnd.html(option);
+		
+		//Restore old values if possible
+		if(oldStartLvl != null && oldStartLvl != "null") {
+			$("#routing-start-level option[value="+oldStartLvl+"]").attr("selected", "selected");
+		}
+		if(oldEndLvl != null && oldEndLvl != "null") {
+			$("#routing-end-level option[value="+oldEndLvl+"]").attr("selected", "selected");
+		}
+	};
+	
+	/**
+	 * Called when start level changes in selector
+	 */
+	RoutingView.prototype.startLevelChanged = function() {
+		this._mainView.getMapView()._updateRoutingLayer();
+	};
+
+	/**
+	 * Called when end level changes in selector
+	 */
+	RoutingView.prototype.endLevelChanged = function() {
+		this._mainView.getMapView()._updateRoutingLayer();
 	};

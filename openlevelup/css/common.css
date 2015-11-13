@@ -696,7 +696,7 @@ span.osm-key, span.osm-val {
 	padding: 3px;
 }
 
-.note-new-icon {
+.note-new-icon, .marker-routing-drag {
 	cursor: move;
 }
 
