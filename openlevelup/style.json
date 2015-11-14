@@ -579,6 +579,12 @@
 			"img": "icon_compass.svg",
 			"values": "direction"
 		},
+		"display": {
+			"name": "Display",
+			"values": "icons",
+			"icons": "display_${v}.png",
+			"iconsAlias": { }
+		},
 		"email": {
 			"name": "@",
 			"values": "link",
@@ -758,6 +764,9 @@
 		"barrier_toll_booth.png",
 		"barrier_turnstile.png",
 		"bench_type_stand_up.png",
+		"display_analog.png",
+		"display_electronic.png",
+		"display_paper.png",
 		"door_no.png",
 		"door_sliding.png",
 		"door.png",
