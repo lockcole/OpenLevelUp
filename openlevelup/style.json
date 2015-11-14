@@ -222,7 +222,7 @@
 			},
 			{
 				"description": "Small amenities",
-				"onTags": [ { "amenity": "bbq|drinking_water|atm|bench|seat|clock|photo_booth|post_box|recycling|vending_machine|waste_basket|ticket_validator|piano|telephone|parking_space" } ],
+				"onTags": [ { "amenity": "bbq|drinking_water|atm|bench|seat|clock|photo_booth|post_box|recycling|vending_machine|waste_basket|ticket_validator|piano|telephone|parking_space|showcase" } ],
 				"isDetail": true,
 				"style": { "color": "#FFBA66" }
 			},
@@ -714,6 +714,7 @@
 		"amenity_restaurant.png",
 		"amenity_school.png",
 		"amenity_shelter.png",
+		"amenity_showcase.png",
 		"amenity_taxi.png",
 		"amenity_telephone.png",
 		"amenity_theatre.png",
