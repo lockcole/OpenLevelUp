@@ -640,6 +640,12 @@
 			"img": "icon_compass.svg",
 			"values": "text"
 		},
+		"support": {
+			"name": "Support",
+			"values": "icons",
+			"icons": "support_${v}.png",
+			"iconsAlias": { }
+		},
 		"vendor": {
 			"name": "With vendor",
 			"values": "icons",
@@ -869,6 +875,12 @@
 		"shopping_tobacco.png",
 		"shopping_toys.png",
 		"shopping_video_rental.png",
+		"support_ceiling.png",
+		"support_column.png",
+		"support_ground.png",
+		"support_pole.png",
+		"support_poster_box.png",
+		"support_wall_mounted.png",
 		"tourism_artwork.png",
 		"tourism_attraction.png",
 		"tourism_bed_and_breakfast.png",
