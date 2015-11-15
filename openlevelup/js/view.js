@@ -220,6 +220,7 @@ var MainView = function(ctrl) {
 		if(zoom >= CONFIG.view.map.full_data_min_zoom) {
 			//Update levels
 			this._cLevel.update();
+			this._cRouting.updateLevels();
 			
 			//Add names and export buttons if needed
 			if(oldZoom == null || oldZoom < CONFIG.view.map.full_data_min_zoom) {
@@ -234,6 +235,7 @@ var MainView = function(ctrl) {
 		else if(zoom >= CONFIG.view.map.data_min_zoom) {
 			//Update levels
 			this._cLevel.update();
+			this._cRouting.updateLevels();
 			
 			//Add names and export buttons if needed
 			if(oldZoom == null || oldZoom < CONFIG.view.map.data_min_zoom) {
@@ -282,7 +284,6 @@ var MainView = function(ctrl) {
 		
 		this._cUrl.mapUpdated();
 		this._cNames.update();
-		this._cRouting.updateLevels();
 	};
 	
 	/**
@@ -840,16 +841,38 @@ var MapView = function(main) {
 		if(this._routingMarkers[type] != null) {
 			this._routingMarkers[type].setLatLng(this._map.getCenter());
 			this._updateRoutingLayer();
+			this._mainView.getRoutingView().updateLabel(type, this._map.getCenter());
 		}
 		else {
 			var icon = L.icon({
 				iconUrl: 'img/icon_marker_'+type+'.png',
-				className: 'marker-routing-drag marker-routing-'+type
+				className: 'marker-routing-drag marker-routing-'+type,
+				iconAnchor: [12.5, 41]
 			});
 			var marker = L.marker(this._map.getCenter(), { draggable: true, icon: icon, zIndexOffset: 10000 });
 			this._routingMarkers[type] = marker;
 			this._routingLayer.addLayer(marker);
+			this._mainView.getRoutingView().updateLabel(type, this._map.getCenter());
+			
+			//Move event on marker
+			this._routingMarkers[type].on("move", function() {
+				this._mainView.getRoutingView().updateLabel(type, this._routingMarkers[type].getLatLng());
+			}.bind(this));
 		}
+	};
+	
+	/**
+	 * Removes a routing marker on map
+	 * @param type The kind of marker (start or end)
+	 */
+	MapView.prototype.removeRoutingMarker = function(type) {
+		if(this._routingMarkers[type] != null) {
+			if(this._routingLayer.hasLayer(this._routingMarkers[type])) {
+				this._routingLayer.removeLayer(this._routingMarkers[type]);
+			}
+			this._routingMarkers[type] = null;
+		}
+		this._mainView.getRoutingView().updateLabel(type, null);
 	};
 
 
@@ -3164,6 +3187,26 @@ var RoutingView = function(main) {
 	//Disable level selectors
 	$("#routing-start-level").prop("disabled", true);
 	$("#routing-end-level").prop("disabled", true);
+	
+	//Disable buttons
+	$("#routing-start-delete").prop("disabled", true);
+	$("#routing-end-delete").prop("disabled", true);
+	$("#routing-valid").prop("disabled", true);
+	
+	//Delete buttons events
+	$("#routing-start-delete").click(this.removeStartMarker.bind(this));
+	$("#routing-end-delete").click(this.removeEndMarker.bind(this));
+	
+	//Set marker labels to default
+	this.updateLabel("start", null);
+	this.updateLabel("end", null);
+	
+	//Define routing modes
+	var modeOptions = '';
+	for(var mode in CONFIG.routing) {
+		modeOptions += '<option value="'+ mode + '">' + CONFIG.routing[mode].name + '</option>';
+	}
+	$("#routing-mode").html(modeOptions);
 };
 
 //ACCESSORS
@@ -3199,12 +3242,29 @@ var RoutingView = function(main) {
 	};
 
 	/**
+	 * Updates the label next to marker
+	 * @param type The kind of marker (start or end)
+	 * @param coords The marker coordinates, or null if disabled
+	 */
+	RoutingView.prototype.updateLabel = function(type, coords) {
+		var obj = $("#routing-"+type);
+		if(coords == null) {
+			obj.html("Click marker to add on map");
+		}
+		else {
+			obj.html(coords.lat.toFixed(6)+", "+coords.lng.toFixed(6));
+		}
+	};
+	
+	/**
 	 * Adds the start marker on map
 	 */
 	RoutingView.prototype.addStartMarker = function() {
 		$("#routing-start-level option[value="+this._mainView.getLevelView().get()+"]").attr("selected", "selected");
 		this._mainView.getMapView().addRoutingMarker("start");
 		$("#routing-start-level").prop("disabled", false);
+		$("#routing-start-delete").prop("disabled", false);
+		this._updateValidButton();
 	};
 	
 	/**
@@ -3214,14 +3274,51 @@ var RoutingView = function(main) {
 		$("#routing-end-level option[value="+this._mainView.getLevelView().get()+"]").attr("selected", "selected");
 		this._mainView.getMapView().addRoutingMarker("end");
 		$("#routing-end-level").prop("disabled", false);
+		$("#routing-end-delete").prop("disabled", false);
+		this._updateValidButton();
 	};
 	
+	/**
+	 * Removes the start marker on map
+	 */
+	RoutingView.prototype.removeStartMarker = function() {
+		this._mainView.getMapView().removeRoutingMarker("start");
+		$("#routing-start-level").prop("disabled", true);
+		$("#routing-start-delete").prop("disabled", true);
+		this._updateValidButton();
+	};
+	
+	/**
+	 * Removes the end marker on map
+	 */
+	RoutingView.prototype.removeEndMarker = function() {
+		this._mainView.getMapView().removeRoutingMarker("end");
+		$("#routing-end-level").prop("disabled", true);
+		$("#routing-end-delete").prop("disabled", true);
+		this._updateValidButton();
+	};
+	
+	/**
+	 * Changes the state of valid button according to markers state
+	 */
+	RoutingView.prototype._updateValidButton = function() {
+		if($("#routing-end-level").prop("disabled") || $("#routing-start-level").prop("disabled")) {
+			$("#routing-valid").prop("disabled", true);
+		}
+		else {
+			$("#routing-valid").prop("disabled", false);
+		}
+	};
+	
+	/**
+	 * Updates levels values in selectors
+	 */
 	RoutingView.prototype.updateLevels = function() {
 		var selectStart = $("#routing-start-level");
 		var selectEnd = $("#routing-end-level");
 		
 		var levels = this._mainView.getData().getLevels();
-		var option = '<option value="null"></option>';
+		var option = '';
 
 		//Create options list
 		for(var i=0; i < levels.length; i++) {

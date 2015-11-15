@@ -80,5 +80,15 @@
 			"maxZoom": 19,
 			"subdomains": "1234"
 		}
-	]
+	],
+	
+	"routing": {
+		"foot": {
+			"name": "By foot"
+		},
+		
+		"wheelchair": {
+			"name": "In wheelchair"
+		}
+	}
 }
