@@ -3160,6 +3160,10 @@ var RoutingView = function(main) {
 	//Level selectors for markers
 	$("#routing-start-level").change(this.startLevelChanged.bind(this));
 	$("#routing-end-level").change(this.endLevelChanged.bind(this));
+	
+	//Disable level selectors
+	$("#routing-start-level").prop("disabled", true);
+	$("#routing-end-level").prop("disabled", true);
 };
 
 //ACCESSORS
@@ -3200,6 +3204,7 @@ var RoutingView = function(main) {
 	RoutingView.prototype.addStartMarker = function() {
 		$("#routing-start-level option[value="+this._mainView.getLevelView().get()+"]").attr("selected", "selected");
 		this._mainView.getMapView().addRoutingMarker("start");
+		$("#routing-start-level").prop("disabled", false);
 	};
 	
 	/**
@@ -3208,6 +3213,7 @@ var RoutingView = function(main) {
 	RoutingView.prototype.addEndMarker = function() {
 		$("#routing-end-level option[value="+this._mainView.getLevelView().get()+"]").attr("selected", "selected");
 		this._mainView.getMapView().addRoutingMarker("end");
+		$("#routing-end-level").prop("disabled", false);
 	};
 	
 	RoutingView.prototype.updateLevels = function() {

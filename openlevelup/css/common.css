@@ -297,10 +297,6 @@ header, footer, #home > div {
 	vertical-align: middle;
 }
 
-.routing-destination > div select, .routing-destination > div button {
-	width: 100%;
-}
-
 .routing-buttons button {
 	float: right;
 }
