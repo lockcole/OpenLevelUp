@@ -922,7 +922,9 @@ var FeatureStyle = function(feature) {
 	FeatureStyle.prototype._createIconUrl = function(style) {
 		var regex = /\$\{(\w+)\}/;
 		var icon = style.icon;
-		if(regex.test(icon)) {
+		
+		//Replace all tags in icon name
+		while(regex.test(icon)) {
 			//Replace tag name with actual tag value
 			var tagName = regex.exec(icon)[1];
 			var tagValue = this._feature.getTag(tagName);
@@ -933,11 +935,11 @@ var FeatureStyle = function(feature) {
 			}
 			
 			icon = icon.replace(regex, tagValue);
-			
-			//Check if icon file exists (to avoid exotic values)
-			if(!contains(STYLE.images, icon)) {
-				icon = null;
-			}
+		}
+		
+		//Check if icon file exists (to avoid exotic values)
+		if(!contains(STYLE.images, icon)) {
+			icon = null;
 		}
 		
 		return icon;

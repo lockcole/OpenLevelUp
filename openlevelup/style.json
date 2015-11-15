@@ -399,7 +399,10 @@
 				"description": "Information icons",
 				"onTags": [ { "information": "*" } ],
 				"isDetail": true,
-				"style": { "icon": "information_${information}.png" }
+				"style": {
+					"color": "#7583D9", "opacity": 1,
+					"icon": "information_${information}.png"
+				}
 			},
 			{
 				"description": "Show large information objects",
@@ -407,10 +410,9 @@
 				"isDetail": false
 			},
 			{
-				"name": "Street map",
-				"description": "Map",
-				"onTags": [ { "map_type": "street|scheme" } ],
-				"style": { "icon": "map_type_${map_type}.png" }
+				"description": "Information icons with support",
+				"onTags": [ { "information": "board", "support": "*" } ],
+				"style": { "icon": "information_${information}_${support}.png" }
 			}
 		],
 
@@ -767,6 +769,7 @@
 		"display_analog.png",
 		"display_electronic.png",
 		"display_paper.png",
+		"display_screen.png",
 		"door_no.png",
 		"door_sliding.png",
 		"door.png",
@@ -792,6 +795,11 @@
 		"icon_status_yes.png",
 		"information_audioguide.png",
 		"information_board.png",
+		"information_board_ceiling.png",
+		"information_board_ground.png",
+		"information_board_pole.png",
+		"information_board_poster_box.png",
+		"information_board_wall_mounted.png",
 		"information_guidepost.png",
 		"information_map.png",
 		"information_office.png",
