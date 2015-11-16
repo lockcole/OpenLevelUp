@@ -862,7 +862,7 @@ var FeatureStyle = function(feature) {
 						}
 						
 						for(param in style.style) {
-							if(style.style[param] != undefined && (param != "icon" || this._createIconUrl(style.style) != null)) {
+							if(style.style[param] != undefined) {
 								this._style[param] = style.style[param];
 							}
 						}
