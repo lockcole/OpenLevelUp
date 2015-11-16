@@ -862,6 +862,19 @@ var MapView = function(main) {
 	};
 	
 	/**
+	 * @param type The kind of marker
+	 * @return Its coordinates
+	 */
+	MapView.prototype.getRoutingMarkerCoords = function(type) {
+		if(this._routingMarkers[type] != null) {
+			return this._routingMarkers[type].getLatLng();
+		}
+		else {
+			return null;
+		}
+	};
+	
+	/**
 	 * Removes a routing marker on map
 	 * @param type The kind of marker (start or end)
 	 */
@@ -3207,6 +3220,9 @@ var RoutingView = function(main) {
 		modeOptions += '<option value="'+ mode + '">' + CONFIG.routing[mode].name + '</option>';
 	}
 	$("#routing-mode").html(modeOptions);
+	
+	//Add valid button handler
+	$("#routing-valid").click(this.validClicked.bind(this));
 };
 
 //ACCESSORS
@@ -3355,4 +3371,17 @@ var RoutingView = function(main) {
 	 */
 	RoutingView.prototype.endLevelChanged = function() {
 		this._mainView.getMapView()._updateRoutingLayer();
+	};
+	
+	/**
+	 * Called when OK button is clicked
+	 */
+	RoutingView.prototype.validClicked = function() {
+		controller.startRouting(
+			$("#routing-mode").val(),
+			this._mainView.getMapView().getRoutingMarkerCoords("start"),
+			parseFloat($("#routing-start-level").val()),
+			this._mainView.getMapView().getRoutingMarkerCoords("end"),
+			parseFloat($("#routing-end-level").val())
+		);
 	};

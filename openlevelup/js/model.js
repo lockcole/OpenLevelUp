@@ -1255,10 +1255,11 @@ var Graph = function() {
 		}
 		
 		//Parse ways
-		var node, nodeNext;
+		var node, nodeNext, direction;
 		for(var i=0, l=data.elements.length; i < l; i++) {
 			currentElement = data.elements[i];
 			if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
+				direction = this._direction(currentElement.tags);
 				for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
 					node = currentElement.nodes[j];
 					//Set level for each node
@@ -1270,15 +1271,28 @@ var Graph = function() {
 					if(j > 0 && !isNaN(nodes[node]._level)) {
 						nodePrev = currentElement.nodes[j-1];
 						if(!isNaN(nodes[nodePrev]._level)) {
-							nodes[nodePrev].addNeighbour(
-								nodes[node],
-								distanceLevels(
-									nodes[nodePrev].getLatLng(),
-									nodes[nodePrev].getLevel(),
-									nodes[node].getLatLng(),
-									nodes[node].getLevel()
-								)
-							);
+							if(direction >= 0) {
+								nodes[nodePrev].addNeighbour(
+									nodes[node],
+									distanceLevels(
+										nodes[nodePrev].getLatLng(),
+										nodes[nodePrev].getLevel(),
+										nodes[node].getLatLng(),
+										nodes[node].getLevel()
+									)
+								);
+							}
+							if(direction <= 0) {
+								nodes[node].addNeighbour(
+									nodes[nodePrev],
+									distanceLevels(
+										nodes[nodePrev].getLatLng(),
+										nodes[nodePrev].getLevel(),
+										nodes[node].getLatLng(),
+										nodes[node].getLevel()
+									)
+								);
+							}
 						}
 					}
 				}
@@ -1296,7 +1310,37 @@ var Graph = function() {
 	 * @return True if the object can be walked on
 	 */
 	Graph.prototype._isWalkable = function(tags) {
-		return tags.highway != undefined;
+		return tags != null && tags.highway != undefined;
+	};
+	
+	/**
+	 * @return 0 if not oneway, 1 if oneway in the direction of the way, -1 if oneway in the opposite direction
+	 */
+	Graph.prototype._direction = function(tags) {
+		if(tags == null) { return 0; }
+		if(tags.oneway != undefined) {
+			switch(tags.oneway) {
+				case "yes":
+					return 1;
+				case "-1":
+					return -1;
+				default:
+					return 0;
+			}
+		}
+		else if(tags.conveying != undefined) {
+			switch(tags.conveying) {
+				case "forward":
+					return 1;
+				case "backward":
+					return -1;
+				default:
+					return 0;
+			}
+		}
+		else {
+			return 0;
+		}
 	};
 	
 	/**
@@ -1345,11 +1389,6 @@ var Graph = function() {
 				if(minDist == null || minDist > currentDist) {
 					minDist = currentDist;
 					minDistNode = current;
-					
-					//Stop search if distance is less than 3 meters
-					if(minDist <= 3) {
-						break;
-					}
 				}
 			}
 		}
@@ -1365,15 +1404,15 @@ var Graph = function() {
 	 */
 	Graph.prototype._process = function(start, end) {
 		//Init A*
-		var frontier = new PriorityQueue({ comparator: function(a, b) { return b.priority - a.priority } });
-		var cameFrom = {};
-		var costSoFar = {};
+		var frontier = new PriorityQueue({ comparator: function(a, b) { return a.priority - b.priority } });
+		var cameFrom = new HashMap();
+		var costSoFar = new HashMap();
 		var current = null, neighbors = null, next = null, newCost = null, priority = null;
 		
 		//Add start node
 		frontier.queue({ node: start, priority: 0 });
-		cameFrom[this._graph.indexOf(start)] = null;
-		costSoFar[this._graph.indexOf(start)] = 0;
+		cameFrom.set(start, null);
+		costSoFar.set(start, 0);
 		
 		//Find path
 		while(frontier.length > 0) {
@@ -1386,12 +1425,12 @@ var Graph = function() {
 			neighbors = current.getNeighbours();
 			for(var i=0, l=neighbors.length; i < l; i++) {
 				next = neighbors[i];
-				newCost = costSoFar[this._graph.indexOf(current)] + current.getCost(next);
-				if(!contains(costSoFar, this._graph.indexOf(next)) || newCost < costSoFar[this._graph.indexOf(next)]) {
-					costSoFar[this._graph.indexOf(next)] = newCost;
+				newCost = costSoFar.get(current) + current.getCost(next);
+				if(!costSoFar.has(next) || newCost < costSoFar.get(next)) {
+					costSoFar.set(next, newCost);
 					priority = newCost + this._heuristic(end, next);
 					frontier.queue({ node: next, priority: priority });
-					cameFrom[this._graph.indexOf(next)] = current;
+					cameFrom.set(next, current);
 				}
 			}
 		}
@@ -1400,7 +1439,7 @@ var Graph = function() {
 		current = end;
 		var path = [ current ];
 		while(!current.equals(start)) {
-			current = cameFrom[this._graph.indexOf(current)];
+			current = cameFrom.get(current);
 			path.push(current);
 		}
 		path.reverse();
@@ -1478,13 +1517,6 @@ var Node = function(latlng, level) {
 		if(this._level != n._level) return false;
 		if(!this._latLng.equals(n._latLng)) return false;
 		if(this._neighbours.length != n._neighbours.length) return false;
-		
-		//Check each neighbour
-		for(var i=0, l=this._neighbours.length; i<l; i++) {
-			if(!n._neighbours[i].equals(this._neighbours[i])) return false;
-			if(n._costs[i] != this._costs[i]) return false;
-		}
-		
 		return true;
 	};
 

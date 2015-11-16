@@ -88,6 +88,9 @@ var Ctrl = function() {
 	/** The amount of requested external metadata via Ajax **/
 	this._nbExternalApiRequests = null;
 	
+	/** The routing graphs **/
+	this._graphs = {};
+	
 	/** The current HTML view **/
 	this._view = null;
 };
@@ -650,4 +653,39 @@ var Ctrl = function() {
 		this._view.getMessagesView().displayMessage("An error occurred during note sending", "error");
 		this._view.getMapView().hideDraggableMarker();
 		this._view.collapseSidebar();
+	};
+
+/***************************
+ * Routing related methods *
+ ***************************/
+
+	/**
+	 * Starts routing
+	 * @param mode The routing mode (see CONFIG.routing)
+	 * @param startPt The start coordinates
+	 * @param startLvl The start level
+	 * @param endPt The end coordinates
+	 * @param endLvl The end level
+	 */
+	Ctrl.prototype.startRouting = function(mode, startPt, startLvl, endPt, endLvl) {
+		//Create graph if not available
+		if(this._graphs[mode] == undefined) {
+			this._graphs[mode] = new Graph();
+			this._graphs[mode].createFromOSMData(this._data);
+		}
+		
+		//Launch routing
+		try {
+			var path = this._graphs[mode].findShortestPath(startPt, startLvl, endPt, endLvl);
+			var polyline = L.polyline([]);
+			for(var i=0, l=path.length; i < l; i++) {
+				console.log(path[i].getLatLng().lat+" "+path[i].getLatLng().lng+" "+path[i].getLevel());
+				polyline.addLatLng(path[i].getLatLng());
+			}
+			this.getView().getMapView().get().addLayer(polyline);
+		}
+		catch(e) {
+			//TODO Error handling
+			console.log(e);
+		}
 	};
