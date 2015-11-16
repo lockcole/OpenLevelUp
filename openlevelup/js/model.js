@@ -1317,10 +1317,44 @@ var Graph = function() {
 	 */
 	Graph.prototype.findShortestPath = function(startPt, startLvl, endPt, endLvl) {
 		//Find start and end nodes near given coordinates
-		var start = null;
-		var end = null;
+		var start = this._findNearestNode(startPt, startLvl);
+		if(start == null) { throw Exception("No start node found"); }
+		
+		var end = this._findNearestNode(endPt, endLvl);
+		if(end == null) { throw Exception("No end node found"); }
 		
 		return this._process(start, end);
+	};
+	
+	/**
+	 * Finds the nearest node in graph from given coordinates at given level
+	 * @param coords The coordinates
+	 * @param lvl The level
+	 * @return The nearest node in graph, or null if no one found
+	 */
+	Graph.prototype._findNearestNode = function(coords, lvl) {
+		var minDistNode = null;
+		var minDist = null;
+		var current = null;
+		var currentDist = null;
+		
+		for(var i=0, l=this._graph.length; i < l; i++) {
+			current = this._graph[i];
+			if(current.getLevel() == lvl) {
+				currentDist = current.getLatLng().distanceTo(coords);
+				if(minDist == null || minDist > currentDist) {
+					minDist = currentDist;
+					minDistNode = current;
+					
+					//Stop search if distance is less than 3 meters
+					if(minDist <= 3) {
+						break;
+					}
+				}
+			}
+		}
+		
+		return minDistNode;
 	};
 	
 	/**

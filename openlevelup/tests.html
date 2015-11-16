@@ -271,7 +271,112 @@
 		});
 		
 		//Other methods
-		QUnit.test("Find shortest path", function(assert) {
+		QUnit.test("Find nearest node valid", function(assert) {
+			//Create nodes
+			var n1 = new Node(L.latLng(48.1211157104915, -1.7040754297291494), 0);
+			var n2 = new Node(L.latLng(48.12111533622601, -1.7039823620829195), 0);
+			var n3 = new Node(L.latLng(48.12111084503996, -1.7040703838929083), 1);
+			var n4 = new Node(L.latLng(48.121101488401074, -1.7040883246439886), 0);
+			
+			//Create graph
+			var graph = [ n1, n2, n3, n4 ];
+			var g1 = new Graph();
+			g1.createFromNodes(graph);
+			
+			assert.ok(g1._findNearestNode(L.latLng(48.12110597958796, -1.7040759903776208), 0).equals(n1));
+			assert.ok(g1._findNearestNode(L.latLng(48.12110597958796, -1.7040759903776208), 1).equals(n3));
+		});
+		
+		QUnit.test("Find nearest node no valid", function(assert) {
+			//Create nodes
+			var n1 = new Node(L.latLng(48.1211157104915, -1.7040754297291494), 0);
+			var n2 = new Node(L.latLng(48.12111533622601, -1.7039823620829195), 0);
+			var n3 = new Node(L.latLng(48.12111084503996, -1.7040703838929083), 0);
+			var n4 = new Node(L.latLng(48.121101488401074, -1.7040883246439886), 0);
+			
+			//Create graph
+			var graph = [ n1, n2, n3, n4 ];
+			var g1 = new Graph();
+			g1.createFromNodes(graph);
+			
+			assert.equal(g1._findNearestNode(L.latLng(48.12110597958796, -1.7040759903776208), 1), null);
+		});
+		
+		QUnit.test("Find shortest path valid", function(assert) {
+			//Create nodes
+			var n1 = new Node(L.latLng(48.119663567472834, -1.7349844588305359), 0);
+			var n2 = new Node(L.latLng(48.11964742045143, -1.7349211835803848), 0);
+			var n3 = new Node(L.latLng(48.119640132120516, -1.734812752131052), 0);
+			var n4 = new Node(L.latLng(48.119586960402366, -1.7349030703176818), 0);
+			
+			//Set neighbours
+			n1.addNeighbour(n2, 1);
+			n2.addNeighbour(n3, 1);
+			n2.addNeighbour(n4, 1);
+			
+			//Create graph
+			var graph = [ n1, n2, n3, n4 ];
+			var g1 = new Graph();
+			g1.createFromNodes(graph);
+			
+			//Find shortest path
+			var result = g1.findShortestPath(
+				L.latLng(48.11965934680886, -1.7350119980207874),
+				0,
+				L.latLng(48.11963880696933, -1.7348020826749389),
+				0
+			);
+			
+			//Check result
+			assert.ok(result[0].equals(n1));
+			assert.ok(result[1].equals(n2));
+			assert.ok(result[2].equals(n3));
+		});
+		
+		QUnit.test("Find shortest path no valid start or end", function(assert) {
+			//Create nodes
+			var n1 = new Node(L.latLng(48.119663567472834, -1.7349844588305359), 0);
+			var n2 = new Node(L.latLng(48.11964742045143, -1.7349211835803848), 0);
+			var n3 = new Node(L.latLng(48.119640132120516, -1.734812752131052), 0);
+			var n4 = new Node(L.latLng(48.119586960402366, -1.7349030703176818), 0);
+			
+			//Set neighbours
+			n1.addNeighbour(n2, 1);
+			n2.addNeighbour(n3, 1);
+			n2.addNeighbour(n4, 1);
+			
+			//Create graph
+			var graph = [ n1, n2, n3, n4 ];
+			var g1 = new Graph();
+			g1.createFromNodes(graph);
+			
+			//Test start
+			try {
+				var result = g1.findShortestPath(
+					L.latLng(48.11965934680886, -1.7350119980207874),
+					1,
+					L.latLng(48.11963880696933, -1.7348020826749389),
+					0
+				);
+				assert.ok(false);
+			}
+			catch(e) {
+				assert.ok(true);
+			}
+			
+			//Test end
+			try {
+				var result = g1.findShortestPath(
+					L.latLng(48.11965934680886, -1.7350119980207874),
+					0,
+					L.latLng(48.11963880696933, -1.7348020826749389),
+					1
+				);
+				assert.ok(false);
+			}
+			catch(e) {
+				assert.ok(true);
+			}
 		});
 		
 		QUnit.test("Process", function(assert) {
