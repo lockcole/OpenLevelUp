@@ -862,7 +862,7 @@ var FeatureStyle = function(feature) {
 						}
 						
 						for(param in style.style) {
-							if(style.style[param] != undefined) {
+							if(style.style[param] != undefined && (param != "icon" || this._createIconUrl(style.style) != null)) {
 								this._style[param] = style.style[param];
 							}
 						}
@@ -938,7 +938,7 @@ var FeatureStyle = function(feature) {
 		}
 		
 		//Check if icon file exists (to avoid exotic values)
-		if(!contains(STYLE.images, icon)) {
+		if(!contains(STYLE.images, icon) && icon != "none") {
 			icon = null;
 		}
 		
