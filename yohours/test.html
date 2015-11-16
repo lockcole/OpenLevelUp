@@ -2927,6 +2927,13 @@
 			
 			assert.equal(builder.build(result), "PH,Mo-Sa 12:00-16:00");
 		});
+		QUnit.test("Parse Mo 04:00-08:00; PH off", function(assert) {
+			var parser = new OpeningHoursParser();
+			var builder = new OpeningHoursBuilder();
+			
+			var result = parser.parse("Mo 04:00-08:00; PH off");
+			assert.equal(builder.build(result), "Mo 04:00-08:00; PH off");
+		});
 		
 		/*
 		 * YoHoursChecker

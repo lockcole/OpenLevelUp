@@ -18,6 +18,8 @@
 		{ "key": "room" },
 		{ "key": "laboratory" },
 		{ "key": "door" },
+		{ "key": "display" },
+		{ "key": "support" },
 		{ "key": "entrance" },
 		{ "key": "highway" },
 		{ "key": "amenity" },
@@ -32,6 +34,7 @@
 		{ "key": "advertising" },
 		{ "key": "material" },
 		{ "key": "mapillary" },
-		{ "key": "image" }
+		{ "key": "image" },
+		{ "key": "department", "value": "store_section", "description": "Vending area in a store around a given theme" }
 	]
 }

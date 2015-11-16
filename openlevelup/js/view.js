@@ -1572,7 +1572,7 @@ var TagsView = function(main) {
 			}
 		}
 		
-		console.log("layer",ft.getStyle().get().layer);
+		//console.log("layer",ft.getStyle().get().layer);
 		
 		var content = '<p class="op-tags-list">'+tagList+'</p>';
 		
