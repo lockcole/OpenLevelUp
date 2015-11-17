@@ -255,7 +255,9 @@
 			
 			//Check
 			assert.equal(g1._graph.length, 4);
+			console.log(g1._graph);
 			assert.ok(g1._graph[0].equals(n1));
+			console.log(g1._graph[1], n2);
 			assert.ok(g1._graph[1].equals(n2));
 			assert.ok(g1._graph[2].equals(n3));
 			assert.ok(g1._graph[3].equals(n4));
@@ -328,6 +330,47 @@
 			assert.ok(g1._graph[3].equals(n4));
 		});
 		
+		QUnit.test("Create from OSM Data (two disconnected levels)", function(assert) {
+			var data = new OSMData(null, { "elements": [
+				{"type": "way","id": 1,"nodes": [1,2,3],"tags": {"highway": "footway","level": "1"}},
+				{"type": "way","id": 2,"nodes": [3,4],"tags": {"highway": "footway","level": "1"}},
+				{"type": "way","id": 3,"nodes": [1,4],"tags": {"highway": "footway","level": "2"}},
+				{"type": "node","id": 1,"lat": 48.8450691,"lon": 2.3740886},
+				{"type": "node","id": 2,"lat": 48.8451673,"lon": 2.3742123},
+				{"type": "node","id": 3,"lat": 48.8452128,"lon": 2.3743246},
+				{"type": "node","id": 4,"lat": 48.8452412,"lon": 2.3742728}
+			] });
+			
+			var g1 = new Graph();
+			g1.createFromOSMData(data);
+			
+			//Create result graph
+			var n1 = new Node(L.latLng(48.8450691, 2.3740886), 1);
+			var n2 = new Node(L.latLng(48.8451673, 2.3742123), 1);
+			var n3 = new Node(L.latLng(48.8452128, 2.3743246), 1);
+			var n4 = new Node(L.latLng(48.8452412, 2.3742728), 1);
+			var n1_2 = new Node(L.latLng(48.8450691, 2.3740886), 2);
+			var n4_2 = new Node(L.latLng(48.8452412, 2.3742728), 2);
+			n1.addNeighbour(n2, n1.getLatLng().distanceTo(n2.getLatLng()));
+			n2.addNeighbour(n1, n1.getLatLng().distanceTo(n2.getLatLng()));
+			n2.addNeighbour(n3, n2.getLatLng().distanceTo(n3.getLatLng()));
+			n3.addNeighbour(n2, n2.getLatLng().distanceTo(n3.getLatLng()));
+			n3.addNeighbour(n4, n4.getLatLng().distanceTo(n3.getLatLng()));
+			n4.addNeighbour(n3, n4.getLatLng().distanceTo(n3.getLatLng()));
+			n1_2.addNeighbour(n4_2, n1_2.getLatLng().distanceTo(n4_2.getLatLng()));
+			n4_2.addNeighbour(n1_2, n1_2.getLatLng().distanceTo(n4_2.getLatLng()));
+			
+			
+			//Check
+			assert.equal(g1._graph.length, 6);
+			assert.ok(g1._graph[0].equals(n1));
+			assert.ok(g1._graph[1].equals(n1_2));
+			assert.ok(g1._graph[2].equals(n2));
+			assert.ok(g1._graph[3].equals(n3));
+			assert.ok(g1._graph[4].equals(n4));
+			assert.ok(g1._graph[5].equals(n4_2));
+		});
+		
 		QUnit.test("Create from nodes", function(assert) {
 			//Create nodes
 			var n1 = new Node(L.latLng(0, 0), 0);
@@ -363,7 +406,7 @@
 			var g1 = new Graph();
 			g1.createFromNodes(graph);
 			
-			assert.ok(g1._findNearestNode(L.latLng(48.12110597958796, -1.7040759903776208), 0).equals(n1));
+			assert.ok(g1._findNearestNode(L.latLng(48.12110597958796, -1.7040759903776208), 0).equals(n4));
 			assert.ok(g1._findNearestNode(L.latLng(48.12110597958796, -1.7040759903776208), 1).equals(n3));
 		});
 		
@@ -465,15 +508,17 @@
 			var n2 = new Node(L.latLng(1, 0), 0);
 			var n3 = new Node(L.latLng(1, 1), 0);
 			var n4 = new Node(L.latLng(0, 1), 0);
+			var n5 = new Node(L.latLng(-1, -1), 0);
 			
 			//Build graph
 			n1.addNeighbour(n2, 1);
-			n1.addNeighbour(n3, 3);
-			n1.addNeighbour(n4, 3);
+			n1.addNeighbour(n5, 2);
+			n1.addNeighbour(n4, 1);
 			n2.addNeighbour(n3, 1);
 			n4.addNeighbour(n3, 1);
+			n5.addNeighbour(n3, 2);
 			
-			var graph = [ n1, n2, n3, n4 ];
+			var graph = [ n1, n2, n3, n4, n5 ];
 			
 			//Create A*
 			var as1 = new Graph();

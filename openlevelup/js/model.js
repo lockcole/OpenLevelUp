@@ -1246,54 +1246,91 @@ var Graph = function() {
 		var currentElement = null;
 		for(var i=0, l=data.elements.length; i < l; i++) {
 			currentElement = data.elements[i];
+			
 			if(currentElement.type == "node") {
-				nodes[currentElement.id] = new Node(L.latLng(currentElement.lat, currentElement.lon));
+				nodes[currentElement.id] = { default: new Node(L.latLng(currentElement.lat, currentElement.lon)) };
+				
 				if(currentElement.tags != undefined && currentElement.tags.level != undefined) {
-					nodes[currentElement.id]._level = filterFloat(currentElement.tags.level);
+					var level = filterFloat(currentElement.tags.level);
+					nodes[currentElement.id][level] = new Node(nodes[currentElement.id].default.getLatLng(), level);
 				}
 			}
 		}
 		
 		//Parse ways
-		var node, nodeNext, direction;
+		var nodeId, node, nodePrevId, direction, level, levelPrev = null;
 		for(var i=0, l=data.elements.length; i < l; i++) {
 			currentElement = data.elements[i];
 			if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
+				//Direction of way
 				direction = this._direction(currentElement.tags);
+				
+				//Read each node
 				for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
-					node = currentElement.nodes[j];
-					//Set level for each node
-					if(currentElement.tags != undefined && currentElement.tags.level != undefined && isNaN(nodes[node]._level)) {
-						nodes[node]._level = filterFloat(currentElement.tags.level);
-					}
+					nodeId = currentElement.nodes[j];
 					
-					//Link node to next one
-					if(j > 0 && !isNaN(nodes[node]._level)) {
-						nodePrev = currentElement.nodes[j-1];
-						if(!isNaN(nodes[nodePrev]._level)) {
-							if(direction >= 0) {
-								nodes[nodePrev].addNeighbour(
-									nodes[node],
-									distanceLevels(
-										nodes[nodePrev].getLatLng(),
-										nodes[nodePrev].getLevel(),
-										nodes[node].getLatLng(),
-										nodes[node].getLevel()
-									)
-								);
-							}
-							if(direction <= 0) {
-								nodes[node].addNeighbour(
-									nodes[nodePrev],
-									distanceLevels(
-										nodes[nodePrev].getLatLng(),
-										nodes[nodePrev].getLevel(),
-										nodes[node].getLatLng(),
-										nodes[node].getLevel()
-									)
-								);
+					//Check level on node
+					if(currentElement.tags != undefined && currentElement.tags.level != undefined) {
+						var levels = parseLevelsFloat(currentElement.tags.level);
+						
+						//Find node to use
+						if(levels.length == 0) {
+							node = null;
+							level = null;
+						}
+						else if(levels.length == 1) {
+							level = levels[0];
+							//Create node on current level
+							if(!isNaN(level) && nodes[nodeId][level] == undefined) {
+								nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level);
 							}
 						}
+						else {
+							//Search which node is available
+							node = null;
+							level = null;
+
+							for(var lvl in nodes[nodeId]) {
+								if(lvl != "default" && contains(levels, filterFloat(lvl))) {
+									node = nodes[nodeId][lvl];
+									level = lvl;
+								}
+							}
+						}
+						
+						//Link node to next one
+						if(j > 0 && nodes[nodeId][level] != undefined) {
+							nodePrevId = currentElement.nodes[j-1];
+							if(levelPrev != null && nodes[nodePrevId][levelPrev] != undefined) {
+								//Forward link
+								if(direction >= 0) {
+									nodes[nodePrevId][levelPrev].addNeighbour(
+										nodes[nodeId][level],
+										distanceLevels(
+											nodes[nodePrevId][levelPrev].getLatLng(),
+											nodes[nodePrevId][levelPrev].getLevel(),
+											nodes[nodeId][level].getLatLng(),
+											nodes[nodeId][level].getLevel()
+										)
+									);
+								}
+								
+								//Backward link
+								if(direction <= 0) {
+									nodes[nodeId][level].addNeighbour(
+										nodes[nodePrevId][levelPrev],
+										distanceLevels(
+											nodes[nodePrevId][levelPrev].getLatLng(),
+											nodes[nodePrevId][levelPrev].getLevel(),
+											nodes[nodeId][level].getLatLng(),
+											nodes[nodeId][level].getLevel()
+										)
+									);
+								}
+							}
+						}
+						
+						levelPrev = level;
 					}
 				}
 			}
@@ -1302,7 +1339,11 @@ var Graph = function() {
 		//Store final graph
 		this._graph = [];
 		for(var i in nodes) {
-			this._graph.push(nodes[i]);
+			for(var j in nodes[i]) {
+				if(j != "default") {
+					this._graph.push(nodes[i][j]);
+				}
+			}
 		}
 	};
 	
