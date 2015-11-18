@@ -1326,6 +1326,8 @@ var TagsView = function(main) {
 		var first = true;
 		var val, detail, link, icon, tagValue, vInt, v, vOk;
 		var regex = /\$\{(\w+)\}/;
+		var mapillaryRegex = /^mapillary.*$/;
+		var mapillaryValRegex = /^[\w\-]+$/;
 		var txtVals = {
 			N: "North", NNE: "North North-east", NE:"North-east", ENE: "East North-east",
 			E: "East", ESE: "East South-east", SE: "South-east", SSE: "South South-east",
@@ -1346,6 +1348,12 @@ var TagsView = function(main) {
 			}
 			
 			val = tags[k];
+			
+			//Link to tags values
+			if(k.match(mapillaryRegex) && val.match(mapillaryValRegex)) {
+				val = '<a href="http://www.mapillary.com/map/im/'+val+'" target="_blank">'+val+'</a>';
+			}
+			
 			tagList += '<span class="osm-tag"><a href="http://wiki.openstreetmap.org/wiki/Key:'+k+'" target="_blank" class="osm-key">'+k+'</a>=<span class="osm-val">'+val+'</span></span>';
 			
 			/*
@@ -1491,26 +1499,6 @@ var TagsView = function(main) {
 				visible: true
 			}
 		);
-	};
-
-	/**
-	 * Creates a formated tag display
-	 * @param ftId the feature ID
-	 * @param key The OSM key to display
-	 * @param cleanName The clean name to display
-	 * @param tagCleaner The function that will clean the tag value (for example, add proper unit for dimensions), optional
-	 * @return The formated tag, or empty string if not found
-	 */
-	TagsView.prototype._addFormatedTag = function(ftId, key, cleanName, tagCleaner) {
-		var text = '';
-
-		if(this._mainView.getData().getFeature(ftId).hasTag(key)) {
-			text = (tagCleaner == undefined) ?
-				'<span class="detail"><span class="label">'+cleanName+'</span><span class="value">'+this._mainView.getData().getFeature(ftId).getTag(key)+'</span></span>'
-				: '<span class="detail"><span class="label">'+cleanName+'</span><span class="value">'+tagCleaner(this._mainView.getData().getFeature(ftId).getTag(key))+'</span></span>';
-		}
-		
-		return text;
 	};
 
 

@@ -571,7 +571,12 @@ h2.popup {
 	font-size: 85%;
 }
 
-a.osm-key, a.osm-val, .leaflet-control-window .content a.osm-key, .leaflet-control-window .content a.osm-val {
+a.osm-key,
+a.osm-val,
+.osm-val a,
+.leaflet-control-window .content a.osm-key,
+.leaflet-control-window .content a.osm-val,
+.leaflet-control-window .content .osm-val a {
 	text-decoration: none;
 	color: #0645AD;
 }
