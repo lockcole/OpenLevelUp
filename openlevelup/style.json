@@ -222,7 +222,7 @@
 			},
 			{
 				"description": "Small amenities",
-				"onTags": [ { "amenity": "bbq|drinking_water|atm|bench|seat|clock|photo_booth|post_box|recycling|vending_machine|waste_basket|ticket_validator|piano|telephone|parking_space|showcase" } ],
+				"onTags": [ { "amenity": "bbq|drinking_water|atm|bench|seat|clock|photo_booth|post_box|recycling|vending_machine|waste_basket|ticket_validator|piano|telephone|parking_space|heater|showcase" } ],
 				"isDetail": true,
 				"style": { "color": "#FFBA66" }
 			},
@@ -706,6 +706,7 @@
 		"amenity_fast_food.png",
 		"amenity_firestation.png",
 		"amenity_fountain.png",
+		"amenity_heater.png",
 		"amenity_hospital.png",
 		"amenity_ice_cream.png",
 		"amenity_library.png",
