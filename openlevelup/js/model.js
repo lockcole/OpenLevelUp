@@ -1248,11 +1248,11 @@ var Graph = function() {
 			currentElement = data.elements[i];
 			
 			if(currentElement.type == "node") {
-				nodes[currentElement.id] = { default: new Node(L.latLng(currentElement.lat, currentElement.lon)) };
+				nodes[currentElement.id] = { default: new Node(L.latLng(currentElement.lat, currentElement.lon), null, currentElement.id) };
 				
 				if(currentElement.tags != undefined && currentElement.tags.level != undefined) {
 					var level = filterFloat(currentElement.tags.level);
-					nodes[currentElement.id][level] = new Node(nodes[currentElement.id].default.getLatLng(), level);
+					nodes[currentElement.id][level] = new Node(nodes[currentElement.id].default.getLatLng(), level, currentElement.id);
 				}
 			}
 		}
@@ -1264,6 +1264,8 @@ var Graph = function() {
 			if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
 				//Direction of way
 				direction = this._direction(currentElement.tags);
+				levelPrev = null;
+				nodePrevId = null;
 				
 				//Read each node
 				for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
@@ -1282,7 +1284,7 @@ var Graph = function() {
 							level = levels[0];
 							//Create node on current level
 							if(!isNaN(level) && nodes[nodeId][level] == undefined) {
-								nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level);
+								nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level, nodes[nodeId].default._name);
 							}
 						}
 						else {
@@ -1298,9 +1300,8 @@ var Graph = function() {
 							}
 						}
 						
-						//Link node to next one
+						//Link node to previous one
 						if(j > 0 && nodes[nodeId][level] != undefined) {
-							nodePrevId = currentElement.nodes[j-1];
 							if(levelPrev != null && nodes[nodePrevId][levelPrev] != undefined) {
 								//Forward link
 								if(direction >= 0) {
@@ -1330,7 +1331,10 @@ var Graph = function() {
 							}
 						}
 						
-						levelPrev = level;
+						if(level != null) {
+							levelPrev = level;
+							nodePrevId = nodeId;
+						}
 					}
 				}
 			}
@@ -1479,6 +1483,8 @@ var Graph = function() {
 		//Reconstruct path
 		current = end;
 		var path = [ current ];
+		cameFrom.forEach(function(value, key) { console.log(key, value); });
+		
 		while(!current.equals(start)) {
 			current = cameFrom.get(current);
 			path.push(current);
@@ -1505,13 +1511,16 @@ var Graph = function() {
  * Transition between nodes have a cost
  * As the graph is oriented, you should set neighbours on two concerned nodes to make the link bidirectionnal.
  */
-var Node = function(latlng, level) {
+var Node = function(latlng, level, name) {
 //ATTRIBUTES
 	/** The coordinates of the node **/
 	this._latLng = latlng;
 	
 	/** The level where the node can be found **/
 	this._level = level;
+	
+	/** The name of the node **/
+	this._name = name;
 	
 	/** The neighbours of the node **/
 	this._neighbours = [];

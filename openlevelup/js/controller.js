@@ -677,15 +677,11 @@ var Ctrl = function() {
 		//Launch routing
 		try {
 			var path = this._graphs[mode].findShortestPath(startPt, startLvl, endPt, endLvl);
-			var polyline = L.polyline([]);
-			for(var i=0, l=path.length; i < l; i++) {
-				console.log(path[i].getLatLng().lat+" "+path[i].getLatLng().lng+" "+path[i].getLevel());
-				polyline.addLatLng(path[i].getLatLng());
-			}
-			this.getView().getMapView().get().addLayer(polyline);
+			this.getView().getRoutingView().showRoute(path);
 		}
 		catch(e) {
-			//TODO Error handling
+			this.getView().getMessagesView().displayMessage("No route found", "alert");
 			console.log(e);
+			this.getView().getRoutingView().showRoute(null);
 		}
 	};

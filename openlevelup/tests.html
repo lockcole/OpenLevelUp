@@ -255,9 +255,8 @@
 			
 			//Check
 			assert.equal(g1._graph.length, 4);
-			console.log(g1._graph);
+			//console.log(g1._graph);
 			assert.ok(g1._graph[0].equals(n1));
-			console.log(g1._graph[1], n2);
 			assert.ok(g1._graph[1].equals(n2));
 			assert.ok(g1._graph[2].equals(n3));
 			assert.ok(g1._graph[3].equals(n4));
@@ -369,6 +368,43 @@
 			assert.ok(g1._graph[3].equals(n3));
 			assert.ok(g1._graph[4].equals(n4));
 			assert.ok(g1._graph[5].equals(n4_2));
+		});
+		
+		QUnit.test("Create from OSM Data (stairs with intermediate nodes)", function(assert) {
+			var data = new OSMData(null, { "elements": [
+				{"type": "way","id": 1,"nodes": [1,2],"tags": {"highway": "footway","level": "0"}},
+				{"type": "way","id": 2,"nodes": [2,3,4,5],"tags": {"highway": "steps","level": "0;1"}},
+				{"type": "way","id": 3,"nodes": [5,6],"tags": {"highway": "footway","level": "1"}},
+				{"type": "node","id": 1,"lat": 48.8450691,"lon": 2.3740886},
+				{"type": "node","id": 2,"lat": 48.8451673,"lon": 2.3742123,"tags":{"door":"no","level":"0"}},
+				{"type": "node","id": 3,"lat": 48.84518,"lon": 2.37427},
+				{"type": "node","id": 4,"lat": 48.84519,"lon": 2.37428},
+				{"type": "node","id": 5,"lat": 48.8452128,"lon": 2.3743246,"tags":{"door":"no","level":"1"}},
+				{"type": "node","id": 6,"lat": 48.8452412,"lon": 2.3742728}
+			] });
+			
+			var g1 = new Graph();
+			g1.createFromOSMData(data);
+			
+			//Create result graph
+			var n1 = new Node(L.latLng(48.8450691, 2.3740886), 0);
+			var n2 = new Node(L.latLng(48.8451673, 2.3742123), 0);
+			var n3 = new Node(L.latLng(48.8452128, 2.3743246), 1);
+			var n4 = new Node(L.latLng(48.8452412, 2.3742728), 1);
+			n1.addNeighbour(n2, distanceLevels(n1.getLatLng(), 0, n2.getLatLng(), 0));
+			n2.addNeighbour(n1, distanceLevels(n1.getLatLng(), 0, n2.getLatLng(), 0));
+			n2.addNeighbour(n3, distanceLevels(n2.getLatLng(), 0, n3.getLatLng(), 1));
+			n3.addNeighbour(n2, distanceLevels(n2.getLatLng(), 0, n3.getLatLng(), 1));
+			n3.addNeighbour(n4, distanceLevels(n3.getLatLng(), 1, n4.getLatLng(), 1));
+			n4.addNeighbour(n3, distanceLevels(n3.getLatLng(), 1, n4.getLatLng(), 1));
+			
+			
+			//Check
+			assert.equal(g1._graph.length, 4);
+			assert.ok(g1._graph[0].equals(n1));
+			assert.ok(g1._graph[1].equals(n2));
+			assert.ok(g1._graph[2].equals(n3));
+			assert.ok(g1._graph[3].equals(n4));
 		});
 		
 		QUnit.test("Create from nodes", function(assert) {
@@ -502,6 +538,62 @@
 			}
 		});
 		
+		QUnit.test("Find shortest path (through levels, with oneways)", function(assert) {
+			var data = new OSMData(null, {"elements":[
+				{"type":"way","id":379435685,"nodes":[3827342804,3827342815],"tags":{"conveying":"forward","highway":"footway","incline":"down","level":"0;1"}},
+				{"type":"way","id":379435690,"nodes":[3827342800,3827342790],"tags":{"conveying":"forward","highway":"footway","incline":"up","level":"0;1"}},
+				{"type":"way","id":379435697,"nodes":[3827342242,3827342547],"tags":{"highway":"service","level":"2","oneway":"yes"}},
+				{"type":"way","id":379435699,"nodes":[3827342552,3827342549],"tags":{"highway":"service","level":"1;2","oneway":"yes"}},
+				{"type":"way","id":379435702,"nodes":[3827342548,3827342243],"tags":{"highway":"service","level":"2","oneway":"yes"}},
+				{"type":"way","id":379435707,"nodes":[3827342797,3827342782],"tags":{"highway":"footway","level":"2"}},
+				{"type":"way","id":379435710,"nodes":[3827342546,3827342540],"tags":{"highway":"service","level":"1;2","oneway":"yes"}},
+				{"type":"way","id":379435719,"nodes":[3827342803,3827342806],"tags":{"conveying":"forward","highway":"footway","incline":"down","level":"1;2"}},
+				{"type":"way","id":379435727,"nodes":[3827342804,3827342805,3827342806],"tags":{"highway":"footway","level":"1"}},
+				{"type":"way","id":379435728,"nodes":[3827342786,3827342784,3827342782],"tags":{"conveying":"forward","highway":"footway","incline":"up","level":"1;2"}},
+				{"type":"way","id":379435736,"nodes":[3827342790,3827342787,3827342786],"tags":{"highway":"footway","level":"1"}},
+				{"type":"way","id":379435754,"nodes":[3827342241,3827342514,3827342787,3827342805],"tags":{"highway":"footway","level":"1"}},
+				{"type":"way","id":379435760,"nodes":[3827342549,3827342548,3827342547,3827342546],"tags":{"highway":"service","level":"2","oneway":"yes"}},
+				{"type":"way","id":379435770,"nodes":[3827342233,3827342507,3827342796,3827342797,3827342803],"tags":{"highway":"footway","level":"2"}},
+				{"type":"node","id":3827342233,"lat":48.0838245,"lon":-1.6794517},
+				{"type":"node","id":3827342241,"lat":48.0838306,"lon":-1.6798351},
+				{"type":"node","id":3827342242,"lat":48.0838310,"lon":-1.6798550},
+				{"type":"node","id":3827342243,"lat":48.0838324,"lon":-1.6799481},
+				{"type":"node","id":3827342507,"lat":48.0839007,"lon":-1.6794511},
+				{"type":"node","id":3827342514,"lat":48.0839052,"lon":-1.6798319},
+				{"type":"node","id":3827342540,"lat":48.0839253,"lon":-1.6793787},
+				{"type":"node","id":3827342546,"lat":48.0839326,"lon":-1.6797570},
+				{"type":"node","id":3827342547,"lat":48.0839338,"lon":-1.6798522},
+				{"type":"node","id":3827342548,"lat":48.0839350,"lon":-1.6799453},
+				{"type":"node","id":3827342549,"lat":48.0839359,"lon":-1.6800143},
+				{"type":"node","id":3827342552,"lat":48.0839403,"lon":-1.6803664},
+				{"type":"node","id":3827342782,"lat":48.0839709,"lon":-1.6795712},
+				{"type":"node","id":3827342784,"lat":48.0839717,"lon":-1.6796324},
+				{"type":"node","id":3827342786,"lat":48.0839737,"lon":-1.6797956},
+				{"type":"node","id":3827342787,"lat":48.0839740,"lon":-1.6798295},
+				{"type":"node","id":3827342790,"lat":48.0839743,"lon":-1.6798637},
+				{"type":"node","id":3827342796,"lat":48.0839765,"lon":-1.6794500},
+				{"type":"node","id":3827342797,"lat":48.0839773,"lon":-1.6795433},
+				{"type":"node","id":3827342800,"lat":48.0839810,"lon":-1.6803103},
+				{"type":"node","id":3827342803,"lat":48.0839835,"lon":-1.6795709},
+				{"type":"node","id":3827342804,"lat":48.0839871,"lon":-1.6798633},
+				{"type":"node","id":3827342805,"lat":48.0839874,"lon":-1.6798290},
+				{"type":"node","id":3827342806,"lat":48.0839877,"lon":-1.6797951},
+				{"type":"node","id":3827342815,"lat":48.0839954,"lon":-1.6803100}]
+			});
+			
+			var g1 = new Graph();
+			g1.createFromOSMData(data);
+			
+			//Nodes succession
+			//3827342241,3827342514,3827342787,3827342786,3827342784,3827342782,3827342797,3827342796,3827342507,3827342233
+			
+			//Path
+			var path = g1.findShortestPath(L.latLng(48.0838306,-1.6798351), 1, L.latLng(48.0838245,-1.6794517), 2);
+			
+			//Check result
+			assert.equal(path.length, 10);
+		});
+		
 		QUnit.test("Process", function(assert) {
 			//Create nodes
 			var n1 = new Node(L.latLng(0, 0), 0);
@@ -528,7 +620,7 @@
 			var path = as1._process(n1, n3);
 			
 			//Check
-			console.log(path);
+			//console.log(path);
 			assert.equal(path.length, 3);
 			assert.ok(path[0].equals(n1));
 			assert.ok(path[1].equals(n2));

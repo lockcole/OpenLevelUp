@@ -363,6 +363,9 @@ var MapView = function(main) {
 	/** The routing markers **/
 	this._routingMarkers = { start: null, end: null, inter: [] };
 	
+	/** The routing path, segmented by level **/
+	this._routingPath = {};
+	
 	/** The previous zoom value **/
 	this._oldZoom = null;
 
@@ -713,6 +716,14 @@ var MapView = function(main) {
 			this._routingLayer.addLayer(this._routingMarkers.end);
 		}
 		
+		//Check routing path
+		if(this._routingPath != null && this._routingPath[this._mainView.getLevelView().get()] != undefined) {
+			var linesOnLevel = this._routingPath[this._mainView.getLevelView().get()];
+			for(var i=0, l=linesOnLevel.length; i < l; i++) {
+				this._routingLayer.addLayer(linesOnLevel[i]);
+			}
+		}
+		
 		//Add to map
 		this._map.addLayer(this._routingLayer);
 	};
@@ -886,6 +897,43 @@ var MapView = function(main) {
 			this._routingMarkers[type] = null;
 		}
 		this._mainView.getRoutingView().updateLabel(type, null);
+	};
+	
+	/**
+	 * Sets the current routing result
+	 * @param path The result path (or null to reset)
+	 */
+	MapView.prototype.setRoute = function(path) {
+		//Clear routing path
+		this._routingPath = {};
+		
+		if(path != null) {
+			var prevLvl = null, currentNode = null, currentLvl = null;
+			
+			//Read path
+			for(var i=0, l=path.length; i < l; i++) {
+				currentNode = path[i];
+				currentLvl = currentNode.getLevel();
+				
+				//Check if level changed
+				if(prevLvl == null || prevLvl != currentLvl) {
+					//Create level entry in path if not existing
+					if(this._routingPath[currentLvl] == undefined) {
+						this._routingPath[currentLvl] = [];
+					}
+					
+					//Add new segment in level
+					this._routingPath[currentLvl].push(L.polyline([]));
+				}
+				
+				//Add current node in last segment in current level
+				this._routingPath[currentLvl][this._routingPath[currentLvl].length - 1].addLatLng(currentNode.getLatLng());
+				
+				//Change previous level value
+				prevLvl = currentLvl;
+			}
+		}
+		this._updateRoutingLayer();
 	};
 
 
@@ -3298,6 +3346,7 @@ var RoutingView = function(main) {
 	 * Removes the start marker on map
 	 */
 	RoutingView.prototype.removeStartMarker = function() {
+		this._mainView.getMapView().setRoute(null);
 		this._mainView.getMapView().removeRoutingMarker("start");
 		$("#routing-start-level").prop("disabled", true);
 		$("#routing-start-delete").prop("disabled", true);
@@ -3308,6 +3357,7 @@ var RoutingView = function(main) {
 	 * Removes the end marker on map
 	 */
 	RoutingView.prototype.removeEndMarker = function() {
+		this._mainView.getMapView().setRoute(null);
 		this._mainView.getMapView().removeRoutingMarker("end");
 		$("#routing-end-level").prop("disabled", true);
 		$("#routing-end-delete").prop("disabled", true);
@@ -3384,4 +3434,15 @@ var RoutingView = function(main) {
 			this._mainView.getMapView().getRoutingMarkerCoords("end"),
 			parseFloat($("#routing-end-level").val())
 		);
+	};
+	
+	/**
+	 * Shows the given route in view and on map
+	 * @param path The path to display
+	 */
+	RoutingView.prototype.showRoute = function(path) {
+		//Show route on map
+		this._mainView.getMapView().setRoute(path);
+		
+		//TODO Show instructions in panel
 	};
