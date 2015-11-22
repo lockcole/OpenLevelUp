@@ -781,9 +781,11 @@ var HoursInputView = function(main) {
 	 * Called when input value changed to check it, and update calendar
 	 */
 	HoursInputView.prototype.changed = function() {
+		var caretPos = this._field.caret();
 		this._field.val(this._field.val().replace(/␣/gi, ' ')); //Allow to paste directly from Taginfo
 		this._vUrl.update(this._field.val());
 		this._mainView.getController().showHours(this._field.val());
+		this._field.caret(caretPos);
 	};
 
 
