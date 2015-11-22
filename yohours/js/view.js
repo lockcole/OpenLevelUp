@@ -720,7 +720,20 @@ var HoursInputView = function(main) {
 	}
 	
 	//Add triggers
-	this._field.bind("input propertychange", this.changed.bind(this));
+	this._field.bind("input propertychange", function() {
+		window.clearTimeout(this._timer);
+		this._timer = window.setTimeout(
+			this.changed.bind(this),
+			this._delay
+		);
+	}.bind(this));
+	this._field.keydown(function(event){
+		if(event.keyCode == 13) {
+			event.preventDefault();
+			window.clearTimeout(this._timer);
+			this.changed();
+		}
+	}.bind(this));
 };
 
 //ACCESSORS
@@ -764,16 +777,13 @@ var HoursInputView = function(main) {
 		}
 	};
 	
+	/**
+	 * Called when input value changed to check it, and update calendar
+	 */
 	HoursInputView.prototype.changed = function() {
-		window.clearTimeout(this._timer);
-		this._timer = window.setTimeout(
-			function() {
-				this._field.val(this._field.val().replace(/␣/gi, ' ')); //Allow to paste directly from Taginfo
-				this._vUrl.update(this._field.val());
-				this._mainView.getController().showHours(this._field.val());
-			}.bind(this),
-			this._delay
-		);
+		this._field.val(this._field.val().replace(/␣/gi, ' ')); //Allow to paste directly from Taginfo
+		this._vUrl.update(this._field.val());
+		this._mainView.getController().showHours(this._field.val());
 	};
 
 
