@@ -56,7 +56,7 @@
 			{
 				"name": "Escalator",
 				"description": "Escalator (verticalpassage)",
-				"onTags": [ { "buildingpart:verticalpassage": "escalator" }, { "room": "escalator" } ],
+				"onTags": [ { "buildingpart:verticalpassage": "escalator" }, { "room": "escalator" }, { "conveying": "yes" } ],
 				"style": { "icon": "passage_escalator.png" }
 			},
 			{
