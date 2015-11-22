@@ -1247,7 +1247,7 @@ var Graph = function() {
 		for(var i=0, l=data.elements.length; i < l; i++) {
 			currentElement = data.elements[i];
 			
-			if(currentElement.type == "node") {
+			if(currentElement.type == "node" && nodes[currentElement.id] == undefined) {
 				nodes[currentElement.id] = { default: new Node(L.latLng(currentElement.lat, currentElement.lon), null, currentElement.id) };
 				
 				if(currentElement.tags != undefined && currentElement.tags.level != undefined) {
@@ -1407,10 +1407,10 @@ var Graph = function() {
 	Graph.prototype.findShortestPath = function(startPt, startLvl, endPt, endLvl) {
 		//Find start and end nodes near given coordinates
 		var start = this._findNearestNode(startPt, startLvl);
-		if(start == null) { throw Exception("No start node found"); }
+		if(start == null) { throw Error("No start node found"); }
 		
 		var end = this._findNearestNode(endPt, endLvl);
-		if(end == null) { throw Exception("No end node found"); }
+		if(end == null) { throw Error("No end node found"); }
 		
 		return this._process(start, end);
 	};
@@ -1483,7 +1483,10 @@ var Graph = function() {
 		//Reconstruct path
 		current = end;
 		var path = [ current ];
-		cameFrom.forEach(function(value, key) { console.log(key, value); });
+		
+		if(!cameFrom.has(end)) {
+			throw Error("No route found");
+		}
 		
 		while(!current.equals(start)) {
 			current = cameFrom.get(current);

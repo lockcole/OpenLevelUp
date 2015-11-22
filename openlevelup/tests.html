@@ -461,6 +461,19 @@
 			assert.equal(g1._findNearestNode(L.latLng(48.12110597958796, -1.7040759903776208), 1), null);
 		});
 		
+		QUnit.test("Find nearest node null level", function(assert) {
+			//Create nodes
+			var n1 = new Node(L.latLng(48.0837174, -1.6812299), null);
+			var n2 = new Node(L.latLng(48.083981, -1.6803103), 0);
+			
+			//Create graph
+			var graph = [ n1, n2 ];
+			var g1 = new Graph();
+			g1.createFromNodes(graph);
+			
+			assert.ok(g1._findNearestNode(L.latLng(48.083982, -1.680309), 0).equals(n2));
+		});
+		
 		QUnit.test("Find shortest path valid", function(assert) {
 			//Create nodes
 			var n1 = new Node(L.latLng(48.119663567472834, -1.7349844588305359), 0);
@@ -560,24 +573,24 @@
 				{"type":"node","id":3827342243,"lat":48.0838324,"lon":-1.6799481},
 				{"type":"node","id":3827342507,"lat":48.0839007,"lon":-1.6794511},
 				{"type":"node","id":3827342514,"lat":48.0839052,"lon":-1.6798319},
-				{"type":"node","id":3827342540,"lat":48.0839253,"lon":-1.6793787},
-				{"type":"node","id":3827342546,"lat":48.0839326,"lon":-1.6797570},
+				{"type":"node","id":3827342540,"lat":48.0839253,"lon":-1.6793787,"tags":{"door":"no","level":"2"}},
+				{"type":"node","id":3827342546,"lat":48.0839326,"lon":-1.6797570,"tags":{"door":"no","level":"1"}},
 				{"type":"node","id":3827342547,"lat":48.0839338,"lon":-1.6798522},
 				{"type":"node","id":3827342548,"lat":48.0839350,"lon":-1.6799453},
-				{"type":"node","id":3827342549,"lat":48.0839359,"lon":-1.6800143},
-				{"type":"node","id":3827342552,"lat":48.0839403,"lon":-1.6803664},
-				{"type":"node","id":3827342782,"lat":48.0839709,"lon":-1.6795712},
+				{"type":"node","id":3827342549,"lat":48.0839359,"lon":-1.6800143,"tags":{"door":"no","level":"2"}},
+				{"type":"node","id":3827342552,"lat":48.0839403,"lon":-1.6803664,"tags":{"door":"no","level":"1"}},
+				{"type":"node","id":3827342782,"lat":48.0839709,"lon":-1.6795712,"tags":{"door":"no","level":"2"}},
 				{"type":"node","id":3827342784,"lat":48.0839717,"lon":-1.6796324},
-				{"type":"node","id":3827342786,"lat":48.0839737,"lon":-1.6797956},
+				{"type":"node","id":3827342786,"lat":48.0839737,"lon":-1.6797956,"tags":{"door":"no","level":"1"}},
 				{"type":"node","id":3827342787,"lat":48.0839740,"lon":-1.6798295},
 				{"type":"node","id":3827342790,"lat":48.0839743,"lon":-1.6798637},
 				{"type":"node","id":3827342796,"lat":48.0839765,"lon":-1.6794500},
 				{"type":"node","id":3827342797,"lat":48.0839773,"lon":-1.6795433},
 				{"type":"node","id":3827342800,"lat":48.0839810,"lon":-1.6803103},
-				{"type":"node","id":3827342803,"lat":48.0839835,"lon":-1.6795709},
+				{"type":"node","id":3827342803,"lat":48.0839835,"lon":-1.6795709,"tags":{"door":"no","level":"2"}},
 				{"type":"node","id":3827342804,"lat":48.0839871,"lon":-1.6798633},
 				{"type":"node","id":3827342805,"lat":48.0839874,"lon":-1.6798290},
-				{"type":"node","id":3827342806,"lat":48.0839877,"lon":-1.6797951},
+				{"type":"node","id":3827342806,"lat":48.0839877,"lon":-1.6797951,"tags":{"door":"no","level":"1"}},
 				{"type":"node","id":3827342815,"lat":48.0839954,"lon":-1.6803100}]
 			});
 			
@@ -585,13 +598,23 @@
 			g1.createFromOSMData(data);
 			
 			//Nodes succession
-			//3827342241,3827342514,3827342787,3827342786,3827342784,3827342782,3827342797,3827342796,3827342507,3827342233
-			
+			//3827342241,3827342514,3827342787,3827342786,3827342784 (ignored),3827342782,3827342797,3827342796,3827342507,3827342233
+
 			//Path
 			var path = g1.findShortestPath(L.latLng(48.0838306,-1.6798351), 1, L.latLng(48.0838245,-1.6794517), 2);
 			
 			//Check result
-			assert.equal(path.length, 10);
+			console.log(path);
+			assert.equal(path.length, 9);
+			assert.equal(path[0]._name, "3827342241");
+			assert.equal(path[1]._name, "3827342514");
+			assert.equal(path[2]._name, "3827342787");
+			assert.equal(path[3]._name, "3827342786");
+			assert.equal(path[4]._name, "3827342782");
+			assert.equal(path[5]._name, "3827342797");
+			assert.equal(path[6]._name, "3827342796");
+			assert.equal(path[7]._name, "3827342507");
+			assert.equal(path[8]._name, "3827342233");
 		});
 		
 		QUnit.test("Process", function(assert) {
