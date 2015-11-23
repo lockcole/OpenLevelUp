@@ -84,11 +84,13 @@
 	
 	"routing": {
 		"foot": {
-			"name": "By foot"
+			"name": "By foot",
+			"speed": 1.39
 		},
 		
 		"wheelchair": {
-			"name": "In wheelchair"
+			"name": "In wheelchair",
+			"speed": 0.7
 		}
 	}
 }

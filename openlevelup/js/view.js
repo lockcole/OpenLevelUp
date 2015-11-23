@@ -3444,5 +3444,84 @@ var RoutingView = function(main) {
 		//Show route on map
 		this._mainView.getMapView().setRoute(path);
 		
-		//TODO Show instructions in panel
+		if(path == null) {
+			$("#rtg-instructions").addClass("hidden");
+		}
+		else {
+			var length = 0;
+			var speed = CONFIG.routing[$("#routing-mode").val()].speed;
+			var instructions = '', lastLength = 0, lastDirection = 0, currentDirection, userDirection, userDirectionLabel;
+			
+			//TODO Show instructions in panel
+			for(var i=0, l=path.length; i < l; i++) {
+				//Calculate length
+				if(i < l-1) {
+					lastLength = path[i].getCost(path[i+1]);
+					length += lastLength;
+				}
+				else {
+					lastLength = null;
+				}
+				
+				//Calculate direction
+				if(i == 0) {
+					lastDirection = azimuth(
+						{lat: path[i].getLatLng().lat, lng: path[i].getLatLng().lng, elv: 0},
+						{lat: path[i+1].getLatLng().lat, lng: path[i+1].getLatLng().lng, elv: 0}
+					).azimuth;
+					currentDirection = lastDirection;
+				}
+				else if(i < l-1) {
+					currentDirection = azimuth(
+						{lat: path[i].getLatLng().lat, lng: path[i].getLatLng().lng, elv: 0},
+						{lat: path[i+1].getLatLng().lat, lng: path[i+1].getLatLng().lng, elv: 0}
+					).azimuth;
+				}
+				
+				//Create instruction
+				instructions += '<div class="routing-instruction">';
+				
+				if(i == l-1) {
+					instructions += '<span class="routing-instr-img"><img src="img/icon_rtg_end.svg" /></span>'
+							+' <span class="routing-instr-ref">'+l+'.</span>'
+							+' <span class="routing-instr-txt">You are arrived</span>';
+				}
+				else {
+					//Find direction relatively to user
+					userDirection = currentDirection - lastDirection;
+					if(userDirection <= 30 && userDirection >= -30) {
+						userDirection = "forward";
+						userDirectionLabel = "Go forward";
+					}
+					else if(userDirection < -30 && userDirection >= -120) {
+						userDirection = "left";
+						userDirectionLabel = "Turn to left";
+					}
+					else if(userDirection > 30 && userDirection <= 120) {
+						userDirection = "right";
+						userDirectionLabel = "Turn to right";
+					}
+					else {
+						userDirection = "backward";
+						userDirectionLabel = "Go backward";
+					}
+					
+					instructions += '<span class="routing-instr-img"><img src="img/icon_rtg_'+userDirection+'.svg" /></span>'
+							+' <span class="routing-instr-ref">'+(i+1)+'.</span>'
+							+' <span class="routing-instr-txt">'+userDirectionLabel+'</span>'
+							+'<span class="routing-instr-time">'+Math.ceil(lastLength)+' m</span>';
+				}
+				instructions += '</div>';
+				
+				lastDirection = currentDirection;
+			}
+			
+			//Update length
+			$("#rtg-instr-length").html(Math.ceil(length));
+			$("#rtg-instr-time").html(Math.ceil(length / speed / 60));
+			
+			//Show instructions list
+			$("#rtg-instr-list").html(instructions);
+			$("#rtg-instructions").removeClass("hidden");
+		}
 	};

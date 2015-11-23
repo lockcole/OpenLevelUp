@@ -68,6 +68,10 @@ a.help {
 	text-decoration-style: dotted;
 }
 
+.hidden {
+	display: none;
+}
+
 /*******
  * Map *
  *******/
