@@ -1258,7 +1258,7 @@ var Graph = function() {
 		}
 		
 		//Parse ways
-		var nodeId, node, nodePrevId, direction, level, levelPrev = null;
+		var nodeId, node, nodePrevId, direction, transition, level, levelPrev = null;
 		for(var i=0, l=data.elements.length; i < l; i++) {
 			currentElement = data.elements[i];
 			if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
@@ -1266,6 +1266,7 @@ var Graph = function() {
 				direction = this._direction(currentElement.tags);
 				levelPrev = null;
 				nodePrevId = null;
+				transition = this._transition(currentElement.tags);
 				
 				//Read each node
 				for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
@@ -1312,7 +1313,8 @@ var Graph = function() {
 											nodes[nodePrevId][levelPrev].getLevel(),
 											nodes[nodeId][level].getLatLng(),
 											nodes[nodeId][level].getLevel()
-										)
+										),
+										transition
 									);
 								}
 								
@@ -1386,6 +1388,20 @@ var Graph = function() {
 		else {
 			return 0;
 		}
+	};
+	
+	/**
+	 * @return The kind of transition (elevator, escalator, stairs, null)
+	 */
+	Graph.prototype._transition = function(tags) {
+		//Elevator
+		if(tags.highway == "elevator" || tags["buildingpart:verticalpassage"] == "elevator" || tags.indoor == "elevator") { return "elevator"; }
+		//Escalator
+		if((tags.conveying != null && tags.conveying != "no") || tags["buildingpart:verticalpassage"] == "escalator" || tags.room == "escalator") { return "escalator"; }
+		//Stairs
+		if(tags.highway == "steps" || tags["buildingpart:verticalpassage"] == "stairway" || tags.room == "stairs" || tags.stairs == "yes") { return "stairs"; }
+		//Default
+		return null;
 	};
 	
 	/**
@@ -1528,6 +1544,9 @@ var Node = function(latlng, level, name) {
 	/** The neighbours of the node **/
 	this._neighbours = [];
 	
+	/** The kind of transition between this node and neighbours (null = flat, stairs, escalator, elevator) **/
+	this._transition = [];
+	
 	/** The costs to go to a neighbour **/
 	this._costs = [];
 };
@@ -1563,6 +1582,14 @@ var Node = function(latlng, level, name) {
 	};
 	
 	/**
+	 * @return The kind of transition between this node and the given one
+	 */
+	Node.prototype.getTransition = function(n) {
+		var id = this._neighbours.indexOf(n);
+		return this._transition[id];
+	};
+	
+	/**
 	 * @return True if the given node is the same as the current one
 	 */
 	Node.prototype.equals = function(n) {
@@ -1578,8 +1605,10 @@ var Node = function(latlng, level, name) {
 	 * Add a neighbour to this node
 	 * @param n The node to add
 	 * @param w The cost to go from this node to the given one
+	 * @param t The kind of transition (stairs, elevator, escalator, or null if flat)
 	 */
-	Node.prototype.addNeighbour = function(n, w) {
+	Node.prototype.addNeighbour = function(n, w, t) {
 		this._neighbours.push(n);
 		this._costs.push(w);
+		this._transition.push(t || null);
 	};

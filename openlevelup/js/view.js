@@ -361,7 +361,7 @@ var MapView = function(main) {
 	this._routingLayer = null;
 	
 	/** The routing markers **/
-	this._routingMarkers = { start: null, end: null, inter: [] };
+	this._routingMarkers = { start: null, end: null, inter: {} };
 	
 	/** The routing path, segmented by level **/
 	this._routingPath = {};
@@ -706,19 +706,34 @@ var MapView = function(main) {
 		//Clear layer
 		this._routingLayer.clearLayers();
 		
+		var mapLevel = this._mainView.getLevelView().get();
+		
 		//Check start marker
-		if(this._routingMarkers.start != null && this._mainView.getRoutingView().getStartLevel() == this._mainView.getLevelView().get()) {
+		if(this._routingMarkers.start != null && this._mainView.getRoutingView().getStartLevel() == mapLevel) {
 			this._routingLayer.addLayer(this._routingMarkers.start);
 		}
 		
 		//Check end marker
-		if(this._routingMarkers.end != null && this._mainView.getRoutingView().getEndLevel() == this._mainView.getLevelView().get()) {
+		if(this._routingMarkers.end != null && this._mainView.getRoutingView().getEndLevel() == mapLevel) {
 			this._routingLayer.addLayer(this._routingMarkers.end);
 		}
 		
+		//Check intermediate markers
+		if(this._routingMarkers.inter != null) {
+			//Find current level
+			for(var lvl in this._routingMarkers.inter) {
+				if(lvl == mapLevel) {
+					//Add markers
+					for(var i=0, l=this._routingMarkers.inter[lvl].length; i < l; i++) {
+						this._routingLayer.addLayer(this._routingMarkers.inter[lvl][i]);
+					}
+				}
+			}
+		}
+		
 		//Check routing path
-		if(this._routingPath != null && this._routingPath[this._mainView.getLevelView().get()] != undefined) {
-			var linesOnLevel = this._routingPath[this._mainView.getLevelView().get()];
+		if(this._routingPath != null && this._routingPath[mapLevel] != undefined) {
+			var linesOnLevel = this._routingPath[mapLevel];
 			for(var i=0, l=linesOnLevel.length; i < l; i++) {
 				this._routingLayer.addLayer(linesOnLevel[i]);
 			}
@@ -906,9 +921,17 @@ var MapView = function(main) {
 	MapView.prototype.setRoute = function(path) {
 		//Clear routing path
 		this._routingPath = {};
+		this._routingMarkers.inter = {};
 		
 		if(path != null) {
 			var prevLvl = null, currentNode = null, currentLvl = null;
+			
+			//Icon for intermediate markers
+			var icon = L.icon({
+				iconUrl: 'img/icon_marker_inter.png',
+				className: 'marker-routing-inter',
+				iconAnchor: [12.5, 41]
+			});
 			
 			//Read path
 			for(var i=0, l=path.length; i < l; i++) {
@@ -924,6 +947,26 @@ var MapView = function(main) {
 					
 					//Add new segment in level
 					this._routingPath[currentLvl].push(L.polyline([]));
+					
+					if(i > 0) {
+						//Create level entry in markers if not existing
+						if(this._routingMarkers.inter[prevLvl] == undefined) {
+							this._routingMarkers.inter[prevLvl] = [];
+						}
+						if(this._routingMarkers.inter[currentLvl] == undefined) {
+							this._routingMarkers.inter[currentLvl] = [];
+						}
+						
+						//Add markers for level change
+						this._routingMarkers.inter[prevLvl].push(
+							L.marker(path[i-1].getLatLng(), { icon: icon, zIndexOffset: 10000, title: 'Click to change level' })
+							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i]))
+						);
+						this._routingMarkers.inter[currentLvl].push(
+							L.marker(path[i].getLatLng(), { icon: icon, zIndexOffset: 10000, title: 'Click to change level' })
+							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i-1]))
+						);
+					}
 				}
 				
 				//Add current node in last segment in current level
@@ -3324,7 +3367,7 @@ var RoutingView = function(main) {
 	 * Adds the start marker on map
 	 */
 	RoutingView.prototype.addStartMarker = function() {
-		$("#routing-start-level option[value="+this._mainView.getLevelView().get()+"]").attr("selected", "selected");
+		$("#routing-start-level option[value=\""+this._mainView.getLevelView().get()+"\"]").attr("selected", "selected");
 		this._mainView.getMapView().addRoutingMarker("start");
 		$("#routing-start-level").prop("disabled", false);
 		$("#routing-start-delete").prop("disabled", false);
@@ -3335,7 +3378,7 @@ var RoutingView = function(main) {
 	 * Adds the end marker on map
 	 */
 	RoutingView.prototype.addEndMarker = function() {
-		$("#routing-end-level option[value="+this._mainView.getLevelView().get()+"]").attr("selected", "selected");
+		$("#routing-end-level option[value=\""+this._mainView.getLevelView().get()+"\"]").attr("selected", "selected");
 		this._mainView.getMapView().addRoutingMarker("end");
 		$("#routing-end-level").prop("disabled", false);
 		$("#routing-end-delete").prop("disabled", false);
@@ -3346,7 +3389,7 @@ var RoutingView = function(main) {
 	 * Removes the start marker on map
 	 */
 	RoutingView.prototype.removeStartMarker = function() {
-		this._mainView.getMapView().setRoute(null);
+		this.showRoute(null);
 		this._mainView.getMapView().removeRoutingMarker("start");
 		$("#routing-start-level").prop("disabled", true);
 		$("#routing-start-delete").prop("disabled", true);
@@ -3357,7 +3400,7 @@ var RoutingView = function(main) {
 	 * Removes the end marker on map
 	 */
 	RoutingView.prototype.removeEndMarker = function() {
-		this._mainView.getMapView().setRoute(null);
+		this.showRoute(null);
 		this._mainView.getMapView().removeRoutingMarker("end");
 		$("#routing-end-level").prop("disabled", true);
 		$("#routing-end-delete").prop("disabled", true);
@@ -3402,10 +3445,10 @@ var RoutingView = function(main) {
 		
 		//Restore old values if possible
 		if(oldStartLvl != null && oldStartLvl != "null") {
-			$("#routing-start-level option[value="+oldStartLvl+"]").attr("selected", "selected");
+			$("#routing-start-level option[value=\""+oldStartLvl+"\"]").attr("selected", "selected");
 		}
 		if(oldEndLvl != null && oldEndLvl != "null") {
-			$("#routing-end-level option[value="+oldEndLvl+"]").attr("selected", "selected");
+			$("#routing-end-level option[value=\""+oldEndLvl+"\"]").attr("selected", "selected");
 		}
 	};
 	
@@ -3413,14 +3456,14 @@ var RoutingView = function(main) {
 	 * Called when start level changes in selector
 	 */
 	RoutingView.prototype.startLevelChanged = function() {
-		this._mainView.getMapView()._updateRoutingLayer();
+		this.showRoute(null);
 	};
 
 	/**
 	 * Called when end level changes in selector
 	 */
 	RoutingView.prototype.endLevelChanged = function() {
-		this._mainView.getMapView()._updateRoutingLayer();
+		this.showRoute(null);
 	};
 	
 	/**
@@ -3452,7 +3495,7 @@ var RoutingView = function(main) {
 			var speed = CONFIG.routing[$("#routing-mode").val()].speed;
 			var instructions = '', lastLength = 0, lastDirection = 0, currentDirection, userDirection, userDirectionLabel;
 			
-			//TODO Show instructions in panel
+			//Show instructions in panel
 			for(var i=0, l=path.length; i < l; i++) {
 				//Calculate length
 				if(i < l-1) {
@@ -3488,7 +3531,7 @@ var RoutingView = function(main) {
 				}
 				else {
 					//Find direction relatively to user
-					userDirection = currentDirection - lastDirection;
+					userDirection = angle360toAngle180(currentDirection) - angle360toAngle180(lastDirection);
 					if(userDirection <= 30 && userDirection >= -30) {
 						userDirection = "forward";
 						userDirectionLabel = "Go forward";

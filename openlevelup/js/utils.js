@@ -304,6 +304,13 @@ function filterFloat(value) {
 }
 
 /**
+ * Converts a 0-360° angle into a -180 - 180° angle
+ */
+function angle360toAngle180(a) {
+	return (a <= 180) ? a : -(360-a);
+}
+
+/**
  * Contains characters used in base 62
  */
 var base62 = [ "0","1","2","3","4","5","6","7","8","9",
