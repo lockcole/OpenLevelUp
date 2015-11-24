@@ -945,6 +945,11 @@ var MapView = function(main) {
 						this._routingPath[currentLvl] = [];
 					}
 					
+					//Add current node to previous level segment to make path continuous
+					if(prevLvl != null) {
+						this._routingPath[prevLvl][this._routingPath[prevLvl].length - 1].addLatLng(currentNode.getLatLng());
+					}
+					
 					//Add new segment in level
 					this._routingPath[currentLvl].push(L.polyline([]));
 					
@@ -3493,7 +3498,8 @@ var RoutingView = function(main) {
 		else {
 			var length = 0;
 			var speed = CONFIG.routing[$("#routing-mode").val()].speed;
-			var instructions = '', lastLength = 0, lastDirection = 0, currentDirection, userDirection, userDirectionLabel;
+			var instructions = '', lastLength = 0, lastDirection = 0, currentDirection, userInstruction, userInstructionLabel;
+			var transition, levelDiff;
 			
 			//Show instructions in panel
 			for(var i=0, l=path.length; i < l; i++) {
@@ -3501,9 +3507,13 @@ var RoutingView = function(main) {
 				if(i < l-1) {
 					lastLength = path[i].getCost(path[i+1]);
 					length += lastLength;
+					transition = path[i].getTransition(path[i+1]);
+					levelDiff = path[i+1].getLevel() - path[i].getLevel();
 				}
 				else {
 					lastLength = null;
+					transition = null;
+					levelDiff = 0;
 				}
 				
 				//Calculate direction
@@ -3531,27 +3541,78 @@ var RoutingView = function(main) {
 				}
 				else {
 					//Find direction relatively to user
-					userDirection = angle360toAngle180(currentDirection) - angle360toAngle180(lastDirection);
-					if(userDirection <= 30 && userDirection >= -30) {
-						userDirection = "forward";
-						userDirectionLabel = "Go forward";
+					if(transition == null) {
+						userInstruction = angle360toAngle180(currentDirection) - angle360toAngle180(lastDirection);
+						if(userInstruction <= 30 && userInstruction >= -30) {
+							userInstruction = "forward";
+							userInstructionLabel = "Go forward";
+						}
+						else if(userInstruction < -30 && userInstruction >= -120) {
+							userInstruction = "left";
+							userInstructionLabel = "Turn to left";
+						}
+						else if(userInstruction > 30 && userInstruction <= 120) {
+							userInstruction = "right";
+							userInstructionLabel = "Turn to right";
+						}
+						else {
+							userInstruction = "backward";
+							userInstructionLabel = "Go backward";
+						}
 					}
-					else if(userDirection < -30 && userDirection >= -120) {
-						userDirection = "left";
-						userDirectionLabel = "Turn to left";
-					}
-					else if(userDirection > 30 && userDirection <= 120) {
-						userDirection = "right";
-						userDirectionLabel = "Turn to right";
-					}
+					//Create label for transition
 					else {
-						userDirection = "backward";
-						userDirectionLabel = "Go backward";
+						switch(transition) {
+							case "stairs":
+								if(levelDiff > 0) {
+									userInstruction = "stairs_up";
+									userInstructionLabel = "Go upstairs";
+								}
+								else if(levelDiff < 0) {
+									userInstruction = "stairs_down";
+									userInstructionLabel = "Go downstairs";
+								}
+								else {
+									userInstruction = "stairs";
+									userInstructionLabel = "Use stairs";
+								}
+								break;
+							case "escalator":
+								if(levelDiff > 0) {
+									userInstruction = "escalator_up";
+									userInstructionLabel = "Go up using conveying stairs";
+								}
+								else if(levelDiff < 0) {
+									userInstruction = "escalator_down";
+									userInstructionLabel = "Go down using conveying stairs";
+								}
+								else {
+									userInstruction= "escalator";
+									userInstructionLabel = "Use conveying path";
+								}
+								break;
+							case "elevator":
+								if(levelDiff > 0) {
+									userInstruction = "elevator_up";
+									userInstructionLabel = "Go to level "+path[i+1].getLevel()+" using elevator";
+								}
+								else if(levelDiff < 0) {
+									userInstruction = "elevator_down";
+									userInstructionLabel = "Go to level "+path[i+1].getLevel()+" using elevator";
+								}
+								else {
+									userInstruction= "elevator";
+									userInstructionLabel = "Use elevator";
+								}
+								break;
+							default:
+								console.error("[Routing] Unknown transition type: "+transition);
+						}
 					}
 					
-					instructions += '<span class="routing-instr-img"><img src="img/icon_rtg_'+userDirection+'.svg" /></span>'
+					instructions += '<span class="routing-instr-img"><img src="img/icon_rtg_'+userInstruction+'.svg" /></span>'
 							+' <span class="routing-instr-ref">'+(i+1)+'.</span>'
-							+' <span class="routing-instr-txt">'+userDirectionLabel+'</span>'
+							+' <span class="routing-instr-txt">'+userInstructionLabel+'</span>'
 							+'<span class="routing-instr-time">'+Math.ceil(lastLength)+' m</span>';
 				}
 				instructions += '</div>';

@@ -1327,7 +1327,8 @@ var Graph = function() {
 											nodes[nodePrevId][levelPrev].getLevel(),
 											nodes[nodeId][level].getLatLng(),
 											nodes[nodeId][level].getLevel()
-										)
+										),
+										transition
 									);
 								}
 							}
