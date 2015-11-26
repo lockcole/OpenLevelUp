@@ -35,7 +35,8 @@
 			"retaining_wall": true,
 			"spikes": true,
 			"self_checkout": true,
-			"checkout": true
+			"checkout": true,
+			"shelf": true
 		}
 	},
 	"railway": {
@@ -92,5 +93,6 @@
 			"wall": true
 		}
 	},
-	"room": true
+	"room": true,
+	"department": true
 }

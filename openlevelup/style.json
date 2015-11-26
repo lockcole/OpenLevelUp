@@ -505,7 +505,7 @@
 				"onTags": [ { "department": "store_section", "vending": "*" } ],
 				"style": {
 					"icon": "vending_${vending}.png",
-					"iconAlias": { "news_papers": "newspapers" }
+					"iconAlias": { "news_papers": "newspapers", "drinks": "drink", "vegetables": "vegetable" }
 				}
 			}
 		],
