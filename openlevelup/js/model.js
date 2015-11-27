@@ -1243,7 +1243,7 @@ var Graph = function() {
 		var nodes = {};
 		
 		//Parse nodes
-		var currentElement = null;
+		var currentElement = null, isElevator;
 		for(var i=0, l=data.elements.length; i < l; i++) {
 			currentElement = data.elements[i];
 			
@@ -1251,8 +1251,32 @@ var Graph = function() {
 				nodes[currentElement.id] = { default: new Node(L.latLng(currentElement.lat, currentElement.lon), null, currentElement.id) };
 				
 				if(currentElement.tags != undefined && currentElement.tags.level != undefined) {
-					var level = filterFloat(currentElement.tags.level);
-					nodes[currentElement.id][level] = new Node(nodes[currentElement.id].default.getLatLng(), level, currentElement.id);
+					var levels = parseLevelsFloat(currentElement.tags.level);
+					isElevator = this._isElevator(currentElement.tags);
+					
+					for(var j=0; j < levels.length; j++) {
+						nodes[currentElement.id][levels[j]] = new Node(nodes[currentElement.id].default.getLatLng(), levels[j], currentElement.id);
+						if(isElevator && j > 0) {
+							nodes[currentElement.id][levels[j]].addNeighbour(
+								nodes[currentElement.id][levels[j-1]],
+								distanceLevels(
+									nodes[currentElement.id][levels[j]].getLatLng(),
+									levels[j],
+									nodes[currentElement.id][levels[j-1]].getLatLng(),
+									levels[j-1]),
+								"elevator"
+							);
+							nodes[currentElement.id][levels[j-1]].addNeighbour(
+								nodes[currentElement.id][levels[j]],
+								distanceLevels(
+									nodes[currentElement.id][levels[j]].getLatLng(),
+									levels[j],
+									nodes[currentElement.id][levels[j-1]].getLatLng(),
+									levels[j-1]),
+								"elevator"
+							);
+						}
+					}
 				}
 			}
 		}
@@ -1347,7 +1371,7 @@ var Graph = function() {
 		this._graph = [];
 		for(var i in nodes) {
 			for(var j in nodes[i]) {
-				if(j != "default") {
+				if(j != "default" && nodes[i][j].getNeighbours().length > 0) {
 					this._graph.push(nodes[i][j]);
 				}
 			}
@@ -1358,7 +1382,14 @@ var Graph = function() {
 	 * @return True if the object can be walked on
 	 */
 	Graph.prototype._isWalkable = function(tags) {
-		return tags != null && tags.highway != undefined;
+		return tags != null && tags.highway != undefined && tags.area == undefined;
+	};
+	
+	/**
+	 * @return True if the object is an elevator
+	 */
+	Graph.prototype._isElevator = function(tags) {
+		return tags != null && (tags.highway == "elevator" || tags.highway == "lift" || tags["buildingpart:verticalpassage"] == "elevator" || tags.indoor == "elevator");
 	};
 	
 	/**

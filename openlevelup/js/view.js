@@ -3543,7 +3543,14 @@ var RoutingView = function(main) {
 					//Find direction relatively to user
 					if(transition == null) {
 						userInstruction = angle360toAngle180(currentDirection) - angle360toAngle180(lastDirection);
-						if(userInstruction <= 30 && userInstruction >= -30) {
+						
+						//Case of going out of an elevator
+						if(i > 0 && path[i-1].getTransition(path[i]) == "elevator") {
+							userInstruction = "forward";
+							userInstructionLabel = "Go out of the elevator";
+						}
+						//Other directions
+						else if(userInstruction <= 30 && userInstruction >= -30) {
 							userInstruction = "forward";
 							userInstructionLabel = "Go forward";
 						}
