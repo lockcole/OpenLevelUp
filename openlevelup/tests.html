@@ -459,6 +459,63 @@
 			assert.ok(path[4].equals(n4));
 		});
 		
+		QUnit.test("Create from OSM Data (simple elevator as area)", function(assert) {
+			var data = new OSMData(null, { "elements": [
+				{"type": "way","id": 1,"nodes": [1,2,3,4],"tags": {"highway": "elevator","level": "0-2"}},
+				{"type": "way","id": 1,"nodes": [1,11],"tags": {"highway": "footway","level": "0"}},
+				{"type": "way","id": 2,"nodes": [3,31],"tags": {"highway": "footway","level": "1"}},
+				{"type": "way","id": 3,"nodes": [1,12],"tags": {"highway": "footway","level": "2"}},
+				{"type": "node","id": 1,"lat": 0,"lon": 0,"tags":{"door":"sliding","repeat_on":"0;2"}},
+				{"type": "node","id": 2,"lat": 0,"lon": 0.1},
+				{"type": "node","id": 3,"lat": 0.1,"lon": 0.1,"tags":{"door":"sliding","level":"1"}},
+				{"type": "node","id": 4,"lat": 0.1,"lon": 0},
+				{"type": "node","id": 11,"lat": -0.1,"lon": -0.1},
+				{"type": "node","id": 12,"lat": -0.1,"lon": -0.2},
+				{"type": "node","id": 31,"lat": 0.2,"lon": 0.2}
+			] });
+			
+			var g1 = new Graph();
+			g1.createFromOSMData(data);
+			
+			//Create result graph
+			var n1_0 = new Node(L.latLng(0, 0), 0);
+			var n1_2 = new Node(L.latLng(0, 0), 2);
+			var n3 = new Node(L.latLng(0.1, 0.1), 1);
+			var n11 = new Node(L.latLng(-0.1, -0.1), 0);
+			var n12 = new Node(L.latLng(-0.1, -0.2), 2);
+			var n31 = new Node(L.latLng(0.2, 0.2), 1);
+			
+			n1_0.addNeighbour(n11, distanceLevels(n1_0.getLatLng(), 0, n11.getLatLng(), 0));
+			n11.addNeighbour(n1_0, distanceLevels(n1_0.getLatLng(), 0, n11.getLatLng(), 0));
+			n1_2.addNeighbour(n12, distanceLevels(n1_2.getLatLng(), 2, n12.getLatLng(), 2));
+			n12.addNeighbour(n1_2, distanceLevels(n1_2.getLatLng(), 2, n12.getLatLng(), 2));
+			n3.addNeighbour(n31, distanceLevels(n3.getLatLng(), 1, n31.getLatLng(), 1));
+			n31.addNeighbour(n3, distanceLevels(n3.getLatLng(), 1, n31.getLatLng(), 1));
+			n1_0.addNeighbour(n3, distanceLevels(n1_0.getLatLng(), 0, n3.getLatLng(), 1), "elevator");
+			n3.addNeighbour(n1_0, distanceLevels(n1_0.getLatLng(), 0, n3.getLatLng(), 1), "elevator");
+			n3.addNeighbour(n1_2, distanceLevels(n1_2.getLatLng(), 2, n3.getLatLng(), 1), "elevator");
+			n1_2.addNeighbour(n3, distanceLevels(n1_2.getLatLng(), 2, n3.getLatLng(), 1), "elevator");
+			
+			//Check
+			assert.equal(g1._graph.length, 6);
+			console.log(g1._graph);
+			assert.ok(g1._graph[0].equals(n1_0));
+			assert.ok(g1._graph[1].equals(n1_2));
+			assert.ok(g1._graph[2].equals(n3));
+			assert.ok(g1._graph[3].equals(n11));
+			assert.ok(g1._graph[4].equals(n12));
+			assert.ok(g1._graph[5].equals(n31));
+			
+			//Test shortest path
+			/*var path = g1._process(n2, n4);
+			assert.equal(path.length, 5);
+			assert.ok(path[0].equals(n2));
+			assert.ok(path[1].equals(n1_0));
+			assert.ok(path[2].equals(n1_1));
+			assert.ok(path[3].equals(n1_2));
+			assert.ok(path[4].equals(n4));*/
+		});
+		
 		QUnit.test("Create from nodes", function(assert) {
 			//Create nodes
 			var n1 = new Node(L.latLng(0, 0), 0);

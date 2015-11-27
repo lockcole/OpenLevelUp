@@ -154,6 +154,70 @@ function rmDuplicatesSortedArray(item, pos, ary) {
 };
 
 /**
+ * Get the levels list from tags and relation list
+ * @param tags The object tags
+ * @param relations The list of associated relations
+ * @return The levels in a sorted array
+ */
+function listLevels(tags, relations) {
+	//try to find levels for this feature
+	var currentLevel = null;
+	
+	//No tags
+	if(tags == null) {
+		currentLevel = [];
+	}
+	//Tag level
+	else if(tags.level != undefined) {
+		currentLevel = parseLevelsFloat(tags.level);
+	}
+	//Tag repeat_on
+	else if(tags.repeat_on != undefined) {
+		currentLevel = parseLevelsFloat(tags.repeat_on);
+	}
+	//Tag min_level and max_level
+	else if(tags.min_level != undefined && tags.max_level != undefined) {
+		currentLevel = parseLevelsFloat(tags.min_level+"-"+tags.max_level);
+	}
+	//Tag buildingpart:verticalpassage:floorrange
+	else if(tags["buildingpart:verticalpassage:floorrange"] != undefined) {
+		currentLevel = parseLevelsFloat(tags["buildingpart:verticalpassage:floorrange"]);
+	}
+	//Relations type=level
+	else if(relations != undefined && relations.length > 0) {
+		currentLevel = [];
+		
+		//Try to find type=level relations, and add level value in level array
+		for(var i=0; i < relations.length; i++) {
+			var rel = relations[i];
+			if(rel.reltags.type == "level" && rel.reltags.level != undefined) {
+				var relLevel = parseLevelsFloat(rel.reltags.level);
+				
+				//Test if level value in relation is unique
+				if(relLevel.length == 1) {
+					currentLevel.push(relLevel[0]);
+				}
+				else {
+					console.log("Invalid level value for relation "+rel.rel);
+				}
+			}
+		}
+		
+		//Reset currentLevel if no level found
+		if(currentLevel.length == 0) { currentLevel = null; }
+	}
+	
+	//Save found levels
+	if(currentLevel != null) {
+		currentLevel.sort(sortNumberArray);
+		return currentLevel;
+	} else {
+		//console.log("No valid level found for "+_id);
+		return [];
+	}
+}
+
+/**
  * Parses levels list.
  * @param str The levels as a string (for example "1;5", "1,3", "1-3", "-1--6", "from 1 to 42" or "-2 to 6")
  * @return The parsed levels as a float array, or null if invalid

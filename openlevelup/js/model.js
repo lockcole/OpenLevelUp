@@ -421,58 +421,7 @@ var Feature = function(f) {
 	/*
 	 * Parse levels
 	 */
-	//try to find levels for this feature
-	var currentLevel = null;
-	var relations = f.properties.relations;
-	
-	//Tag level
-	if(this._tags.level != undefined) {
-		currentLevel = parseLevelsFloat(this._tags.level);
-	}
-	//Tag repeat_on
-	else if(this._tags.repeat_on != undefined) {
-		currentLevel = parseLevelsFloat(this._tags.repeat_on);
-	}
-	//Tag min_level and max_level
-	else if(this._tags.min_level != undefined && this._tags.max_level != undefined) {
-		currentLevel = parseLevelsFloat(this._tags.min_level+"-"+this._tags.max_level);
-	}
-	//Tag buildingpart:verticalpassage:floorrange
-	else if(this._tags["buildingpart:verticalpassage:floorrange"] != undefined) {
-		currentLevel = parseLevelsFloat(this._tags["buildingpart:verticalpassage:floorrange"]);
-	}
-	//Relations type=level
-	else if(relations != undefined && relations.length > 0) {
-		currentLevel = [];
-		
-		//Try to find type=level relations, and add level value in level array
-		for(var i=0; i < relations.length; i++) {
-			var rel = relations[i];
-			if(rel.reltags.type == "level" && rel.reltags.level != undefined) {
-				var relLevel = parseLevelsFloat(rel.reltags.level);
-				
-				//Test if level value in relation is unique
-				if(relLevel.length == 1) {
-					currentLevel.push(relLevel[0]);
-				}
-				else {
-					console.log("Invalid level value for relation "+rel.rel);
-				}
-			}
-		}
-		
-		//Reset currentLevel if no level found
-		if(currentLevel.length == 0) { currentLevel = null; }
-	}
-	
-	//Save found levels
-	if(currentLevel != null) {
-		currentLevel.sort(sortNumberArray);
-		this._onLevels = currentLevel;
-	} else {
-		//console.log("No valid level found for "+_id);
-		this._onLevels = [];
-	}
+	this._onLevels = listLevels(this._tags, f.properties.relations);
 	
 	/*
 	 * Check if the feature could have images
@@ -1250,8 +1199,8 @@ var Graph = function() {
 			if(currentElement.type == "node" && nodes[currentElement.id] == undefined) {
 				nodes[currentElement.id] = { default: new Node(L.latLng(currentElement.lat, currentElement.lon), null, currentElement.id) };
 				
-				if(currentElement.tags != undefined && currentElement.tags.level != undefined) {
-					var levels = parseLevelsFloat(currentElement.tags.level);
+				var levels = listLevels(currentElement.tags);
+				if(currentElement.tags != undefined && levels.length > 0) {
 					isElevator = this._isElevator(currentElement.tags);
 					
 					for(var j=0; j < levels.length; j++) {
@@ -1282,24 +1231,25 @@ var Graph = function() {
 		}
 		
 		//Parse ways
-		var nodeId, node, nodePrevId, direction, transition, level, levelPrev = null;
+		var nodeId, node, nodePrevId, direction, transition, levels, level, levelPrev = null;
 		for(var i=0, l=data.elements.length; i < l; i++) {
 			currentElement = data.elements[i];
+			
+			//Walkable paths
 			if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
 				//Direction of way
 				direction = this._direction(currentElement.tags);
 				levelPrev = null;
 				nodePrevId = null;
 				transition = this._transition(currentElement.tags);
+				levels = listLevels(currentElement.tags);
 				
 				//Read each node
 				for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
 					nodeId = currentElement.nodes[j];
 					
 					//Check level on node
-					if(currentElement.tags != undefined && currentElement.tags.level != undefined) {
-						var levels = parseLevelsFloat(currentElement.tags.level);
-						
+					if(levels.length > 0) {
 						//Find node to use
 						if(levels.length == 0) {
 							node = null;
@@ -1362,6 +1312,19 @@ var Graph = function() {
 							levelPrev = level;
 							nodePrevId = nodeId;
 						}
+					}
+				}
+			}
+			
+			//Elevators as areas
+			else if(currentElement.type == "way" && this._isElevator(currentElement.tags)) {
+				//Check levels
+				levels = listLevels(currentElement.tags);
+				
+				if(levels.length > 0) {
+					//Read each node
+					for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
+						nodeId = currentElement.nodes[j];
 					}
 				}
 			}
