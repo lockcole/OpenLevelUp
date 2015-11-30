@@ -1186,26 +1186,31 @@ var Graph = function() {
 //CONSTRUCTORS
 	/**
 	 * Initializes the graph from OSM data
+	 * @param osmData The raw OSM data in JSON
+	 * @param avoidTransitions The transitions to avoid, as a string array
 	 */
-	Graph.prototype.createFromOSMData = function(osmData) {
+	Graph.prototype.createFromOSMData = function(osmData, avoidTransitions) {
 		var data = osmData.getData();
 		var nodes = {};
+		avoidTransitions = avoidTransitions || [];
+		var avoidElevator = contains(avoidTransitions, "elevator");
 		
 		//Parse nodes
-		var currentElement = null, isElevator;
+		var currentElement = null, isElevator, type;
 		for(var i=0, l=data.elements.length; i < l; i++) {
 			currentElement = data.elements[i];
 			
 			if(currentElement.type == "node" && nodes[currentElement.id] == undefined) {
-				nodes[currentElement.id] = { default: new Node(L.latLng(currentElement.lat, currentElement.lon), null, currentElement.id) };
+				type = (this._isEntrance(currentElement.tags)) ? "door" : null;
+				nodes[currentElement.id] = { default: new Node(L.latLng(currentElement.lat, currentElement.lon), null, currentElement.id, type) };
 				
 				var levels = listLevels(currentElement.tags);
 				if(currentElement.tags != undefined && levels.length > 0) {
 					isElevator = this._isElevator(currentElement.tags);
 					
 					for(var j=0; j < levels.length; j++) {
-						nodes[currentElement.id][levels[j]] = new Node(nodes[currentElement.id].default.getLatLng(), levels[j], currentElement.id);
-						if(isElevator && j > 0) {
+						nodes[currentElement.id][levels[j]] = new Node(nodes[currentElement.id].default.getLatLng(), levels[j], currentElement.id, type);
+						if(isElevator && !avoidElevator && j > 0) {
 							nodes[currentElement.id][levels[j]].addNeighbour(
 								nodes[currentElement.id][levels[j-1]],
 								distanceLevels(
@@ -1235,96 +1240,145 @@ var Graph = function() {
 		for(var i=0, l=data.elements.length; i < l; i++) {
 			currentElement = data.elements[i];
 			
-			//Walkable paths
-			if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
-				//Direction of way
-				direction = this._direction(currentElement.tags);
-				levelPrev = null;
-				nodePrevId = null;
-				transition = this._transition(currentElement.tags);
-				levels = listLevels(currentElement.tags);
-				
-				//Read each node
-				for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
-					nodeId = currentElement.nodes[j];
-					
-					//Check level on node
-					if(levels.length > 0) {
-						//Find node to use
-						if(levels.length == 0) {
-							node = null;
-							level = null;
-						}
-						else if(levels.length == 1) {
-							level = levels[0];
-							//Create node on current level
-							if(!isNaN(level) && nodes[nodeId][level] == undefined) {
-								nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level, nodes[nodeId].default._name);
-							}
-						}
-						else {
-							//Search which node is available
-							node = null;
-							level = null;
-
-							for(var lvl in nodes[nodeId]) {
-								if(lvl != "default" && contains(levels, filterFloat(lvl))) {
-									node = nodes[nodeId][lvl];
-									level = lvl;
-								}
-							}
-						}
-						
-						//Link node to previous one
-						if(j > 0 && nodes[nodeId][level] != undefined) {
-							if(levelPrev != null && nodes[nodePrevId][levelPrev] != undefined) {
-								//Forward link
-								if(direction >= 0) {
-									nodes[nodePrevId][levelPrev].addNeighbour(
-										nodes[nodeId][level],
-										distanceLevels(
-											nodes[nodePrevId][levelPrev].getLatLng(),
-											nodes[nodePrevId][levelPrev].getLevel(),
-											nodes[nodeId][level].getLatLng(),
-											nodes[nodeId][level].getLevel()
-										),
-										transition
-									);
-								}
-								
-								//Backward link
-								if(direction <= 0) {
-									nodes[nodeId][level].addNeighbour(
-										nodes[nodePrevId][levelPrev],
-										distanceLevels(
-											nodes[nodePrevId][levelPrev].getLatLng(),
-											nodes[nodePrevId][levelPrev].getLevel(),
-											nodes[nodeId][level].getLatLng(),
-											nodes[nodeId][level].getLevel()
-										),
-										transition
-									);
-								}
-							}
-						}
-						
-						if(level != null) {
-							levelPrev = level;
-							nodePrevId = nodeId;
-						}
-					}
-				}
-			}
-			
 			//Elevators as areas
-			else if(currentElement.type == "way" && this._isElevator(currentElement.tags)) {
+			if(currentElement.type == "way" && this._isElevator(currentElement.tags) && !avoidElevator) {
 				//Check levels
 				levels = listLevels(currentElement.tags);
+				elevatorEntries = {}; //TODO Handle multiple entries for a given level
 				
 				if(levels.length > 0) {
 					//Read each node
 					for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
 						nodeId = currentElement.nodes[j];
+						
+						//If levels were read on node
+						if(nodes[nodeId].default.getType() == "door" && Object.keys(nodes[nodeId]).length > 1) {
+							//Read each level
+							for(var k in nodes[nodeId]) {
+								if(k != "default" && contains(levels, parseFloat(k))) {
+									elevatorEntries[k] = nodes[nodeId][k];
+								}
+							}
+						}
+					}
+					
+					//Link elevator entries nodes
+					var prevEntry = null, currentEntry = null;
+					var sortedLevels = Object.keys(elevatorEntries);
+					sortedLevels.sort(sortNumberArray);
+					
+					for(var j=0, lj=sortedLevels.length; j < lj; j++) {
+						currentEntry = elevatorEntries[sortedLevels[j]];
+						
+						if(prevEntry != null) {
+							currentEntry.addNeighbour(
+								prevEntry,
+								distanceLevels(
+									prevEntry.getLatLng(),
+									prevEntry.getLevel(),
+									currentEntry.getLatLng(),
+									currentEntry.getLevel()
+								),
+								"elevator"
+							);
+							prevEntry.addNeighbour(
+								currentEntry,
+								distanceLevels(
+									prevEntry.getLatLng(),
+									prevEntry.getLevel(),
+									currentEntry.getLatLng(),
+									currentEntry.getLevel()
+								),
+								"elevator"
+							);
+						}
+						
+						prevEntry = currentEntry;
+					}
+				}
+			}
+			
+			//Walkable paths
+			else if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
+				//Check transition
+				transition = this._transition(currentElement.tags);
+				
+				if(transition == null || !contains(avoidTransitions, transition)) {
+					//Direction of way
+					direction = this._direction(currentElement.tags);
+					levelPrev = null;
+					nodePrevId = null;
+					levels = listLevels(currentElement.tags);
+					
+					//Read each node
+					for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
+						nodeId = currentElement.nodes[j];
+						
+						//Check level on node
+						if(levels.length > 0) {
+							//Find node to use
+							if(levels.length == 0) {
+								node = null;
+								level = null;
+							}
+							else if(levels.length == 1) {
+								level = levels[0];
+								//Create node on current level
+								if(!isNaN(level) && nodes[nodeId][level] == undefined) {
+									nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level, nodes[nodeId].default._name);
+								}
+							}
+							else {
+								//Search which node is available
+								node = null;
+								level = null;
+
+								for(var lvl in nodes[nodeId]) {
+									if(lvl != "default" && contains(levels, filterFloat(lvl))) {
+										node = nodes[nodeId][lvl];
+										level = lvl;
+									}
+								}
+							}
+							
+							//Link node to previous one
+							if(j > 0 && nodes[nodeId][level] != undefined) {
+								if(levelPrev != null && nodes[nodePrevId][levelPrev] != undefined) {
+									//Forward link
+									if(direction >= 0) {
+										nodes[nodePrevId][levelPrev].addNeighbour(
+											nodes[nodeId][level],
+											distanceLevels(
+												nodes[nodePrevId][levelPrev].getLatLng(),
+												nodes[nodePrevId][levelPrev].getLevel(),
+												nodes[nodeId][level].getLatLng(),
+												nodes[nodeId][level].getLevel()
+											),
+											transition
+										);
+									}
+									
+									//Backward link
+									if(direction <= 0) {
+										nodes[nodeId][level].addNeighbour(
+											nodes[nodePrevId][levelPrev],
+											distanceLevels(
+												nodes[nodePrevId][levelPrev].getLatLng(),
+												nodes[nodePrevId][levelPrev].getLevel(),
+												nodes[nodeId][level].getLatLng(),
+												nodes[nodeId][level].getLevel()
+											),
+											transition
+										);
+									}
+								}
+							}
+							
+							if(level != null) {
+								levelPrev = level;
+								nodePrevId = nodeId;
+							}
+						}
 					}
 				}
 			}
@@ -1346,6 +1400,13 @@ var Graph = function() {
 	 */
 	Graph.prototype._isWalkable = function(tags) {
 		return tags != null && tags.highway != undefined && tags.area == undefined;
+	};
+	
+	/**
+	 * @return True if the object is an entrance
+	 */
+	Graph.prototype._isEntrance = function(tags) {
+		return tags != null && (tags.entrance != undefined || tags.door != undefined);
 	};
 	
 	/**
@@ -1525,7 +1586,7 @@ var Graph = function() {
  * Transition between nodes have a cost
  * As the graph is oriented, you should set neighbours on two concerned nodes to make the link bidirectionnal.
  */
-var Node = function(latlng, level, name) {
+var Node = function(latlng, level, name, type) {
 //ATTRIBUTES
 	/** The coordinates of the node **/
 	this._latLng = latlng;
@@ -1535,6 +1596,9 @@ var Node = function(latlng, level, name) {
 	
 	/** The name of the node **/
 	this._name = name;
+	
+	/** The type of node (default = null, door) **/
+	this._type = type;
 	
 	/** The neighbours of the node **/
 	this._neighbours = [];
@@ -1569,6 +1633,13 @@ var Node = function(latlng, level, name) {
 	};
 	
 	/**
+	 * @return The type (default is null)
+	 */
+	Node.prototype.getType = function() {
+		return this._type;
+	};
+	
+	/**
 	 * @return The cost to travel to the given node
 	 */
 	Node.prototype.getCost = function(n) {
@@ -1590,6 +1661,7 @@ var Node = function(latlng, level, name) {
 	Node.prototype.equals = function(n) {
 		if(this === n) { return true; }
 		if(this._level != n._level) return false;
+		if(this._type != n._type) return false;
 		if(!this._latLng.equals(n._latLng)) return false;
 		if(this._neighbours.length != n._neighbours.length) return false;
 		return true;

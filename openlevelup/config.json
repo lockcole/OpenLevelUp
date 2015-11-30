@@ -90,7 +90,8 @@
 		
 		"wheelchair": {
 			"name": "In wheelchair",
-			"speed": 0.7
+			"speed": 0.7,
+			"avoid": [ "stairs", "escalator" ]
 		}
 	}
 }

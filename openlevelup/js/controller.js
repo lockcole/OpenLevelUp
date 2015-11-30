@@ -671,7 +671,7 @@ var Ctrl = function() {
 		//Create graph if not available
 		if(this._graphs[mode] == undefined) {
 			this._graphs[mode] = new Graph();
-			this._graphs[mode].createFromOSMData(this._data);
+			this._graphs[mode].createFromOSMData(this._data, CONFIG.routing[mode].avoid);
 		}
 		
 		//Launch routing
