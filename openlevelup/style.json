@@ -36,6 +36,15 @@
 				}
 			},
 			{
+				"name": "${area} (area)",
+				"description": "Areas",
+				"onTags": [ { "area": "waiting" } ],
+				"style": {
+					"icon": "room_${area}.png",
+					"showMissingIcon": false
+				}
+			},
+			{
 				"name": "Vertical passage",
 				"description": "Elevetor, stairs (as polygons)",
 				"onTags": [ { "buildingpart": "verticalpassage" }, { "room": "stairs|escalator" }, { "indoor": "elevator" }, { "stairs": "yes" } ],
@@ -297,10 +306,10 @@
 			}
 		],
 		
-		"amenity|public_transport|room": [
+		"amenity|public_transport|room|area": [
 			{
 				"description": "Comfort amenities",
-				"onTags": [ { "amenity": "toilets" }, { "public_transport": "waiting_area" }, { "room": "waiting" } ],
+				"onTags": [ { "amenity": "toilets" }, { "public_transport": "waiting_area" }, { "room": "waiting" }, { "area": "waiting" } ],
 				"style": { "fillColor": "#E3C8E3" }
 			}
 		],
