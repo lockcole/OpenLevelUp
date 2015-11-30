@@ -371,7 +371,9 @@ function filterFloat(value) {
  * Converts a 0-360° angle into a -180 - 180° angle
  */
 function angle360toAngle180(a) {
-	return (a <= 180) ? a : -(360-a);
+	if(a >= 0 && a <= 360) { return (a <= 180) ? a : -(360-a); }
+	else if(a > 360) { return angle360toAngle180(a-360); }
+	else { return angle360toAngle180(a+360); }
 }
 
 /**
