@@ -296,6 +296,11 @@ header, footer, #home > div {
 	text-align: left;
 }
 
+#rtg-marker-start, #rtg-marker-end {
+	cursor: pointer;
+	z-index: 1000;
+}
+
 .routing-destination > div img {
 	height: 24px;
 	vertical-align: middle;

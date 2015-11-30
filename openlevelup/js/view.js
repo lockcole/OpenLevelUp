@@ -862,12 +862,15 @@ var MapView = function(main) {
 	/**
 	 * Adds a routing marker on map
 	 * @param type The kind of marker (start or end)
+	 * @param coords The marker coordinates (or null to center on map)
 	 */
-	MapView.prototype.addRoutingMarker = function(type) {
+	MapView.prototype.addRoutingMarker = function(type, coords) {
+		coords = (coords.lat != undefined) ? coords : this._map.getCenter();
+		
 		if(this._routingMarkers[type] != null) {
-			this._routingMarkers[type].setLatLng(this._map.getCenter());
+			this._routingMarkers[type].setLatLng(coords);
 			this._updateRoutingLayer();
-			this._mainView.getRoutingView().updateLabel(type, this._map.getCenter());
+			this._mainView.getRoutingView().updateLabel(type, coords);
 		}
 		else {
 			var icon = L.icon({
@@ -875,10 +878,10 @@ var MapView = function(main) {
 				className: 'marker-routing-drag marker-routing-'+type,
 				iconAnchor: [12.5, 41]
 			});
-			var marker = L.marker(this._map.getCenter(), { draggable: true, icon: icon, zIndexOffset: 10000 });
+			var marker = L.marker(coords, { draggable: true, icon: icon, zIndexOffset: 10000 });
 			this._routingMarkers[type] = marker;
 			this._routingLayer.addLayer(marker);
-			this._mainView.getRoutingView().updateLabel(type, this._map.getCenter());
+			this._mainView.getRoutingView().updateLabel(type, coords);
 			
 			//Move event on marker
 			this._routingMarkers[type].on("move", function() {
@@ -3317,6 +3320,10 @@ var RoutingView = function(main) {
 	}
 	$("#routing-mode").html(modeOptions);
 	
+	//Add draggable markers
+	var markerStart = new DraggableMarkerView(this._mainView, "start", "#rtg-marker-start");
+	var markerEnd = new DraggableMarkerView(this._mainView, "end", "#rtg-marker-end");
+	
 	//Add valid button handler
 	$("#routing-valid").click(this.validClicked.bind(this));
 };
@@ -3361,7 +3368,7 @@ var RoutingView = function(main) {
 	RoutingView.prototype.updateLabel = function(type, coords) {
 		var obj = $("#routing-"+type);
 		if(coords == null) {
-			obj.html("Click marker to add on map");
+			obj.html("Click or drag marker");
 		}
 		else {
 			obj.html(coords.lat.toFixed(6)+", "+coords.lng.toFixed(6));
@@ -3369,11 +3376,22 @@ var RoutingView = function(main) {
 	};
 	
 	/**
+	 * Adds a marker on map
+	 * @param type Start or end
+	 * @param coords The marker coords
+	 */
+	RoutingView.prototype.addMarker = function(type, coords) {
+		if(type == "start") { this.addStartMarker(coords); }
+		else if(type == "end") { this.addEndMarker(coords); }
+	};
+	
+	/**
 	 * Adds the start marker on map
 	 */
-	RoutingView.prototype.addStartMarker = function() {
+	RoutingView.prototype.addStartMarker = function(coords) {
+		coords = coords || null;
 		$("#routing-start-level option[value=\""+this._mainView.getLevelView().get()+"\"]").attr("selected", "selected");
-		this._mainView.getMapView().addRoutingMarker("start");
+		this._mainView.getMapView().addRoutingMarker("start", coords);
 		$("#routing-start-level").prop("disabled", false);
 		$("#routing-start-delete").prop("disabled", false);
 		this._updateValidButton();
@@ -3382,9 +3400,10 @@ var RoutingView = function(main) {
 	/**
 	 * Adds the end marker on map
 	 */
-	RoutingView.prototype.addEndMarker = function() {
+	RoutingView.prototype.addEndMarker = function(coords) {
+		coords = coords || null;
 		$("#routing-end-level option[value=\""+this._mainView.getLevelView().get()+"\"]").attr("selected", "selected");
-		this._mainView.getMapView().addRoutingMarker("end");
+		this._mainView.getMapView().addRoutingMarker("end", coords);
 		$("#routing-end-level").prop("disabled", false);
 		$("#routing-end-delete").prop("disabled", false);
 		this._updateValidButton();
@@ -3563,7 +3582,6 @@ var RoutingView = function(main) {
 							userInstructionLabel = "Turn to right";
 						}
 						else {
-							console.log(lastDirection, currentDirection, userInstruction);
 							userInstruction = "backward";
 							userInstructionLabel = "Go backward";
 						}
@@ -3637,3 +3655,39 @@ var RoutingView = function(main) {
 			$("#rtg-instructions").removeClass("hidden");
 		}
 	};
+
+/**
+ * A draggable marker, which can be dropped on map
+ */
+var DraggableMarkerView = function(main, type, domId) {
+//ATTRIBUTES
+	/** The main view **/
+	this._mainView = main;
+	
+	/** The DOM object **/
+	this._dom = $(domId);
+
+//CONSTRUCTOR
+	var posTop = this._dom.css('top');
+	var posLeft = this._dom.css('left');
+	
+	this._dom.draggable({
+		helper: 'clone',
+		appendTo: 'body',
+		zIndex: 5000,
+		scroll: false,
+		stop: function(event, ui) {
+			this._dom.css('top', posTop);
+			this._dom.css('left', posLeft);
+			this._mainView.getRoutingView().addMarker(
+				type,
+				this._mainView.getMapView().get().containerPointToLatLng(
+					L.point(
+						event.clientX,
+						event.clientY+20
+					)
+				)
+			);
+		}.bind(this)
+	});
+};
