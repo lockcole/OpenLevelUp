@@ -1240,143 +1240,145 @@ var Graph = function() {
 		for(var i=0, l=data.elements.length; i < l; i++) {
 			currentElement = data.elements[i];
 			
-			//Elevators as areas
-			if(currentElement.type == "way" && this._isElevator(currentElement.tags) && !avoidElevator) {
-				//Check levels
-				levels = listLevels(currentElement.tags);
-				elevatorEntries = {}; //TODO Handle multiple entries for a given level
-				
-				if(levels.length > 0) {
-					//Read each node
-					for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
-						nodeId = currentElement.nodes[j];
-						
-						//If levels were read on node
-						if(nodes[nodeId].default.getType() == "door" && Object.keys(nodes[nodeId]).length > 1) {
-							//Read each level
-							for(var k in nodes[nodeId]) {
-								if(k != "default" && contains(levels, parseFloat(k))) {
-									elevatorEntries[k] = nodes[nodeId][k];
+			if(this._isAccessible(currentElement.tags)) {
+				//Elevators as areas
+				if(currentElement.type == "way" && this._isElevator(currentElement.tags) && !avoidElevator) {
+					//Check levels
+					levels = listLevels(currentElement.tags);
+					elevatorEntries = {}; //TODO Handle multiple entries for a given level
+					
+					if(levels.length > 0) {
+						//Read each node
+						for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
+							nodeId = currentElement.nodes[j];
+							
+							//If levels were read on node
+							if(nodes[nodeId].default.getType() == "door" && Object.keys(nodes[nodeId]).length > 1) {
+								//Read each level
+								for(var k in nodes[nodeId]) {
+									if(k != "default" && contains(levels, parseFloat(k))) {
+										elevatorEntries[k] = nodes[nodeId][k];
+									}
 								}
 							}
 						}
-					}
-					
-					//Link elevator entries nodes
-					var prevEntry = null, currentEntry = null;
-					var sortedLevels = Object.keys(elevatorEntries);
-					sortedLevels.sort(sortNumberArray);
-					
-					for(var j=0, lj=sortedLevels.length; j < lj; j++) {
-						currentEntry = elevatorEntries[sortedLevels[j]];
 						
-						if(prevEntry != null) {
-							currentEntry.addNeighbour(
-								prevEntry,
-								distanceLevels(
-									prevEntry.getLatLng(),
-									prevEntry.getLevel(),
-									currentEntry.getLatLng(),
-									currentEntry.getLevel()
-								),
-								"elevator"
-							);
-							prevEntry.addNeighbour(
-								currentEntry,
-								distanceLevels(
-									prevEntry.getLatLng(),
-									prevEntry.getLevel(),
-									currentEntry.getLatLng(),
-									currentEntry.getLevel()
-								),
-								"elevator"
-							);
+						//Link elevator entries nodes
+						var prevEntry = null, currentEntry = null;
+						var sortedLevels = Object.keys(elevatorEntries);
+						sortedLevels.sort(sortNumberArray);
+						
+						for(var j=0, lj=sortedLevels.length; j < lj; j++) {
+							currentEntry = elevatorEntries[sortedLevels[j]];
+							
+							if(prevEntry != null) {
+								currentEntry.addNeighbour(
+									prevEntry,
+									distanceLevels(
+										prevEntry.getLatLng(),
+										prevEntry.getLevel(),
+										currentEntry.getLatLng(),
+										currentEntry.getLevel()
+									),
+									"elevator"
+								);
+								prevEntry.addNeighbour(
+									currentEntry,
+									distanceLevels(
+										prevEntry.getLatLng(),
+										prevEntry.getLevel(),
+										currentEntry.getLatLng(),
+										currentEntry.getLevel()
+									),
+									"elevator"
+								);
+							}
+							
+							prevEntry = currentEntry;
 						}
-						
-						prevEntry = currentEntry;
 					}
 				}
-			}
-			
-			//Walkable paths
-			else if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
-				//Check transition
-				transition = this._transition(currentElement.tags);
 				
-				if(transition == null || !contains(avoidTransitions, transition)) {
-					//Direction of way
-					direction = this._direction(currentElement.tags);
-					levelPrev = null;
-					nodePrevId = null;
-					levels = listLevels(currentElement.tags);
+				//Walkable paths
+				else if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
+					//Check transition
+					transition = this._transition(currentElement.tags);
 					
-					//Read each node
-					for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
-						nodeId = currentElement.nodes[j];
+					if(transition == null || !contains(avoidTransitions, transition)) {
+						//Direction of way
+						direction = this._direction(currentElement.tags);
+						levelPrev = null;
+						nodePrevId = null;
+						levels = listLevels(currentElement.tags);
 						
-						//Check level on node
-						if(levels.length > 0) {
-							//Find node to use
-							if(levels.length == 0) {
-								node = null;
-								level = null;
-							}
-							else if(levels.length == 1) {
-								level = levels[0];
-								//Create node on current level
-								if(!isNaN(level) && nodes[nodeId][level] == undefined) {
-									nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level, nodes[nodeId].default._name);
+						//Read each node
+						for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
+							nodeId = currentElement.nodes[j];
+							
+							//Check level on node
+							if(levels.length > 0) {
+								//Find node to use
+								if(levels.length == 0) {
+									node = null;
+									level = null;
 								}
-							}
-							else {
-								//Search which node is available
-								node = null;
-								level = null;
+								else if(levels.length == 1) {
+									level = levels[0];
+									//Create node on current level
+									if(!isNaN(level) && nodes[nodeId][level] == undefined) {
+										nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level, nodes[nodeId].default._name);
+									}
+								}
+								else {
+									//Search which node is available
+									node = null;
+									level = null;
 
-								for(var lvl in nodes[nodeId]) {
-									if(lvl != "default" && contains(levels, filterFloat(lvl))) {
-										node = nodes[nodeId][lvl];
-										level = lvl;
+									for(var lvl in nodes[nodeId]) {
+										if(lvl != "default" && contains(levels, filterFloat(lvl))) {
+											node = nodes[nodeId][lvl];
+											level = lvl;
+										}
 									}
 								}
-							}
-							
-							//Link node to previous one
-							if(j > 0 && nodes[nodeId][level] != undefined) {
-								if(levelPrev != null && nodes[nodePrevId][levelPrev] != undefined) {
-									//Forward link
-									if(direction >= 0) {
-										nodes[nodePrevId][levelPrev].addNeighbour(
-											nodes[nodeId][level],
-											distanceLevels(
-												nodes[nodePrevId][levelPrev].getLatLng(),
-												nodes[nodePrevId][levelPrev].getLevel(),
-												nodes[nodeId][level].getLatLng(),
-												nodes[nodeId][level].getLevel()
-											),
-											transition
-										);
-									}
-									
-									//Backward link
-									if(direction <= 0) {
-										nodes[nodeId][level].addNeighbour(
-											nodes[nodePrevId][levelPrev],
-											distanceLevels(
-												nodes[nodePrevId][levelPrev].getLatLng(),
-												nodes[nodePrevId][levelPrev].getLevel(),
-												nodes[nodeId][level].getLatLng(),
-												nodes[nodeId][level].getLevel()
-											),
-											transition
-										);
+								
+								//Link node to previous one
+								if(j > 0 && nodes[nodeId][level] != undefined) {
+									if(levelPrev != null && nodes[nodePrevId][levelPrev] != undefined) {
+										//Forward link
+										if(direction >= 0) {
+											nodes[nodePrevId][levelPrev].addNeighbour(
+												nodes[nodeId][level],
+												distanceLevels(
+													nodes[nodePrevId][levelPrev].getLatLng(),
+													nodes[nodePrevId][levelPrev].getLevel(),
+													nodes[nodeId][level].getLatLng(),
+													nodes[nodeId][level].getLevel()
+												),
+												transition
+											);
+										}
+										
+										//Backward link
+										if(direction <= 0) {
+											nodes[nodeId][level].addNeighbour(
+												nodes[nodePrevId][levelPrev],
+												distanceLevels(
+													nodes[nodePrevId][levelPrev].getLatLng(),
+													nodes[nodePrevId][levelPrev].getLevel(),
+													nodes[nodeId][level].getLatLng(),
+													nodes[nodeId][level].getLevel()
+												),
+												transition
+											);
+										}
 									}
 								}
-							}
-							
-							if(level != null) {
-								levelPrev = level;
-								nodePrevId = nodeId;
+								
+								if(level != null) {
+									levelPrev = level;
+									nodePrevId = nodeId;
+								}
 							}
 						}
 					}
@@ -1414,6 +1416,13 @@ var Graph = function() {
 	 */
 	Graph.prototype._isElevator = function(tags) {
 		return tags != null && (tags.highway == "elevator" || tags.highway == "lift" || tags["buildingpart:verticalpassage"] == "elevator" || tags.indoor == "elevator");
+	};
+	
+	/**
+	 * @return True if the object can be accessed by everyone
+	 */
+	Graph.prototype._isAccessible = function(tags) {
+		return tags != null && (tags.access == undefined || tags.access == "yes" || tags.access == "permissive" || tags.access == "destination" || tags.access == "customers");
 	};
 	
 	/**

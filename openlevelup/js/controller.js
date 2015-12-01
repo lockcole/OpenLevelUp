@@ -314,6 +314,7 @@ var Ctrl = function() {
 	 */
 	Ctrl.prototype.downloadData = function(type, bbox) {
 		this._downloadStart = (new Date()).getTime();
+		this._resetRouting();
 		
 		var oapiRequest = null;
 		var bounds = boundsString(bbox);
@@ -684,4 +685,12 @@ var Ctrl = function() {
 			console.log(e);
 			this.getView().getRoutingView().showRoute(null);
 		}
+	};
+	
+	/**
+	 * Resets routing view and model
+	 */
+	Ctrl.prototype._resetRouting = function() {
+		this._graphs = {};
+		this.getView().getRoutingView().reset();
 	};

@@ -3504,6 +3504,15 @@ var RoutingView = function(main) {
 	};
 	
 	/**
+	 * Resets the view
+	 */
+	RoutingView.prototype.reset = function() {
+		this.showRoute(null);
+		this.removeStartMarker();
+		this.removeEndMarker();
+	};
+	
+	/**
 	 * Shows the given route in view and on map
 	 * @param path The path to display
 	 */
