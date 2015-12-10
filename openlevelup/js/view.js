@@ -3526,7 +3526,7 @@ var RoutingView = function(main) {
 		else {
 			var length = 0;
 			var speed = CONFIG.routing[$("#routing-mode").val()].speed;
-			var instructions = '', lastLength = 0, lastDirection = 0, currentDirection, userInstruction, userInstructionLabel;
+			var instructions = [], instruction, lastLength = 0, lastDirection = 0, currentDirection;
 			var transition, levelDiff;
 			
 			//Show instructions in panel
@@ -3560,39 +3560,39 @@ var RoutingView = function(main) {
 				}
 				
 				//Create instruction
-				instructions += '<div class="routing-instruction">';
+				instruction = {};
 				
 				if(i == l-1) {
-					instructions += '<span class="routing-instr-img"><img src="img/icon_rtg_end.svg" /></span>'
-							+' <span class="routing-instr-ref">'+l+'.</span>'
-							+' <span class="routing-instr-txt">You are arrived</span>';
+					instruction.img = 'end';
+					instruction.txt = 'You are arrived';
+					instructions.push(instruction);
 				}
 				else {
 					//Find direction relatively to user
 					if(transition == null) {
-						userInstruction = angle360toAngle180(angle360toAngle180(currentDirection) - angle360toAngle180(lastDirection));
+						instruction.img = angle360toAngle180(angle360toAngle180(currentDirection) - angle360toAngle180(lastDirection));
 						
 						//Case of going out of an elevator
 						if(i > 0 && path[i-1].getTransition(path[i]) == "elevator") {
-							userInstruction = "forward";
-							userInstructionLabel = "Go out of the elevator";
+							instruction.img = "forward";
+							instruction.txt = "Go out of the elevator";
 						}
 						//Other directions
-						else if(userInstruction <= 30 && userInstruction >= -30) {
-							userInstruction = "forward";
-							userInstructionLabel = "Go forward";
+						else if(instruction.img <= 30 && instruction.img >= -30) {
+							instruction.img = "forward";
+							instruction.txt = "Go forward";
 						}
-						else if(userInstruction < -30 && userInstruction >= -120) {
-							userInstruction = "left";
-							userInstructionLabel = "Turn to left";
+						else if(instruction.img < -30 && instruction.img >= -120) {
+							instruction.img = "left";
+							instruction.txt = "Turn to left";
 						}
-						else if(userInstruction > 30 && userInstruction <= 120) {
-							userInstruction = "right";
-							userInstructionLabel = "Turn to right";
+						else if(instruction.img > 30 && instruction.img <= 120) {
+							instruction.img = "right";
+							instruction.txt = "Turn to right";
 						}
 						else {
-							userInstruction = "backward";
-							userInstructionLabel = "Go backward";
+							instruction.img = "backward";
+							instruction.txt = "Go backward";
 						}
 					}
 					//Create label for transition
@@ -3600,44 +3600,44 @@ var RoutingView = function(main) {
 						switch(transition) {
 							case "stairs":
 								if(levelDiff > 0) {
-									userInstruction = "stairs_up";
-									userInstructionLabel = "Go upstairs";
+									instruction.img = "stairs_up";
+									instruction.txt = "Go upstairs";
 								}
 								else if(levelDiff < 0) {
-									userInstruction = "stairs_down";
-									userInstructionLabel = "Go downstairs";
+									instruction.img = "stairs_down";
+									instruction.txt = "Go downstairs";
 								}
 								else {
-									userInstruction = "stairs";
-									userInstructionLabel = "Use stairs";
+									instruction.img = "stairs";
+									instruction.txt = "Use stairs";
 								}
 								break;
 							case "escalator":
 								if(levelDiff > 0) {
-									userInstruction = "escalator_up";
-									userInstructionLabel = "Go up using conveying stairs";
+									instruction.img = "escalator_up";
+									instruction.txt = "Go up using conveying stairs";
 								}
 								else if(levelDiff < 0) {
-									userInstruction = "escalator_down";
-									userInstructionLabel = "Go down using conveying stairs";
+									instruction.img = "escalator_down";
+									instruction.txt = "Go down using conveying stairs";
 								}
 								else {
-									userInstruction= "escalator";
-									userInstructionLabel = "Use conveying path";
+									instruction.img= "escalator";
+									instruction.txt = "Use conveying path";
 								}
 								break;
 							case "elevator":
 								if(levelDiff > 0) {
-									userInstruction = "elevator_up";
-									userInstructionLabel = "Go to level "+path[i+1].getLevel()+" using elevator";
+									instruction.img = "elevator_up";
+									instruction.txt = "Go to level "+path[i+1].getLevel()+" using elevator";
 								}
 								else if(levelDiff < 0) {
-									userInstruction = "elevator_down";
-									userInstructionLabel = "Go to level "+path[i+1].getLevel()+" using elevator";
+									instruction.img = "elevator_down";
+									instruction.txt = "Go to level "+path[i+1].getLevel()+" using elevator";
 								}
 								else {
-									userInstruction= "elevator";
-									userInstructionLabel = "Use elevator";
+									instruction.img= "elevator";
+									instruction.txt = "Use elevator";
 								}
 								break;
 							default:
@@ -3645,12 +3645,16 @@ var RoutingView = function(main) {
 						}
 					}
 					
-					instructions += '<span class="routing-instr-img"><img src="img/icon_rtg_'+userInstruction+'.svg" /></span>'
-							+' <span class="routing-instr-ref">'+(i+1)+'.</span>'
-							+' <span class="routing-instr-txt">'+userInstructionLabel+'</span>'
-							+'<span class="routing-instr-time">'+Math.ceil(lastLength)+' m</span>';
+					//Merge with previous instruction if possible
+					if(instructions.length > 0 && instructions[instructions.length-1].img == instruction.img && instruction.img == "forward") {
+						instructions[instructions.length-1].lgt += lastLength;
+					}
+					//Add new instruction
+					else {
+						instruction.lgt = lastLength;
+						instructions.push(instruction);
+					}
 				}
-				instructions += '</div>';
 				
 				lastDirection = currentDirection;
 			}
@@ -3660,7 +3664,17 @@ var RoutingView = function(main) {
 			$("#rtg-instr-time").html(Math.ceil(length / speed / 60));
 			
 			//Show instructions list
-			$("#rtg-instr-list").html(instructions);
+			var instructionsTxt = '';
+			for(var instrId=0, instrL = instructions.length; instrId < instrL; instrId++) {
+				instructionsTxt += '<div class="routing-instruction">'
+									+'<span class="routing-instr-img"><img src="img/icon_rtg_'+instructions[instrId].img+'.svg" /></span>'
+									+' <span class="routing-instr-ref">'+(instrId+1)+'.</span>'
+									+' <span class="routing-instr-txt">'+instructions[instrId].txt+'</span>'
+									+'<span class="routing-instr-time">'+((instructions[instrId].lgt != undefined) ? Math.ceil(instructions[instrId].lgt)+' m' : '')+'</span>'
+									+'</div>';
+			}
+			
+			$("#rtg-instr-list").html(instructionsTxt);
 			$("#rtg-instructions").removeClass("hidden");
 		}
 	};
