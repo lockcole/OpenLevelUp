@@ -56,6 +56,7 @@
 	<!-- jQuery includes -->
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 	
 	<!-- Galleria includes -->
 	<script src="lib/galleria/galleria-1.4.2.min.js"></script>
@@ -68,6 +69,12 @@
 	
 	<!-- jQuery-QRCode includes -->
 	<script type="text/javascript" src="lib/jquery.qrcode.min.js"></script>
+	
+	<!-- JS Priority Queue includes -->
+	<script type="text/javascript" src="lib/priority-queue.min.js"></script>
+	
+	<!-- HashMap includes -->
+	<script type="text/javascript" src="lib/hashmap.js"></script>
 
 	<!-- Leaflet plugin includes -->
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.css" />
@@ -102,6 +109,7 @@
 			
 			<ul role="tablist">
 				<li id="sidebar-tab-roomlist" class="disabled"><a href="#roomlist" role="tab"><img src="img/icon_rooms.svg" /></a></li>
+				<li id="sidebar-tab-routing" class="disabled"><a href="#routing" role="tab"><img src="img/icon_routing.svg" /></a></li>
 				<li id="sidebar-tab-notes" class="disabled"><a href="#notes" role="tab"><img src="img/icon_note.svg" /></a></li>
 			</ul>
 			
@@ -142,6 +150,36 @@
 				<h1 class="sidebar-header"><img src="img/icon_rooms.svg" /> Rooms<div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
 				<p class="input-max"><span class="text"><input type="text" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
 				<div id="rooms">
+				</div>
+			</div>
+			
+			<div class="sidebar-pane" id="routing">
+				<h1 class="sidebar-header"><img src="img/icon_routing.svg" /> Navigation (beta)<div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
+				
+				<div class="routing-destinations">
+					<div class="routing-destination">
+						<div><img id="rtg-marker-start" src="img/icon_marker_start.png" /></div>
+						<div id="routing-start"></div>
+						<div><select id="routing-start-level"></select><button id="routing-start-delete">x</button></div>
+					</div>
+					<div class="routing-destination">
+						<div><img id="rtg-marker-end" src="img/icon_marker_end.png" /></div>
+						<div id="routing-end"></div>
+						<div><select id="routing-end-level"></select><button id="routing-end-delete">x</button></div>
+					</div>
+				</div>
+				
+				<div class="routing-buttons">
+					<select id="routing-mode"></select>
+					<button id="routing-valid">OK</button>
+				</div>
+				
+				<div id="rtg-instructions" class="routing-instructions hidden">
+					<div class="routing-instructions-general">
+						<span class="rtg-instr-title">Length:</span> <span id="rtg-instr-length"></span> m | <span class="rtg-instr-title">Time:</span> <span id="rtg-instr-time"></span> min
+					</div>
+					<div id="rtg-instr-list">
+					</div>
 				</div>
 			</div>
 

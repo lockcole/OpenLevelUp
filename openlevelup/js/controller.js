@@ -88,6 +88,9 @@ var Ctrl = function() {
 	/** The amount of requested external metadata via Ajax **/
 	this._nbExternalApiRequests = null;
 	
+	/** The routing graphs **/
+	this._graphs = {};
+	
 	/** The current HTML view **/
 	this._view = null;
 };
@@ -311,6 +314,7 @@ var Ctrl = function() {
 	 */
 	Ctrl.prototype.downloadData = function(type, bbox) {
 		this._downloadStart = (new Date()).getTime();
+		this._resetRouting();
 		
 		var oapiRequest = null;
 		var bounds = boundsString(bbox);
@@ -650,4 +654,43 @@ var Ctrl = function() {
 		this._view.getMessagesView().displayMessage("An error occurred during note sending", "error");
 		this._view.getMapView().hideDraggableMarker();
 		this._view.collapseSidebar();
+	};
+
+/***************************
+ * Routing related methods *
+ ***************************/
+
+	/**
+	 * Starts routing
+	 * @param mode The routing mode (see CONFIG.routing)
+	 * @param startPt The start coordinates
+	 * @param startLvl The start level
+	 * @param endPt The end coordinates
+	 * @param endLvl The end level
+	 */
+	Ctrl.prototype.startRouting = function(mode, startPt, startLvl, endPt, endLvl) {
+		//Create graph if not available
+		if(this._graphs[mode] == undefined) {
+			this._graphs[mode] = new Graph();
+			this._graphs[mode].createFromOSMData(this._data, CONFIG.routing[mode].avoid);
+		}
+		
+		//Launch routing
+		try {
+			var path = this._graphs[mode].findShortestPath(startPt, startLvl, endPt, endLvl);
+			this.getView().getRoutingView().showRoute(path);
+		}
+		catch(e) {
+			this.getView().getMessagesView().displayMessage("No route found", "alert");
+			console.log(e);
+			this.getView().getRoutingView().showRoute(null);
+		}
+	};
+	
+	/**
+	 * Resets routing view and model
+	 */
+	Ctrl.prototype._resetRouting = function() {
+		this._graphs = {};
+		this.getView().getRoutingView().reset();
 	};

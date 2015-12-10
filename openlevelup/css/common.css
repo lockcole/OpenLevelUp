@@ -68,6 +68,10 @@ a.help {
 	text-decoration-style: dotted;
 }
 
+.hidden {
+	display: none;
+}
+
 /*******
  * Map *
  *******/
@@ -266,6 +270,85 @@ header, footer, #home > div {
 #notes .buttons button {
 	display: table-cell;
 	width: 50%;
+}
+
+/* Routing tab */
+
+.routing-destinations {
+	display: table;
+	width: 100%;
+	margin-top: 5px;
+	border-collapse: separate;
+	border-spacing: 10px;
+}
+
+.routing-destination {
+	display: table-row;
+}
+
+.routing-destination > div {
+	display: table-cell;
+	text-align: center;
+}
+
+#routing-start, #routing-end {
+	width: 70%;
+	text-align: left;
+}
+
+#rtg-marker-start, #rtg-marker-end {
+	cursor: pointer;
+	z-index: 1000;
+}
+
+.routing-destination > div img {
+	height: 24px;
+	vertical-align: middle;
+}
+
+.routing-buttons button {
+	float: right;
+}
+
+.routing-instructions {
+	margin-top: 15px;
+	padding: 10px;
+	background-color: white;
+}
+
+.routing-instructions-general {
+	font-size: 70%;
+	margin-bottom: 5px;
+	color: #777;
+}
+
+.rtg-instr-title {
+	color: black;
+}
+
+.routing-instruction {
+	border-top: 1px solid #ccc;
+	padding: 5px 0;
+}
+
+.routing-instr-img img {
+	vertical-align: middle;
+	height: 16px;
+}
+
+.routing-instr-ref {
+	font-weight: bold;
+	font-size: 80%;
+}
+
+.routing-instr-txt {
+	font-size: 80%;
+}
+
+.routing-instr-time {
+	float: right;
+	font-size: 70%;
+	color: #777;
 }
 
 
@@ -623,7 +706,7 @@ span.osm-key, span.osm-val {
 	padding: 3px;
 }
 
-.note-new-icon {
+.note-new-icon, .marker-routing-drag {
 	cursor: move;
 }
 

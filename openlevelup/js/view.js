@@ -68,6 +68,9 @@ var MainView = function(ctrl) {
 	/** The notes component **/
 	this._cNotes = null;
 	
+	/** The routing component **/
+	this._cRouting = null;
+	
 	/** The map component **/
 	this._cMap = null;
 
@@ -78,6 +81,7 @@ var MainView = function(ctrl) {
 	this._cMessages = new MessagesView(this);
 	this._cAbout = new AboutView(this);
 	this._cNames = new NamesView(this);
+	this._cRouting = new RoutingView(this);
 	this._cImages = new ImagesView(this);
 	this._cLevel = new LevelView(this);
 	this._cTags = new TagsView(this);
@@ -177,6 +181,13 @@ var MainView = function(ctrl) {
 	};
 	
 	/**
+	 * @return The routing component
+	 */
+	MainView.prototype.getRoutingView = function() {
+		return this._cRouting;
+	};
+	
+	/**
 	 * @return The map data from the controller
 	 */
 	MainView.prototype.getData = function() {
@@ -209,11 +220,13 @@ var MainView = function(ctrl) {
 		if(zoom >= CONFIG.view.map.full_data_min_zoom) {
 			//Update levels
 			this._cLevel.update();
+			this._cRouting.updateLevels();
 			
 			//Add names and export buttons if needed
 			if(oldZoom == null || oldZoom < CONFIG.view.map.full_data_min_zoom) {
 				this._cNames.showButton();
 				this._cNotes.showButton();
+				this._cRouting.showButton();
 				this._cLevel.enable();
 				this._cOptions.enable();
 				this._cMap.update();
@@ -222,11 +235,13 @@ var MainView = function(ctrl) {
 		else if(zoom >= CONFIG.view.map.data_min_zoom) {
 			//Update levels
 			this._cLevel.update();
+			this._cRouting.updateLevels();
 			
 			//Add names and export buttons if needed
 			if(oldZoom == null || oldZoom < CONFIG.view.map.data_min_zoom) {
 				this._cNames.showButton();
 				this._cNotes.showButton();
+				this._cRouting.showButton();
 				this._cLevel.enable();
 				this._cOptions.enable();
 				this._cMap.update();
@@ -240,6 +255,7 @@ var MainView = function(ctrl) {
 			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
 				this._cNames.hideButton();
 				this._cNotes.hideButton();
+				this._cRouting.hideButton();
 				this._cLevel.disable();
 				this._cOptions.disable();
 			}
@@ -255,6 +271,7 @@ var MainView = function(ctrl) {
 			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
 				this._cNames.hideButton();
 				this._cNotes.hideButton();
+				this._cRouting.hideButton();
 				this._cLevel.disable();
 				this._cOptions.disable();
 			}
@@ -275,6 +292,7 @@ var MainView = function(ctrl) {
 	MainView.prototype.updateLevelChanged = function() {
 		this._cMap.update();
 		this._cUrl.levelChanged();
+		this._cRouting.updateLevels();
 	};
 	
 	/**
@@ -338,6 +356,15 @@ var MapView = function(main) {
 	
 	/** The draggable marker **/
 	this._draggableMarker = null;
+	
+	/** The layer containing routing data **/
+	this._routingLayer = null;
+	
+	/** The routing markers **/
+	this._routingMarkers = { start: null, end: null, inter: {} };
+	
+	/** The routing path, segmented by level **/
+	this._routingPath = {};
 	
 	/** The previous zoom value **/
 	this._oldZoom = null;
@@ -424,6 +451,10 @@ var MapView = function(main) {
 	}
 	L.control.layers(tileLayers).addTo(this._map);
 	
+	//Routing layer
+	this._routingLayer = L.layerGroup();
+	this._routingLayer.addTo(this._map);
+	
 	//Add scale bar
 	L.control.scale({ position: "bottomright" }).addTo(this._map);
 	
@@ -488,6 +519,11 @@ var MapView = function(main) {
 			this._dataPopups = {};
 		}
 		
+		//Remove routing layer
+		if(this._map.hasLayer(this._routingLayer)) {
+			this._map.removeLayer(this._routingLayer);
+		}
+		
 		//Create data (specific to level)
 		var zoom = this._map.getZoom();
 		
@@ -514,6 +550,9 @@ var MapView = function(main) {
 						this._dataLayer.addLayer(notesLayer);
 					}
 				}
+				
+				//Routing layer
+				this._updateRoutingLayer();
 			}
 			else {
 				this._mainView.getMessagesView().displayMessage("There is no available data in this area", "alert");
@@ -661,6 +700,50 @@ var MapView = function(main) {
 	};
 	
 	/**
+	 * Updates the routing layer according to level
+	 */
+	MapView.prototype._updateRoutingLayer = function() {
+		//Clear layer
+		this._routingLayer.clearLayers();
+		
+		var mapLevel = this._mainView.getLevelView().get();
+		
+		//Check start marker
+		if(this._routingMarkers.start != null && this._mainView.getRoutingView().getStartLevel() == mapLevel) {
+			this._routingLayer.addLayer(this._routingMarkers.start);
+		}
+		
+		//Check end marker
+		if(this._routingMarkers.end != null && this._mainView.getRoutingView().getEndLevel() == mapLevel) {
+			this._routingLayer.addLayer(this._routingMarkers.end);
+		}
+		
+		//Check intermediate markers
+		if(this._routingMarkers.inter != null) {
+			//Find current level
+			for(var lvl in this._routingMarkers.inter) {
+				if(lvl == mapLevel) {
+					//Add markers
+					for(var i=0, l=this._routingMarkers.inter[lvl].length; i < l; i++) {
+						this._routingLayer.addLayer(this._routingMarkers.inter[lvl][i]);
+					}
+				}
+			}
+		}
+		
+		//Check routing path
+		if(this._routingPath != null && this._routingPath[mapLevel] != undefined) {
+			var linesOnLevel = this._routingPath[mapLevel];
+			for(var i=0, l=linesOnLevel.length; i < l; i++) {
+				this._routingLayer.addLayer(linesOnLevel[i]);
+			}
+		}
+		
+		//Add to map
+		this._map.addLayer(this._routingLayer);
+	};
+	
+	/**
 	 * Changes the tiles opacity, depending of shown level
 	 */
 	MapView.prototype.changeTilesOpacity = function() {
@@ -774,6 +857,134 @@ var MapView = function(main) {
 	 */
 	MapView.prototype.getDraggableMarkerCoords = function() {
 		return (this._draggableMarker != null) ? this._draggableMarker.getLatLng() : null;
+	};
+	
+	/**
+	 * Adds a routing marker on map
+	 * @param type The kind of marker (start or end)
+	 * @param coords The marker coordinates (or null to center on map)
+	 */
+	MapView.prototype.addRoutingMarker = function(type, coords) {
+		coords = (coords.lat != undefined) ? coords : this._map.getCenter();
+		
+		if(this._routingMarkers[type] != null) {
+			this._routingMarkers[type].setLatLng(coords);
+			this._updateRoutingLayer();
+			this._mainView.getRoutingView().updateLabel(type, coords);
+		}
+		else {
+			var icon = L.icon({
+				iconUrl: 'img/icon_marker_'+type+'.png',
+				className: 'marker-routing-drag marker-routing-'+type,
+				iconAnchor: [12.5, 41]
+			});
+			var marker = L.marker(coords, { draggable: true, icon: icon, zIndexOffset: 10000 });
+			this._routingMarkers[type] = marker;
+			this._routingLayer.addLayer(marker);
+			this._mainView.getRoutingView().updateLabel(type, coords);
+			
+			//Move event on marker
+			this._routingMarkers[type].on("move", function() {
+				this._mainView.getRoutingView().updateLabel(type, this._routingMarkers[type].getLatLng());
+			}.bind(this));
+		}
+	};
+	
+	/**
+	 * @param type The kind of marker
+	 * @return Its coordinates
+	 */
+	MapView.prototype.getRoutingMarkerCoords = function(type) {
+		if(this._routingMarkers[type] != null) {
+			return this._routingMarkers[type].getLatLng();
+		}
+		else {
+			return null;
+		}
+	};
+	
+	/**
+	 * Removes a routing marker on map
+	 * @param type The kind of marker (start or end)
+	 */
+	MapView.prototype.removeRoutingMarker = function(type) {
+		if(this._routingMarkers[type] != null) {
+			if(this._routingLayer.hasLayer(this._routingMarkers[type])) {
+				this._routingLayer.removeLayer(this._routingMarkers[type]);
+			}
+			this._routingMarkers[type] = null;
+		}
+		this._mainView.getRoutingView().updateLabel(type, null);
+	};
+	
+	/**
+	 * Sets the current routing result
+	 * @param path The result path (or null to reset)
+	 */
+	MapView.prototype.setRoute = function(path) {
+		//Clear routing path
+		this._routingPath = {};
+		this._routingMarkers.inter = {};
+		
+		if(path != null) {
+			var prevLvl = null, currentNode = null, currentLvl = null;
+			
+			//Icon for intermediate markers
+			var icon = L.icon({
+				iconUrl: 'img/icon_marker_inter.png',
+				className: 'marker-routing-inter',
+				iconAnchor: [12.5, 41]
+			});
+			
+			//Read path
+			for(var i=0, l=path.length; i < l; i++) {
+				currentNode = path[i];
+				currentLvl = currentNode.getLevel();
+				
+				//Check if level changed
+				if(prevLvl == null || prevLvl != currentLvl) {
+					//Create level entry in path if not existing
+					if(this._routingPath[currentLvl] == undefined) {
+						this._routingPath[currentLvl] = [];
+					}
+					
+					//Add current node to previous level segment to make path continuous
+					if(prevLvl != null) {
+						this._routingPath[prevLvl][this._routingPath[prevLvl].length - 1].addLatLng(currentNode.getLatLng());
+					}
+					
+					//Add new segment in level
+					this._routingPath[currentLvl].push(L.polyline([]));
+					
+					if(i > 0) {
+						//Create level entry in markers if not existing
+						if(this._routingMarkers.inter[prevLvl] == undefined) {
+							this._routingMarkers.inter[prevLvl] = [];
+						}
+						if(this._routingMarkers.inter[currentLvl] == undefined) {
+							this._routingMarkers.inter[currentLvl] = [];
+						}
+						
+						//Add markers for level change
+						this._routingMarkers.inter[prevLvl].push(
+							L.marker(path[i-1].getLatLng(), { icon: icon, zIndexOffset: 10000, title: 'Click to change level' })
+							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i]))
+						);
+						this._routingMarkers.inter[currentLvl].push(
+							L.marker(path[i].getLatLng(), { icon: icon, zIndexOffset: 10000, title: 'Click to change level' })
+							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i-1]))
+						);
+					}
+				}
+				
+				//Add current node in last segment in current level
+				this._routingPath[currentLvl][this._routingPath[currentLvl].length - 1].addLatLng(currentNode.getLatLng());
+				
+				//Change previous level value
+				prevLvl = currentLvl;
+			}
+		}
+		this._updateRoutingLayer();
 	};
 
 
@@ -3053,3 +3264,441 @@ var NotesView = function(main) {
 		this._mainView.collapseSidebar();
 		this._mainView.getMapView().hideDraggableMarker();
 	};
+
+
+
+/**
+ * The routing view
+ */
+var RoutingView = function(main) {
+//ATTRIBUTES
+	/** The main view **/
+	this._mainView = main;
+
+//CONSTRUCTOR
+	//Markers buttons
+	$("#rtg-marker-start").click(this.addStartMarker.bind(this));
+	$("#rtg-marker-end").click(this.addEndMarker.bind(this));
+	
+	//Level selectors for markers
+	$("#routing-start-level").change(this.startLevelChanged.bind(this));
+	$("#routing-end-level").change(this.endLevelChanged.bind(this));
+	
+	//Disable level selectors
+	$("#routing-start-level").prop("disabled", true);
+	$("#routing-end-level").prop("disabled", true);
+	
+	//Disable buttons
+	$("#routing-start-delete").prop("disabled", true);
+	$("#routing-end-delete").prop("disabled", true);
+	$("#routing-valid").prop("disabled", true);
+	
+	//Delete buttons events
+	$("#routing-start-delete").click(this.removeStartMarker.bind(this));
+	$("#routing-end-delete").click(this.removeEndMarker.bind(this));
+	
+	//Set marker labels to default
+	this.updateLabel("start", null);
+	this.updateLabel("end", null);
+	
+	//Define routing modes
+	var modeOptions = '';
+	for(var mode in CONFIG.routing) {
+		modeOptions += '<option value="'+ mode + '">' + CONFIG.routing[mode].name + '</option>';
+	}
+	$("#routing-mode").html(modeOptions);
+	
+	//Add draggable markers
+	var markerStart = new DraggableMarkerView(this._mainView, "start", "#rtg-marker-start");
+	var markerEnd = new DraggableMarkerView(this._mainView, "end", "#rtg-marker-end");
+	
+	//Add valid button handler
+	$("#routing-valid").click(this.validClicked.bind(this));
+};
+
+//ACCESSORS
+	/**
+	 * @return The start level
+	 */
+	RoutingView.prototype.getStartLevel = function() {
+		var lvl = $("#routing-start-level").val();
+		return (lvl == "null") ? null : parseFloat(lvl);
+	};
+	
+	/**
+	 * @return The end level
+	 */
+	RoutingView.prototype.getEndLevel = function() {
+		var lvl = $("#routing-end-level").val();
+		return (lvl == "null") ? null : parseFloat(lvl);
+	};
+
+//MODIFIERS
+	/**
+	* Shows the button
+	*/
+	RoutingView.prototype.showButton = function() {
+		$("#sidebar-tab-routing").removeClass("disabled");
+	};
+
+	/**
+	* Hides the button
+	*/
+	RoutingView.prototype.hideButton = function() {
+		$("#sidebar-tab-routing").addClass("disabled");
+	};
+
+	/**
+	 * Updates the label next to marker
+	 * @param type The kind of marker (start or end)
+	 * @param coords The marker coordinates, or null if disabled
+	 */
+	RoutingView.prototype.updateLabel = function(type, coords) {
+		var obj = $("#routing-"+type);
+		if(coords == null) {
+			obj.html("Click or drag marker");
+		}
+		else {
+			obj.html(coords.lat.toFixed(6)+", "+coords.lng.toFixed(6));
+		}
+	};
+	
+	/**
+	 * Adds a marker on map
+	 * @param type Start or end
+	 * @param coords The marker coords
+	 */
+	RoutingView.prototype.addMarker = function(type, coords) {
+		if(type == "start") { this.addStartMarker(coords); }
+		else if(type == "end") { this.addEndMarker(coords); }
+	};
+	
+	/**
+	 * Adds the start marker on map
+	 */
+	RoutingView.prototype.addStartMarker = function(coords) {
+		coords = coords || null;
+		$("#routing-start-level option[value=\""+this._mainView.getLevelView().get()+"\"]").attr("selected", "selected");
+		this._mainView.getMapView().addRoutingMarker("start", coords);
+		$("#routing-start-level").prop("disabled", false);
+		$("#routing-start-delete").prop("disabled", false);
+		this._updateValidButton();
+	};
+	
+	/**
+	 * Adds the end marker on map
+	 */
+	RoutingView.prototype.addEndMarker = function(coords) {
+		coords = coords || null;
+		$("#routing-end-level option[value=\""+this._mainView.getLevelView().get()+"\"]").attr("selected", "selected");
+		this._mainView.getMapView().addRoutingMarker("end", coords);
+		$("#routing-end-level").prop("disabled", false);
+		$("#routing-end-delete").prop("disabled", false);
+		this._updateValidButton();
+	};
+	
+	/**
+	 * Removes the start marker on map
+	 */
+	RoutingView.prototype.removeStartMarker = function() {
+		this.showRoute(null);
+		this._mainView.getMapView().removeRoutingMarker("start");
+		$("#routing-start-level").prop("disabled", true);
+		$("#routing-start-delete").prop("disabled", true);
+		this._updateValidButton();
+	};
+	
+	/**
+	 * Removes the end marker on map
+	 */
+	RoutingView.prototype.removeEndMarker = function() {
+		this.showRoute(null);
+		this._mainView.getMapView().removeRoutingMarker("end");
+		$("#routing-end-level").prop("disabled", true);
+		$("#routing-end-delete").prop("disabled", true);
+		this._updateValidButton();
+	};
+	
+	/**
+	 * Changes the state of valid button according to markers state
+	 */
+	RoutingView.prototype._updateValidButton = function() {
+		if($("#routing-end-level").prop("disabled") || $("#routing-start-level").prop("disabled")) {
+			$("#routing-valid").prop("disabled", true);
+		}
+		else {
+			$("#routing-valid").prop("disabled", false);
+		}
+	};
+	
+	/**
+	 * Updates levels values in selectors
+	 */
+	RoutingView.prototype.updateLevels = function() {
+		var selectStart = $("#routing-start-level");
+		var selectEnd = $("#routing-end-level");
+		
+		var levels = this._mainView.getData().getLevels();
+		var option = '';
+
+		//Create options list
+		for(var i=0; i < levels.length; i++) {
+			var lvl = levels[i];
+			option += '<option value="'+ lvl + '">' + lvl + '</option>';
+		}
+		
+		//Keep old values
+		var oldStartLvl = selectStart.val();
+		var oldEndLvl = selectEnd.val();
+		
+		//Update levels
+		selectStart.html(option);
+		selectEnd.html(option);
+		
+		//Restore old values if possible
+		if(oldStartLvl != null && oldStartLvl != "null") {
+			$("#routing-start-level option[value=\""+oldStartLvl+"\"]").attr("selected", "selected");
+		}
+		if(oldEndLvl != null && oldEndLvl != "null") {
+			$("#routing-end-level option[value=\""+oldEndLvl+"\"]").attr("selected", "selected");
+		}
+	};
+	
+	/**
+	 * Called when start level changes in selector
+	 */
+	RoutingView.prototype.startLevelChanged = function() {
+		this.showRoute(null);
+	};
+
+	/**
+	 * Called when end level changes in selector
+	 */
+	RoutingView.prototype.endLevelChanged = function() {
+		this.showRoute(null);
+	};
+	
+	/**
+	 * Called when OK button is clicked
+	 */
+	RoutingView.prototype.validClicked = function() {
+		controller.startRouting(
+			$("#routing-mode").val(),
+			this._mainView.getMapView().getRoutingMarkerCoords("start"),
+			parseFloat($("#routing-start-level").val()),
+			this._mainView.getMapView().getRoutingMarkerCoords("end"),
+			parseFloat($("#routing-end-level").val())
+		);
+	};
+	
+	/**
+	 * Resets the view
+	 */
+	RoutingView.prototype.reset = function() {
+		this.showRoute(null);
+		this.removeStartMarker();
+		this.removeEndMarker();
+	};
+	
+	/**
+	 * Shows the given route in view and on map
+	 * @param path The path to display
+	 */
+	RoutingView.prototype.showRoute = function(path) {
+		//Show route on map
+		this._mainView.getMapView().setRoute(path);
+		
+		if(path == null) {
+			$("#rtg-instructions").addClass("hidden");
+		}
+		else {
+			var length = 0;
+			var speed = CONFIG.routing[$("#routing-mode").val()].speed;
+			var instructions = [], instruction, lastLength = 0, lastDirection = 0, currentDirection;
+			var transition, levelDiff;
+			
+			//Show instructions in panel
+			for(var i=0, l=path.length; i < l; i++) {
+				//Calculate length
+				if(i < l-1) {
+					lastLength = path[i].getCost(path[i+1]);
+					length += lastLength;
+					transition = path[i].getTransition(path[i+1]);
+					levelDiff = path[i+1].getLevel() - path[i].getLevel();
+				}
+				else {
+					lastLength = null;
+					transition = null;
+					levelDiff = 0;
+				}
+				
+				//Calculate direction
+				if(i == 0) {
+					lastDirection = azimuth(
+						{lat: path[i].getLatLng().lat, lng: path[i].getLatLng().lng, elv: 0},
+						{lat: path[i+1].getLatLng().lat, lng: path[i+1].getLatLng().lng, elv: 0}
+					).azimuth;
+					currentDirection = lastDirection;
+				}
+				else if(i < l-1) {
+					currentDirection = azimuth(
+						{lat: path[i].getLatLng().lat, lng: path[i].getLatLng().lng, elv: 0},
+						{lat: path[i+1].getLatLng().lat, lng: path[i+1].getLatLng().lng, elv: 0}
+					).azimuth;
+				}
+				
+				//Create instruction
+				instruction = {};
+				
+				if(i == l-1) {
+					instruction.img = 'end';
+					instruction.txt = 'You are arrived';
+					instructions.push(instruction);
+				}
+				else {
+					//Find direction relatively to user
+					if(transition == null) {
+						instruction.img = angle360toAngle180(angle360toAngle180(currentDirection) - angle360toAngle180(lastDirection));
+						
+						//Case of going out of an elevator
+						if(i > 0 && path[i-1].getTransition(path[i]) == "elevator") {
+							instruction.img = "forward";
+							instruction.txt = "Go out of the elevator";
+						}
+						//Other directions
+						else if(instruction.img <= 30 && instruction.img >= -30) {
+							instruction.img = "forward";
+							instruction.txt = "Go forward";
+						}
+						else if(instruction.img < -30 && instruction.img >= -120) {
+							instruction.img = "left";
+							instruction.txt = "Turn to left";
+						}
+						else if(instruction.img > 30 && instruction.img <= 120) {
+							instruction.img = "right";
+							instruction.txt = "Turn to right";
+						}
+						else {
+							instruction.img = "backward";
+							instruction.txt = "Go backward";
+						}
+					}
+					//Create label for transition
+					else {
+						switch(transition) {
+							case "stairs":
+								if(levelDiff > 0) {
+									instruction.img = "stairs_up";
+									instruction.txt = "Go upstairs";
+								}
+								else if(levelDiff < 0) {
+									instruction.img = "stairs_down";
+									instruction.txt = "Go downstairs";
+								}
+								else {
+									instruction.img = "stairs";
+									instruction.txt = "Use stairs";
+								}
+								break;
+							case "escalator":
+								if(levelDiff > 0) {
+									instruction.img = "escalator_up";
+									instruction.txt = "Go up using conveying stairs";
+								}
+								else if(levelDiff < 0) {
+									instruction.img = "escalator_down";
+									instruction.txt = "Go down using conveying stairs";
+								}
+								else {
+									instruction.img= "escalator";
+									instruction.txt = "Use conveying path";
+								}
+								break;
+							case "elevator":
+								if(levelDiff > 0) {
+									instruction.img = "elevator_up";
+									instruction.txt = "Go to level "+path[i+1].getLevel()+" using elevator";
+								}
+								else if(levelDiff < 0) {
+									instruction.img = "elevator_down";
+									instruction.txt = "Go to level "+path[i+1].getLevel()+" using elevator";
+								}
+								else {
+									instruction.img= "elevator";
+									instruction.txt = "Use elevator";
+								}
+								break;
+							default:
+								console.error("[Routing] Unknown transition type: "+transition);
+						}
+					}
+					
+					//Merge with previous instruction if possible
+					if(instructions.length > 0 && instructions[instructions.length-1].img == instruction.img && instruction.img == "forward") {
+						instructions[instructions.length-1].lgt += lastLength;
+					}
+					//Add new instruction
+					else {
+						instruction.lgt = lastLength;
+						instructions.push(instruction);
+					}
+				}
+				
+				lastDirection = currentDirection;
+			}
+			
+			//Update length
+			$("#rtg-instr-length").html(Math.ceil(length));
+			$("#rtg-instr-time").html(Math.ceil(length / speed / 60));
+			
+			//Show instructions list
+			var instructionsTxt = '';
+			for(var instrId=0, instrL = instructions.length; instrId < instrL; instrId++) {
+				instructionsTxt += '<div class="routing-instruction">'
+									+'<span class="routing-instr-img"><img src="img/icon_rtg_'+instructions[instrId].img+'.svg" /></span>'
+									+' <span class="routing-instr-ref">'+(instrId+1)+'.</span>'
+									+' <span class="routing-instr-txt">'+instructions[instrId].txt+'</span>'
+									+'<span class="routing-instr-time">'+((instructions[instrId].lgt != undefined) ? Math.ceil(instructions[instrId].lgt)+' m' : '')+'</span>'
+									+'</div>';
+			}
+			
+			$("#rtg-instr-list").html(instructionsTxt);
+			$("#rtg-instructions").removeClass("hidden");
+		}
+	};
+
+/**
+ * A draggable marker, which can be dropped on map
+ */
+var DraggableMarkerView = function(main, type, domId) {
+//ATTRIBUTES
+	/** The main view **/
+	this._mainView = main;
+	
+	/** The DOM object **/
+	this._dom = $(domId);
+
+//CONSTRUCTOR
+	var posTop = this._dom.css('top');
+	var posLeft = this._dom.css('left');
+	
+	this._dom.draggable({
+		helper: 'clone',
+		appendTo: 'body',
+		zIndex: 5000,
+		scroll: false,
+		stop: function(event, ui) {
+			this._dom.css('top', posTop);
+			this._dom.css('left', posLeft);
+			this._mainView.getRoutingView().addMarker(
+				type,
+				this._mainView.getMapView().get().containerPointToLatLng(
+					L.point(
+						event.clientX,
+						event.clientY+20
+					)
+				)
+			);
+		}.bind(this)
+	});
+};
