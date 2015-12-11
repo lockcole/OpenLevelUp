@@ -36,6 +36,9 @@
 	
 	<!-- HashMap includes -->
 	<script type="text/javascript" src="lib/hashmap.js"></script>
+	
+	<!-- TurfJS includes -->
+	<script type="text/javascript" src="lib/turf.min.js"></script>
 
 	<!-- Leaflet plugin includes -->
 	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.css" />
@@ -593,6 +596,32 @@
 			assert.ok(g3._graph[3].equals(n6));
 			assert.ok(g3._graph[4].equals(n7));
 			assert.ok(g3._graph[5].equals(n8));
+		});
+		
+		QUnit.test("Create from OSM Data (simple footway area)", function(assert) {
+			var data = new OSMData(null, { "elements": [
+				{"type": "way","id": 1,"nodes": [1,2,3,4,1],"tags": {"highway": "footway","level": "0","area":"yes"}},
+				{"type": "way","id": 2,"nodes": [11,1],"tags": {"highway": "footway","level": "0"}},
+				{"type": "way","id": 3,"nodes": [3,21],"tags": {"highway": "footway","level": "0"}},
+				{"type": "node","id": 1,"lat": 0,"lon": 0},
+				{"type": "node","id": 2,"lat": 0,"lon": 1},
+				{"type": "node","id": 3,"lat": 1,"lon": 1},
+				{"type": "node","id": 4,"lat": 1,"lon": 0},
+				{"type": "node","id": 11,"lat": -1,"lon": -1},
+				{"type": "node","id": 21,"lat": 2,"lon": 2}
+			]});
+			
+			var g1 = new Graph();
+			g1.createFromOSMData(data);
+		});
+		
+		QUnit.test("Create from OSM Data (area as C shape)", function(assert) {
+		});
+		
+		QUnit.test("Create from OSM Data (two touching areas)", function(assert) {
+		});
+		
+		QUnit.test("Create from OSM Data (rooms as areas, with walls)", function(assert) {
 		});
 		
 		QUnit.test("Create from nodes", function(assert) {
