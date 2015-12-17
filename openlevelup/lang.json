@@ -10,6 +10,14 @@
 		}
 	},
 	"error": {
+		"bbox": {
+			"FR": "Enveloppe invalide",
+			"EN": "Invalid bounding box"
+		},
+		"nodata": {
+			"FR": "Il n'y a pas de données dans cette zone",
+			"EN": "There is no available data in this area"
+		},
 		"zoomin": {
 			"FR": "Zoomez pour voir plus de détails",
 			"EN": "Zoom in to see more information"
@@ -39,6 +47,24 @@
 		"slogan": {
 			"FR": "Voyez l'intérieur des bâtiments<br />avec OpenLevelUp!",
 			"EN": "See inside buildings<br />with OpenLevelUp!"
+		}
+	},
+	"direction": {
+		"N": {
+			"FR": "Nord",
+			"EN": "North"
+		},
+		"S": {
+			"FR": "Sud",
+			"EN": "South"
+		},
+		"W": {
+			"FR": "Ouest",
+			"EN": "West"
+		},
+		"E": {
+			"FR": "Est",
+			"EN": "East"
 		}
 	},
 	"notes": {
@@ -98,6 +124,30 @@
 		}
 	},
 	"title": {
+		"general": {
+			"tags": {
+				"FR": "Tags",
+				"EN": "Tags"
+			}
+		},
+		"feature": {
+			"leveldown": {
+				"FR": "Descendre",
+				"EN": "Go down"
+			},
+			"levelup": {
+				"FR": "Monter",
+				"EN": "Go up"
+			},
+			"pictures": {
+				"FR": "Photos associées",
+				"EN": "Related pictures"
+			},
+			"seeosm": {
+				"FR": "Voir cet objet sur OSM.org",
+				"EN": "See this on OSM.org"
+			}
+		},
 		"main": {
 			"about": {
 				"FR": "En savoir plus sur le projet",
@@ -140,6 +190,12 @@
 			"unrendered": {
 				"FR": "Objets associés à une valeur de niveau mais sans rendu défini. Cela signifie que l'objet n'a pas vocation à être affiché ou alors que certaines informations sont manquantes.",
 				"EN": "Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information."
+			}
+		},
+		"routing": {
+			"changelevel": {
+				"FR": "Cliquez pour changer de niveau",
+				"EN": "Click to change level"
 			}
 		}
 	}

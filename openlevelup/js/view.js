@@ -463,7 +463,7 @@ var MapView = function(main) {
 			this._map.fitBounds(bounds);
 		}
 		else {
-			this._mainView.getMessagesView().displayMessage("Invalid bounding box", "alert");
+			this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "bbox"), "alert");
 			this._map.setView([lat, lon], zoom);
 		}
 	}
@@ -627,7 +627,7 @@ var MapView = function(main) {
 				this._updateRoutingLayer();
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage("There is no available data in this area", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "nodata"), "alert");
 			}
 		}
 		else if(zoom >= CONFIG.view.map.cluster_min_zoom) {
@@ -638,7 +638,7 @@ var MapView = function(main) {
 				this._dataLayer.addTo(this._map);
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage("There is no available data in this area", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "nodata"), "alert");
 			}
 		}
 		
@@ -1039,11 +1039,11 @@ var MapView = function(main) {
 						
 						//Add markers for level change
 						this._routingMarkers.inter[prevLvl].push(
-							L.marker(path[i-1].getLatLng(), { icon: icon, zIndexOffset: 10000, title: 'Click to change level' })
+							L.marker(path[i-1].getLatLng(), { icon: icon, zIndexOffset: 10000, title: this._mainView.getTranslation("title", "routing", "changelevel") })
 							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i]))
 						);
 						this._routingMarkers.inter[currentLvl].push(
-							L.marker(path[i].getLatLng(), { icon: icon, zIndexOffset: 10000, title: 'Click to change level' })
+							L.marker(path[i].getLatLng(), { icon: icon, zIndexOffset: 10000, title: this._mainView.getTranslation("title", "routing", "changelevel") })
 							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i-1]))
 						);
 					}
@@ -1516,11 +1516,11 @@ var FeatureView = function(main, feature, details) {
 			//Able to go up ?
 			var levelId = ftLevels.indexOf(this._mainView.getLevelView().get());
 			if(levelId < ftLevels.length -1) {
-				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+CONFIG.view.icons.folder+'/arrow_up_3.png" title="Go up" alt="Up!" /></a>';
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+CONFIG.view.icons.folder+'/arrow_up_3.png" class="i18n-title title.feature.levelup" title="'+this._mainView.getTranslation("title", "feature", "levelup")+'" alt="Up!" /></a>';
 			}
 			//Able to go down ?
 			if(levelId > 0) {
-				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+CONFIG.view.icons.folder+'/arrow_down_3.png" title="Go down" alt="Down!" /></a>';
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+CONFIG.view.icons.folder+'/arrow_down_3.png" class="i18n-title title.feature.leveldown" title="'+this._mainView.getTranslation("title", "feature", "leveldown")+'" alt="Down!" /></a>';
 			}
 		}
 
@@ -1531,11 +1531,11 @@ var FeatureView = function(main, feature, details) {
 		
 		//Picture link
 		if(this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && this._feature.getImages().hasValidSpherical())) {
-			text += '<a href="#" id="images-open" title="Related pictures" onclick="controller.getView().getImagesView().open(\''+this._feature.getId()+'\')"><img src="img/icon_picture_2.svg" alt="Pictures" /></a> ';
+			text += '<a href="#" id="images-open" class="i18n-title title.feature.pictures" title="'+this._mainView.getTranslation("title", "feature", "pictures")+'" onclick="controller.getView().getImagesView().open(\''+this._feature.getId()+'\')"><img src="img/icon_picture_2.svg" alt="Pictures" /></a> ';
 		}
 		
 		//Tags and OSM links
-		text += '<a href="#" id="tags-open" title="Tags" onclick="controller.getView().getTagsView().open(\''+this._feature.getId()+'\')"><img src="img/icon_tags.svg" alt="Tags" /></a><a href="http://www.openstreetmap.org/'+this._feature.getId()+'" title="See this on OSM.org" target="_blank"><img src="img/icon_osm.svg" alt="OSM.org" /></a></div>';
+		text += '<a href="#" id="tags-open" class="i18n-title title.general.tags" title="'+this._mainView.getTranslation("title", "general", "tags")+'" onclick="controller.getView().getTagsView().open(\''+this._feature.getId()+'\')"><img src="img/icon_tags.svg" alt="Tags" /></a><a href="http://www.openstreetmap.org/'+this._feature.getId()+'" class="i18n-title title.feature.seeosm" title="'+this._mainView.getTranslation("title", "feature", "seeosm")+'" target="_blank"><img src="img/icon_osm.svg" alt="OSM.org" /></a></div>';
 		
 		return L.popup({ autoPan: false }).setContent(text);
 	}
