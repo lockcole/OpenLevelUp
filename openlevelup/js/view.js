@@ -35,6 +35,9 @@ var MainView = function(ctrl) {
 	/** Is the user using a WebGL capable browser ? **/
 	this._hasWebGL = Detector.webgl;
 	
+	/** The view language **/
+	this._lang = null;
+	
 	/*
 	 * The view components
 	 */
@@ -266,7 +269,7 @@ var MainView = function(ctrl) {
 			}
 		}
 		else {
-			this._cMessages.displayMessage("Zoom in to see more information", "info");
+			this._cMessages.displayMessage(this.getTranslation("error", "zoomin"), "info");
 			
 			//Remove names and export buttons if needed
 			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
@@ -332,6 +335,7 @@ var MainView = function(ctrl) {
 	 */
 	MainView.prototype.translate = function(lng) {
 		lng = lng.toUpperCase();
+		this._lang = lng;
 		console.log("[Lang] Set to "+lng);
 		$(".i18n").each(function(index) {
 			//Check classes of DOM element
@@ -380,6 +384,18 @@ var MainView = function(ctrl) {
 				i++;
 			}
 		});
+	};
+	
+	/**
+	 * Get translation for a given code
+	 */
+	MainView.prototype.getTranslation = function(n1, n2, n3) {
+		if(n1 == "title") {
+			return (LANG.title[n2][n3][this._lang] != undefined) ? LANG.title[n2][n3][this._lang] : LANG.title[n2][n3].EN;
+		}
+		else {
+			return (LANG[n1][n2][this._lang] != undefined) ? LANG[n1][n2][this._lang] : LANG[n1][n2].EN;
+		}
 	};
 
 

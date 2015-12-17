@@ -9,6 +9,12 @@
 			"EN": "OK"
 		}
 	},
+	"error": {
+		"zoomin": {
+			"FR": "Zoomez pour voir plus de détails",
+			"EN": "Zoom in to see more information"
+		}
+	},
 	"main": {
 		"about": {
 			"FR": "À propos",
