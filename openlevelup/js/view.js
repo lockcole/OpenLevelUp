@@ -89,6 +89,7 @@ var MainView = function(ctrl) {
 	
 	this._cNames.hideButton();
 	this._cLevel.disable();
+	this.translate(window.navigator.userLanguage || window.navigator.language);
 	
 	//Link on logo
 	$("#logo-link").click(function() {
@@ -324,6 +325,61 @@ var MainView = function(ctrl) {
 		$(".sidebar-tabs li").removeClass("active");
 		$("#sidebar .sidebar-pane").removeClass("active");
 		$("#sidebar").addClass("collapsed");
+	};
+	
+	/**
+	 * Translates all available labels
+	 */
+	MainView.prototype.translate = function(lng) {
+		lng = lng.toUpperCase();
+		console.log("[Lang] Set to "+lng);
+		$(".i18n").each(function(index) {
+			//Check classes of DOM element
+			var classes = $(this).attr("class").split(" ");
+			var i=0, l=classes.length, found=false, categories, label;
+			
+			while(i < l && !found) {
+				//If class for i18n, read it and translate
+				if(classes[i].indexOf(".") >= 0) {
+					categories = classes[i].split(".");
+					
+					if(categories.length == 2) {
+						//Check if given label exists in LANG, or use default english
+						label = (LANG[categories[0]][categories[1]][lng] != undefined) ? LANG[categories[0]][categories[1]][lng] : LANG[categories[0]][categories[1]].EN;
+						
+						//Replace text in DOM
+						$(this).html(label);
+						
+						found = true;
+					}
+				}
+				i++;
+			}
+		});
+		
+		$(".i18n-title").each(function(index) {
+			//Check classes of DOM element
+			var classes = $(this).attr("class").split(" ");
+			var i=0, l=classes.length, found=false, categories, label;
+			
+			while(i < l && !found) {
+				//If class for i18n, read it and translate
+				if(classes[i].indexOf("title.") == 0) {
+					categories = classes[i].substring(6).split(".");
+					
+					if(categories.length == 2) {
+						//Check if given label exists in LANG, or use default english
+						label = (LANG.title[categories[0]][categories[1]][lng] != undefined) ? LANG.title[categories[0]][categories[1]][lng] : LANG.title[categories[0]][categories[1]].EN;
+						
+						//Replace text in DOM
+						$(this).attr("title", label);
+						
+						found = true;
+					}
+				}
+				i++;
+			}
+		});
 	};
 
 

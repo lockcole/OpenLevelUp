@@ -1,0 +1,140 @@
+{
+	"general": {
+		"cancel": {
+			"FR": "Annuler",
+			"EN": "Cancel"
+		},
+		"ok": {
+			"FR": "OK",
+			"EN": "OK"
+		}
+	},
+	"main": {
+		"about": {
+			"FR": "À propos",
+			"EN": "About"
+		},
+		"doctag": {
+			"FR": "Documentation pour l'édition",
+			"EN": "Documentation for editing"
+		},
+		"how": {
+			"FR": "Comment ?",
+			"EN": "How ?"
+		},
+		"qr": {
+			"FR": "QR Code",
+			"EN": "QR Code"
+		},
+		"shortlink": {
+			"FR": "Lien court",
+			"EN": "Shortlink"
+		},
+		"slogan": {
+			"FR": "Voyez l'intérieur des bâtiments<br />avec OpenLevelUp!",
+			"EN": "See inside buildings<br />with OpenLevelUp!"
+		}
+	},
+	"notes": {
+		"desc": {
+			"FR": "Ajoutez une note pour indiquer aux contributeurs s'il manque un objet ou s'il y a une erreur. Glissez le marqueur sur la carte, et donnez des détails ci-dessous.",
+			"EN": "Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here."
+		},
+		"new": {
+			"FR": "Nouvelle note",
+			"EN": "New note"
+		},
+		"title": {
+			"FR": "Nouvelle note",
+			"EN": "New note"
+		}
+	},
+	"params": {
+		"buildings": {
+			"FR": "Voir uniquement les bâtiments",
+			"EN": "Show buildings only"
+		},
+		"notes": {
+			"FR": "Voir les notes OpenStreetMap",
+			"EN": "Show OpenStreetMap notes"
+		},
+		"pictures": {
+			"FR": "Voir les photos",
+			"EN": "Show pictures"
+		},
+		"transcend": {
+			"FR": "Voir les objets inter-étages",
+			"EN": "Show transcendent objects"
+		},
+		"unrendered": {
+			"FR": "Voir les objets sans style",
+			"EN": "Show unrendered objects"
+		}
+	},
+	"rooms": {
+		"title": {
+			"FR": "Salles",
+			"EN": "Rooms"
+		}
+	},
+	"routing": {
+		"length": {
+			"FR": "Longueur",
+			"EN": "Length"
+		},
+		"time": {
+			"FR": "Durée",
+			"EN": "Time"
+		},
+		"title": {
+			"FR": "Navigation (bêta)",
+			"EN": "Navigation (beta)"
+		}
+	},
+	"title": {
+		"main": {
+			"about": {
+				"FR": "En savoir plus sur le projet",
+				"EN": "Know more about the project"
+			},
+			"how": {
+				"FR": "Zoomez sur une zone avec des données d'intérieur (les bulles numérotées sur la carte), puis naviguez à travers les étages avec les flèches haut et bas du panneau latéral.",
+				"EN": "Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel."
+			},
+			"osmlink": {
+				"FR": "Voir la zone sur OpenStreetMap",
+				"EN": "See this area on OpenStreetMap"
+			},
+			"qr": {
+				"FR": "QR Code pour cette zone",
+				"EN": "QR Code for this map area"
+			},
+			"shortlink": {
+				"FR": "Lien court pour cette zone",
+				"EN": "Short URL for this map area"
+			}
+		},
+		"params": {
+			"buildings": {
+				"FR": "Cache tous les objets qui ne sont pas des bâtiments (sans tag building=*)",
+				"EN": "Hides all objects that aren't buildings (no building=* tag)"
+			},
+			"notes": {
+				"FR": "Les notes OpenStreetMap permettent d'indiquer aux contributeurs qu'une donnée est manquante ou qu'une erreur existe.",
+				"EN": "OpenStreetMap notes allow other users to know that there is some edits to do in data."
+			},
+			"pictures": {
+				"FR": "Affiche un marqueur sur les objets associés à une photo",
+				"EN": "Adds markers on objects which have an associated photo"
+			},
+			"transcend": {
+				"FR": "Objets traversant les étages, par exemples les escaliers ou ascenseurs",
+				"EN": "Objects passing through levels, such as stairs or elevators"
+			},
+			"unrendered": {
+				"FR": "Objets associés à une valeur de niveau mais sans rendu défini. Cela signifie que l'objet n'a pas vocation à être affiché ou alors que certaines informations sont manquantes.",
+				"EN": "Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information."
+			}
+		}
+	}
+}

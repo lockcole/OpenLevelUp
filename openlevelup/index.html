@@ -128,33 +128,33 @@
 				
 				<header>
 					<a id="logo-link" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a>
-					<p>See inside buildings<br>with OpenLevelUp! <a class="help" title="Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.">How ?</a></p>
+					<p><span class="i18n main.slogan">See inside buildings<br />with OpenLevelUp!</span> <a class="help i18n main.how i18n-title title.main.how">How ?</a></p>
 				</header>
 				
 				<div id="settings">
 					<ul>
-						<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> Show <a class="help" title="Objects passing through levels, such as stairs or elevators">transcendent objects</a></label></li>
-						<li><label><input type="checkbox" id="show-buildings-only" disabled="true" /> Show <a class="help" title="Hides all objects that aren't buildings (no building=* tag)">buildings only</a></label></li>
-						<li><label><input type="checkbox" id="show-photos" disabled="true" /> Show <a class="help" title="Adds markers on objects which have an associated photo">pictures</a></label></li>
-						<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> Show <a class="help" title="Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.">unrendered objects</a></label></li>
-						<li><label><input type="checkbox" id="show-notes" disabled="true" /> Show <a class="help" title="OpenStreetMap notes allow other users to know that there is some edits to do in data.">OpenStreetMap notes</a></label></li>
+						<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> <a class="help i18n params.transcend i18n-title title.params.transcend">Show transcendent objects</a></label></li>
+						<li><label><input type="checkbox" id="show-buildings-only" disabled="true" /> <a class="help i18n params.buildings i18n-title title.params.buildings">Show buildings only</a></label></li>
+						<li><label><input type="checkbox" id="show-photos" disabled="true" /> <a class="help i18n params.pictures i18n-title title.params.pictures">Show pictures</a></label></li>
+						<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> <a class="help i18n params.unrendered i18n-title title.params.unrendered">Show unrendered objects</a></label></li>
+						<li><label><input type="checkbox" id="show-notes" disabled="true" /> <a class="help i18n params.notes i18n-title title.params.notes">Show OpenStreetMap notes</a></label></li>
 					</ul>
 				</div>
 				
 				<footer>
-					<p><a id="osm-link" title="See this area on OpenStreetMap" href="http://openstreetmap.org">OSM.org</a> | <a href="#" id="about-link" title="Know more about the project">About</a><br /><a id="shortlink" href="" title="Short URL for this map area">Shortlink</a> | <a id="qrcode-link" href="#" title="QR Code for this map area">QR Code</a><br /><a href="https://wiki.openstreetmap.org/wiki/OpenLevelUp/Recommended_tagging" target="_blank">Documentation for editing</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
+					<p><a id="osm-link" class="i18n-title title.main.osmlink" href="http://openstreetmap.org">OSM.org</a> | <a href="#" id="about-link" class="i18n main.about i18n-title title.main.about">About</a><br /><a id="shortlink" href="" class="i18n main.shortlink i18n-title title.main.shortlink">Shortlink</a> | <a id="qrcode-link" href="#" class="i18n main.qr i18n-title title.main.qr">QR Code</a><br /><a class="i18n main.doctag" href="https://wiki.openstreetmap.org/wiki/OpenLevelUp/Recommended_tagging" target="_blank">Documentation for editing</a><br />&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
 				</footer>
 			</div>
 
 			<div class="sidebar-pane" id="roomlist">
-				<h1 class="sidebar-header"><img src="img/icon_rooms.svg" /> Rooms<div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
+				<h1 class="sidebar-header"><img src="img/icon_rooms.svg" /> <span class="i18n rooms.title">Rooms</span><div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
 				<p class="input-max"><span class="text"><input type="text" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
 				<div id="rooms">
 				</div>
 			</div>
 			
 			<div class="sidebar-pane" id="routing">
-				<h1 class="sidebar-header"><img src="img/icon_routing.svg" /> Navigation (beta)<div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
+				<h1 class="sidebar-header"><img src="img/icon_routing.svg" /> <span class="i18n routing.title">Navigation (beta)</span><div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
 				
 				<div class="routing-destinations">
 					<div class="routing-destination">
@@ -171,12 +171,12 @@
 				
 				<div class="routing-buttons">
 					<select id="routing-mode"></select>
-					<button id="routing-valid">OK</button>
+					<button id="routing-valid" class="i18n general.ok">OK</button>
 				</div>
 				
 				<div id="rtg-instructions" class="routing-instructions hidden">
 					<div class="routing-instructions-general">
-						<span class="rtg-instr-title">Length:</span> <span id="rtg-instr-length"></span> m | <span class="rtg-instr-title">Time:</span> <span id="rtg-instr-time"></span> min
+						<span class="rtg-instr-title"><span class="i18n routing.length">Length</span>:</span> <span id="rtg-instr-length"></span> m | <span class="rtg-instr-title"><span class="i18n routing.time">Time</span>:</span> <span id="rtg-instr-time"></span> min
 					</div>
 					<div id="rtg-instr-list">
 					</div>
@@ -184,10 +184,10 @@
 			</div>
 
 			<div class="sidebar-pane" id="notes">
-				<h1 class="sidebar-header"><img src="img/icon_note.svg" /> New note<div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
-				<p>Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here.</p>
+				<h1 class="sidebar-header"><img src="img/icon_note.svg" /> <span class="i18n notes.title">New note</span><div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
+				<p class="i18n notes.desc">Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here.</p>
 				<textarea id="note-txt" rows="5"></textarea>
-				<div class="buttons"><button id="note-send">New note</button><button id="note-cancel">Cancel</button></div>
+				<div class="buttons"><button id="note-send" class="i18n notes.new">New note</button><button id="note-cancel" class="i18n general.cancel">Cancel</button></div>
 			</div>
 		</div>
 	</div>

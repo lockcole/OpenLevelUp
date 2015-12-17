@@ -57,6 +57,15 @@ $.ajax({
        success: function(data) { POLYGON_FEATURES = data; }
 }).fail(function() { console.error("[Controller] Error while retrieving POLYGON_FEATURES"); });
 
+//Load lang file
+var LANG;
+$.ajax({
+	url: 'lang.json',
+       async: false,
+       dataType: 'json',
+       success: function(data) { LANG = data; }
+}).fail(function() { console.error("[Controller] Error while retrieving LANG"); });
+
 addCompatibility();
 
 
