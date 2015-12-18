@@ -1,201 +1,272 @@
 {
 	"general": {
 		"cancel": {
-			"FR": "Annuler",
-			"EN": "Cancel"
+			"fr": "Annuler",
+			"en": "Cancel"
+		},
+		"loading": {
+			"fr": "Chargement",
+			"en": "Loading"
 		},
 		"ok": {
-			"FR": "OK",
-			"EN": "OK"
+			"fr": "OK",
+			"en": "OK"
+		},
+		"search": {
+			"fr": "Rechercher",
+			"en": "Search"
 		}
 	},
 	"error": {
 		"bbox": {
-			"FR": "Enveloppe invalide",
-			"EN": "Invalid bounding box"
+			"fr": "Enveloppe invalide",
+			"en": "Invalid bounding box"
 		},
 		"nodata": {
-			"FR": "Il n'y a pas de données dans cette zone",
-			"EN": "There is no available data in this area"
+			"fr": "Il n'y a pas de données dans cette zone",
+			"en": "There is no available data in this area"
 		},
 		"zoomin": {
-			"FR": "Zoomez pour voir plus de détails",
-			"EN": "Zoom in to see more information"
+			"fr": "Zoomez pour voir plus de détails",
+			"en": "Zoom in to see more information"
+		},
+		"invalidlevel": {
+			"fr": "Niveau invalide",
+			"en": "Invalid level"
+		},
+		"lastlevel": {
+			"fr": "Vous êtes déjà au dernier niveau disponible",
+			"en": "You are already at the last available level"
+		},
+		"firstlevel": {
+			"fr": "Vous êtes déjà au premier niveau disponible",
+			"en": "You are already at the first available level"
+		},
+		"invalidshortlink": {
+			"fr": "Lien court invalide",
+			"en": "Invalid short link"
 		}
 	},
 	"main": {
 		"about": {
-			"FR": "À propos",
-			"EN": "About"
+			"fr": "À propos",
+			"en": "About"
 		},
 		"doctag": {
-			"FR": "Documentation pour l'édition",
-			"EN": "Documentation for editing"
+			"fr": "Documentation pour l'édition",
+			"en": "Documentation for editing"
 		},
 		"how": {
-			"FR": "Comment ?",
-			"EN": "How ?"
+			"fr": "Comment ?",
+			"en": "How ?"
 		},
 		"qr": {
-			"FR": "QR Code",
-			"EN": "QR Code"
+			"fr": "QR Code",
+			"en": "QR Code"
 		},
 		"shortlink": {
-			"FR": "Lien court",
-			"EN": "Shortlink"
+			"fr": "Lien court",
+			"en": "Shortlink"
 		},
 		"slogan": {
-			"FR": "Voyez l'intérieur des bâtiments<br />avec OpenLevelUp!",
-			"EN": "See inside buildings<br />with OpenLevelUp!"
+			"fr": "Voyez l'intérieur des bâtiments<br />avec OpenLevelUp!",
+			"en": "See inside buildings<br />with OpenLevelUp!"
 		}
 	},
 	"direction": {
 		"N": {
-			"FR": "Nord",
-			"EN": "North"
+			"fr": "Nord",
+			"en": "North"
 		},
-		"S": {
-			"FR": "Sud",
-			"EN": "South"
+		"NW": {
+			"fr": "Nord-ouest",
+			"en": "North-west"
 		},
 		"W": {
-			"FR": "Ouest",
-			"EN": "West"
+			"fr": "Ouest",
+			"en": "West"
+		},
+		"SW": {
+			"fr": "Sud-ouest",
+			"en": "South-west"
+		},
+		"S": {
+			"fr": "Sud",
+			"en": "South"
+		},
+		"SE": {
+			"fr": "Sud-est",
+			"en": "South-east"
 		},
 		"E": {
-			"FR": "Est",
-			"EN": "East"
+			"fr": "Est",
+			"en": "East"
+		},
+		"NE": {
+			"fr": "Nord-est",
+			"en": "North-east"
 		}
+	},
+	"feature": {
+		"details": {
+			"fr": "Détails",
+			"en": "Details"
+		}
+	},
+	"images": {
+		
 	},
 	"notes": {
 		"desc": {
-			"FR": "Ajoutez une note pour indiquer aux contributeurs s'il manque un objet ou s'il y a une erreur. Glissez le marqueur sur la carte, et donnez des détails ci-dessous.",
-			"EN": "Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here."
+			"fr": "Ajoutez une note pour indiquer aux contributeurs s'il manque un objet ou s'il y a une erreur. Glissez le marqueur sur la carte, et donnez des détails ci-dessous.",
+			"en": "Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here."
 		},
 		"new": {
-			"FR": "Nouvelle note",
-			"EN": "New note"
+			"fr": "Nouvelle note",
+			"en": "New note"
 		},
 		"title": {
-			"FR": "Nouvelle note",
-			"EN": "New note"
+			"fr": "Nouvelle note",
+			"en": "New note"
 		}
 	},
 	"params": {
 		"buildings": {
-			"FR": "Voir uniquement les bâtiments",
-			"EN": "Show buildings only"
+			"fr": "Voir uniquement les bâtiments",
+			"en": "Show buildings only"
 		},
 		"notes": {
-			"FR": "Voir les notes OpenStreetMap",
-			"EN": "Show OpenStreetMap notes"
+			"fr": "Voir les notes OpenStreetMap",
+			"en": "Show OpenStreetMap notes"
 		},
 		"pictures": {
-			"FR": "Voir les photos",
-			"EN": "Show pictures"
+			"fr": "Voir les photos",
+			"en": "Show pictures"
 		},
 		"transcend": {
-			"FR": "Voir les objets inter-étages",
-			"EN": "Show transcendent objects"
+			"fr": "Voir les objets inter-étages",
+			"en": "Show transcendent objects"
 		},
 		"unrendered": {
-			"FR": "Voir les objets sans style",
-			"EN": "Show unrendered objects"
+			"fr": "Voir les objets sans style",
+			"en": "Show unrendered objects"
 		}
 	},
 	"rooms": {
 		"title": {
-			"FR": "Salles",
-			"EN": "Rooms"
+			"fr": "Salles",
+			"en": "Rooms"
 		}
 	},
 	"routing": {
 		"length": {
-			"FR": "Longueur",
-			"EN": "Length"
+			"fr": "Longueur",
+			"en": "Length"
 		},
 		"time": {
-			"FR": "Durée",
-			"EN": "Time"
+			"fr": "Durée",
+			"en": "Time"
 		},
 		"title": {
-			"FR": "Navigation (bêta)",
-			"EN": "Navigation (beta)"
+			"fr": "Navigation (bêta)",
+			"en": "Navigation (beta)"
 		}
 	},
 	"title": {
 		"general": {
 			"tags": {
-				"FR": "Tags",
-				"EN": "Tags"
+				"fr": "Tags",
+				"en": "Tags"
 			}
 		},
 		"feature": {
 			"leveldown": {
-				"FR": "Descendre",
-				"EN": "Go down"
+				"fr": "Descendre",
+				"en": "Go down"
 			},
 			"levelup": {
-				"FR": "Monter",
-				"EN": "Go up"
+				"fr": "Monter",
+				"en": "Go up"
 			},
 			"pictures": {
-				"FR": "Photos associées",
-				"EN": "Related pictures"
+				"fr": "Photos associées",
+				"en": "Related pictures"
 			},
 			"seeosm": {
-				"FR": "Voir cet objet sur OSM.org",
-				"EN": "See this on OSM.org"
+				"fr": "Voir cet objet sur OSM.org",
+				"en": "See this on OSM.org"
+			}
+		},
+		"images": {
+			"statusok": {
+				"fr": "L'image est valide",
+				"en": "The image link is valid"
+			},
+			"statusmissing": {
+				"fr": "Pas d'image associée",
+				"en": "No image link defined"
+			},
+			"statusbad": {
+				"fr": "L'image est indisponible",
+				"en": "The image link is broken"
+			},
+			"checkmpl": {
+				"fr": "(Vérifiez les tags mapillary:*)",
+				"en": "(Check mapillary:* tags)"
+			},
+			"loading": {
+				"fr": "L'image est en cours de chargement",
+				"en": "The image is still potentially loading"
 			}
 		},
 		"main": {
 			"about": {
-				"FR": "En savoir plus sur le projet",
-				"EN": "Know more about the project"
+				"fr": "En savoir plus sur le projet",
+				"en": "Know more about the project"
 			},
 			"how": {
-				"FR": "Zoomez sur une zone avec des données d'intérieur (les bulles numérotées sur la carte), puis naviguez à travers les étages avec les flèches haut et bas du panneau latéral.",
-				"EN": "Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel."
+				"fr": "Zoomez sur une zone avec des données d'intérieur (les bulles numérotées sur la carte), puis naviguez à travers les étages avec les flèches haut et bas du panneau latéral.",
+				"en": "Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel."
 			},
 			"osmlink": {
-				"FR": "Voir la zone sur OpenStreetMap",
-				"EN": "See this area on OpenStreetMap"
+				"fr": "Voir la zone sur OpenStreetMap",
+				"en": "See this area on OpenStreetMap"
 			},
 			"qr": {
-				"FR": "QR Code pour cette zone",
-				"EN": "QR Code for this map area"
+				"fr": "QR Code pour cette zone",
+				"en": "QR Code for this map area"
 			},
 			"shortlink": {
-				"FR": "Lien court pour cette zone",
-				"EN": "Short URL for this map area"
+				"fr": "Lien court pour cette zone",
+				"en": "Short URL for this map area"
 			}
 		},
 		"params": {
 			"buildings": {
-				"FR": "Cache tous les objets qui ne sont pas des bâtiments (sans tag building=*)",
-				"EN": "Hides all objects that aren't buildings (no building=* tag)"
+				"fr": "Cache tous les objets qui ne sont pas des bâtiments (sans tag building=*)",
+				"en": "Hides all objects that aren't buildings (no building=* tag)"
 			},
 			"notes": {
-				"FR": "Les notes OpenStreetMap permettent d'indiquer aux contributeurs qu'une donnée est manquante ou qu'une erreur existe.",
-				"EN": "OpenStreetMap notes allow other users to know that there is some edits to do in data."
+				"fr": "Les notes OpenStreetMap permettent d'indiquer aux contributeurs qu'une donnée est manquante ou qu'une erreur existe.",
+				"en": "OpenStreetMap notes allow other users to know that there is some edits to do in data."
 			},
 			"pictures": {
-				"FR": "Affiche un marqueur sur les objets associés à une photo",
-				"EN": "Adds markers on objects which have an associated photo"
+				"fr": "Affiche un marqueur sur les objets associés à une photo",
+				"en": "Adds markers on objects which have an associated photo"
 			},
 			"transcend": {
-				"FR": "Objets traversant les étages, par exemples les escaliers ou ascenseurs",
-				"EN": "Objects passing through levels, such as stairs or elevators"
+				"fr": "Objets traversant les étages, par exemples les escaliers ou ascenseurs",
+				"en": "Objects passing through levels, such as stairs or elevators"
 			},
 			"unrendered": {
-				"FR": "Objets associés à une valeur de niveau mais sans rendu défini. Cela signifie que l'objet n'a pas vocation à être affiché ou alors que certaines informations sont manquantes.",
-				"EN": "Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information."
+				"fr": "Objets associés à une valeur de niveau mais sans rendu défini. Cela signifie que l'objet n'a pas vocation à être affiché ou alors que certaines informations sont manquantes.",
+				"en": "Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information."
 			}
 		},
 		"routing": {
 			"changelevel": {
-				"FR": "Cliquez pour changer de niveau",
-				"EN": "Click to change level"
+				"fr": "Cliquez pour changer de niveau",
+				"en": "Click to change level"
 			}
 		}
 	}

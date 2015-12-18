@@ -334,9 +334,9 @@ var MainView = function(ctrl) {
 	 * Translates all available labels
 	 */
 	MainView.prototype.translate = function(lng) {
-		lng = lng.toUpperCase();
 		this._lang = lng;
 		console.log("[Lang] Set to "+lng);
+		//TODO i18n value
 		$(".i18n").each(function(index) {
 			//Check classes of DOM element
 			var classes = $(this).attr("class").split(" ");
@@ -349,7 +349,7 @@ var MainView = function(ctrl) {
 					
 					if(categories.length == 2) {
 						//Check if given label exists in LANG, or use default english
-						label = (LANG[categories[0]][categories[1]][lng] != undefined) ? LANG[categories[0]][categories[1]][lng] : LANG[categories[0]][categories[1]].EN;
+						label = (LANG[categories[0]][categories[1]][lng] != undefined) ? LANG[categories[0]][categories[1]][lng] : LANG[categories[0]][categories[1]].en;
 						
 						//Replace text in DOM
 						$(this).html(label);
@@ -373,7 +373,7 @@ var MainView = function(ctrl) {
 					
 					if(categories.length == 2) {
 						//Check if given label exists in LANG, or use default english
-						label = (LANG.title[categories[0]][categories[1]][lng] != undefined) ? LANG.title[categories[0]][categories[1]][lng] : LANG.title[categories[0]][categories[1]].EN;
+						label = (LANG.title[categories[0]][categories[1]][lng] != undefined) ? LANG.title[categories[0]][categories[1]][lng] : LANG.title[categories[0]][categories[1]].en;
 						
 						//Replace text in DOM
 						$(this).attr("title", label);
@@ -391,11 +391,17 @@ var MainView = function(ctrl) {
 	 */
 	MainView.prototype.getTranslation = function(n1, n2, n3) {
 		if(n1 == "title") {
-			return (LANG.title[n2][n3][this._lang] != undefined) ? LANG.title[n2][n3][this._lang] : LANG.title[n2][n3].EN;
+			if(LANG.title[n2] != undefined && LANG.title[n2][n3] != undefined) {
+				return (LANG.title[n2][n3][this._lang] != undefined) ? LANG.title[n2][n3][this._lang] : LANG.title[n2][n3].en;
+			}
 		}
 		else {
-			return (LANG[n1][n2][this._lang] != undefined) ? LANG[n1][n2][this._lang] : LANG[n1][n2].EN;
+			if(LANG[n1] != undefined && LANG[n1][n2] != undefined) {
+				return (LANG[n1][n2][this._lang] != undefined) ? LANG[n1][n2][this._lang] : LANG[n1][n2].en;
+			}
 		}
+		console.error("[Lang] Missing translation:",n1,n2,n3);
+		return "";
 	};
 
 
@@ -1612,11 +1618,26 @@ var TagsView = function(main) {
 		var mapillaryRegex = /^mapillary.*$/;
 		var mapillaryValRegex = /^[\w\-]+$/;
 		var txtVals = {
-			N: "North", NNE: "North North-east", NE:"North-east", ENE: "East North-east",
-			E: "East", ESE: "East South-east", SE: "South-east", SSE: "South South-east",
-			S: "South", SSW: "South South-west", SW: "South-west", WSW:"West South-west",
-			W: "West", WNW: "West North-west", NW: "North-west", NNW: "North North-west",
-			north: "North", south: "South", east: "East", west: "West"
+			N: this._mainView.getTranslation("direction", "N"),
+			NNE: this._mainView.getTranslation("direction", "N")+" "+this._mainView.getTranslation("direction", "NE"),
+			NE: this._mainView.getTranslation("direction", "NE"),
+			ENE: this._mainView.getTranslation("direction", "E")+" "+this._mainView.getTranslation("direction", "NE"),
+			E: this._mainView.getTranslation("direction", "E"),
+			ESE: this._mainView.getTranslation("direction", "E")+" "+this._mainView.getTranslation("direction", "SE"),
+			SE: this._mainView.getTranslation("direction", "SE"),
+			SSE: this._mainView.getTranslation("direction", "S")+" "+this._mainView.getTranslation("direction", "SE"),
+			S: this._mainView.getTranslation("direction", "S"),
+			SSW: this._mainView.getTranslation("direction", "S")+" "+this._mainView.getTranslation("direction", "SW"),
+			SW: this._mainView.getTranslation("direction", "SW"),
+			WSW: this._mainView.getTranslation("direction", "W")+" "+this._mainView.getTranslation("direction", "SW"),
+			W: this._mainView.getTranslation("direction", "W"),
+			WNW: this._mainView.getTranslation("direction", "W")+" "+this._mainView.getTranslation("direction", "NW"),
+			NW: this._mainView.getTranslation("direction", "NW"),
+			NNW: this._mainView.getTranslation("direction", "N")+" "+this._mainView.getTranslation("direction", "NW"),
+			north: this._mainView.getTranslation("direction", "N"),
+			south: this._mainView.getTranslation("direction", "S"),
+			east: this._mainView.getTranslation("direction", "E"),
+			west: this._mainView.getTranslation("direction", "W")
 		};
 		
 		for(var k in tags) {
@@ -1710,28 +1731,28 @@ var TagsView = function(main) {
 						else {
 							//Define a simple direction
 							if((vInt >= 337 && vInt < 360) || (vInt >= 0 && vInt < 22)) {
-								v = "North";
+								v = txtVals.N;
 							}
 							else if(vInt >= 22 && vInt < 67) {
-								v = "North-east";
+								v = txtVals.NE;
 							}
 							else if(vInt >= 67 && vInt < 112) {
-								v = "East";
+								v = txtVals.E;
 							}
 							else if(vInt >= 112 && vInt < 157) {
-								v = "South-east";
+								v = txtVals.SE;
 							}
 							else if(vInt >= 157 && vInt < 202) {
-								v = "South";
+								v = txtVals.S;
 							}
 							else if(vInt >= 202 && vInt < 247) {
-								v = "South-west";
+								v = txtVals.SW;
 							}
 							else if(vInt >= 247 && vInt < 292) {
-								v = "West";
+								v = txtVals.W;
 							}
 							else if(vInt >= 292 && vInt < 337) {
-								v = "North-west";
+								v = txtVals.NW;
 							}
 							else {
 								v = "Invalid";
@@ -1776,7 +1797,7 @@ var TagsView = function(main) {
 		L.control.window(
 			this._mainView.getMapView().get(),
 			{
-				title: 'Details',
+				title: this._mainView.getTranslation("feature", "details"),
 				content: content,
 				position: 'center',
 				visible: true
@@ -1888,14 +1909,14 @@ var LevelView = function(main) {
 			var currentLevelId = this._levels.indexOf(this._level);
 			
 			if(currentLevelId == -1) {
-				this._mainView.getMessagesView().displayMessage("Invalid level", "error");
+				this._mainView.getMessagesView().displayMessage(this._mainView("error", "invalidlevel"), "error");
 			}
 			else if(currentLevelId + 1 < this._levels.length) {
 				this.set(this._levels[currentLevelId+1]);
 				result = true;
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage("You are already at the last available level", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView("error", "lastlevel"), "alert");
 			}
 		}
 		
@@ -1913,14 +1934,14 @@ var LevelView = function(main) {
 			var currentLevelId = this._levels.indexOf(this._level);
 			
 			if(currentLevelId == -1) {
-				this._mainView.getMessagesView().displayMessage("Invalid level", "error");
+				this._mainView.getMessagesView().displayMessage(this._mainView("error", "invalidlevel"), "error");
 			}
 			else if(currentLevelId > 0) {
 				this.set(this._levels[currentLevelId-1]);
 				result = true;
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage("You are already at the first available level", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView("error", "firstlevel"), "alert");
 			}
 		}
 		
@@ -2268,7 +2289,7 @@ var URLView = function(main) {
 		var lwindow = L.control.window(
 			this._mainView.getMapView().get(),
 			{
-				title: 'QR Code',
+				title: this._mainView.getTranslation("main", "qr"),
 				content: '<div id="qrcode"></div>',
 				position: 'center',
 				modal: true
@@ -2339,7 +2360,7 @@ var URLView = function(main) {
 				}
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage("Invalid short link", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "invalidshortlink"), "alert");
 			}
 		}
 		//Read parameters directly
@@ -2467,7 +2488,7 @@ var NamesView = function(main) {
 	$("#search-room").focusout(this.searchFocus.bind(this));
 	$("#search-room").bind("input propertychange", this.update.bind(this));
 	$("#search-room-reset").click(this.reset.bind(this));
-	$("#search-room").val("Search");
+	$("#search-room").val(this._mainView.getTranslation("general", "search"));
 };
 
 //OTHER METHODS
@@ -2556,7 +2577,7 @@ var NamesView = function(main) {
 	 * Resets the room names list
 	 */
 	NamesView.prototype.reset = function() {
-		$("#search-room").val("Search");
+		$("#search-room").val(this._mainView.getTranslation("general", "search"));
 		this.update();
 	};
 	
@@ -2565,7 +2586,7 @@ var NamesView = function(main) {
 	 */
 	NamesView.prototype.searchOK = function() {
 		var search = $("#search-room").val();
-		return search != "Search" && search.length >= 3;
+		return search != this._mainView.getTranslation("general", "search") && search.length >= 3;
 	};
 	
 	/**
@@ -2573,7 +2594,7 @@ var NamesView = function(main) {
 	 */
 	NamesView.prototype.searchFocus = function() {
 		var search = $("#search-room").val();
-		if(search == "Search" && $("#search-room").is(":focus")) {
+		if(search == this._mainView.getTranslation("general", "search") && $("#search-room").is(":focus")) {
 			$("#search-room").val("");
 		}
 		else if(search == "" && !$("#search-room").is(":focus")) {
@@ -2789,22 +2810,22 @@ var ImagesView = function(main) {
 		var title;
 		switch(status) {
 			case "ok":
-				title = "The image link is valid";
+				title = this._mainView.getTranslation("title", "image", "statusok");
 				break;
 			case "missing":
-				title = "No image link defined";
+				title = this._mainView.getTranslation("title", "image", "statusmissing");
 				break;
 			case "bad":
-				title = "The image link is broken";
+				title = this._mainView.getTranslation("title", "image", "statusbad");
 				if(source == "mapillary") {
-					title += " (Check mapillary:* tags)";
+					title += " "+this._mainView.getTranslation("title", "image", "checkmpl");
 				}
 				else if(source == "web") {
 					title += " (URL: "+baselink+")";
 				}
 				break;
 			case "unknown":
-				title = "The image is still potentially loading";
+				title = this._mainView.getTranslation("title", "image", "loading");
 				break;
 		}
 		link.prop("title", title);
@@ -3070,7 +3091,7 @@ var LoadingView = function(main) {
 	this._window = L.control.window(
 		this._mainView.getMapView().get(),
 		{
-			title: '<img id="spinner" src="img/icon_spinner.gif" height="32" />Loading',
+			title: '<img id="spinner" src="img/icon_spinner.gif" height="32" /><span class="i18n general.loading">'+this._mainView.getTranslation("general", "loading")+'</span>',
 			content: '',
 			modal: true,
 			position: 'center',
