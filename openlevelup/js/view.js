@@ -336,7 +336,7 @@ var MainView = function(ctrl) {
 	MainView.prototype.translate = function(lng) {
 		this._lang = lng;
 		console.log("[Lang] Set to "+lng);
-		//TODO i18n value
+
 		$(".i18n").each(function(index) {
 			//Check classes of DOM element
 			var classes = $(this).attr("class").split(" ");
@@ -384,15 +384,39 @@ var MainView = function(ctrl) {
 				i++;
 			}
 		});
+		
+		$(".i18n-value").each(function(index) {
+			//Check classes of DOM element
+			var classes = $(this).attr("class").split(" ");
+			var i=0, l=classes.length, found=false, categories, label;
+			
+			while(i < l && !found) {
+				//If class for i18n, read it and translate
+				if(classes[i].indexOf("value.") == 0) {
+					categories = classes[i].substring(6).split(".");
+					
+					if(categories.length == 2) {
+						//Check if given label exists in LANG, or use default english
+						label = (LANG.value[categories[0]][categories[1]][lng] != undefined) ? LANG.value[categories[0]][categories[1]][lng] : LANG.value[categories[0]][categories[1]].en;
+						
+						//Replace text in DOM
+						$(this).attr("value", label);
+						
+						found = true;
+					}
+				}
+				i++;
+			}
+		});
 	};
 	
 	/**
 	 * Get translation for a given code
 	 */
 	MainView.prototype.getTranslation = function(n1, n2, n3) {
-		if(n1 == "title") {
-			if(LANG.title[n2] != undefined && LANG.title[n2][n3] != undefined) {
-				return (LANG.title[n2][n3][this._lang] != undefined) ? LANG.title[n2][n3][this._lang] : LANG.title[n2][n3].en;
+		if(n1 == "title" || n1 == "value") {
+			if(LANG[n1][n2] != undefined && LANG[n1][n2][n3] != undefined) {
+				return (LANG[n1][n2][n3][this._lang] != undefined) ? LANG[n1][n2][n3][this._lang] : LANG[n1][n2][n3].en;
 			}
 		}
 		else {
@@ -1672,7 +1696,12 @@ var TagsView = function(main) {
 					detailsTxt += '<img src="'+CONFIG.view.icons.folder+'/'+detail.img+'" title="'+k+'" />';
 				}
 				else if(detail.name != undefined) {
-					detailsTxt += detail.name;
+					if(LANG.details[k] != undefined) {
+						detailsTxt += this._mainView.getTranslation("details", k);
+					}
+					else {
+						detailsTxt += detail.name;
+					}
 				}
 				else {
 					detailsTxt += k;
@@ -1909,14 +1938,14 @@ var LevelView = function(main) {
 			var currentLevelId = this._levels.indexOf(this._level);
 			
 			if(currentLevelId == -1) {
-				this._mainView.getMessagesView().displayMessage(this._mainView("error", "invalidlevel"), "error");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "invalidlevel"), "error");
 			}
 			else if(currentLevelId + 1 < this._levels.length) {
 				this.set(this._levels[currentLevelId+1]);
 				result = true;
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage(this._mainView("error", "lastlevel"), "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "lastlevel"), "alert");
 			}
 		}
 		
@@ -1934,14 +1963,14 @@ var LevelView = function(main) {
 			var currentLevelId = this._levels.indexOf(this._level);
 			
 			if(currentLevelId == -1) {
-				this._mainView.getMessagesView().displayMessage(this._mainView("error", "invalidlevel"), "error");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "invalidlevel"), "error");
 			}
 			else if(currentLevelId > 0) {
 				this.set(this._levels[currentLevelId-1]);
 				result = true;
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage(this._mainView("error", "firstlevel"), "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "firstlevel"), "alert");
 			}
 		}
 		
@@ -2488,7 +2517,7 @@ var NamesView = function(main) {
 	$("#search-room").focusout(this.searchFocus.bind(this));
 	$("#search-room").bind("input propertychange", this.update.bind(this));
 	$("#search-room-reset").click(this.reset.bind(this));
-	$("#search-room").val(this._mainView.getTranslation("general", "search"));
+	$("#search-room").val(this._mainView.getTranslation("value", "general", "search"));
 };
 
 //OTHER METHODS
@@ -2577,7 +2606,7 @@ var NamesView = function(main) {
 	 * Resets the room names list
 	 */
 	NamesView.prototype.reset = function() {
-		$("#search-room").val(this._mainView.getTranslation("general", "search"));
+		$("#search-room").val(this._mainView.getTranslation("value", "general", "search"));
 		this.update();
 	};
 	
@@ -2586,7 +2615,7 @@ var NamesView = function(main) {
 	 */
 	NamesView.prototype.searchOK = function() {
 		var search = $("#search-room").val();
-		return search != this._mainView.getTranslation("general", "search") && search.length >= 3;
+		return search != this._mainView.getTranslation("value", "general", "search") && search.length >= 3;
 	};
 	
 	/**
@@ -2594,11 +2623,11 @@ var NamesView = function(main) {
 	 */
 	NamesView.prototype.searchFocus = function() {
 		var search = $("#search-room").val();
-		if(search == this._mainView.getTranslation("general", "search") && $("#search-room").is(":focus")) {
+		if(search == this._mainView.getTranslation("value", "general", "search") && $("#search-room").is(":focus")) {
 			$("#search-room").val("");
 		}
 		else if(search == "" && !$("#search-room").is(":focus")) {
-			$("#search-room").val("Search");
+			$("#search-room").val(this._mainView.getTranslation("value", "general", "search"));
 		}
 	};
 
@@ -2845,7 +2874,7 @@ var ImagesView = function(main) {
 		}
 		if(img.page != undefined) {
 			if(description != "") { description += " - "; }
-			description += '<a href="'+img.page+'" target="_blank">Page</a>';
+			description += '<a href="'+img.page+'" target="_blank" class="i18n image.page">'+this._mainView.getTranslation("image", "page")+'</a>';
 		}
 		description += "<br />"+img.tag;
 		
@@ -3159,8 +3188,8 @@ var AboutView = function(main) {
 		L.control.window(
 			this._mainView.getMapView().get(),
 			{
-				title: 'About OpenLevelUp!',
-				content: 'This website allows you to see <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project. Licensed under <a href="https://www.gnu.org/licenses/agpl.html">AGPL v3</a>.<br /><p style="text-align: center;"><a href="mailto:panieravide@riseup.net">Contact</a> | <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup">GitHub repository</a> | <a href="https://wiki.openstreetmap.org/wiki/OpenLevelUp">Wiki</a></p><p class="laureate"><span class="images"><a href="http://opendata.regionpaca.fr"><img src="img/logo_paca.jpg" /></a></span><span class="desc">This project was laureate of the <a href="http://opendata.regionpaca.fr/concours-regional-open-paca.html">OpenPACA</a> contest (2015 edition), organized by the french region <a href="http://opendata.regionpaca.fr">Provence-Alpes-Côte d\'Azur</a>.</span></p>',
+				title: this._mainView.getTranslation("about", "title"),
+				 content: '<span class="i18n about.summary">'+this._mainView.getTranslation("about", "summary")+'</span><br /><p style="text-align: center;"><a href="mailto:panieravide@riseup.net" class="i18n about.contact">'+this._mainView.getTranslation("about", "contact")+'</a> | <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup" class="i18n about.github">'+this._mainView.getTranslation("about", "github")+'</a> | <a href="https://wiki.openstreetmap.org/wiki/OpenLevelUp" class="i18n about.wiki">'+this._mainView.getTranslation("about", "wiki")+'</a></p><p class="laureate"><span class="images"><a href="http://opendata.regionpaca.fr"><img src="img/logo_paca.jpg" /></a></span><span class="desc i18n about.laureate">'+this._mainView.getTranslation("about", "laureate")+'</span></p>',
 				modal: true,
 				position: 'center',
 				visible: true
@@ -3304,7 +3333,7 @@ var NotesView = function(main) {
 			var commentsHtml = "", comment, user;
 			for(var i=0, l=note.comments.length; i < l; i++) {
 				comment = note.comments[i];
-				user = (comment.user != "") ? "User "+comment.user : "Anonymous";
+				user = (comment.user != "") ? this._mainView.getTranslation("notes", "user")+" "+comment.user : this._mainView.getTranslation("notes", "anonymous");
 				commentsHtml += '<div class="op-notes-comment">'
 								+'<p class="desc">'+user+', '+comment.date+'</p>'
 								+'<p class="txt">'+comment.text+'</p>'
@@ -3314,10 +3343,10 @@ var NotesView = function(main) {
 			var lWindow = L.control.window(
 				this._mainView.getMapView().get(),
 				{
-					title: 'Note #'+note.id,
+					title: this._mainView.getTranslation("notes", "note")+' #'+note.id,
 					content: '<div class="op-notes-comments">'+commentsHtml+'</div>'
 					+'<div class="op-notes-footer">'
-					+'Status: <span class="notes-status-txt">'+note.status+'</span> | <a id="notes-link" href="http://www.openstreetmap.org/note/'+note.id+'">See on OSM.org</a>'
+					+'<span class="i18n general.status">'+this._mainView.getTranslation("general", "status")+'</span>: <span class="notes-status-txt">'+note.status+'</span> | <a id="notes-link" class="i18n notes.seeosm" href="http://www.openstreetmap.org/note/'+note.id+'">'+this._mainView.getTranslation("notes", "seeosm")+'</a>'
 					+'</div>',
 					position: 'center',
 					visible: true
@@ -3345,7 +3374,7 @@ var NotesView = function(main) {
 			}
 			else {
 				this._mainView.collapseSidebar();
-				this._mainView.getMessagesView().displayMessage("You have to zoom in to add a note", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("notes", "zoomintoadd"), "alert");
 			}
 		}
 	};
@@ -3397,7 +3426,7 @@ var RoutingView = function(main) {
 	//Define routing modes
 	var modeOptions = '';
 	for(var mode in CONFIG.routing) {
-		modeOptions += '<option value="'+ mode + '">' + CONFIG.routing[mode].name + '</option>';
+		modeOptions += '<option value="'+ mode + '" class="i18n routingmode.'+mode+'">' + this._mainView.getTranslation("routingmode", mode) + '</option>';
 	}
 	$("#routing-mode").html(modeOptions);
 	
@@ -3449,7 +3478,7 @@ var RoutingView = function(main) {
 	RoutingView.prototype.updateLabel = function(type, coords) {
 		var obj = $("#routing-"+type);
 		if(coords == null) {
-			obj.html("Click or drag marker");
+			obj.html(this._mainView.getTranslation("routing", "clickmarker"));
 		}
 		else {
 			obj.html(coords.lat.toFixed(6)+", "+coords.lng.toFixed(6));
@@ -3645,7 +3674,7 @@ var RoutingView = function(main) {
 				
 				if(i == l-1) {
 					instruction.img = 'end';
-					instruction.txt = 'You are arrived';
+					instruction.txt = this._mainView.getTranslation("routing", "arrived");
 					instructions.push(instruction);
 				}
 				else {
@@ -3656,24 +3685,24 @@ var RoutingView = function(main) {
 						//Case of going out of an elevator
 						if(i > 0 && path[i-1].getTransition(path[i]) == "elevator") {
 							instruction.img = "forward";
-							instruction.txt = "Go out of the elevator";
+							instruction.txt = this._mainView.getTranslation("routing", "outelevator");
 						}
 						//Other directions
 						else if(instruction.img <= 30 && instruction.img >= -30) {
 							instruction.img = "forward";
-							instruction.txt = "Go forward";
+							instruction.txt = this._mainView.getTranslation("routing", "goforward");
 						}
 						else if(instruction.img < -30 && instruction.img >= -120) {
 							instruction.img = "left";
-							instruction.txt = "Turn to left";
+							instruction.txt = this._mainView.getTranslation("routing", "turnleft");
 						}
 						else if(instruction.img > 30 && instruction.img <= 120) {
 							instruction.img = "right";
-							instruction.txt = "Turn to right";
+							instruction.txt = this._mainView.getTranslation("routing", "turnright");
 						}
 						else {
 							instruction.img = "backward";
-							instruction.txt = "Go backward";
+							instruction.txt = this._mainView.getTranslation("routing", "gobackward");
 						}
 					}
 					//Create label for transition
@@ -3682,43 +3711,43 @@ var RoutingView = function(main) {
 							case "stairs":
 								if(levelDiff > 0) {
 									instruction.img = "stairs_up";
-									instruction.txt = "Go upstairs";
+									instruction.txt = this._mainView.getTranslation("routing", "upstairs");
 								}
 								else if(levelDiff < 0) {
 									instruction.img = "stairs_down";
-									instruction.txt = "Go downstairs";
+									instruction.txt = this._mainView.getTranslation("routing", "downstairs");
 								}
 								else {
 									instruction.img = "stairs";
-									instruction.txt = "Use stairs";
+									instruction.txt = this._mainView.getTranslation("routing", "usestairs");
 								}
 								break;
 							case "escalator":
 								if(levelDiff > 0) {
 									instruction.img = "escalator_up";
-									instruction.txt = "Go up using conveying stairs";
+									instruction.txt = this._mainView.getTranslation("routing", "upconveying");
 								}
 								else if(levelDiff < 0) {
 									instruction.img = "escalator_down";
-									instruction.txt = "Go down using conveying stairs";
+									instruction.txt = this._mainView.getTranslation("routing", "downconveying");
 								}
 								else {
 									instruction.img= "escalator";
-									instruction.txt = "Use conveying path";
+									instruction.txt = this._mainView.getTranslation("routing", "useconveying");
 								}
 								break;
 							case "elevator":
 								if(levelDiff > 0) {
 									instruction.img = "elevator_up";
-									instruction.txt = "Go to level "+path[i+1].getLevel()+" using elevator";
+									instruction.txt = this._mainView.getTranslation("routing", "golevel")+" "+path[i+1].getLevel()+" "+this._mainView.getTranslation("routing", "usingelevator");
 								}
 								else if(levelDiff < 0) {
 									instruction.img = "elevator_down";
-									instruction.txt = "Go to level "+path[i+1].getLevel()+" using elevator";
+									instruction.txt = this._mainView.getTranslation("routing", "golevel")+" "+path[i+1].getLevel()+" "+this._mainView.getTranslation("routing", "usingelevator");
 								}
 								else {
 									instruction.img= "elevator";
-									instruction.txt = "Use elevator";
+									instruction.txt = this._mainView.getTranslation("routing", "useelevator");
 								}
 								break;
 							default:

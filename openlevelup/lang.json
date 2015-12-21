@@ -12,9 +12,9 @@
 			"fr": "OK",
 			"en": "OK"
 		},
-		"search": {
-			"fr": "Rechercher",
-			"en": "Search"
+		"status": {
+			"fr": "État",
+			"en": "Status"
 		}
 	},
 	"error": {
@@ -45,6 +45,30 @@
 		"invalidshortlink": {
 			"fr": "Lien court invalide",
 			"en": "Invalid short link"
+		},
+		"datadownload": {
+			"fr": "Erreur lors du téléchargement des données",
+			"en": "An error occured during data download"
+		},
+		"invalidcoordsnote": {
+			"fr": "Coordonnées invalides pour la note",
+			"en": "Invalid coordinates for your note"
+		},
+		"emptynote": {
+			"fr": "La note est vide",
+			"en": "Your note is empty"
+		},
+		"notesent": {
+			"fr": "La note a été envoyée avec succès",
+			"en": "Your note was successfully sent"
+		},
+		"notefail": {
+			"fr": "Erreur lors de l'envoi de la note",
+			"en": "An error occurred during note sending"
+		},
+		"noroute": {
+			"fr": "Pas de chemin trouvé",
+			"en": "No route found"
 		}
 	},
 	"main": {
@@ -113,10 +137,17 @@
 			"en": "Details"
 		}
 	},
-	"images": {
-		
+	"image": {
+		"page": {
+			"fr": "Page",
+			"en": "Page"
+		}
 	},
 	"notes": {
+		"note": {
+			"fr": "Note",
+			"en": "Note"
+		},
 		"desc": {
 			"fr": "Ajoutez une note pour indiquer aux contributeurs s'il manque un objet ou s'il y a une erreur. Glissez le marqueur sur la carte, et donnez des détails ci-dessous.",
 			"en": "Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here."
@@ -128,6 +159,48 @@
 		"title": {
 			"fr": "Nouvelle note",
 			"en": "New note"
+		},
+		"zoomintoadd": {
+			"fr": "Zoomez pour pouvoir ajouter une note",
+			"en": "You have to zoom in to add a note"
+		},
+		"user": {
+			"fr": "Utilisateur",
+			"en": "User"
+		},
+		"anonymous": {
+			"fr": "Anonyme",
+			"en": "Anonymous"
+		},
+		"seeosm": {
+			"fr": "Voir sur OSM.org",
+			"en": "See on OSM.org"
+		}
+	},
+	"about": {
+		"title": {
+			"fr": "À propos d'OpenLevelUp!",
+			"en": "About OpenLevelUp!"
+		},
+		"summary": {
+			"fr": "Ce site vous permet de voir les <a href=\"http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging\">données de l'intérieur des bâtiments</a> contenues dans le projet <a href=\"http://openstreetmap.org\">OpenStreetMap</a>. OpenLevelUp est disponible sous licence <a href=\"https://www.gnu.org/licenses/agpl.html\">AGPL v3</a>.",
+			"en": "This website allows you to see <a href=\"http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging\">indoor data</a> from the <a href=\"http://openstreetmap.org\">OpenStreetMap</a> project. Licensed under <a href=\"https://www.gnu.org/licenses/agpl.html\">AGPL v3</a>."
+		},
+		"laureate": {
+			"fr": "Ce projet est lauréat du concours <a href=\"http://opendata.regionpaca.fr/concours-regional-open-paca.html\">OpenPACA</a> 2015, organisé par la région <a href=\"http://opendata.regionpaca.fr\">Provence-Alpes-Côte d'Azur</a>.",
+			"en": "This project was laureate of the <a href=\"http://opendata.regionpaca.fr/concours-regional-open-paca.html\">OpenPACA</a> contest (2015 edition), organized by the french region <a href=\"http://opendata.regionpaca.fr\">Provence-Alpes-Côte d'Azur</a>."
+		},
+		"contact": {
+			"fr": "Contact",
+			"en": "Contact"
+		},
+		"github": {
+			"fr": "Dépôt GitHub",
+			"en": "GitHub repository"
+		},
+		"wiki": {
+			"fr": "Wiki",
+			"en": "Wiki"
 		}
 	},
 	"params": {
@@ -170,6 +243,144 @@
 		"title": {
 			"fr": "Navigation (bêta)",
 			"en": "Navigation (beta)"
+		},
+		"useelevator": {
+			"fr": "Prenez l'ascenseur",
+			"en": "Use elevator"
+		},
+		"golevel": {
+			"fr": "Allez au niveau",
+			"en": "Go to level"
+		},
+		"usingelevator": {
+			"fr": "par l'ascenseur",
+			"en": "using elevator"
+		},
+		"useconveying": {
+			"fr": "Prenez l'escalator",
+			"en": "Use conveying path"
+		},
+		"downconveying": {
+			"fr": "Descendez via l'escalator",
+			"en": "Go down using conveying stairs"
+		},
+		"upconveying": {
+			"fr": "Montez via l'escalator",
+			"en": "Go up using conveying stairs"
+		},
+		"usestairs": {
+			"fr": "Prenez les escaliers",
+			"en": "Use stairs"
+		},
+		"downstairs": {
+			"fr": "Descendez les escaliers",
+			"en": "Go downstairs"
+		},
+		"upstairs": {
+			"fr": "Montez les escaliers",
+			"en": "Go upstairs"
+		},
+		"goforward": {
+			"fr": "Allez tout droit",
+			"en": "Go forward"
+		},
+		"gobackward": {
+			"fr": "Reculez",
+			"en": "Go backward"
+		},
+		"turnright": {
+			"fr": "Tournez à droite",
+			"en": "Turn to right"
+		},
+		"turnleft": {
+			"fr": "Tournez à gauche",
+			"en": "Turn to left"
+		},
+		"outelevator": {
+			"fr": "Sortez de l'ascenseur",
+			"en": "Go out of the elevator"
+		},
+		"arrived": {
+			"fr": "Vous êtes arrivé",
+			"en": "You are arrived"
+		},
+		"clickmarker": {
+			"fr": "Cliquez ou glissez le marqueur",
+			"en": "Click or drag marker"
+		}
+	},
+	"routingmode": {
+		"foot": {
+			"fr": "À pied",
+			"en": "By foot"
+		},
+		"wheelchair": {
+			"fr": "En fauteuil",
+			"en": "In wheelchair"
+		}
+	},
+	"details": {
+		"access": {
+			"en": "Access",
+			"fr": "Accès"
+		},
+		"architect": {
+			"en": "Architect",
+			"fr": "Architecte"
+		},
+		"artist": {
+			"en": "Artist",
+			"fr": "Artiste"
+		},
+		"artist_name": {
+			"en": "Artist",
+			"fr": "Artiste"
+		},
+		"capacity": {
+			"en": "Capacity",
+			"fr": "Capacité"
+		},
+		"display": {
+			"en": "Display",
+			"fr": "Affichage"
+		},
+		"material": {
+			"en": "Material",
+			"fr": "Matériau"
+		},
+		"operator": {
+			"en": "Operator",
+			"fr": "Gestionnaire"
+		},
+		"support": {
+			"en": "Support",
+			"fr": "Support"
+		},
+		"vendor": {
+			"en": "With vendor",
+			"fr": "Vendeur présent"
+		}
+	},
+	"loading": {
+		"prepareupdate": {
+			"fr": "Nettoyage",
+			"en": "Prepare update"
+		},
+		"refresh": {
+			"fr": "Rafraîchissement de la carte",
+			"en": "Refresh map"
+		},
+		"requestoapi": {
+			"fr": "Téléchargement des données OSM",
+			"en": "Download OSM data"
+		},
+		"processdata": {
+			"fr": "Analyse des données reçues",
+			"en": "Process received data"
+		},
+		"downloadphoto": {
+			"fr": "Obtention des photos associées",
+			"en": "Download photos metadata"
 		}
 	},
 	"title": {
@@ -197,7 +408,7 @@
 				"en": "See this on OSM.org"
 			}
 		},
-		"images": {
+		"image": {
 			"statusok": {
 				"fr": "L'image est valide",
 				"en": "The image link is valid"
@@ -267,6 +478,14 @@
 			"changelevel": {
 				"fr": "Cliquez pour changer de niveau",
 				"en": "Click to change level"
+			}
+		}
+	},
+	"value": {
+		"general": {
+			"search": {
+				"fr": "Rechercher",
+				"en": "Search"
 			}
 		}
 	}

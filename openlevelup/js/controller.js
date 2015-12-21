@@ -238,7 +238,7 @@ var Ctrl = function() {
 		//Check if zoom is high enough to download data
 		if(zoom >= CONFIG.view.map.cluster_min_zoom) {
 			this._view.getLoadingView().setLoading(true);
-			this._view.getLoadingView().addLoadingInfo("Prepare update");
+			this._view.getLoadingView().addLoadingInfo(this._view.getTranslation("loading", "prepareupdate"));
 			
 			//High zoom data download
 			if(zoom >= CONFIG.view.map.data_min_zoom) {
@@ -297,7 +297,7 @@ var Ctrl = function() {
 	 * This function is called after data download finishes
 	 */
 	Ctrl.prototype.endMapUpdate = function() {
-		this._view.getLoadingView().addLoadingInfo("Refresh map");
+		this._view.getLoadingView().addLoadingInfo(this._view.getTranslation("loading", "refresh"));
 		this._view.updateMapMoved();
 		this._view.getLoadingView().setLoading(false);
 	};
@@ -306,7 +306,7 @@ var Ctrl = function() {
 	 * This function is called after cluster data download finishes
 	 */
 	Ctrl.prototype.endMapClusterUpdate = function() {
-		this._view.getLoadingView().addLoadingInfo("Refresh map");
+		this._view.getLoadingView().addLoadingInfo(this._view.getTranslation("loading", "refresh"));
 		this._view.updateMapMoved();
 		this._view.getLoadingView().setLoading(false);
 	};
@@ -328,7 +328,7 @@ var Ctrl = function() {
 		var oapiRequest = null;
 		var bounds = boundsString(bbox);
 		
-		this._view.getLoadingView().addLoadingInfo("Request Overpass API");
+		this._view.getLoadingView().addLoadingInfo(this._view.getTranslation("loading", "requestoapi"));
 		
 		//Prepare request depending of type
 		if(type == "cluster") {
@@ -339,12 +339,12 @@ var Ctrl = function() {
 		}
 
 		//Download data
-		$(document).ajaxError(function( event, jqxhr, settings, thrownError ) { console.log("Error: "+thrownError+"\nURL: "+settings.url); });
+		$(document).ajaxError(function( event, jqxhr, settings, thrownError ) { console.error("Error: "+thrownError+"\nURL: "+settings.url); });
 		$.get(
 			CONFIG.osm.oapi+encodeURIComponent(oapiRequest),
 			function(data) {
 				//console.log("[Time] Overpass download: "+((new Date()).getTime() - this._downloadStart));
-				this.getView().getLoadingView().addLoadingInfo("Process received data");
+				this.getView().getLoadingView().addLoadingInfo(this._view.getTranslation("loading", "processdata"));
 				
 				if(type == "cluster") {
 					this._clusterData = new OSMClusterData(bbox, data);
@@ -355,7 +355,7 @@ var Ctrl = function() {
 					this._data = new OSMData(bbox, data);
 					this.getView().getMapView().resetVars();
 
-					this.getView().getLoadingView().addLoadingInfo("Download photos metadata");
+					this.getView().getLoadingView().addLoadingInfo(this._view.getTranslation("loading", "downloadphoto"));
 					this._nbExternalApiRequests = 0;
 					
 					//Download OSM notes
@@ -387,7 +387,7 @@ var Ctrl = function() {
 	 */
 	Ctrl.prototype.onDownloadFail = function() {
 		this.getView().getLoadingView().setLoading(false);
-		this.getView().getMessagesView().displayMessage("An error occured during data download", "error");
+		this.getView().getMessagesView().displayMessage(this._view.getTranslation("error", "datadownload"), "error");
 	};
 	
 	/**
@@ -633,11 +633,11 @@ var Ctrl = function() {
 				).fail(this.newNoteFailed.bind(this));
 			}
 			else {
-				this._view.getMessagesView().displayMessage("Invalid coordinates for your note", "error");
+				this._view.getMessagesView().displayMessage(this._view.getTranslation("error", "invalidcoordsnote"), "error");
 			}
 		}
 		else {
-			this._view.getMessagesView().displayMessage("Your note is empty", "alert");
+			this._view.getMessagesView().displayMessage(this._view.getTranslation("error", "emptynote"), "alert");
 		}
 	};
 	
@@ -645,7 +645,7 @@ var Ctrl = function() {
 	 * Success function for note sending
 	 */
 	Ctrl.prototype.newNoteSent = function(data) {
-		this._view.getMessagesView().displayMessage("Your note was successfully sent", "info");
+		this._view.getMessagesView().displayMessage(this._view.getTranslation("error", "notesent"), "info");
 		this._view.getMapView().hideDraggableMarker();
 		this._view.collapseSidebar();
 		
@@ -660,7 +660,7 @@ var Ctrl = function() {
 	 * Fail function for note sending
 	 */
 	Ctrl.prototype.newNoteFailed = function() {
-		this._view.getMessagesView().displayMessage("An error occurred during note sending", "error");
+		this._view.getMessagesView().displayMessage(this._view.getTranslation("error", "notefail"), "error");
 		this._view.getMapView().hideDraggableMarker();
 		this._view.collapseSidebar();
 	};
@@ -690,7 +690,7 @@ var Ctrl = function() {
 			this.getView().getRoutingView().showRoute(path);
 		}
 		catch(e) {
-			this.getView().getMessagesView().displayMessage("No route found", "alert");
+			this.getView().getMessagesView().displayMessage(this._view.getTranslation("error", "noroute"), "alert");
 			console.log(e);
 			this.getView().getRoutingView().showRoute(null);
 		}

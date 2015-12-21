@@ -36,6 +36,12 @@ If you want to change some parameters, such as the Overpass API server or the av
 just edit the **config.json** file. You can also change the objects style by editing **style.json** file.
 
 
+Contribute
+----------
+
+If you speak both english and another language, you may be interested in OpenLevelUp translation. See **lang.json**, which contains all labels used in the interface and their translations.
+
+
 License
 -------
 
