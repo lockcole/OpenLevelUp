@@ -183,6 +183,11 @@ header, footer, #home > div {
 	text-align: left;
 }
 
+#icon-star {
+	height: 16px;
+	vertical-align: middle;
+}
+
 /* Room list sidebar */
 
 #roomlist {
