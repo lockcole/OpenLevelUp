@@ -2,358 +2,441 @@
 	"general": {
 		"cancel": {
 			"fr": "Annuler",
+			"de": "Abbruch",
 			"en": "Cancel"
 		},
 		"loading": {
 			"fr": "Chargement",
+			"fr": "Wird geladen",
 			"en": "Loading"
 		},
 		"ok": {
 			"fr": "OK",
+			"de": "OK",
 			"en": "OK"
 		},
 		"status": {
 			"fr": "État",
+			"de": "Status",
 			"en": "Status"
 		}
 	},
 	"error": {
 		"bbox": {
 			"fr": "Enveloppe invalide",
+			"de": "Ungültige bounding box",
 			"en": "Invalid bounding box"
 		},
 		"nodata": {
 			"fr": "Il n'y a pas de données dans cette zone",
+			"de": "Keine Daten in dieser Region verfügbar",
 			"en": "There is no available data in this area"
 		},
 		"zoomin": {
 			"fr": "Zoomez pour voir plus de détails",
+			"de": "Zoom rein um mehr Informationen zu sehen",
 			"en": "Zoom in to see more information"
 		},
 		"invalidlevel": {
 			"fr": "Niveau invalide",
+			"de": "Ungültiges Stockwerk",
 			"en": "Invalid level"
 		},
 		"lastlevel": {
 			"fr": "Vous êtes déjà au dernier niveau disponible",
+			"de": "Du bist bereits im höchsten Stockwerk",
 			"en": "You are already at the last available level"
 		},
 		"firstlevel": {
 			"fr": "Vous êtes déjà au premier niveau disponible",
+			"de": "Du bist bereits im untersten Stockwerk",
 			"en": "You are already at the first available level"
 		},
 		"invalidshortlink": {
 			"fr": "Lien court invalide",
+			"de": "Ungültiger Kurz-Link",
 			"en": "Invalid short link"
 		},
 		"datadownload": {
 			"fr": "Erreur lors du téléchargement des données",
+			"de": "Beim Laden der Daten ist ein Fehler aufgetreten",
 			"en": "An error occured during data download"
 		},
 		"invalidcoordsnote": {
 			"fr": "Coordonnées invalides pour la note",
+			"de": "Ungültige Korrdinaten für den Hinweis",
 			"en": "Invalid coordinates for your note"
 		},
 		"emptynote": {
 			"fr": "La note est vide",
+			"de": "Dein Hinweis ist leer",
 			"en": "Your note is empty"
 		},
 		"notesent": {
 			"fr": "La note a été envoyée avec succès",
+			"de": "Dein Hinweis wurde erfolgreich gesendet",
 			"en": "Your note was successfully sent"
 		},
 		"notefail": {
 			"fr": "Erreur lors de l'envoi de la note",
+			"de": "Beim Senden des Hinweises ist ein Fehler aufgetreten",
 			"en": "An error occurred during note sending"
 		},
 		"noroute": {
 			"fr": "Pas de chemin trouvé",
+			"de": "Keine Route gefunden",
 			"en": "No route found"
 		}
 	},
 	"main": {
 		"about": {
 			"fr": "À propos",
+			"de": "Über",
 			"en": "About"
 		},
 		"doctag": {
 			"fr": "Documentation pour l'édition",
+			"de": "Dokumentation zum Editieren",
 			"en": "Documentation for editing"
 		},
 		"how": {
 			"fr": "Comment ?",
+			"de": "Kommentar?",
 			"en": "How ?"
 		},
 		"qr": {
 			"fr": "QR Code",
+			"de": "QR Code",
 			"en": "QR Code"
 		},
 		"shortlink": {
 			"fr": "Lien court",
+			"de": "Kurzlink",
 			"en": "Shortlink"
 		},
 		"slogan": {
 			"fr": "Voyez l'intérieur des bâtiments<br />avec OpenLevelUp!",
+			"de": "Erkunde das innere von Gebäuden<br />mit OpenLevelUp!",
 			"en": "See inside buildings<br />with OpenLevelUp!"
 		}
 	},
 	"direction": {
 		"N": {
 			"fr": "Nord",
+			"de": "Nord",
 			"en": "North"
 		},
 		"NW": {
 			"fr": "Nord-ouest",
+			"de": "Nord-West",
 			"en": "North-west"
 		},
 		"W": {
 			"fr": "Ouest",
+			"de": "West",
 			"en": "West"
 		},
 		"SW": {
 			"fr": "Sud-ouest",
+			"de": "Süd-West",
 			"en": "South-west"
 		},
 		"S": {
 			"fr": "Sud",
+			"de": "Süd",
 			"en": "South"
 		},
 		"SE": {
 			"fr": "Sud-est",
+			"de": "Süd-Ost",
 			"en": "South-east"
 		},
 		"E": {
 			"fr": "Est",
+			"de": "Ost",
 			"en": "East"
 		},
 		"NE": {
 			"fr": "Nord-est",
+			"de": "Nord-Ost",
 			"en": "North-east"
 		}
 	},
 	"feature": {
 		"details": {
 			"fr": "Détails",
+			"de": "Details",
 			"en": "Details"
 		}
 	},
 	"image": {
 		"page": {
 			"fr": "Page",
+			"de": "Seite",
 			"en": "Page"
 		}
 	},
 	"notes": {
 		"note": {
 			"fr": "Note",
+			"de": "Hinweis",
 			"en": "Note"
 		},
 		"desc": {
 			"fr": "Ajoutez une note pour indiquer aux contributeurs s'il manque un objet ou s'il y a une erreur. Glissez le marqueur sur la carte, et donnez des détails ci-dessous.",
+			"de": "Ergänze einen Hinweis um Anderen zu zeigen, dass etwas fehlt oder falsch ist. Ziehe den Marker zur genauen Position und gebe einige Details.",
 			"en": "Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here."
 		},
 		"new": {
 			"fr": "Nouvelle note",
+			"de": "Neuer Hinweis",
 			"en": "New note"
 		},
 		"title": {
 			"fr": "Nouvelle note",
+			"de": "Neuer Hinweis",
 			"en": "New note"
 		},
 		"zoomintoadd": {
 			"fr": "Zoomez pour pouvoir ajouter une note",
+			"de": "Du musst reinzoomen um einen Hinweis zu setzen",
 			"en": "You have to zoom in to add a note"
 		},
 		"user": {
 			"fr": "Utilisateur",
+			"de": "Benutzer",
 			"en": "User"
 		},
 		"anonymous": {
 			"fr": "Anonyme",
+			"de": "Anonym",
 			"en": "Anonymous"
 		},
 		"seeosm": {
 			"fr": "Voir sur OSM.org",
+			"de": "Auf OSM.org ansehen",
 			"en": "See on OSM.org"
 		}
 	},
 	"about": {
 		"title": {
 			"fr": "À propos d'OpenLevelUp!",
+			"de": "Über OpenLevelUp!",
 			"en": "About OpenLevelUp!"
 		},
 		"summary": {
 			"fr": "Ce site vous permet de voir les <a href=\"http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging\">données de l'intérieur des bâtiments</a> contenues dans le projet <a href=\"http://openstreetmap.org\">OpenStreetMap</a>. OpenLevelUp est disponible sous licence <a href=\"https://www.gnu.org/licenses/agpl.html\">AGPL v3</a>.",
+			"de": "Diese Seite zeigt <a href=\"http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging\">Innenansichten</a> von <a href=\"http://openstreetmap.org\">OpenStreetMap</a>. OpenLevelUp ist lizensiert unter der Lizenz <a href=\"https://www.gnu.org/licenses/agpl.html\">AGPL v3</a>.",
 			"en": "This website allows you to see <a href=\"http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging\">indoor data</a> from the <a href=\"http://openstreetmap.org\">OpenStreetMap</a> project. Licensed under <a href=\"https://www.gnu.org/licenses/agpl.html\">AGPL v3</a>."
 		},
 		"laureate": {
 			"fr": "Ce projet est lauréat du concours <a href=\"http://opendata.regionpaca.fr/concours-regional-open-paca.html\">OpenPACA</a> 2015, organisé par la région <a href=\"http://opendata.regionpaca.fr\">Provence-Alpes-Côte d'Azur</a>.",
+			"de": "Dieses Projekt wurde unterstützt von <a href=\"http://opendata.regionpaca.fr/concours-regional-open-paca.html\">OpenPACA</a> 2015, organisiert von der französischen Region <a href=\"http://opendata.regionpaca.fr\">Provence-Alpes-Côte d'Azur</a>.",
 			"en": "This project was laureate of the <a href=\"http://opendata.regionpaca.fr/concours-regional-open-paca.html\">OpenPACA</a> contest (2015 edition), organized by the french region <a href=\"http://opendata.regionpaca.fr\">Provence-Alpes-Côte d'Azur</a>."
 		},
 		"contact": {
 			"fr": "Contact",
+			"de": "Kontakt",
 			"en": "Contact"
 		},
 		"github": {
 			"fr": "Dépôt GitHub",
+			"de": "GitHub repository",
 			"en": "GitHub repository"
 		},
 		"wiki": {
 			"fr": "Wiki",
+			"de": "Wiki",
 			"en": "Wiki"
 		}
 	},
 	"params": {
 		"buildings": {
 			"fr": "Voir uniquement les bâtiments",
+			"de": "Zeige nur Gebäude",
 			"en": "Show buildings only"
 		},
 		"notes": {
 			"fr": "Voir les notes OpenStreetMap",
+			"de": "Zeige OpenStreetMap Hinweise",
 			"en": "Show OpenStreetMap notes"
 		},
 		"pictures": {
 			"fr": "Voir les photos",
+			"de": "Zeige Bilder",
 			"en": "Show pictures"
 		},
 		"transcend": {
 			"fr": "Voir les objets inter-étages",
+			"de": "Zeige durchsichtige Gebäude",
 			"en": "Show transcendent objects"
 		},
 		"unrendered": {
 			"fr": "Voir les objets sans style",
+			"de": "Zeige Objekte, die kein speziellen Stil haben",
 			"en": "Show unrendered objects"
 		}
 	},
 	"rooms": {
 		"title": {
 			"fr": "Salles",
+			"de": "Räume",
 			"en": "Rooms"
 		}
 	},
 	"routing": {
 		"length": {
 			"fr": "Longueur",
+			"de": "Länge",
 			"en": "Length"
 		},
 		"time": {
 			"fr": "Durée",
+			"de": "Zeit",
 			"en": "Time"
 		},
 		"title": {
 			"fr": "Navigation (bêta)",
+			"de": "Navigation (beta)",
 			"en": "Navigation (beta)"
 		},
 		"useelevator": {
 			"fr": "Prenez l'ascenseur",
+			"de": "Aufzug erlauben",
 			"en": "Use elevator"
 		},
 		"golevel": {
 			"fr": "Allez au niveau",
+			"de": "Gehe zu Etage",
 			"en": "Go to level"
 		},
 		"usingelevator": {
 			"fr": "par l'ascenseur",
+			"de": "nutze den Aufzug",
 			"en": "using elevator"
 		},
 		"useconveying": {
 			"fr": "Prenez l'escalator",
+			"de": "Nutze die Rolltreppe",
 			"en": "Use conveying path"
 		},
 		"downconveying": {
 			"fr": "Descendez via l'escalator",
+			"de": "Gehe die Rolltreppe runter",
 			"en": "Go down using conveying stairs"
 		},
 		"upconveying": {
 			"fr": "Montez via l'escalator",
+			"de": "Gehe die Rolltreppe rauf",
 			"en": "Go up using conveying stairs"
 		},
 		"usestairs": {
 			"fr": "Prenez les escaliers",
+			"de": "Nutze die Treppe",
 			"en": "Use stairs"
 		},
 		"downstairs": {
 			"fr": "Descendez les escaliers",
+			"de": "Geh die Treppe runter",
 			"en": "Go downstairs"
 		},
 		"upstairs": {
 			"fr": "Montez les escaliers",
+			"de": "Geh die Treppe rauf",
 			"en": "Go upstairs"
 		},
 		"goforward": {
 			"fr": "Allez tout droit",
+			"de": "Gehe vorwärts",
 			"en": "Go forward"
 		},
 		"gobackward": {
 			"fr": "Reculez",
+			"de": "Gehe rückwärts",
 			"en": "Go backward"
 		},
 		"turnright": {
 			"fr": "Tournez à droite",
+			"de": "Drehe dich rechts",
 			"en": "Turn to right"
 		},
 		"turnleft": {
 			"fr": "Tournez à gauche",
+			"de": "Drehe dich links",
 			"en": "Turn to left"
 		},
 		"outelevator": {
 			"fr": "Sortez de l'ascenseur",
+			"de": "Verlasse den Aufzug"
 			"en": "Go out of the elevator"
 		},
 		"arrived": {
 			"fr": "Vous êtes arrivé",
+			"de": "Du hast das Ziel erreicht",
 			"en": "You are arrived"
 		},
 		"clickmarker": {
 			"fr": "Cliquez ou glissez le marqueur",
+			"de": "Klicke oder ziehe den Marker",
 			"en": "Click or drag marker"
 		}
 	},
 	"routingmode": {
 		"foot": {
 			"fr": "À pied",
+			"de": "zu Fuß",
 			"en": "By foot"
 		},
 		"wheelchair": {
 			"fr": "En fauteuil",
+			"de": "Per Rollstuhl",
 			"en": "In wheelchair"
 		}
 	},
 	"details": {
 		"access": {
 			"en": "Access",
+			"de": "Zugang",
 			"fr": "Accès"
 		},
 		"architect": {
 			"en": "Architect",
+			"de": "Architekt",
 			"fr": "Architecte"
 		},
 		"artist": {
 			"en": "Artist",
+			"de": "Künstler",
 			"fr": "Artiste"
 		},
 		"artist_name": {
 			"en": "Artist",
+			"de": "Künstler",
 			"fr": "Artiste"
 		},
 		"capacity": {
 			"en": "Capacity",
+			"de": "Kapazität",
 			"fr": "Capacité"
 		},
 		"display": {
 			"en": "Display",
+			"de": "Anzeige",
 			"fr": "Affichage"
 		},
 		"material": {
 			"en": "Material",
+			"de": "Material",
 			"fr": "Matériau"
 		},
 		"operator": {
 			"en": "Operator",
+			"de": "Betreiber",
 			"fr": "Gestionnaire"
 		},
 		"support": {
 			"en": "Support",
+			"de": "Befestigt",
 			"fr": "Support"
 		},
 		"vendor": {
@@ -364,22 +447,27 @@
 	"loading": {
 		"prepareupdate": {
 			"fr": "Nettoyage",
+			"de": "Bereite Update vor",
 			"en": "Prepare update"
 		},
 		"refresh": {
 			"fr": "Rafraîchissement de la carte",
+			"de": "Karte aktualisieren",
 			"en": "Refresh map"
 		},
 		"requestoapi": {
 			"fr": "Téléchargement des données OSM",
+			"de": "Lade OSM Daten runter",
 			"en": "Download OSM data"
 		},
 		"processdata": {
 			"fr": "Analyse des données reçues",
+			"de": "Analysiere geladene Daten",
 			"en": "Process received data"
 		},
 		"downloadphoto": {
 			"fr": "Obtention des photos associées",
+			"de": "Lade Bilder runter",
 			"en": "Download photos metadata"
 		}
 	},
@@ -387,96 +475,117 @@
 		"general": {
 			"tags": {
 				"fr": "Tags",
+				"de": "Tags",
 				"en": "Tags"
 			}
 		},
 		"feature": {
 			"leveldown": {
 				"fr": "Descendre",
+				"de": "Runter",
 				"en": "Go down"
 			},
 			"levelup": {
 				"fr": "Monter",
+				"de": "Hoch",
 				"en": "Go up"
 			},
 			"pictures": {
 				"fr": "Photos associées",
+				"de": "Zugehörige Bilder",
 				"en": "Related pictures"
 			},
 			"seeosm": {
 				"fr": "Voir cet objet sur OSM.org",
+				"de": "Betrachte dieses Objekt auf OSM.org",
 				"en": "See this on OSM.org"
 			}
 		},
 		"image": {
 			"statusok": {
 				"fr": "L'image est valide",
+				"de": "Diese Adresse des Bildes ist gültig",
 				"en": "The image link is valid"
 			},
 			"statusmissing": {
 				"fr": "Pas d'image associée",
+				"de": "Keine Bildadresse hinterlegt",
 				"en": "No image link defined"
 			},
 			"statusbad": {
 				"fr": "L'image est indisponible",
+				"de": "Diese Adresse des Bildes ist nicht gültig",
 				"en": "The image link is broken"
 			},
 			"checkmpl": {
 				"fr": "(Vérifiez les tags mapillary:*)",
+				"de": "(Prüfe mapillary:* tags)",
 				"en": "(Check mapillary:* tags)"
 			},
 			"loading": {
 				"fr": "L'image est en cours de chargement",
+				"de": "Das Bild wird eventuell noch geladen",
 				"en": "The image is still potentially loading"
 			}
 		},
 		"main": {
 			"about": {
 				"fr": "En savoir plus sur le projet",
+				"de": "Lerne mehr über das Projekt",
 				"en": "Know more about the project"
 			},
 			"how": {
 				"fr": "Zoomez sur une zone avec des données d'intérieur (les bulles numérotées sur la carte), puis naviguez à travers les étages avec les flèches haut et bas du panneau latéral.",
+				"de": "Zoome einfach auf eine Region mit Gebäudedaten (Kreise mit Nummern) und bewege dich durch die Etagen mit den Hoch- und Runter-Pfeilen.",
 				"en": "Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel."
 			},
 			"osmlink": {
 				"fr": "Voir la zone sur OpenStreetMap",
+				"de": "Betrachte diese Region auf OpenStreetMap",
 				"en": "See this area on OpenStreetMap"
 			},
 			"qr": {
 				"fr": "QR Code pour cette zone",
+				"de": "QR Code für diesen Ort",
 				"en": "QR Code for this map area"
 			},
 			"shortlink": {
 				"fr": "Lien court pour cette zone",
+				"de": "Kurz-Link für diesen Ort",
 				"en": "Short URL for this map area"
 			}
 		},
 		"params": {
 			"buildings": {
 				"fr": "Cache tous les objets qui ne sont pas des bâtiments (sans tag building=*)",
+				"de": "Verstecke alle Objekte die keine Gebäude sind (kein building=* Tag)",
 				"en": "Hides all objects that aren't buildings (no building=* tag)"
 			},
 			"notes": {
 				"fr": "Les notes OpenStreetMap permettent d'indiquer aux contributeurs qu'une donnée est manquante ou qu'une erreur existe.",
+				"de": "OpenStreetMap Hinweise können anderen Nutzern Informationen zu Verbesserungen in den Daten geben.",
 				"en": "OpenStreetMap notes allow other users to know that there is some edits to do in data."
 			},
 			"pictures": {
 				"fr": "Affiche un marqueur sur les objets associés à une photo",
+				"de": "Ergänzt Marker für Objekte mit zugehörigen Bildern",
 				"en": "Adds markers on objects which have an associated photo"
 			},
 			"transcend": {
 				"fr": "Objets traversant les étages, par exemples les escaliers ou ascenseurs",
+				"de": "Objekte die Stockwerke verbinden, wie Treppen oder Aufzüge",
 				"en": "Objects passing through levels, such as stairs or elevators"
 			},
 			"unrendered": {
 				"fr": "Objets associés à une valeur de niveau mais sans rendu défini. Cela signifie que l'objet n'a pas vocation à être affiché ou alors que certaines informations sont manquantes.",
+				"de": "Objekte welche bisher unbekannte Gebäudedaten haben. Es ist möglich, dass das Objekte nicht gezeichnet werden soll oder Informationen fehlen.",
 				"en": "Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information."
 			}
 		},
 		"routing": {
 			"changelevel": {
 				"fr": "Cliquez pour changer de niveau",
+				"de": "Klicke um das Stockwerk zu wechseln",
 				"en": "Click to change level"
 			}
 		}
@@ -485,6 +594,7 @@
 		"general": {
 			"search": {
 				"fr": "Rechercher",
+				"de": "Suche",
 				"en": "Search"
 			}
 		}
