@@ -334,6 +334,23 @@ var MainView = function(ctrl) {
 	 * Translates all available labels
 	 */
 	MainView.prototype.translate = function(lng) {
+		//Find if language is available
+		if(LANG.available[lng] == undefined) {
+			//Check for complex codes
+			if(lng.indexOf("-") == 2) {
+				var lngSimple = lng.substring(0, 2);
+				if(LANG.available[lngSimple]) {
+					lng = lngSimple;
+				}
+				else {
+					lng = "en";
+				}
+			}
+			else {
+				lng = "en";
+			}
+		}
+		
 		this._lang = lng;
 		console.log("[Lang] Set to "+lng);
 

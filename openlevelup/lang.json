@@ -1,4 +1,10 @@
 {
+	"available": {
+		"fr": true,
+		"de": true,
+		"en": true,
+		"zh-TW": true
+	},
 	"general": {
 		"cancel": {
 			"fr": "Annuler",
