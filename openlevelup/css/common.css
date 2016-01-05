@@ -741,3 +741,16 @@ span.osm-key, span.osm-val {
 
 .laureate .desc {
 }
+
+/* Ways for donations in support window */
+.donation {
+	margin-bottom: 10px;
+}
+
+.donation .way {
+	font-weight: bold;
+}
+
+.donation a {
+	float: right;
+}

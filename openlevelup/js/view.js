@@ -83,6 +83,7 @@ var MainView = function(ctrl) {
 	this._cLoading = new LoadingView(this);
 	this._cMessages = new MessagesView(this);
 	this._cAbout = new AboutView(this);
+	this._cSupport = new SupportView(this);
 	this._cNames = new NamesView(this);
 	this._cRouting = new RoutingView(this);
 	this._cImages = new ImagesView(this);
@@ -2435,7 +2436,7 @@ var URLView = function(main) {
 	
 	URLView.prototype._updateUrl = function() {
 		var optionsView = this._mainView.getOptionsView();
-		var params = "lat="+this._lat.toFixed(6)+"&lon="+this._lon.toFixed(6)+"&z="+this._zoom+"&t="+this._tiles;
+		var params = "lat="+parseFloat(this._lat).toFixed(6)+"&lon="+parseFloat(this._lon).toFixed(6)+"&z="+this._zoom+"&t="+this._tiles;
 		
 		if(this._zoom >= CONFIG.view.map.data_min_zoom) {
 			if(this._level != null) {
@@ -3206,11 +3207,36 @@ var AboutView = function(main) {
 			this._mainView.getMapView().get(),
 			{
 				title: this._mainView.getTranslation("about", "title"),
-				 content: '<span class="i18n about.summary">'+this._mainView.getTranslation("about", "summary")+'</span><br /><p style="text-align: center;"><a href="mailto:panieravide@riseup.net" class="i18n about.contact">'+this._mainView.getTranslation("about", "contact")+'</a> | <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup" class="i18n about.github">'+this._mainView.getTranslation("about", "github")+'</a> | <a href="https://wiki.openstreetmap.org/wiki/OpenLevelUp" class="i18n about.wiki">'+this._mainView.getTranslation("about", "wiki")+'</a></p><p class="laureate"><span class="images"><a href="http://opendata.regionpaca.fr"><img src="img/logo_paca.jpg" /></a></span><span class="desc i18n about.laureate">'+this._mainView.getTranslation("about", "laureate")+'</span></p>',
+				 content: '<span class="i18n about.summary">'+this._mainView.getTranslation("about", "summary")+'</span><br /><p style="text-align: center;"><a href="mailto:panieravide@riseup.net" class="i18n about.contact">'+this._mainView.getTranslation("about", "contact")+'</a> | <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup" class="i18n about.github">'+this._mainView.getTranslation("about", "github")+'</a> | <a href="https://wiki.openstreetmap.org/wiki/OpenLevelUp" class="i18n about.wiki">'+this._mainView.getTranslation("about", "wiki")+'</a> | <a class="i18n about.doctag" href="https://wiki.openstreetmap.org/wiki/OpenLevelUp/Recommended_tagging">'+this._mainView.getTranslation("about", "doctag")+'</a></p><p class="laureate"><span class="images"><a href="http://opendata.regionpaca.fr"><img src="img/logo_paca.jpg" /></a></span><span class="desc i18n about.laureate">'+this._mainView.getTranslation("about", "laureate")+'</span></p>',
 				modal: true,
 				position: 'center',
 				visible: true
 			}
+		);
+	}.bind(this));
+}
+
+
+
+/**
+ * The support view
+ */
+var SupportView = function(main) {
+	//ATTRIBUTES
+	/** The main view **/
+	this._mainView = main;
+	
+	//CONSTRUCTOR
+	$("#support-link").click(function() {
+		L.control.window(
+			this._mainView.getMapView().get(),
+				{
+					title: this._mainView.getTranslation("support", "title"),
+					content: this._mainView.getTranslation("support", "desc")+'<hr /><p class="donation"><span class="way">Bitcoin</span> <a href="bitcoin:1Jn58LkSNh5iyJ7tA7VHqrLvueVacvuUWt?label=OpenLevelUp">1Jn58LkSNh5iyJ7tA7VHqrLvueVacvuUWt</a></p><p class="donation"><span class="way">Flattr</span> <a href="https://flattr.com/submit/auto?fid=66g2vo&url=http%3A%2F%2Fopenlevelup.pavie.info%2F" target="_blank"><img src="https://button.flattr.com/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0"></a></p>',
+					modal: true,
+					position: 'center',
+					visible: true
+				}
 		);
 	}.bind(this));
 }

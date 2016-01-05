@@ -118,12 +118,6 @@
 			"en": "About",
 			"zh-TW": "關於"
 		},
-		"doctag": {
-			"fr": "Documentation pour l'édition",
-			"de": "Dokumentation zum Editieren",
-			"en": "Documentation for editing",
-			"zh-TW": "編輯指南文件"
-		},
 		"how": {
 			"fr": "Comment ?",
 			"de": "Kommentar?",
@@ -301,6 +295,12 @@
 			"de": "Wiki",
 			"en": "Wiki",
 			"zh-TW": "Wiki"
+		},
+		"doctag": {
+			"fr": "Documentation pour l'édition",
+			"de": "Dokumentation zum Editieren",
+			"en": "Documentation for editing",
+			"zh-TW": "編輯指南文件"
 		}
 	},
 	"params": {
@@ -471,6 +471,16 @@
 			"de": "Per Rollstuhl",
 			"en": "In wheelchair",
 			"zh-TW": "輪椅"
+		}
+	},
+	"support": {
+		"title": {
+			"fr": "Soutenez OpenLevelUp",
+			"en": "Support OpenLevelUp"
+		},
+		"desc": {
+			"fr": "Si vous appréciez le projet et que vous souhaitez le soutenir, vous pouvez faire un don en utilisant l'un des moyens ci-dessous.",
+			"en": "If you like this project and wish to support it, you can make a donation using one of the following ways."
 		}
 	},
 	"details": {
