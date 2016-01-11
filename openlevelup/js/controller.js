@@ -196,6 +196,13 @@ var Ctrl = function() {
 			controller.getView().getMessagesView().displayMessage(e.message, "error");
 		}
 	};
+	
+	/**
+	 * Handles the edit of implicit level option
+	 */
+	Ctrl.prototype.implicitLevelChanged = function() {
+		controller.onMapUpdate(true);
+	};
 
 
 /*******************
@@ -335,7 +342,12 @@ var Ctrl = function() {
 			oapiRequest = '[out:json][timeout:25][bbox:'+bounds+'];(way["indoor"]["indoor"!="yes"]["level"];way["buildingpart"]["level"];);out ids center;';
 		}
 		else {
-			oapiRequest = '[out:json][timeout:25][bbox:'+bounds+'];(node["repeat_on"];way["repeat_on"];relation["repeat_on"];node[~"^((min|max)_)?level$"~"."];way[~"^((min|max)_)?level$"~"."];relation[~"^((min|max)_)?level$"~"."];);out body;>;out qt skel;';
+			if(this._view.getOptionsView().showImplicitLevel()) {
+				oapiRequest = '[out:json][timeout:25][bbox:'+bounds+'];(node;way;relation;);(._;>;);out body;';
+			}
+			else {
+				oapiRequest = '[out:json][timeout:25][bbox:'+bounds+'];(node["repeat_on"];way["repeat_on"];relation["repeat_on"];node[~"^((min|max)_)?level$"~"."];way[~"^((min|max)_)?level$"~"."];relation[~"^((min|max)_)?level$"~"."];);out body;>;out qt skel;';
+			}
 		}
 
 		//Download data
@@ -352,7 +364,7 @@ var Ctrl = function() {
 					this.endMapClusterUpdate();
 				}
 				else {
-					this._data = new OSMData(bbox, data);
+					this._data = new OSMData(bbox, data, this._view.getOptionsView().showImplicitLevel());
 					this.getView().getMapView().resetVars();
 
 					this.getView().getLoadingView().addLoadingInfo(this._view.getTranslation("loading", "downloadphoto"));

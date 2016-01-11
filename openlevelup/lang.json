@@ -333,6 +333,10 @@
 			"de": "Zeige Objekte, die kein speziellen Stil haben",
 			"en": "Show unrendered objects",
 			"zh-TW": "顯示未繪圖的物件"
+		},
+		"implicitlvl": {
+			"fr": "Voir les objets sans niveau défini",
+			"en": "Show objects with implicit level"
 		}
 	},
 	"rooms": {
@@ -705,6 +709,10 @@
 				"de": "Objekte welche bisher unbekannte Gebäudedaten haben. Es ist möglich, dass das Objekte nicht gezeichnet werden soll oder Informationen fehlen.",
 				"en": "Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.",
 				"zh-TW": "包含室內資料，但不在我們的繪圖規則裡的物件。代表該物件不必被繪圖出來或遺漏所需資訊。"
+			},
+			"implicitlvl": {
+				"fr": "Objets sans valeur de niveau définie, donc à priori au rez-de-chaussée.",
+				"en": "Objects without defined level value, so implicitly on ground level."
 			}
 		},
 		"routing": {
