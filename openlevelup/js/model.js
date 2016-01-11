@@ -1302,7 +1302,12 @@ var Graph = function() {
 				//Walkable paths
 				else if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
 					if(this._isArea(currentElement.tags)) {
-						//TODO
+						//Create grid from polygon
+						var areaGeojson = osmData.getFeature("way/"+currentElement.id).getGeometry().get();
+						var grid = turf.triangleGrid(turf.extent(areaGeojson), 0.002, 'kilometers');
+						console.log(JSON.stringify(grid));
+						
+						//TODO Connect grid to network
 					}
 					else {
 						//Check transition
