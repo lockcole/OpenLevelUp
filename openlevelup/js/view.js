@@ -35,6 +35,9 @@ var MainView = function(ctrl) {
 	/** Is the user using a WebGL capable browser ? **/
 	this._hasWebGL = Detector.webgl;
 	
+	/** The view language **/
+	this._lang = null;
+	
 	/*
 	 * The view components
 	 */
@@ -80,6 +83,7 @@ var MainView = function(ctrl) {
 	this._cLoading = new LoadingView(this);
 	this._cMessages = new MessagesView(this);
 	this._cAbout = new AboutView(this);
+	this._cSupport = new SupportView(this);
 	this._cNames = new NamesView(this);
 	this._cRouting = new RoutingView(this);
 	this._cImages = new ImagesView(this);
@@ -89,6 +93,7 @@ var MainView = function(ctrl) {
 	
 	this._cNames.hideButton();
 	this._cLevel.disable();
+	this.translate(window.navigator.userLanguage || window.navigator.language);
 	
 	//Link on logo
 	$("#logo-link").click(function() {
@@ -265,7 +270,7 @@ var MainView = function(ctrl) {
 			}
 		}
 		else {
-			this._cMessages.displayMessage("Zoom in to see more information", "info");
+			this._cMessages.displayMessage(this.getTranslation("error", "zoomin"), "info");
 			
 			//Remove names and export buttons if needed
 			if(oldZoom == null || oldZoom >= CONFIG.view.map.data_min_zoom) {
@@ -324,6 +329,121 @@ var MainView = function(ctrl) {
 		$(".sidebar-tabs li").removeClass("active");
 		$("#sidebar .sidebar-pane").removeClass("active");
 		$("#sidebar").addClass("collapsed");
+	};
+	
+	/**
+	 * Translates all available labels
+	 */
+	MainView.prototype.translate = function(lng) {
+		//Find if language is available
+		if(LANG.available[lng] == undefined) {
+			//Check for complex codes
+			if(lng.indexOf("-") == 2) {
+				var lngSimple = lng.substring(0, 2);
+				if(LANG.available[lngSimple]) {
+					lng = lngSimple;
+				}
+				else {
+					lng = "en";
+				}
+			}
+			else {
+				lng = "en";
+			}
+		}
+		
+		this._lang = lng;
+		console.log("[Lang] Set to "+lng);
+
+		$(".i18n").each(function(index) {
+			//Check classes of DOM element
+			var classes = $(this).attr("class").split(" ");
+			var i=0, l=classes.length, found=false, categories, label;
+			
+			while(i < l && !found) {
+				//If class for i18n, read it and translate
+				if(classes[i].indexOf(".") >= 0) {
+					categories = classes[i].split(".");
+					
+					if(categories.length == 2) {
+						//Check if given label exists in LANG, or use default english
+						label = (LANG[categories[0]][categories[1]][lng] != undefined) ? LANG[categories[0]][categories[1]][lng] : LANG[categories[0]][categories[1]].en;
+						
+						//Replace text in DOM
+						$(this).html(label);
+						
+						found = true;
+					}
+				}
+				i++;
+			}
+		});
+		
+		$(".i18n-title").each(function(index) {
+			//Check classes of DOM element
+			var classes = $(this).attr("class").split(" ");
+			var i=0, l=classes.length, found=false, categories, label;
+			
+			while(i < l && !found) {
+				//If class for i18n, read it and translate
+				if(classes[i].indexOf("title.") == 0) {
+					categories = classes[i].substring(6).split(".");
+					
+					if(categories.length == 2) {
+						//Check if given label exists in LANG, or use default english
+						label = (LANG.title[categories[0]][categories[1]][lng] != undefined) ? LANG.title[categories[0]][categories[1]][lng] : LANG.title[categories[0]][categories[1]].en;
+						
+						//Replace text in DOM
+						$(this).attr("title", label);
+						
+						found = true;
+					}
+				}
+				i++;
+			}
+		});
+		
+		$(".i18n-value").each(function(index) {
+			//Check classes of DOM element
+			var classes = $(this).attr("class").split(" ");
+			var i=0, l=classes.length, found=false, categories, label;
+			
+			while(i < l && !found) {
+				//If class for i18n, read it and translate
+				if(classes[i].indexOf("value.") == 0) {
+					categories = classes[i].substring(6).split(".");
+					
+					if(categories.length == 2) {
+						//Check if given label exists in LANG, or use default english
+						label = (LANG.value[categories[0]][categories[1]][lng] != undefined) ? LANG.value[categories[0]][categories[1]][lng] : LANG.value[categories[0]][categories[1]].en;
+						
+						//Replace text in DOM
+						$(this).attr("value", label);
+						
+						found = true;
+					}
+				}
+				i++;
+			}
+		});
+	};
+	
+	/**
+	 * Get translation for a given code
+	 */
+	MainView.prototype.getTranslation = function(n1, n2, n3) {
+		if(n1 == "title" || n1 == "value") {
+			if(LANG[n1][n2] != undefined && LANG[n1][n2][n3] != undefined) {
+				return (LANG[n1][n2][n3][this._lang] != undefined) ? LANG[n1][n2][n3][this._lang] : LANG[n1][n2][n3].en;
+			}
+		}
+		else {
+			if(LANG[n1] != undefined && LANG[n1][n2] != undefined) {
+				return (LANG[n1][n2][this._lang] != undefined) ? LANG[n1][n2][this._lang] : LANG[n1][n2].en;
+			}
+		}
+		console.error("[Lang] Missing translation:",n1,n2,n3);
+		return "";
 	};
 
 
@@ -391,7 +511,7 @@ var MapView = function(main) {
 			this._map.fitBounds(bounds);
 		}
 		else {
-			this._mainView.getMessagesView().displayMessage("Invalid bounding box", "alert");
+			this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "bbox"), "alert");
 			this._map.setView([lat, lon], zoom);
 		}
 	}
@@ -555,7 +675,7 @@ var MapView = function(main) {
 				this._updateRoutingLayer();
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage("There is no available data in this area", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "nodata"), "alert");
 			}
 		}
 		else if(zoom >= CONFIG.view.map.cluster_min_zoom) {
@@ -566,7 +686,7 @@ var MapView = function(main) {
 				this._dataLayer.addTo(this._map);
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage("There is no available data in this area", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "nodata"), "alert");
 			}
 		}
 		
@@ -967,11 +1087,11 @@ var MapView = function(main) {
 						
 						//Add markers for level change
 						this._routingMarkers.inter[prevLvl].push(
-							L.marker(path[i-1].getLatLng(), { icon: icon, zIndexOffset: 10000, title: 'Click to change level' })
+							L.marker(path[i-1].getLatLng(), { icon: icon, zIndexOffset: 10000, title: this._mainView.getTranslation("title", "routing", "changelevel") })
 							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i]))
 						);
 						this._routingMarkers.inter[currentLvl].push(
-							L.marker(path[i].getLatLng(), { icon: icon, zIndexOffset: 10000, title: 'Click to change level' })
+							L.marker(path[i].getLatLng(), { icon: icon, zIndexOffset: 10000, title: this._mainView.getTranslation("title", "routing", "changelevel") })
 							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i-1]))
 						);
 					}
@@ -1444,11 +1564,11 @@ var FeatureView = function(main, feature, details) {
 			//Able to go up ?
 			var levelId = ftLevels.indexOf(this._mainView.getLevelView().get());
 			if(levelId < ftLevels.length -1) {
-				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+CONFIG.view.icons.folder+'/arrow_up_3.png" title="Go up" alt="Up!" /></a>';
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId+1]+')" href="#"><img src="'+CONFIG.view.icons.folder+'/arrow_up_3.png" class="i18n-title title.feature.levelup" title="'+this._mainView.getTranslation("title", "feature", "levelup")+'" alt="Up!" /></a>';
 			}
 			//Able to go down ?
 			if(levelId > 0) {
-				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+CONFIG.view.icons.folder+'/arrow_down_3.png" title="Go down" alt="Down!" /></a>';
+				text += ' <a onclick="controller.toLevel('+ftLevels[levelId-1]+')" href="#"><img src="'+CONFIG.view.icons.folder+'/arrow_down_3.png" class="i18n-title title.feature.leveldown" title="'+this._mainView.getTranslation("title", "feature", "leveldown")+'" alt="Down!" /></a>';
 			}
 		}
 
@@ -1459,11 +1579,11 @@ var FeatureView = function(main, feature, details) {
 		
 		//Picture link
 		if(this._feature.getImages().hasValidImages() || (this._mainView.hasWebGL() && this._feature.getImages().hasValidSpherical())) {
-			text += '<a href="#" id="images-open" title="Related pictures" onclick="controller.getView().getImagesView().open(\''+this._feature.getId()+'\')"><img src="img/icon_picture_2.svg" alt="Pictures" /></a> ';
+			text += '<a href="#" id="images-open" class="i18n-title title.feature.pictures" title="'+this._mainView.getTranslation("title", "feature", "pictures")+'" onclick="controller.getView().getImagesView().open(\''+this._feature.getId()+'\')"><img src="img/icon_picture_2.svg" alt="Pictures" /></a> ';
 		}
 		
 		//Tags and OSM links
-		text += '<a href="#" id="tags-open" title="Tags" onclick="controller.getView().getTagsView().open(\''+this._feature.getId()+'\')"><img src="img/icon_tags.svg" alt="Tags" /></a><a href="http://www.openstreetmap.org/'+this._feature.getId()+'" title="See this on OSM.org" target="_blank"><img src="img/icon_osm.svg" alt="OSM.org" /></a></div>';
+		text += '<a href="#" id="tags-open" class="i18n-title title.general.tags" title="'+this._mainView.getTranslation("title", "general", "tags")+'" onclick="controller.getView().getTagsView().open(\''+this._feature.getId()+'\')"><img src="img/icon_tags.svg" alt="Tags" /></a><a href="http://www.openstreetmap.org/'+this._feature.getId()+'" class="i18n-title title.feature.seeosm" title="'+this._mainView.getTranslation("title", "feature", "seeosm")+'" target="_blank"><img src="img/icon_osm.svg" alt="OSM.org" /></a></div>';
 		
 		return L.popup({ autoPan: false }).setContent(text);
 	}
@@ -1540,11 +1660,26 @@ var TagsView = function(main) {
 		var mapillaryRegex = /^mapillary.*$/;
 		var mapillaryValRegex = /^[\w\-]+$/;
 		var txtVals = {
-			N: "North", NNE: "North North-east", NE:"North-east", ENE: "East North-east",
-			E: "East", ESE: "East South-east", SE: "South-east", SSE: "South South-east",
-			S: "South", SSW: "South South-west", SW: "South-west", WSW:"West South-west",
-			W: "West", WNW: "West North-west", NW: "North-west", NNW: "North North-west",
-			north: "North", south: "South", east: "East", west: "West"
+			N: this._mainView.getTranslation("direction", "N"),
+			NNE: this._mainView.getTranslation("direction", "N")+" "+this._mainView.getTranslation("direction", "NE"),
+			NE: this._mainView.getTranslation("direction", "NE"),
+			ENE: this._mainView.getTranslation("direction", "E")+" "+this._mainView.getTranslation("direction", "NE"),
+			E: this._mainView.getTranslation("direction", "E"),
+			ESE: this._mainView.getTranslation("direction", "E")+" "+this._mainView.getTranslation("direction", "SE"),
+			SE: this._mainView.getTranslation("direction", "SE"),
+			SSE: this._mainView.getTranslation("direction", "S")+" "+this._mainView.getTranslation("direction", "SE"),
+			S: this._mainView.getTranslation("direction", "S"),
+			SSW: this._mainView.getTranslation("direction", "S")+" "+this._mainView.getTranslation("direction", "SW"),
+			SW: this._mainView.getTranslation("direction", "SW"),
+			WSW: this._mainView.getTranslation("direction", "W")+" "+this._mainView.getTranslation("direction", "SW"),
+			W: this._mainView.getTranslation("direction", "W"),
+			WNW: this._mainView.getTranslation("direction", "W")+" "+this._mainView.getTranslation("direction", "NW"),
+			NW: this._mainView.getTranslation("direction", "NW"),
+			NNW: this._mainView.getTranslation("direction", "N")+" "+this._mainView.getTranslation("direction", "NW"),
+			north: this._mainView.getTranslation("direction", "N"),
+			south: this._mainView.getTranslation("direction", "S"),
+			east: this._mainView.getTranslation("direction", "E"),
+			west: this._mainView.getTranslation("direction", "W")
 		};
 		
 		for(var k in tags) {
@@ -1579,7 +1714,12 @@ var TagsView = function(main) {
 					detailsTxt += '<img src="'+CONFIG.view.icons.folder+'/'+detail.img+'" title="'+k+'" />';
 				}
 				else if(detail.name != undefined) {
-					detailsTxt += detail.name;
+					if(LANG.details[k] != undefined) {
+						detailsTxt += this._mainView.getTranslation("details", k);
+					}
+					else {
+						detailsTxt += detail.name;
+					}
 				}
 				else {
 					detailsTxt += k;
@@ -1638,28 +1778,28 @@ var TagsView = function(main) {
 						else {
 							//Define a simple direction
 							if((vInt >= 337 && vInt < 360) || (vInt >= 0 && vInt < 22)) {
-								v = "North";
+								v = txtVals.N;
 							}
 							else if(vInt >= 22 && vInt < 67) {
-								v = "North-east";
+								v = txtVals.NE;
 							}
 							else if(vInt >= 67 && vInt < 112) {
-								v = "East";
+								v = txtVals.E;
 							}
 							else if(vInt >= 112 && vInt < 157) {
-								v = "South-east";
+								v = txtVals.SE;
 							}
 							else if(vInt >= 157 && vInt < 202) {
-								v = "South";
+								v = txtVals.S;
 							}
 							else if(vInt >= 202 && vInt < 247) {
-								v = "South-west";
+								v = txtVals.SW;
 							}
 							else if(vInt >= 247 && vInt < 292) {
-								v = "West";
+								v = txtVals.W;
 							}
 							else if(vInt >= 292 && vInt < 337) {
-								v = "North-west";
+								v = txtVals.NW;
 							}
 							else {
 								v = "Invalid";
@@ -1704,7 +1844,7 @@ var TagsView = function(main) {
 		L.control.window(
 			this._mainView.getMapView().get(),
 			{
-				title: 'Details',
+				title: this._mainView.getTranslation("feature", "details"),
 				content: content,
 				position: 'center',
 				visible: true
@@ -1816,14 +1956,14 @@ var LevelView = function(main) {
 			var currentLevelId = this._levels.indexOf(this._level);
 			
 			if(currentLevelId == -1) {
-				this._mainView.getMessagesView().displayMessage("Invalid level", "error");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "invalidlevel"), "error");
 			}
 			else if(currentLevelId + 1 < this._levels.length) {
 				this.set(this._levels[currentLevelId+1]);
 				result = true;
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage("You are already at the last available level", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "lastlevel"), "alert");
 			}
 		}
 		
@@ -1841,14 +1981,14 @@ var LevelView = function(main) {
 			var currentLevelId = this._levels.indexOf(this._level);
 			
 			if(currentLevelId == -1) {
-				this._mainView.getMessagesView().displayMessage("Invalid level", "error");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "invalidlevel"), "error");
 			}
 			else if(currentLevelId > 0) {
 				this.set(this._levels[currentLevelId-1]);
 				result = true;
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage("You are already at the first available level", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "firstlevel"), "alert");
 			}
 		}
 		
@@ -2196,7 +2336,7 @@ var URLView = function(main) {
 		var lwindow = L.control.window(
 			this._mainView.getMapView().get(),
 			{
-				title: 'QR Code',
+				title: this._mainView.getTranslation("main", "qr"),
 				content: '<div id="qrcode"></div>',
 				position: 'center',
 				modal: true
@@ -2267,7 +2407,7 @@ var URLView = function(main) {
 				}
 			}
 			else {
-				this._mainView.getMessagesView().displayMessage("Invalid short link", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "invalidshortlink"), "alert");
 			}
 		}
 		//Read parameters directly
@@ -2296,7 +2436,7 @@ var URLView = function(main) {
 	
 	URLView.prototype._updateUrl = function() {
 		var optionsView = this._mainView.getOptionsView();
-		var params = "lat="+this._lat.toFixed(6)+"&lon="+this._lon.toFixed(6)+"&z="+this._zoom+"&t="+this._tiles;
+		var params = "lat="+parseFloat(this._lat).toFixed(6)+"&lon="+parseFloat(this._lon).toFixed(6)+"&z="+this._zoom+"&t="+this._tiles;
 		
 		if(this._zoom >= CONFIG.view.map.data_min_zoom) {
 			if(this._level != null) {
@@ -2395,7 +2535,7 @@ var NamesView = function(main) {
 	$("#search-room").focusout(this.searchFocus.bind(this));
 	$("#search-room").bind("input propertychange", this.update.bind(this));
 	$("#search-room-reset").click(this.reset.bind(this));
-	$("#search-room").val("Search");
+	$("#search-room").val(this._mainView.getTranslation("value", "general", "search"));
 };
 
 //OTHER METHODS
@@ -2484,7 +2624,7 @@ var NamesView = function(main) {
 	 * Resets the room names list
 	 */
 	NamesView.prototype.reset = function() {
-		$("#search-room").val("Search");
+		$("#search-room").val(this._mainView.getTranslation("value", "general", "search"));
 		this.update();
 	};
 	
@@ -2493,7 +2633,7 @@ var NamesView = function(main) {
 	 */
 	NamesView.prototype.searchOK = function() {
 		var search = $("#search-room").val();
-		return search != "Search" && search.length >= 3;
+		return search != this._mainView.getTranslation("value", "general", "search") && search.length >= 3;
 	};
 	
 	/**
@@ -2501,11 +2641,11 @@ var NamesView = function(main) {
 	 */
 	NamesView.prototype.searchFocus = function() {
 		var search = $("#search-room").val();
-		if(search == "Search" && $("#search-room").is(":focus")) {
+		if(search == this._mainView.getTranslation("value", "general", "search") && $("#search-room").is(":focus")) {
 			$("#search-room").val("");
 		}
 		else if(search == "" && !$("#search-room").is(":focus")) {
-			$("#search-room").val("Search");
+			$("#search-room").val(this._mainView.getTranslation("value", "general", "search"));
 		}
 	};
 
@@ -2717,22 +2857,22 @@ var ImagesView = function(main) {
 		var title;
 		switch(status) {
 			case "ok":
-				title = "The image link is valid";
+				title = this._mainView.getTranslation("title", "image", "statusok");
 				break;
 			case "missing":
-				title = "No image link defined";
+				title = this._mainView.getTranslation("title", "image", "statusmissing");
 				break;
 			case "bad":
-				title = "The image link is broken";
+				title = this._mainView.getTranslation("title", "image", "statusbad");
 				if(source == "mapillary") {
-					title += " (Check mapillary:* tags)";
+					title += " "+this._mainView.getTranslation("title", "image", "checkmpl");
 				}
 				else if(source == "web") {
 					title += " (URL: "+baselink+")";
 				}
 				break;
 			case "unknown":
-				title = "The image is still potentially loading";
+				title = this._mainView.getTranslation("title", "image", "loading");
 				break;
 		}
 		link.prop("title", title);
@@ -2752,7 +2892,7 @@ var ImagesView = function(main) {
 		}
 		if(img.page != undefined) {
 			if(description != "") { description += " - "; }
-			description += '<a href="'+img.page+'" target="_blank">Page</a>';
+			description += '<a href="'+img.page+'" target="_blank" class="i18n image.page">'+this._mainView.getTranslation("image", "page")+'</a>';
 		}
 		description += "<br />"+img.tag;
 		
@@ -2998,7 +3138,7 @@ var LoadingView = function(main) {
 	this._window = L.control.window(
 		this._mainView.getMapView().get(),
 		{
-			title: '<img id="spinner" src="img/icon_spinner.gif" height="32" />Loading',
+			title: '<img id="spinner" src="img/icon_spinner.gif" height="32" /><span class="i18n general.loading">'+this._mainView.getTranslation("general", "loading")+'</span>',
 			content: '',
 			modal: true,
 			position: 'center',
@@ -3066,12 +3206,37 @@ var AboutView = function(main) {
 		L.control.window(
 			this._mainView.getMapView().get(),
 			{
-				title: 'About OpenLevelUp!',
-				content: 'This website allows you to see <a href="http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging">indoor data</a> from the <a href="http://openstreetmap.org">OpenStreetMap</a> project. Licensed under <a href="https://www.gnu.org/licenses/agpl.html">AGPL v3</a>.<br /><p style="text-align: center;"><a href="mailto:panieravide@riseup.net">Contact</a> | <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup">GitHub repository</a> | <a href="https://wiki.openstreetmap.org/wiki/OpenLevelUp">Wiki</a></p><p class="laureate"><span class="images"><a href="http://opendata.regionpaca.fr"><img src="img/logo_paca.jpg" /></a></span><span class="desc">This project was laureate of the <a href="http://opendata.regionpaca.fr/concours-regional-open-paca.html">OpenPACA</a> contest (2015 edition), organized by the french region <a href="http://opendata.regionpaca.fr">Provence-Alpes-Côte d\'Azur</a>.</span></p>',
+				title: this._mainView.getTranslation("about", "title"),
+				 content: '<span class="i18n about.summary">'+this._mainView.getTranslation("about", "summary")+'</span><br /><p style="text-align: center;"><a href="mailto:panieravide@riseup.net" class="i18n about.contact">'+this._mainView.getTranslation("about", "contact")+'</a> | <a href="https://github.com/PanierAvide/panieravide.github.io/tree/master/openlevelup" class="i18n about.github">'+this._mainView.getTranslation("about", "github")+'</a> | <a href="https://wiki.openstreetmap.org/wiki/OpenLevelUp" class="i18n about.wiki">'+this._mainView.getTranslation("about", "wiki")+'</a> | <a class="i18n about.doctag" href="https://wiki.openstreetmap.org/wiki/OpenLevelUp/Recommended_tagging">'+this._mainView.getTranslation("about", "doctag")+'</a></p><p class="laureate"><span class="images"><a href="http://opendata.regionpaca.fr"><img src="img/logo_paca.jpg" /></a></span><span class="desc i18n about.laureate">'+this._mainView.getTranslation("about", "laureate")+'</span></p>',
 				modal: true,
 				position: 'center',
 				visible: true
 			}
+		);
+	}.bind(this));
+}
+
+
+
+/**
+ * The support view
+ */
+var SupportView = function(main) {
+	//ATTRIBUTES
+	/** The main view **/
+	this._mainView = main;
+	
+	//CONSTRUCTOR
+	$("#support-link").click(function() {
+		L.control.window(
+			this._mainView.getMapView().get(),
+				{
+					title: this._mainView.getTranslation("support", "title"),
+					content: this._mainView.getTranslation("support", "desc")+'<hr /><p class="donation"><span class="way">Bitcoin</span> <a href="bitcoin:1Jn58LkSNh5iyJ7tA7VHqrLvueVacvuUWt?label=OpenLevelUp">1Jn58LkSNh5iyJ7tA7VHqrLvueVacvuUWt</a></p><p class="donation"><span class="way">Flattr</span> <a href="https://flattr.com/submit/auto?fid=66g2vo&url=http%3A%2F%2Fopenlevelup.pavie.info%2F" target="_blank"><img src="https://button.flattr.com/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0"></a></p>',
+					modal: true,
+					position: 'center',
+					visible: true
+				}
 		);
 	}.bind(this));
 }
@@ -3211,7 +3376,7 @@ var NotesView = function(main) {
 			var commentsHtml = "", comment, user;
 			for(var i=0, l=note.comments.length; i < l; i++) {
 				comment = note.comments[i];
-				user = (comment.user != "") ? "User "+comment.user : "Anonymous";
+				user = (comment.user != "") ? this._mainView.getTranslation("notes", "user")+" "+comment.user : this._mainView.getTranslation("notes", "anonymous");
 				commentsHtml += '<div class="op-notes-comment">'
 								+'<p class="desc">'+user+', '+comment.date+'</p>'
 								+'<p class="txt">'+comment.text+'</p>'
@@ -3221,10 +3386,10 @@ var NotesView = function(main) {
 			var lWindow = L.control.window(
 				this._mainView.getMapView().get(),
 				{
-					title: 'Note #'+note.id,
+					title: this._mainView.getTranslation("notes", "note")+' #'+note.id,
 					content: '<div class="op-notes-comments">'+commentsHtml+'</div>'
 					+'<div class="op-notes-footer">'
-					+'Status: <span class="notes-status-txt">'+note.status+'</span> | <a id="notes-link" href="http://www.openstreetmap.org/note/'+note.id+'">See on OSM.org</a>'
+					+'<span class="i18n general.status">'+this._mainView.getTranslation("general", "status")+'</span>: <span class="notes-status-txt">'+note.status+'</span> | <a id="notes-link" class="i18n notes.seeosm" href="http://www.openstreetmap.org/note/'+note.id+'">'+this._mainView.getTranslation("notes", "seeosm")+'</a>'
 					+'</div>',
 					position: 'center',
 					visible: true
@@ -3252,7 +3417,7 @@ var NotesView = function(main) {
 			}
 			else {
 				this._mainView.collapseSidebar();
-				this._mainView.getMessagesView().displayMessage("You have to zoom in to add a note", "alert");
+				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("notes", "zoomintoadd"), "alert");
 			}
 		}
 	};
@@ -3304,7 +3469,7 @@ var RoutingView = function(main) {
 	//Define routing modes
 	var modeOptions = '';
 	for(var mode in CONFIG.routing) {
-		modeOptions += '<option value="'+ mode + '">' + CONFIG.routing[mode].name + '</option>';
+		modeOptions += '<option value="'+ mode + '" class="i18n routingmode.'+mode+'">' + this._mainView.getTranslation("routingmode", mode) + '</option>';
 	}
 	$("#routing-mode").html(modeOptions);
 	
@@ -3356,7 +3521,7 @@ var RoutingView = function(main) {
 	RoutingView.prototype.updateLabel = function(type, coords) {
 		var obj = $("#routing-"+type);
 		if(coords == null) {
-			obj.html("Click or drag marker");
+			obj.html(this._mainView.getTranslation("routing", "clickmarker"));
 		}
 		else {
 			obj.html(coords.lat.toFixed(6)+", "+coords.lng.toFixed(6));
@@ -3552,7 +3717,7 @@ var RoutingView = function(main) {
 				
 				if(i == l-1) {
 					instruction.img = 'end';
-					instruction.txt = 'You are arrived';
+					instruction.txt = this._mainView.getTranslation("routing", "arrived");
 					instructions.push(instruction);
 				}
 				else {
@@ -3563,24 +3728,24 @@ var RoutingView = function(main) {
 						//Case of going out of an elevator
 						if(i > 0 && path[i-1].getTransition(path[i]) == "elevator") {
 							instruction.img = "forward";
-							instruction.txt = "Go out of the elevator";
+							instruction.txt = this._mainView.getTranslation("routing", "outelevator");
 						}
 						//Other directions
 						else if(instruction.img <= 30 && instruction.img >= -30) {
 							instruction.img = "forward";
-							instruction.txt = "Go forward";
+							instruction.txt = this._mainView.getTranslation("routing", "goforward");
 						}
 						else if(instruction.img < -30 && instruction.img >= -120) {
 							instruction.img = "left";
-							instruction.txt = "Turn to left";
+							instruction.txt = this._mainView.getTranslation("routing", "turnleft");
 						}
 						else if(instruction.img > 30 && instruction.img <= 120) {
 							instruction.img = "right";
-							instruction.txt = "Turn to right";
+							instruction.txt = this._mainView.getTranslation("routing", "turnright");
 						}
 						else {
 							instruction.img = "backward";
-							instruction.txt = "Go backward";
+							instruction.txt = this._mainView.getTranslation("routing", "gobackward");
 						}
 					}
 					//Create label for transition
@@ -3589,43 +3754,43 @@ var RoutingView = function(main) {
 							case "stairs":
 								if(levelDiff > 0) {
 									instruction.img = "stairs_up";
-									instruction.txt = "Go upstairs";
+									instruction.txt = this._mainView.getTranslation("routing", "upstairs");
 								}
 								else if(levelDiff < 0) {
 									instruction.img = "stairs_down";
-									instruction.txt = "Go downstairs";
+									instruction.txt = this._mainView.getTranslation("routing", "downstairs");
 								}
 								else {
 									instruction.img = "stairs";
-									instruction.txt = "Use stairs";
+									instruction.txt = this._mainView.getTranslation("routing", "usestairs");
 								}
 								break;
 							case "escalator":
 								if(levelDiff > 0) {
 									instruction.img = "escalator_up";
-									instruction.txt = "Go up using conveying stairs";
+									instruction.txt = this._mainView.getTranslation("routing", "upconveying");
 								}
 								else if(levelDiff < 0) {
 									instruction.img = "escalator_down";
-									instruction.txt = "Go down using conveying stairs";
+									instruction.txt = this._mainView.getTranslation("routing", "downconveying");
 								}
 								else {
 									instruction.img= "escalator";
-									instruction.txt = "Use conveying path";
+									instruction.txt = this._mainView.getTranslation("routing", "useconveying");
 								}
 								break;
 							case "elevator":
 								if(levelDiff > 0) {
 									instruction.img = "elevator_up";
-									instruction.txt = "Go to level "+path[i+1].getLevel()+" using elevator";
+									instruction.txt = this._mainView.getTranslation("routing", "golevel")+" "+path[i+1].getLevel()+" "+this._mainView.getTranslation("routing", "usingelevator");
 								}
 								else if(levelDiff < 0) {
 									instruction.img = "elevator_down";
-									instruction.txt = "Go to level "+path[i+1].getLevel()+" using elevator";
+									instruction.txt = this._mainView.getTranslation("routing", "golevel")+" "+path[i+1].getLevel()+" "+this._mainView.getTranslation("routing", "usingelevator");
 								}
 								else {
 									instruction.img= "elevator";
-									instruction.txt = "Use elevator";
+									instruction.txt = this._mainView.getTranslation("routing", "useelevator");
 								}
 								break;
 							default:
