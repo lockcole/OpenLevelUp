@@ -385,7 +385,7 @@ var CalendarView = function(main) {
 		var intervals = this._dateRange.getTypical().getIntervals();
 		var events = [];
 		var interval, weekId, eventData, to, eventConstraint, defaultView, colFormat;
-		var fctSelect, fctResize, fctDrop;
+		var fctSelect, fctEdit;
 		
 		/*
 		 * Variables depending of the kind of typical day/week
@@ -454,29 +454,23 @@ var CalendarView = function(main) {
 				this.simulateClick();
 			}.bind(this);
 			
-			fctResize = function(event, delta, revertFunc, jsEvent, ui, view) {
+			fctEdit = function(event, delta, revertFunc, jsEvent, ui, view) {
 				var minStart = parseInt(event.start.format("H"),10) * 60 + parseInt(event.start.format("m"),10);
 				var minEnd = parseInt(event.end.format("H"),10) * 60 + parseInt(event.end.format("m"),10);
+				var dayStart = swDayToMwDay(event.start.format("d"));
+				var dayEnd = swDayToMwDay(event.end.format("d"));
+				
+				//All day interval
+				if(minStart == 0 && minEnd == 0 && dayEnd - dayStart >= 1) {
+					minEnd = MINUTES_MAX;
+					dayEnd--;
+				}
+				
 				this._dateRange.getTypical().editInterval(
 					event.id,
 					new Interval(
-						swDayToMwDay(event.start.format("d")),
-						swDayToMwDay(event.end.format("d")),
-						minStart,
-						minEnd
-					)
-				);
-				this._mainView.refresh();
-			}.bind(this);
-			
-			fctDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
-				var minStart = parseInt(event.start.format("H"),10) * 60 + parseInt(event.start.format("m"),10);
-				var minEnd = parseInt(event.end.format("H"),10) * 60 + parseInt(event.end.format("m"),10);
-				this._dateRange.getTypical().editInterval(
-					event.id,
-					new Interval(
-						swDayToMwDay(event.start.format("d")),
-						swDayToMwDay(event.end.format("d")),
+						dayStart,
+						dayEnd,
 						minStart,
 						minEnd
 					)
@@ -539,22 +533,7 @@ var CalendarView = function(main) {
 				this.simulateClick();
 			}.bind(this);
 			
-			fctResize = function(event, delta, revertFunc, jsEvent, ui, view) {
-				var minStart = parseInt(event.start.format("H"),10) * 60 + parseInt(event.start.format("m"),10);
-				var minEnd = parseInt(event.end.format("H"),10) * 60 + parseInt(event.end.format("m"),10);
-				this._dateRange.getTypical().editInterval(
-					event.id,
-					new Interval(
-						0,
-						0,
-						minStart,
-						minEnd
-					)
-				);
-				this._mainView.refresh();
-			}.bind(this);
-			
-			fctDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
+			fctEdit = function(event, delta, revertFunc, jsEvent, ui, view) {
 				var minStart = parseInt(event.start.format("H"),10) * 60 + parseInt(event.start.format("m"),10);
 				var minEnd = parseInt(event.end.format("H"),10) * 60 + parseInt(event.end.format("m"),10);
 				this._dateRange.getTypical().editInterval(
@@ -599,8 +578,8 @@ var CalendarView = function(main) {
 				$('#calendar').fullCalendar('removeEvents', calEvent._id);
 				this._mainView.refresh();
 			}.bind(this),
-			eventResize: fctResize,
-			eventDrop: fctDrop
+			eventResize: fctEdit,
+			eventDrop: fctEdit
 		});
 		
 		this.updateDateRangeLabel();

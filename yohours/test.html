@@ -2637,6 +2637,14 @@
 			
 			assert.equal(builder.build(dateranges), "Su-Tu 12:00-14:00");
 		});
+		QUnit.test("Build Tu 00:00-24:00", function(assert) {
+			var builder = new OpeningHoursBuilder();
+			var dateranges = [ new DateRange() ];
+			
+			dateranges[0].getTypical().addInterval(new Interval(1, 1, 0*60, 24*60));
+			
+			assert.equal(builder.build(dateranges), "Tu 00:00-24:00");
+		});
 		
 		/*
 		 * OpeningHoursParser
