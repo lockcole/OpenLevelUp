@@ -1,7 +1,7 @@
 OpenRandomMap
 =======
 
-![OpenRandomMap logo](http://github.pavie.info/OpenRandomMap/img/openrandommap.svg)
+![OpenRandomMap logo](http://github.pavie.info/openrandommap/img/openrandommap.svg)
 
 Read-me
 -------
