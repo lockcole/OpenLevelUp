@@ -1,0 +1,132 @@
+<!DOCTYPE html5>
+<html>
+<!--
+	This file is part of OpenRandomMap.
+
+	OpenRandomMap is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	any later version.
+
+	OpenRandomMap is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with OpenRandomMap.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!--
+	OpenRandomMap
+	Random name generator for web open maps
+	Author: Adrien PAVIE
+	
+	Main page
+-->
+<head>
+	<!-- General definitions -->
+	<title>OpenRandomMap</title>
+	<meta charset="utf-8" />
+	<meta name="description" content="No idea for the future best map in the world ? Try OpenRandomMap !" />
+	<meta name="keywords" content="map, random, generator, openrandommap" />
+	<meta name="author" content="Adrien PAVIE (PanierAvide)" />
+	<meta name="copyright" content="&copy; Adrien PAVIE 2016, under AGPL v3" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<!--link rel="icon" type="image/jpg" href="img/favicon.jpg" /-->
+	
+	<!-- jQuery includes -->
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+	
+	<!-- Bootstrap includes -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+	<!-- CSS style -->
+	<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+	<nav class="navbar navbar-default navbar-orm navbar-fixed-top">
+		<div class="container">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header">
+				<!--button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-content" aria-expanded="false">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button-->
+				<a class="navbar-brand" href="./"><img src="img/openrandommap.svg" alt="OpenRandomMap" /></a>
+			</div>
+
+			<!-- Collect the nav links, forms, and other content for toggling -->
+			<div id="navbar-content" class="navbar-collapse collapse">
+				<p class="navbar-text navbar-right hidden-xs">
+					<em>Inspiration for your brand-new open map !</em>
+				</p>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container main">
+		<div class="well hidden-xs">
+			You are a super developer or a great open-source contributor, and want to make a new online map ? But you haven't any idea of what to show to the world ?<br />
+			THIS is the solution : <strong>OpenRandomMap</strong> ! It generates random names of open maps to help you having great ideas to make the world better.
+		</div>
+		
+		<div id="content">
+			The next best map of the world will be named...<br />
+			
+			<button type="button" id="refresh" class="btn btn-default btn-xs pull-right" disabled="disabled">
+				<span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh
+			</button>
+			
+			<div class="panel panel-default" id="randomname-container">
+				<div class="panel-body" id="randomname">Loading...</div>
+			</div>
+			
+			Deal with it ! <img src="img/dealwithit.png" />
+		</div>
+	</div>
+	
+	<footer class="container">
+		<p>&copy; <a href="http://adrien.pavie.info/">Adrien PAVIE</a> 2016, under <a href="https://www.gnu.org/licenses/agpl.html">AGPL v3 license</a>.</p>
+	</div>
+	
+	<!--
+	JS main code
+	-->
+	<script type="text/javascript">
+		var WORDS = undefined;
+		
+		//Random word function
+		function randomWord() {
+			var randomWordNb = Math.floor(Math.random() * WORDS.length);
+			
+			//Format the selected word
+			var word = WORDS[randomWordNb].charAt(0).toUpperCase() + WORDS[randomWordNb].slice(1);
+			var usId = word.indexOf("_");
+			
+			while(usId >= 0) {
+				word = word.slice(0, usId) + word.charAt(usId+1).toUpperCase() + word.slice(usId+2, word.length);
+				usId = word.indexOf("_");
+			}
+			
+			//Show the selected word
+			$("#randomname").html("Open"+word+"Map");
+		};
+		
+		//Load word list
+		$.get("wordlist.txt", function(txt) {
+			WORDS = txt.split("\n");
+			randomWord();
+
+			//Show refresh button and add reaction
+			$("#refresh").removeProp("disabled").click(function() {
+				randomWord();
+			});
+		});
+	</script>
+</body>
+</html>

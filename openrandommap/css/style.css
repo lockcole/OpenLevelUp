@@ -1,0 +1,89 @@
+/*
+ * This file is part of OpenRandomMap.
+ * 
+ * OpenRandomMap is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ * 
+ * OpenRandomMap is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenRandomMap.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * OpenRandomMap
+ * Random name generator for web open maps
+ * Author: Adrien PAVIE
+ *
+ * CSS Style
+ */
+
+/**********
+ * Global *
+ **********/
+
+body {
+	height: 100%;
+	padding-top: 80px;
+}
+
+footer {
+	border-top: 1px solid #ddd;
+	margin-top: 20px;
+	padding: 10px;
+	text-align: center;
+}
+
+
+/**********
+ * Header *
+ **********/
+
+.navbar-default.navbar-orm {
+	background-color: #D9E4EC;
+	background-image: linear-gradient(to bottom, #E7EAEC 0px, #CBDCEC 100%);
+}
+
+.navbar-brand {
+	padding-top: 0px;
+}
+
+.navbar-brand img {
+	height: 50px;
+}
+
+
+/***********
+ * Content *
+ ***********/
+
+#content {
+	text-align: center;
+	font-size: 1.2em;
+	margin: 0px 0px 50px 0px;
+}
+
+#randomname-container {
+	margin: 30px 0px;
+	background-color: #FF8934;
+}
+
+#randomname {
+	text-align: center;
+	font-size: 1.1em;
+}
+
+@media (min-width: 768px) {
+	#content {
+		font-size: 1.3em;
+	}
+	
+	#randomname {
+		font-size: 1.5em;
+	}
+}
