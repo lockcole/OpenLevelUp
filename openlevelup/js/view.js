@@ -1088,11 +1088,11 @@ var MapView = function(main) {
 						//Add markers for level change
 						this._routingMarkers.inter[prevLvl].push(
 							L.marker(path[i-1].getLatLng(), { icon: icon, zIndexOffset: 10000, title: this._mainView.getTranslation("title", "routing", "changelevel") })
-							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i]))
+							.on('click', function() { controller.toLevel(this.getLevel(), true); }.bind(path[i]))
 						);
 						this._routingMarkers.inter[currentLvl].push(
 							L.marker(path[i].getLatLng(), { icon: icon, zIndexOffset: 10000, title: this._mainView.getTranslation("title", "routing", "changelevel") })
-							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i-1]))
+							.on('click', function() { controller.toLevel(this.getLevel(), true); }.bind(path[i-1]))
 						);
 					}
 				}
@@ -3835,7 +3835,14 @@ var RoutingView = function(main) {
 					}
 					
 					//Merge with previous instruction if possible
-					if(instructions.length > 0 && instructions[instructions.length-1].img == instruction.img && instruction.img == "forward") {
+					if(
+						instructions.length > 0
+						&& ((instructions[instructions.length-1].img == instruction.img)
+						|| (instructions[instructions.length-1].img == "stairs_down" && instruction.img == "stairs")
+						|| (instructions[instructions.length-1].img == "escalator_down" && instruction.img == "escalator")
+						|| (instructions[instructions.length-1].img == "stairs_up" && instruction.img == "stairs")
+						|| (instructions[instructions.length-1].img == "escalator_up" && instruction.img == "escalator"))
+					) {
 						instructions[instructions.length-1].lgt += lastLength;
 					}
 					//Add new instruction

@@ -475,6 +475,10 @@
 			"de": "Per Rollstuhl",
 			"en": "In wheelchair",
 			"zh-TW": "輪椅"
+		},
+		"sport": {
+			"fr": "À pied (sportif)",
+			"en": "By foot (sportive)"
 		}
 	},
 	"support": {

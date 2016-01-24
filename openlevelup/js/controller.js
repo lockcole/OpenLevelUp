@@ -185,10 +185,21 @@ var Ctrl = function() {
 	/**
 	 * Makes the map go to the given level
 	 * @param lvl The new level to display
+	 * @param failsafe If true, when destination level doesn't exists, goes to next level available (default: false)
 	 */
-	Ctrl.prototype.toLevel = function(lvl) {
+	Ctrl.prototype.toLevel = function(lvl, failsafe) {
+		failsafe = failsafe || false;
 		try {
 			if(controller.getView().getLevelView().set(lvl)) {
+				controller.getView().updateLevelChanged();
+			}
+			else if(failsafe) {
+				if(lvl < controller.getView().getLevelView().get()) {
+					controller.getView().getLevelView().down();
+				}
+				else {
+					controller.getView().getLevelView().up();
+				}
 				controller.getView().updateLevelChanged();
 			}
 		}

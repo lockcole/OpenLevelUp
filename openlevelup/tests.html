@@ -389,22 +389,30 @@
 			//Create result graph
 			var n1 = new Node(L.latLng(48.8450691, 2.3740886), 0);
 			var n2 = new Node(L.latLng(48.8451673, 2.3742123), 0, null, "door");
-			var n3 = new Node(L.latLng(48.8452128, 2.3743246), 1, null, "door");
-			var n4 = new Node(L.latLng(48.8452412, 2.3742728), 1);
+			var n3 = new Node(L.latLng(48.84518, 2.37427), 0.5);
+			var n4 = new Node(L.latLng(48.84519, 2.37428), 0.5);
+			var n5 = new Node(L.latLng(48.8452128, 2.3743246), 1, null, "door");
+			var n6 = new Node(L.latLng(48.8452412, 2.3742728), 1);
 			n1.addNeighbour(n2, distanceLevels(n1.getLatLng(), 0, n2.getLatLng(), 0));
 			n2.addNeighbour(n1, distanceLevels(n1.getLatLng(), 0, n2.getLatLng(), 0));
-			n2.addNeighbour(n3, distanceLevels(n2.getLatLng(), 0, n3.getLatLng(), 1));
-			n3.addNeighbour(n2, distanceLevels(n2.getLatLng(), 0, n3.getLatLng(), 1));
-			n3.addNeighbour(n4, distanceLevels(n3.getLatLng(), 1, n4.getLatLng(), 1));
-			n4.addNeighbour(n3, distanceLevels(n3.getLatLng(), 1, n4.getLatLng(), 1));
+			n2.addNeighbour(n3, distanceLevels(n2.getLatLng(), 0, n3.getLatLng(), 0.5));
+			n3.addNeighbour(n2, distanceLevels(n2.getLatLng(), 0, n3.getLatLng(), 0.5));
+			n3.addNeighbour(n4, distanceLevels(n4.getLatLng(), 0.5, n3.getLatLng(), 0.5));
+			n4.addNeighbour(n3, distanceLevels(n4.getLatLng(), 0.5, n3.getLatLng(), 0.5));
+			n4.addNeighbour(n5, distanceLevels(n4.getLatLng(), 0.5, n5.getLatLng(), 1));
+			n5.addNeighbour(n4, distanceLevels(n4.getLatLng(), 0.5, n5.getLatLng(), 1));
+			n5.addNeighbour(n6, distanceLevels(n5.getLatLng(), 1, n6.getLatLng(), 1));
+			n6.addNeighbour(n5, distanceLevels(n5.getLatLng(), 1, n6.getLatLng(), 1));
 			
 			
 			//Check
-			assert.equal(g1._graph.length, 4);
+			assert.equal(g1._graph.length, 6);
 			assert.ok(g1._graph[0].equals(n1));
 			assert.ok(g1._graph[1].equals(n2));
 			assert.ok(g1._graph[2].equals(n3));
 			assert.ok(g1._graph[3].equals(n4));
+			assert.ok(g1._graph[4].equals(n5));
+			assert.ok(g1._graph[5].equals(n6));
 		});
 		
 		QUnit.test("Create from OSM Data (elevator as node)", function(assert) {
@@ -786,23 +794,24 @@
 			g1.createFromOSMData(data);
 			
 			//Nodes succession
-			//3827342241,3827342514,3827342787,3827342786,3827342784 (ignored),3827342782,3827342797,3827342796,3827342507,3827342233
+			//3827342241,3827342514,3827342787,3827342786,3827342784,3827342782,3827342797,3827342796,3827342507,3827342233
 
 			//Path
 			var path = g1.findShortestPath(L.latLng(48.0838306,-1.6798351), 1, L.latLng(48.0838245,-1.6794517), 2);
 			
 			//Check result
 			//console.log(path);
-			assert.equal(path.length, 9);
+			assert.equal(path.length, 10);
 			assert.equal(path[0]._name, "3827342241");
 			assert.equal(path[1]._name, "3827342514");
 			assert.equal(path[2]._name, "3827342787");
 			assert.equal(path[3]._name, "3827342786");
-			assert.equal(path[4]._name, "3827342782");
-			assert.equal(path[5]._name, "3827342797");
-			assert.equal(path[6]._name, "3827342796");
-			assert.equal(path[7]._name, "3827342507");
-			assert.equal(path[8]._name, "3827342233");
+			assert.equal(path[4]._name, "3827342784");
+			assert.equal(path[5]._name, "3827342782");
+			assert.equal(path[6]._name, "3827342797");
+			assert.equal(path[7]._name, "3827342796");
+			assert.equal(path[8]._name, "3827342507");
+			assert.equal(path[9]._name, "3827342233");
 		});
 		
 		QUnit.test("Process", function(assert) {

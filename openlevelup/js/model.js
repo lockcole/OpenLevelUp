@@ -1336,6 +1336,14 @@ var Graph = function() {
 										nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level, nodes[nodeId].default._name);
 									}
 								}
+								//Transition ways with several intermediate nodes
+								else if(levels.length == 2 && transition != null && j > 0 && j < lj-1) {
+									level = (levels[0] + levels[1]) / 2;
+									//Create node on intermediate level
+									if(!isNaN(level) && nodes[nodeId][level] == undefined) {
+										nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level, nodes[nodeId].default._name);
+									}
+								}
 								else {
 									//Search which node is available
 									node = null;

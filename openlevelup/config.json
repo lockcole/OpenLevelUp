@@ -107,6 +107,12 @@
 			"name": "In wheelchair",
 			"speed": 0.7,
 			"avoid": [ "stairs", "escalator" ]
+		},
+		
+		"sport": {
+			"name": "By foot (sportive)",
+			"speed": 1.39,
+			"avoid": [ "elevator", "escalator" ]
 		}
 	}
 }
