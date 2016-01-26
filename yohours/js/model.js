@@ -1278,6 +1278,13 @@ var OhDate = function(w, wt, wd) {
 	};
 	
 	/**
+	 * @return The overwrittent weekdays array
+	 */
+	OhDate.prototype.getWdOver = function() {
+		return this._wdOver;
+	};
+	
+	/**
 	 * @param a The other weekdays array
 	 * @return True if same weekdays as other object
 	 */
@@ -1526,6 +1533,13 @@ var OhRule = function() {
 	OhRule.prototype.isOff = function() {
 		return this._time.length == 0 || (this._time.length == 1 && this._time[0].getStart() == null);
 	};
+	
+	/**
+	 * Does the rule have any overwritten weekday ?
+	 */
+	OhRule.prototype.hasOverwrittenWeekday = function() {
+		return this._date.length > 0 && this._date[0]._wdOver.length > 0;
+	};
 
 //MODIFIERS
 	/**
@@ -1695,6 +1709,23 @@ var OpeningHoursBuilder = function() {};
 						//If not, add as new rule
 						if(!ohruleAdded) {
 							rules.push(ohrule);
+						}
+						
+						//If some overwritten weekdays are still in last rule
+						if(ohruleId == orl - 1 && ohrule.hasOverwrittenWeekday()) {
+							var ohruleOWD = new OhRule();
+							for(var ohruleDateId = 0; ohruleDateId < ohrule.getDate().length; ohruleDateId++) {
+								ohruleOWD.addDate(
+									new OhDate(
+										ohrule.getDate()[ohruleDateId].getWideValue(),
+										ohrule.getDate()[ohruleDateId].getWideType(),
+										ohrule.getDate()[ohruleDateId].getWdOver()
+									)
+								);
+							}
+							ohruleOWD.addTime(new OhTime());
+							ohrules.push(ohruleOWD);
+							orl++;
 						}
 					}
 				}
