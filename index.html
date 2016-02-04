@@ -1,63 +1,216 @@
-<!DOCTYPE html>
-<!--
-	Adrien PAVIE GitHub index page
-	Made with a text editor, and time
--->
+<!DOCTYPE html5>
 <html>
-<head>
-	<title>Adrien Pavie</title>
-	<meta charset="UTF-8" />
-	<link rel="stylesheet" type="text/css" href="http://www.adrien.pavie.info/css/style.css" />
-	<link rel="icon" type="image/ico" href="http://www.adrien.pavie.info/favicon.ico" />
+<!--
+	This file is part of OpenLevelUp!.
 
-	<!-- SEO metadata -->
-	<link rel="canonical" href="http://github.pavie.info/" />
-	<link rel='shortlink' href='http://github.pavie.info/' />
-	<meta name="description" content="Adrien Pavie is a professional geomatician and developer. Check out my GitHub space." />
-	<meta name="keywords" content="adrien pavie, geomatics, geomatician, cv, developer, geography, professional, france" />
+	OpenLevelUp! is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	any later version.
+
+	OpenLevelUp! is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with OpenLevelUp!.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!--
+	OpenLevelUp!
+	Web viewer for indoor mapping (based on OpenStreetMap data).
+	Author: Adrien PAVIE
+	
+	Main page
+-->
+<head>
+	<!--
+		TODO (by priority)
+		* Switch to CartoCSS
+		* Several themes for map
+		* Error panel for images or tags error (link to osm editor to correct ?)
+		* Shortcuts for changing levels
+		* Path finding in a building
+	-->
+	
+	<!-- General definitions -->
+	<title>OpenLevelUp!</title>
+	<meta charset="utf-8" />
+	<meta name="description" content="See inside buildings with OpenLevelUp! Based on OpenStreetMap indoor data." />
+	<meta name="keywords" content="openlevelup, openstreetmap, osm, building, indoor, level, floor, map, viewer" />
+	<meta name="author" content="Adrien PAVIE (PanierAvide)" />
+	<meta name="copyright" content="&copy; Adrien PAVIE 2015, under AGPL v3" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<link rel="icon" type="image/jpg" href="img/favicon.jpg" />
+	
+	<!-- Leaflet includes -->
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+
+	<!-- OSMtoGeoJSON include -->
+	<script src="lib/osmtogeojson.js"></script>
+
+	<!-- Azimuth include -->
+	<script src="lib/azimuth.js"></script>
+	
+	<!-- jQuery includes -->
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	
+	<!-- Galleria includes -->
+	<script src="lib/galleria/galleria-1.4.2.min.js"></script>
+	<link rel="stylesheet" href="lib/galleria/themes/classic/galleria.classic.css">
+	<script src="lib/galleria/themes/classic/galleria.classic.min.js"></script>
+	
+	<!-- Three JS includes -->
+	<script src="lib/Detector.js"></script>
+	<script src="lib/three.min.js"></script>
+	
+	<!-- jQuery-QRCode includes -->
+	<script type="text/javascript" src="lib/jquery.qrcode.min.js"></script>
+	
+	<!-- JS Priority Queue includes -->
+	<script type="text/javascript" src="lib/priority-queue.min.js"></script>
+	
+	<!-- HashMap includes -->
+	<script type="text/javascript" src="lib/hashmap.js"></script>
+
+	<!-- Leaflet plugin includes -->
+	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.css" />
+	<link rel="stylesheet" href="lib/markercluster/MarkerCluster.Default.css" />
+	<script src="lib/markercluster/leaflet.markercluster-src.js"></script>
+	<script src="lib/polylinedecorator/L.RotatedMarker.js"></script>
+	<link rel="stylesheet" href="css/Control.Geocoder.css" />
+	<script src="lib/Control.Geocoder.js"></script>
+	<link rel="stylesheet" href="lib/sidebar2/leaflet-sidebar.min.css" />
+	<script src="lib/sidebar2/leaflet-sidebar.min.js"></script>
+	<link rel="stylesheet" href="lib/controlwindow/L.Control.Window.custom.css" />
+	<script src="lib/controlwindow/L.Control.Window.js"></script>
+
+	<!-- OpenLevelUp includes -->
+	<script src="js/utils.js" type="text/javascript"></script>
+	<script src="js/controller.js" type="text/javascript"></script>
+	<script src="js/model.js" type="text/javascript"></script>
+	<script src="js/view.js" type="text/javascript"></script>
+	
+	<!-- CSS style -->
+	<link rel="stylesheet" href="css/common.css" />
+	<link rel="stylesheet" href="css/labels.css" />
 </head>
 <body>
-	<header>
-		<div id="header-content">
-			<div id="header-logo">
-				<a href="index.html"><img src="http://www.adrien.pavie.info/img/logo.svg" alt="Adrien PAVIE" /></a>
+	<!-- Side bar -->
+	<div id="sidebar" class="sidebar">
+		<!-- Nav tabs -->
+		<div class="sidebar-tabs">
+			<ul role="tablist">
+				<li class="active"><a href="#home" role="tab"><img src="img/favicon.jpg" /></i></a></li>
+			</ul>
+			
+			<ul role="tablist">
+				<li id="sidebar-tab-roomlist" class="disabled"><a href="#roomlist" role="tab"><img src="img/icon_rooms.svg" /></a></li>
+				<li id="sidebar-tab-routing" class="disabled"><a href="#routing" role="tab"><img src="img/icon_routing.svg" /></a></li>
+				<li id="sidebar-tab-notes" class="disabled"><a href="#notes" role="tab"><img src="img/icon_note.svg" /></a></li>
+			</ul>
+			
+			<div id="level-control">
+				<a id="levelUp"><img src="img/arrow_up_2.png" alt="↑" /></a><br />
+				<a><select id="level" disabled="true"></select></a><br />
+				<a id="levelDown"><img src="img/arrow_down_2.png" alt="↓" /></a>
 			</div>
-			<nav>
-				<ul>
-					<li><a href="https://github.com/PanierAvide">GitHub profile</a></li>
-					<li class="header-nav-last"><a href="http://www.adrien.pavie.info/">Curriculum vitae</a></li>
-				</ul>
-			</nav>
 		</div>
-	</header>
 
-	<main>
-		<section id="main-about" class="section-two-cols">
-			<div class="section-row">
-				<div class="section-content">
-					<h1>Github.io space</h1>
-					<p>Check out some of my web projects, which are available online.<br />Other projects are listed on my <a href="https://github.com/PanierAvide">GitHub profile</a>.</p>
-					<h2>Projects online</h2>
-					<ul class="ul-left">
-						<li>
-							<a href="openlevelup/">OpenLevelUp!</a><br />
-							<small>A viewer for indoor data present in OpenStreetMap</small>
-						</li>
-						<li>
-							<a href="yohours/">YoHours</a><br />
-							<small>A simple editor for OpenStreetMap opening hours</small>
-						</li>
-						<li>
-							<a href="openrandommap/">OpenRandomMap</a><br />
-							<small>A random name generator for web open maps</small>
-						</li>
-						<li>
-							<a href="hours/">Hours for TimeManager</a><br />
-							<small>A converter to use OpenStreetMap opening hours in QGIS plugin TimeManager</small>
-						</li>
+		<!-- Tab panes -->
+		<div class="sidebar-content">
+			<div class="sidebar-pane active" id="home">
+				<h1 class="sidebar-header">OpenLevelUp <div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
+
+				
+				<header>
+					<a id="logo-link" title="OpenLevelUp!"><img src="img/logo.jpg" alt="OpenLevelUp!" /></a>
+					<p><span class="i18n main.slogan">See inside buildings<br />with OpenLevelUp!</span> <a class="help i18n main.how i18n-title title.main.how">How ?</a></p>
+				</header>
+				
+				<div id="settings">
+					<ul>
+						<li><label><input type="checkbox" id="show-transcendent" checked="true" disabled="true" /> <a class="help i18n params.transcend i18n-title title.params.transcend">Show transcendent objects</a></label></li>
+						<li><label><input type="checkbox" id="show-buildings-only" disabled="true" /> <a class="help i18n params.buildings i18n-title title.params.buildings">Show buildings only</a></label></li>
+						<li><label><input type="checkbox" id="show-photos" disabled="true" /> <a class="help i18n params.pictures i18n-title title.params.pictures">Show pictures</a></label></li>
+						<li><label><input type="checkbox" id="show-unrendered" disabled="true" /> <a class="help i18n params.unrendered i18n-title title.params.unrendered">Show unrendered objects</a></label></li>
+						<li><label><input type="checkbox" id="show-notes" disabled="true" /> <a class="help i18n params.notes i18n-title title.params.notes">Show OpenStreetMap notes</a></label></li>
+						<li><label><input type="checkbox" id="show-implicit-level" disabled="true" /> <a class="help i18n params.implicitlvl i18n-title title.params.implicitlvl">Show object with implicit level</a></label></li>
 					</ul>
 				</div>
+				
+				<footer>
+					<p><a id="osm-link" class="i18n-title title.main.osmlink" href="http://openstreetmap.org">OSM.org</a> | <a href="#" id="about-link" class="i18n main.about i18n-title title.main.about">About</a><br />
+					<a id="shortlink" href="" class="i18n main.shortlink i18n-title title.main.shortlink">Shortlink</a> | <a id="qrcode-link" href="#" class="i18n main.qr i18n-title title.main.qr">QR Code</a> | <a href="http://umap.openstreetmap.fr/fr/map/best-indoor-places_61100" target="_blank"><img id="icon-star" src="img/icon_star.svg" alt="Examples" /></a><br />
+					<a id="support-link" href="#" class="i18n support.title">Support OpenLevelUp</a><br />
+					&copy; <a href="http://adrien.pavie.info">Adrien PAVIE</a> 2015</p>
+				</footer>
 			</div>
-		</section>
+
+			<div class="sidebar-pane" id="roomlist">
+				<h1 class="sidebar-header"><img src="img/icon_rooms.svg" /> <span class="i18n rooms.title">Rooms</span><div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
+				<p class="input-max"><span class="text"><input type="text" class="i18n-value value.general.search" id="search-room" value="Search" /></span><input type="submit" id="search-room-reset" value="X" /></p>
+				<div id="rooms">
+				</div>
+			</div>
+			
+			<div class="sidebar-pane" id="routing">
+				<h1 class="sidebar-header"><img src="img/icon_routing.svg" /> <span class="i18n routing.title">Navigation (beta)</span><div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
+				
+				<div class="routing-destinations">
+					<div class="routing-destination">
+						<div><img id="rtg-marker-start" src="img/icon_marker_start.png" /></div>
+						<div id="routing-start"></div>
+						<div><select id="routing-start-level"></select><button id="routing-start-delete">x</button></div>
+					</div>
+					<div class="routing-destination">
+						<div><img id="rtg-marker-end" src="img/icon_marker_end.png" /></div>
+						<div id="routing-end"></div>
+						<div><select id="routing-end-level"></select><button id="routing-end-delete">x</button></div>
+					</div>
+				</div>
+				
+				<div class="routing-buttons">
+					<select id="routing-mode"></select>
+					<button id="routing-valid" class="i18n general.ok">OK</button>
+				</div>
+				
+				<div id="rtg-instructions" class="routing-instructions hidden">
+					<div class="routing-instructions-general">
+						<span class="rtg-instr-title"><span class="i18n routing.length">Length</span>:</span> <span id="rtg-instr-length"></span> m | <span class="rtg-instr-title"><span class="i18n routing.time">Time</span>:</span> <span id="rtg-instr-time"></span> min
+					</div>
+					<div id="rtg-instr-list">
+					</div>
+				</div>
+			</div>
+
+			<div class="sidebar-pane" id="notes">
+				<h1 class="sidebar-header"><img src="img/icon_note.svg" /> <span class="i18n notes.title">New note</span><div class="sidebar-close"><img src="img/icon_back.svg" alt="&lt;" /></div></h1>
+				<p class="i18n notes.desc">Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here.</p>
+				<textarea id="note-txt" rows="5"></textarea>
+				<div class="buttons"><button id="note-send" class="i18n notes.new">New note</button><button id="note-cancel" class="i18n general.cancel">Cancel</button></div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Map area -->
+	<div id="map" class="sidebar-map"></div>
+
+	<!--
+	JS init code
+	-->
+	<script type="text/javascript">
+		/*
+		 * OpenLevelUp init
+		 */
+		//Create controller object
+		var controller = new Ctrl();
+		
+		//Init map
+		controller.init();
+	</script>
 </body>
 </html>
