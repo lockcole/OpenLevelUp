@@ -27,7 +27,7 @@
  * The OSM global data container.
  * It contains the parsed object from Overpass call.
  */
-var OSMData = function(bbox, data) {
+var OSMData = function(bbox, data, keepNoLevel) {
 //ATTRIBUTES
 	/** The feature objects **/
 	this._features = null;
@@ -45,6 +45,7 @@ var OSMData = function(bbox, data) {
 	this._data = data;
 
 //CONSTRUCTOR
+	keepNoLevel = keepNoLevel || false;
 	var timeStart = new Date().getTime();
 	
 	//Parse OSM data
@@ -53,30 +54,36 @@ var OSMData = function(bbox, data) {
 	//Create features
 	this._features = new Object();
 
-	var id, f, i, currentFeature, ftLevels, lvlId, lvl;
+	var id, f, i, currentFeature, ftLevels, lvlId, lvl, nbLevels;
 	for(i=0; i < geojson.features.length; i++) {
 		f = geojson.features[i];
 		id = f.id;
 		currentFeature = new Feature(f);
+		nbLevels = currentFeature.onLevels().length;
 		
 		if(this._features[id] == undefined) {
-			this._features[id] = currentFeature;
-			
-			//Add levels to list
-			ftLevels = currentFeature.onLevels();
-			$.merge(this._levels, ftLevels);
-			
-			//Add name to list
-			if(currentFeature.hasTag("name")) {
-				for(var lvlId=0; lvlId < ftLevels.length; lvlId++) {
-					lvl = ftLevels[lvlId];
-					
-					//Create given level in names if needed
-					if(this._names[lvl] == undefined) {
-						this._names[lvl] = [];
+			if(keepNoLevel || nbLevels > 0) {
+				//Set default level if no one defined
+				if(nbLevels == 0) { currentFeature._onLevels = [ 0 ]; }
+				
+				this._features[id] = currentFeature;
+				
+				//Add levels to list
+				ftLevels = currentFeature.onLevels();
+				$.merge(this._levels, ftLevels);
+				
+				//Add name to list
+				if(currentFeature.hasTag("name")) {
+					for(var lvlId=0; lvlId < ftLevels.length; lvlId++) {
+						lvl = ftLevels[lvlId];
+						
+						//Create given level in names if needed
+						if(this._names[lvl] == undefined) {
+							this._names[lvl] = [];
+						}
+						
+						this._names[lvl][currentFeature.getTag("name")] = currentFeature;
 					}
-					
-					this._names[lvl][currentFeature.getTag("name")] = currentFeature;
 				}
 			}
 		}
@@ -1331,11 +1338,24 @@ var Graph = function() {
 										node = null;
 										level = null;
 									}
-									else if(levels.length == 1) {
-										level = levels[0];
-										//Create node on current level
-										if(!isNaN(level) && nodes[nodeId][level] == undefined) {
-											nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level, nodes[nodeId].default._name);
+								}
+								//Transition ways with several intermediate nodes
+								else if(levels.length == 2 && transition != null && j > 0 && j < lj-1) {
+									level = (levels[0] + levels[1]) / 2;
+									//Create node on intermediate level
+									if(!isNaN(level) && nodes[nodeId][level] == undefined) {
+										nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level, nodes[nodeId].default._name);
+									}
+								}
+								else {
+									//Search which node is available
+									node = null;
+									level = null;
+
+									for(var lvl in nodes[nodeId]) {
+										if(lvl != "default" && contains(levels, filterFloat(lvl))) {
+											node = nodes[nodeId][lvl];
+											level = lvl;
 										}
 									}
 									else {

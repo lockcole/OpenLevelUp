@@ -1088,11 +1088,11 @@ var MapView = function(main) {
 						//Add markers for level change
 						this._routingMarkers.inter[prevLvl].push(
 							L.marker(path[i-1].getLatLng(), { icon: icon, zIndexOffset: 10000, title: this._mainView.getTranslation("title", "routing", "changelevel") })
-							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i]))
+							.on('click', function() { controller.toLevel(this.getLevel(), true); }.bind(path[i]))
 						);
 						this._routingMarkers.inter[currentLvl].push(
 							L.marker(path[i].getLatLng(), { icon: icon, zIndexOffset: 10000, title: this._mainView.getTranslation("title", "routing", "changelevel") })
-							.on('click', function() { controller.toLevel(this.getLevel()); }.bind(path[i-1]))
+							.on('click', function() { controller.toLevel(this.getLevel(), true); }.bind(path[i-1]))
 						);
 					}
 				}
@@ -2042,6 +2042,9 @@ var OptionsView = function() {
 	
 	/** Show OSM notes **/
 	this._notes = false;
+	
+	/** Show objects with implicit level **/
+	this._implicitLevel = false;
 
 //CONSTRUCTOR
 	//Init checkboxes
@@ -2050,6 +2053,7 @@ var OptionsView = function() {
 	$("#show-buildings-only").prop("checked", this._buildings);
 	$("#show-photos").prop("checked", this._photos);
 	$("#show-notes").prop("checked", this._notes);
+	$("#show-implicit-level").prop("checked", this._implicitLevel);
 	
 	//Add triggers
 	$("#show-transcendent").change(function() {
@@ -2071,6 +2075,10 @@ var OptionsView = function() {
 	$("#show-notes").change(function() {
 		this.changeNotes();
 		controller.getView().updateOptionChanged();
+	}.bind(this));
+	$("#show-implicit-level").change(function() {
+		this.changeImplicitLevel();
+		controller.implicitLevelChanged();
 	}.bind(this));
 	
 	this.enable();
@@ -2111,6 +2119,13 @@ var OptionsView = function() {
 	OptionsView.prototype.showNotes = function() {
 		return this._notes;
 	};
+	
+	/**
+	 * @return Must we show objects with implicit level 0 ?
+	 */
+	OptionsView.prototype.showImplicitLevel = function() {
+		return this._implicitLevel;
+	};
 
 //MODIFIERS
 	/**
@@ -2146,6 +2161,13 @@ var OptionsView = function() {
 	 */
 	OptionsView.prototype.changeNotes = function() {
 		this._notes = !this._notes;
+	};
+	
+	/**
+	 * Must we show objects with implicit level value ?
+	 */
+	OptionsView.prototype.changeImplicitLevel = function() {
+		this._implicitLevel = !this._implicitLevel;
 	};
 	
 	/**
@@ -2189,6 +2211,14 @@ var OptionsView = function() {
 	};
 	
 	/**
+	 * Must we show objects with implicit level ?
+	 */
+	OptionsView.prototype.setImplicitLevel = function(p) {
+		this._implicitLevel = p;
+		$("#show-implicit-level").prop("checked", this._implicitLevel);
+	};
+	
+	/**
 	 * Disable options buttons
 	 */
 	OptionsView.prototype.disable = function() {
@@ -2197,6 +2227,7 @@ var OptionsView = function() {
 		$("#show-transcendent").prop("disabled", true);
 		$("#show-photos").prop("disabled", true);
 		$("#show-notes").prop("disabled", true);
+		$("#show-implicit-level").prop("disabled", true);
 	};
 	
 	/**
@@ -2208,6 +2239,7 @@ var OptionsView = function() {
 		$("#show-transcendent").prop("disabled", false);
 		$("#show-photos").prop("disabled", false);
 		$("#show-notes").prop("disabled", false);
+		$("#show-implicit-level").prop("disabled", false);
 	};
 
 
@@ -2387,13 +2419,14 @@ var URLView = function(main) {
 				this._zoom = letterToInt(shortRes[7]);
 				
 				var options = intToBitArray(base62toDec(shortRes[8]));
-				while(options.length < 6) { options = "0" + options; }
+				while(options.length < 7) { options = "0" + options; }
 				optionsView.setUnrendered(options[options.length - 1] == 1);
 				//optionsView.setLegacy(options[options.length - 2] == 1); //Deprecated option
 				optionsView.setTranscendent(options[options.length - 3] == 1);
 				optionsView.setBuildingsOnly(options[options.length - 4] == 1);
 				optionsView.setPhotos(options[options.length - 5] == 1);
 				optionsView.setNotes(options[options.length - 6] == 1);
+				optionsView.setImplicitLevel(options[options.length - 7] == 1);
 				
 				//Get level if available
 				if(shortRes[10] != undefined && shortRes[11] != undefined) {
@@ -2429,6 +2462,7 @@ var URLView = function(main) {
 			if(parameters.bdg != undefined) { optionsView.setBuildingsOnly(parameters.bdg == "1"); }
 			if(parameters.pic != undefined) { optionsView.setPhotos(parameters.pic == "1"); }
 			if(parameters.nte != undefined) { optionsView.setNotes(parameters.nte == "1"); }
+			if(parameters.ilv != undefined) { optionsView.setImplicitLevel(parameters.ilv == "1"); }
 			this._level = parameters.lvl || parameters.level;
 			this._tiles = parameters.t || parameters.tiles;
 		}
@@ -2448,6 +2482,7 @@ var URLView = function(main) {
 			params += "&bdg="+((optionsView.showBuildingsOnly()) ? "1" : "0");
 			params += "&pic="+((optionsView.showPhotos()) ? "1" : "0");
 			params += "&nte="+((optionsView.showNotes()) ? "1" : "0");
+			params += "&ilv="+((optionsView.showImplicitLevel()) ? "1" : "0");
 		}
 		
 		var hash = this._getUrlHash();
@@ -2490,6 +2525,7 @@ var URLView = function(main) {
 		}
 		
 		var shortOptions = bitArrayToBase62([
+					((optionsView.showImplicitLevel()) ? "1" : "0"),
 					((optionsView.showNotes()) ? "1" : "0"),
 					((optionsView.showPhotos()) ? "1" : "0"),
 					((optionsView.showBuildingsOnly()) ? "1" : "0"),
@@ -3799,7 +3835,14 @@ var RoutingView = function(main) {
 					}
 					
 					//Merge with previous instruction if possible
-					if(instructions.length > 0 && instructions[instructions.length-1].img == instruction.img && instruction.img == "forward") {
+					if(
+						instructions.length > 0
+						&& ((instructions[instructions.length-1].img == instruction.img)
+						|| (instructions[instructions.length-1].img == "stairs_down" && instruction.img == "stairs")
+						|| (instructions[instructions.length-1].img == "escalator_down" && instruction.img == "escalator")
+						|| (instructions[instructions.length-1].img == "stairs_up" && instruction.img == "stairs")
+						|| (instructions[instructions.length-1].img == "escalator_up" && instruction.img == "escalator"))
+					) {
 						instructions[instructions.length-1].lgt += lastLength;
 					}
 					//Add new instruction
