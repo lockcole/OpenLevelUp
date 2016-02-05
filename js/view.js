@@ -27,7 +27,7 @@
  * The main view class.
  * It handles the index page, and contains links to sub-components.
  */
-var MainView = function(ctrl) {
+var MainView = function(ctrl, mode) {
 //ATTRIBUTES
 	/** The main controller **/
 	this._ctrl = ctrl;
@@ -37,6 +37,9 @@ var MainView = function(ctrl) {
 	
 	/** The view language **/
 	this._lang = null;
+	
+	/** The view mode (basic, advanced) **/
+	this._mode = mode;
 	
 	/*
 	 * The view components
@@ -101,10 +104,10 @@ var MainView = function(ctrl) {
 	});
 	
 	//Collapse sidebar if is mobile
-	if($(window).width() < 768) {
+	/*if($(window).width() < 768) {
 		$("#sidebar").addClass("collapsed");
 		$("#sidebar li.active").removeClass("active");
-	}
+	}*/
 };
 
 //ACCESSORS
@@ -120,6 +123,13 @@ var MainView = function(ctrl) {
 	 */
 	MainView.prototype.hasWebGL = function() {
 		return this._hasWebGL;
+	};
+	
+	/**
+	 * @return The view mode
+	 */
+	MainView.prototype.getMode = function() {
+		return this._mode;
 	};
 	
 	/**
@@ -522,7 +532,7 @@ var MapView = function(main) {
 	L.control.zoom({ position: "topright" }).addTo(this._map);
 	
 	//Add search bar
-	var search = L.Control.geocoder({ position: "topright" });
+	var search = L.Control.geocoder({ position: "topleft" });
 	//Limit max zoom in order to avoid having no tiles in background for small objects
 	var minimalMaxZoom = CONFIG.tiles[0].maxZoom;
 	for(var i=0; i < CONFIG.tiles.length; i++) {
@@ -559,17 +569,21 @@ var MapView = function(main) {
 		);
 		this._tileLayers.push(tileLayers[currentLayer.name]);
 		
-		if(firstLayer && tiles == undefined) {
+		if(
+			(tiles == undefined && CONFIG.tilesdefault[this._mainView.getMode()] == l)
+			|| (firstLayer && tiles == undefined)
+			|| l == tiles
+		) {
 			this._map.addLayer(tileLayers[currentLayer.name]);
-			firstLayer = false;
 			this._tileLayer = l;
 		}
-		else if(l == tiles) {
-			this._map.addLayer(tileLayers[currentLayer.name]);
-			this._tileLayer = l;
-		}
+		
+		firstLayer = false;
 	}
-	L.control.layers(tileLayers).addTo(this._map);
+	
+	if(this._mainView.getMode() != "basic") {
+		L.control.layers(tileLayers).addTo(this._map);
+	}
 	
 	//Routing layer
 	this._routingLayer = L.layerGroup();
@@ -577,6 +591,9 @@ var MapView = function(main) {
 	
 	//Add scale bar
 	L.control.scale({ position: "bottomright" }).addTo(this._map);
+	
+	//Add geolocation button
+	L.control.locate({ position: "topright" }).addTo(this._map);
 	
 	//Init sidebar
 	L.control.sidebar("sidebar").addTo(this._map);
@@ -678,7 +695,7 @@ var MapView = function(main) {
 				this._mainView.getMessagesView().displayMessage(this._mainView.getTranslation("error", "nodata"), "alert");
 			}
 		}
-		else if(zoom >= CONFIG.view.map.cluster_min_zoom) {
+		else if(zoom >= CONFIG.view.map.cluster_min_zoom && this._mainView.getMode() != "basic") {
 			this._dataLayer = this._createClusterData();
 			
 			//Add data to map

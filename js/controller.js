@@ -144,8 +144,10 @@ var Ctrl = function() {
 	/**
 	 * This function initializes the controller
 	 */
-	Ctrl.prototype.init = function() {
-		this._view = new MainView(this);
+	Ctrl.prototype.init = function(mode) {
+		mode = mode || "basic";
+		
+		this._view = new MainView(this, mode);
 		
 		//Init leaflet map
  		this.onMapUpdate();
@@ -284,10 +286,12 @@ var Ctrl = function() {
 			//Low zoom data download (cluster)
 			else {
 				//Download data only if new BBox isn't contained in previous one
-				if(force
+				if(
+					this._view.getMode() != "basic"
+					&& (force
 					|| this._clusterData == null
 					|| !this._clusterData.isInitialized()
-					|| !this._clusterData.getBBox().contains(bbox)
+					|| !this._clusterData.getBBox().contains(bbox))
 				) {
 					if(zoom > CONFIG.view.map.cluster_min_zoom) {
 						//Resize BBox for small areas (avoid multiple Overpass API calls)

@@ -96,6 +96,10 @@
 			"subdomains": "abcd"
 		}
 	],
+	"tilesdefault": {
+		"basic": 4,
+		"advanced": 0
+	},
 	
 	"routing": {
 		"foot": {
