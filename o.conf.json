@@ -1,0 +1,120 @@
+{
+	"_comment": "OpenLevelUp configuration file",
+	
+	"olu": {
+		"attribution": "OpenLevelUp © <a href=\"http://pavie.info\">Adrien Pavie</a>"
+	},
+	
+	"map": {
+		"lat": 47,
+		"lon": 2,
+		"zoom": 6,
+		"max_zoom": 24,
+		"data_zoom": 18
+	},
+	
+	"osm": {
+		"oapi": "http://www.overpass-api.de/api/interpreter?data=",
+		"api": "https://api.openstreetmap.org/api/0.6/",
+		"api_dev": "https://api06.dev.openstreetmap.org/api/0.6/",
+		"attribution": "Map data © <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors"
+	},
+	
+	"images": {
+		"flickr": {
+			"api": "https://api.flickr.com/services/rest/?",
+			"key": "d06fb1ebb3ede5813b89c79320e11ab8"
+		},
+		
+		"mapillary": {
+			"api": "https://a.mapillary.com/v2/",
+			"clientId": "eDhQTTdnRmZJNXdYZWUwRDQxc1NwdzpmYjE3YWE3MWM5ZjcyMTdm"
+		}
+	},
+	
+	"tiles": {
+		"basic": [
+			{
+				"name": "MapQuest",
+				"URL": "http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg",
+				"attribution": "Tiles <a href=\"http://open.mapquest.com/\">MapQuest</a>",
+				"minZoom": 1,
+				"maxZoom": 19,
+				"subdomains": "1234"
+			}
+		],
+		
+		"advanced": [
+			{
+				"name": "OpenStreetMap",
+				"URL": "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+				"attribution": "Tiles <a href=\"http://openstreetmap.org/\">OSM</a>",
+				"minZoom": 1,
+				"maxZoom": 19
+			},
+			{
+				"name": "OpenStreetMap FR",
+				"URL": "http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
+				"attribution": "Tiles <a href=\"http://tile.openstreetmap.fr/\">OSMFR</a>",
+				"minZoom": 1,
+				"maxZoom": 20
+			},
+			{
+				"name": "Stamen Toner",
+				"URL": "http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png",
+				"attribution": "Tiles <a href=\"http://maps.stamen.com/\">Stamen Toner</a>",
+				"minZoom": 1,
+				"maxZoom": 20
+			},
+			{
+				"name": "Cadastre FR",
+				"URL": "http://tms.cadastre.openstreetmap.fr/*/tout/{z}/{x}/{y}.png",
+				"attribution": "Tiles Cadastre (DGFiP)",
+				"minZoom": 1,
+				"maxZoom": 20
+			},
+			{
+				"name": "MapQuest",
+				"URL": "http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg",
+				"attribution": "Tiles <a href=\"http://open.mapquest.com/\">MapQuest</a>",
+				"minZoom": 1,
+				"maxZoom": 19,
+				"subdomains": "1234"
+			},
+			{
+				"name": "ÖPNV",
+				"URL": "http://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png",
+				"attribution": "Tiles <a href=\"http://www.öpnvkarte.de/\">ÖPNV</a>",
+				"minZoom": 1,
+				"maxZoom": 18
+			},
+			{
+				"name": "OpenStreetMap DE",
+				"URL": "http://b.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png",
+				"attribution": "Tiles <a href=\"http://openstreetmap.de/karte.html\">OSMDE</a>",
+				"minZoom": 1,
+				"maxZoom": 18,
+				"subdomains": "abcd"
+			}
+		]
+	},
+	
+	"routing": {
+		"foot": {
+			"name": "By foot",
+			"speed": 1.39
+		},
+		
+		"wheelchair": {
+			"name": "In wheelchair",
+			"speed": 0.7,
+			"avoid": [ "stairs", "escalator" ]
+		},
+		
+		"sport": {
+			"name": "By foot (sportive)",
+			"speed": 1.39,
+			"avoid": [ "elevator", "escalator" ]
+		}
+	}
+}

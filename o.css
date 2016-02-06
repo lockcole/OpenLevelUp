@@ -1,0 +1,46 @@
+/*
+ * This file is part of OpenLevelUp!.
+ * 
+ * OpenLevelUp! is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ * 
+ * OpenLevelUp! is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenLevelUp!.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * OpenLevelUp!
+ * Web viewer for indoor mapping (based on OpenStreetMap data).
+ * Author: Adrien PAVIE
+ *
+ * Map Iframe style
+ */
+
+/**********
+ * Global *
+ **********/
+
+body {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	font-family: Arial;
+	color: #222;
+}
+
+
+/*******
+ * Map *
+ *******/
+
+#map {
+	width: 100%;
+	height: 100%;
+}
