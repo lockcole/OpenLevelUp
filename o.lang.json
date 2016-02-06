@@ -1,0 +1,741 @@
+{
+	"available": {
+		"fr": true,
+		"de": true,
+		"en": true,
+		"zh-TW": true
+	},
+	"general": {
+		"cancel": {
+			"fr": "Annuler",
+			"de": "Abbruch",
+			"en": "Cancel",
+			"zh-TW": "取消"
+		},
+		"loading": {
+			"fr": "Chargement",
+			"de": "Wird geladen",
+			"en": "Loading",
+			"zh-TW": "讀取中"
+		},
+		"ok": {
+			"fr": "OK",
+			"de": "OK",
+			"en": "OK",
+			"zh-TW": "確定"
+		},
+		"status": {
+			"fr": "État",
+			"de": "Status",
+			"en": "Status",
+			"zh-TW": "狀態"
+		}
+	},
+	"error": {
+		"bbox": {
+			"fr": "Enveloppe invalide",
+			"de": "Ungültige bounding box",
+			"en": "Invalid bounding box",
+			"zh-TW": "無效的定界框"
+		},
+		"nodata": {
+			"fr": "Il n'y a pas de données dans cette zone",
+			"de": "Keine Daten in dieser Region verfügbar",
+			"en": "There is no available data in this area",
+			"zh-TW": "此區域無可用資料"
+		},
+		"zoomin": {
+			"fr": "Zoomez pour voir plus de détails",
+			"de": "Zoom rein um mehr Informationen zu sehen",
+			"en": "Zoom in to see more information",
+			"zh-TW": "放大以查看更多資訊"
+		},
+		"invalidlevel": {
+			"fr": "Niveau invalide",
+			"de": "Ungültiges Stockwerk",
+			"en": "Invalid level",
+			"zh-TW": "無效的樓層"
+		},
+		"lastlevel": {
+			"fr": "Vous êtes déjà au dernier niveau disponible",
+			"de": "Du bist bereits im höchsten Stockwerk",
+			"en": "You are already at the last available level",
+			"zh-TW": "你已經在最高可瀏覽樓層"
+		},
+		"firstlevel": {
+			"fr": "Vous êtes déjà au premier niveau disponible",
+			"de": "Du bist bereits im untersten Stockwerk",
+			"en": "You are already at the first available level",
+			"zh-TW": "你已經在最低可瀏覽樓層"
+		},
+		"invalidshortlink": {
+			"fr": "Lien court invalide",
+			"de": "Ungültiger Kurz-Link",
+			"en": "Invalid short link",
+			"zh-TW": "無效的短網址"
+		},
+		"datadownload": {
+			"fr": "Erreur lors du téléchargement des données",
+			"de": "Beim Laden der Daten ist ein Fehler aufgetreten",
+			"en": "An error occured during data download",
+			"zh-TW": "下載資料時發生錯誤"
+		},
+		"invalidcoordsnote": {
+			"fr": "Coordonnées invalides pour la note",
+			"de": "Ungültige Korrdinaten für den Hinweis",
+			"en": "Invalid coordinates for your note",
+			"zh-TW": "你的註記的座標無效"
+		},
+		"emptynote": {
+			"fr": "La note est vide",
+			"de": "Dein Hinweis ist leer",
+			"en": "Your note is empty",
+			"zh-TW": "你的註記是空的"
+		},
+		"notesent": {
+			"fr": "La note a été envoyée avec succès",
+			"de": "Dein Hinweis wurde erfolgreich gesendet",
+			"en": "Your note was successfully sent",
+			"zh-TW": "你的註記已成功發送"
+		},
+		"notefail": {
+			"fr": "Erreur lors de l'envoi de la note",
+			"de": "Beim Senden des Hinweises ist ein Fehler aufgetreten",
+			"en": "An error occurred during note sending",
+			"zh-TW": "發送註記時發生錯誤"
+		},
+		"noroute": {
+			"fr": "Pas de chemin trouvé",
+			"de": "Keine Route gefunden",
+			"en": "No route found",
+			"zh-TW": "無法找到路徑"
+		}
+	},
+	"main": {
+		"about": {
+			"fr": "À propos",
+			"de": "Über",
+			"en": "About",
+			"zh-TW": "關於"
+		},
+		"how": {
+			"fr": "Comment ?",
+			"de": "Kommentar?",
+			"en": "How ?",
+			"zh-TW": "怎麼做？"
+		},
+		"qr": {
+			"fr": "QR Code",
+			"de": "QR Code",
+			"en": "QR Code",
+			"zh-TW": "QR Code"
+		},
+		"shortlink": {
+			"fr": "Lien court",
+			"de": "Kurzlink",
+			"en": "Shortlink",
+			"zh-TW": "短網址"
+		},
+		"slogan": {
+			"fr": "Voyez l'intérieur des bâtiments<br />avec OpenLevelUp!",
+			"de": "Erkunde das innere von Gebäuden<br />mit OpenLevelUp!",
+			"en": "See inside buildings<br />with OpenLevelUp!",
+			"zh-TW": "用 OpenLevelUp!<br />看看建築物的內部"
+		}
+	},
+	"direction": {
+		"N": {
+			"fr": "Nord",
+			"de": "Nord",
+			"en": "North",
+			"zh-TW": "北"
+		},
+		"NW": {
+			"fr": "Nord-ouest",
+			"de": "Nord-West",
+			"en": "North-west",
+			"zh-TW": "西北"
+		},
+		"W": {
+			"fr": "Ouest",
+			"de": "West",
+			"en": "West",
+			"zh-TW": "西"
+		},
+		"SW": {
+			"fr": "Sud-ouest",
+			"de": "Süd-West",
+			"en": "South-west",
+			"zh-TW": "西南"
+		},
+		"S": {
+			"fr": "Sud",
+			"de": "Süd",
+			"en": "South",
+			"zh-TW": "南"
+		},
+		"SE": {
+			"fr": "Sud-est",
+			"de": "Süd-Ost",
+			"en": "South-east",
+			"zh-TW": "東南"
+		},
+		"E": {
+			"fr": "Est",
+			"de": "Ost",
+			"en": "East",
+			"zh-TW": "東"
+		},
+		"NE": {
+			"fr": "Nord-est",
+			"de": "Nord-Ost",
+			"en": "North-east",
+			"zh-TW": "東北"
+		}
+	},
+	"feature": {
+		"details": {
+			"fr": "Détails",
+			"de": "Details",
+			"en": "Details",
+			"zh-TW": "細節"
+		}
+	},
+	"image": {
+		"page": {
+			"fr": "Page",
+			"de": "Seite",
+			"en": "Page",
+			"zh-TW": "頁面"
+		}
+	},
+	"notes": {
+		"note": {
+			"fr": "Note",
+			"de": "Hinweis",
+			"en": "Note",
+			"zh-TW": "註記"
+		},
+		"desc": {
+			"fr": "Ajoutez une note pour indiquer aux contributeurs s'il manque un objet ou s'il y a une erreur. Glissez le marqueur sur la carte, et donnez des détails ci-dessous.",
+			"de": "Ergänze einen Hinweis um Anderen zu zeigen, dass etwas fehlt oder falsch ist. Ziehe den Marker zur genauen Position und gebe einige Details.",
+			"en": "Add a note to let people know that something is missing or wrong. Drag the marker to the problem location, and give us some details here.",
+			"zh-TW": "新增一個註記，讓大家知道這裡有錯誤或被遺漏的東西。拖放標記至有問題的地點，再給我們些細節。"
+		},
+		"new": {
+			"fr": "Nouvelle note",
+			"de": "Neuer Hinweis",
+			"en": "New note",
+			"zh-TW": "新註記"
+		},
+		"title": {
+			"fr": "Nouvelle note",
+			"de": "Neuer Hinweis",
+			"en": "New note",
+			"zh-TW": "新註記"
+		},
+		"zoomintoadd": {
+			"fr": "Zoomez pour pouvoir ajouter une note",
+			"de": "Du musst reinzoomen um einen Hinweis zu setzen",
+			"en": "You have to zoom in to add a note",
+			"zh-TW": "你要放大以增加註記"
+		},
+		"user": {
+			"fr": "Utilisateur",
+			"de": "Benutzer",
+			"en": "User",
+			"zh-TW": "使用者"
+		},
+		"anonymous": {
+			"fr": "Anonyme",
+			"de": "Anonym",
+			"en": "Anonymous",
+			"zh-TW": "匿名"
+		},
+		"seeosm": {
+			"fr": "Voir sur OSM.org",
+			"de": "Auf OSM.org ansehen",
+			"en": "See on OSM.org",
+			"zh-TW": "在 OSM.org 上查看"
+		}
+	},
+	"about": {
+		"title": {
+			"fr": "À propos d'OpenLevelUp!",
+			"de": "Über OpenLevelUp!",
+			"en": "About OpenLevelUp!",
+			"zh-TW": "關於 OpenLevelUp!"
+		},
+		"summary": {
+			"fr": "Ce site vous permet de voir les <a href=\"http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging\">données de l'intérieur des bâtiments</a> contenues dans le projet <a href=\"http://openstreetmap.org\">OpenStreetMap</a>. OpenLevelUp est disponible sous licence <a href=\"https://www.gnu.org/licenses/agpl.html\">AGPL v3</a>.",
+			"de": "Diese Seite zeigt <a href=\"http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging\">Innenansichten</a> von <a href=\"http://openstreetmap.org\">OpenStreetMap</a>. OpenLevelUp ist lizensiert unter der Lizenz <a href=\"https://www.gnu.org/licenses/agpl.html\">AGPL v3</a>.",
+			"en": "This website allows you to see <a href=\"http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging\">indoor data</a> from the <a href=\"http://openstreetmap.org\">OpenStreetMap</a> project. Licensed under <a href=\"https://www.gnu.org/licenses/agpl.html\">AGPL v3</a>.",
+			"zh-TW": "本網站讓你能看到 <a href=\"http://openstreetmap.org\">OpenStreetMap</a> 計畫中的<a href=\"http://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging\">室內資料</a>。授權條款為 <a href=\"https://www.gnu.org/licenses/agpl.html\">AGPL v3</a>。"
+		},
+		"laureate": {
+			"fr": "Ce projet est lauréat du concours <a href=\"http://opendata.regionpaca.fr/concours-regional-open-paca.html\">OpenPACA</a> 2015, organisé par la région <a href=\"http://opendata.regionpaca.fr\">Provence-Alpes-Côte d'Azur</a>.",
+			"de": "Dieses Projekt wurde unterstützt von <a href=\"http://opendata.regionpaca.fr/concours-regional-open-paca.html\">OpenPACA</a> 2015, organisiert von der französischen Region <a href=\"http://opendata.regionpaca.fr\">Provence-Alpes-Côte d'Azur</a>.",
+			"en": "This project was laureate of the <a href=\"http://opendata.regionpaca.fr/concours-regional-open-paca.html\">OpenPACA</a> contest (2015 edition), organized by the french region <a href=\"http://opendata.regionpaca.fr\">Provence-Alpes-Côte d'Azur</a>.",
+			"zh-TW": "此專案榮獲 <a href=\"http://opendata.regionpaca.fr/concours-regional-open-paca.html\">OpenPACA</a> 比賽(2015舉行)的桂冠，由法國的 <a href=\"http://opendata.regionpaca.fr\">Provence-Alpes-Côte d'Azur</a> 遴選。"
+		},
+		"contact": {
+			"fr": "Contact",
+			"de": "Kontakt",
+			"en": "Contact",
+			"zh-TW": "聯絡"
+		},
+		"github": {
+			"fr": "Dépôt GitHub",
+			"de": "GitHub repository",
+			"en": "GitHub repository",
+			"zh-TW": "GitHub repository"
+		},
+		"wiki": {
+			"fr": "Wiki",
+			"de": "Wiki",
+			"en": "Wiki",
+			"zh-TW": "Wiki"
+		},
+		"doctag": {
+			"fr": "Documentation pour l'édition",
+			"de": "Dokumentation zum Editieren",
+			"en": "Documentation for editing",
+			"zh-TW": "編輯指南文件"
+		}
+	},
+	"params": {
+		"buildings": {
+			"fr": "Voir uniquement les bâtiments",
+			"de": "Zeige nur Gebäude",
+			"en": "Show buildings only",
+			"zh-TW": "只顯示建築"
+		},
+		"notes": {
+			"fr": "Voir les notes OpenStreetMap",
+			"de": "Zeige OpenStreetMap Hinweise",
+			"en": "Show OpenStreetMap notes",
+			"zh-TW": "顯示 OpenStreetMap 註記"
+		},
+		"pictures": {
+			"fr": "Voir les photos",
+			"de": "Zeige Bilder",
+			"en": "Show pictures",
+			"zh-TW": "顯示照片"
+		},
+		"transcend": {
+			"fr": "Voir les objets inter-étages",
+			"de": "Zeige durchsichtige Gebäude",
+			"en": "Show transcendent objects",
+			"zh-TW": "顯示穿透樓層物件"
+		},
+		"unrendered": {
+			"fr": "Voir les objets sans style",
+			"de": "Zeige Objekte, die kein speziellen Stil haben",
+			"en": "Show unrendered objects",
+			"zh-TW": "顯示未繪圖的物件"
+		},
+		"implicitlvl": {
+			"fr": "Voir les objets sans niveau défini",
+			"en": "Show objects with implicit level"
+		}
+	},
+	"rooms": {
+		"title": {
+			"fr": "Salles",
+			"de": "Räume",
+			"en": "Rooms",
+			"zh-TW": "房間"
+		}
+	},
+	"routing": {
+		"length": {
+			"fr": "Longueur",
+			"de": "Länge",
+			"en": "Length",
+			"zh-TW": "長度"
+		},
+		"time": {
+			"fr": "Durée",
+			"de": "Zeit",
+			"en": "Time",
+			"zh-TW": "時間"
+		},
+		"title": {
+			"fr": "Navigation (bêta)",
+			"de": "Navigation (beta)",
+			"en": "Navigation (beta)",
+			"zh-TW": "導航 (測試版)"
+		},
+		"useelevator": {
+			"fr": "Prenez l'ascenseur",
+			"de": "Aufzug erlauben",
+			"en": "Use elevator",
+			"zh-TW": "用電梯"
+		},
+		"golevel": {
+			"fr": "Allez au niveau",
+			"de": "Gehe zu Etage",
+			"en": "Go to level",
+			"zh-TW": "到樓層"
+		},
+		"usingelevator": {
+			"fr": "par l'ascenseur",
+			"de": "nutze den Aufzug",
+			"en": "using elevator",
+			"zh-TW": "用電梯"
+		},
+		"useconveying": {
+			"fr": "Prenez l'escalator",
+			"de": "Nutze die Rolltreppe",
+			"en": "Use conveying path",
+			"zh-TW": "用電動走道"
+		},
+		"downconveying": {
+			"fr": "Descendez via l'escalator",
+			"de": "Gehe die Rolltreppe runter",
+			"en": "Go down using conveying stairs",
+			"zh-TW": "用電扶梯下樓"
+		},
+		"upconveying": {
+			"fr": "Montez via l'escalator",
+			"de": "Gehe die Rolltreppe rauf",
+			"en": "Go up using conveying stairs",
+			"zh-TW": "用電扶梯上樓"
+		},
+		"usestairs": {
+			"fr": "Prenez les escaliers",
+			"de": "Nutze die Treppe",
+			"en": "Use stairs",
+			"zh-TW": "用樓梯"
+		},
+		"downstairs": {
+			"fr": "Descendez les escaliers",
+			"de": "Geh die Treppe runter",
+			"en": "Go downstairs",
+			"zh-TW": "下樓"
+		},
+		"upstairs": {
+			"fr": "Montez les escaliers",
+			"de": "Geh die Treppe rauf",
+			"en": "Go upstairs",
+			"zh-TW": "上樓"
+		},
+		"goforward": {
+			"fr": "Allez tout droit",
+			"de": "Gehe vorwärts",
+			"en": "Go forward",
+			"zh-TW": "前進"
+		},
+		"gobackward": {
+			"fr": "Reculez",
+			"de": "Gehe rückwärts",
+			"en": "Go backward",
+			"zh-TW": "後退"
+		},
+		"turnright": {
+			"fr": "Tournez à droite",
+			"de": "Drehe dich rechts",
+			"en": "Turn to right",
+			"zh-TW": "右轉"
+		},
+		"turnleft": {
+			"fr": "Tournez à gauche",
+			"de": "Drehe dich links",
+			"en": "Turn to left",
+			"zh-TW": "左轉"
+		},
+		"outelevator": {
+			"fr": "Sortez de l'ascenseur",
+			"de": "Verlasse den Aufzug",
+			"en": "Go out of the elevator",
+			"zh-TW": "出電梯"
+		},
+		"arrived": {
+			"fr": "Vous êtes arrivé",
+			"de": "Du hast das Ziel erreicht",
+			"en": "You are arrived",
+			"zh-TW": "你已抵達"
+		},
+		"clickmarker": {
+			"fr": "Cliquez ou glissez le marqueur",
+			"de": "Klicke oder ziehe den Marker",
+			"en": "Click or drag marker",
+			"zh-TW": "點擊或拖曳標記"
+		}
+	},
+	"routingmode": {
+		"foot": {
+			"fr": "À pied",
+			"de": "zu Fuß",
+			"en": "By foot",
+			"zh-TW": "步行"
+		},
+		"wheelchair": {
+			"fr": "En fauteuil",
+			"de": "Per Rollstuhl",
+			"en": "In wheelchair",
+			"zh-TW": "輪椅"
+		},
+		"sport": {
+			"fr": "À pied (sportif)",
+			"en": "By foot (sportive)"
+		}
+	},
+	"support": {
+		"title": {
+			"fr": "Soutenez OpenLevelUp",
+			"en": "Support OpenLevelUp"
+		},
+		"desc": {
+			"fr": "Si vous appréciez le projet et que vous souhaitez le soutenir, vous pouvez faire un don en utilisant l'un des moyens ci-dessous.",
+			"en": "If you like this project and wish to support it, you can make a donation using one of the following ways."
+		}
+	},
+	"details": {
+		"access": {
+			"en": "Access",
+			"de": "Zugang",
+			"fr": "Accès",
+			"zh-TW": "使用"
+		},
+		"architect": {
+			"en": "Architect",
+			"de": "Architekt",
+			"fr": "Architecte",
+			"zh-TW": "建築師"
+		},
+		"artist": {
+			"en": "Artist",
+			"de": "Künstler",
+			"fr": "Artiste",
+			"zh-TW": "藝術家"
+		},
+		"artist_name": {
+			"en": "Artist",
+			"de": "Künstler",
+			"fr": "Artiste",
+			"zh-TW": "藝術家"
+		},
+		"capacity": {
+			"en": "Capacity",
+			"de": "Kapazität",
+			"fr": "Capacité",
+			"zh-TW": "容量"
+		},
+		"display": {
+			"en": "Display",
+			"de": "Anzeige",
+			"fr": "Affichage",
+			"zh-TW": "顯示"
+		},
+		"material": {
+			"en": "Material",
+			"de": "Material",
+			"fr": "Matériau",
+			"zh-TW": "材質"
+		},
+		"operator": {
+			"en": "Operator",
+			"de": "Betreiber",
+			"fr": "Gestionnaire",
+			"zh-TW": "經營者"
+		},
+		"support": {
+			"en": "Support",
+			"de": "Befestigt",
+			"fr": "Support",
+			"zh-TW": "支撐"
+		},
+		"vendor": {
+			"en": "With vendor",
+			"fr": "Vendeur présent",
+			"zh-TW": "有攤販"
+		}
+	},
+	"loading": {
+		"prepareupdate": {
+			"fr": "Nettoyage",
+			"de": "Bereite Update vor",
+			"en": "Prepare update",
+			"zh-TW": "準備更新"
+		},
+		"refresh": {
+			"fr": "Rafraîchissement de la carte",
+			"de": "Karte aktualisieren",
+			"en": "Refresh map",
+			"zh-TW": "重新整理地圖"
+		},
+		"requestoapi": {
+			"fr": "Téléchargement des données OSM",
+			"de": "Lade OSM Daten runter",
+			"en": "Download OSM data",
+			"zh-TW": "下載 OSM 資料"
+		},
+		"processdata": {
+			"fr": "Analyse des données reçues",
+			"de": "Analysiere geladene Daten",
+			"en": "Process received data",
+			"zh-TW": "處理已接收資料"
+		},
+		"downloadphoto": {
+			"fr": "Obtention des photos associées",
+			"de": "Lade Bilder runter",
+			"en": "Download photos metadata",
+			"zh-TW": "下載照片中繼資料"
+		}
+	},
+	"title": {
+		"general": {
+			"tags": {
+				"fr": "Tags",
+				"de": "Tags",
+				"en": "Tags",
+				"zh-TW": "標籤"
+			}
+		},
+		"feature": {
+			"leveldown": {
+				"fr": "Descendre",
+				"de": "Runter",
+				"en": "Go down",
+				"zh-TW": "下樓"
+			},
+			"levelup": {
+				"fr": "Monter",
+				"de": "Hoch",
+				"en": "Go up",
+				"zh-TW": "上樓"
+			},
+			"pictures": {
+				"fr": "Photos associées",
+				"de": "Zugehörige Bilder",
+				"en": "Related pictures",
+				"zh-TW": "相關照片"
+			},
+			"seeosm": {
+				"fr": "Voir cet objet sur OSM.org",
+				"de": "Betrachte dieses Objekt auf OSM.org",
+				"en": "See this on OSM.org",
+				"zh-TW": "在 OSM.org 查看此物件"
+			}
+		},
+		"image": {
+			"statusok": {
+				"fr": "L'image est valide",
+				"de": "Diese Adresse des Bildes ist gültig",
+				"en": "The image link is valid",
+				"zh-TW": "有效的照片連結"
+			},
+			"statusmissing": {
+				"fr": "Pas d'image associée",
+				"de": "Keine Bildadresse hinterlegt",
+				"en": "No image link defined",
+				"zh-TW": "未指定照片連結"
+			},
+			"statusbad": {
+				"fr": "L'image est indisponible",
+				"de": "Diese Adresse des Bildes ist nicht gültig",
+				"en": "The image link is broken",
+				"zh-TW": "照片連結已損壞"
+			},
+			"checkmpl": {
+				"fr": "(Vérifiez les tags mapillary:*)",
+				"de": "(Prüfe mapillary:* tags)",
+				"en": "(Check mapillary:* tags)",
+				"zh-TW": "(檢查 mapillary:* 標籤)"
+			},
+			"loading": {
+				"fr": "L'image est en cours de chargement",
+				"de": "Das Bild wird eventuell noch geladen",
+				"en": "The image is still potentially loading",
+				"zh-TW": "圖片可能仍在讀取中"
+			}
+		},
+		"main": {
+			"about": {
+				"fr": "En savoir plus sur le projet",
+				"de": "Lerne mehr über das Projekt",
+				"en": "Know more about the project",
+				"zh-TW": "了解更多本專案相關訊息"
+			},
+			"how": {
+				"fr": "Zoomez sur une zone avec des données d'intérieur (les bulles numérotées sur la carte), puis naviguez à travers les étages avec les flèches haut et bas du panneau latéral.",
+				"de": "Zoome einfach auf eine Region mit Gebäudedaten (Kreise mit Nummern) und bewege dich durch die Etagen mit den Hoch- und Runter-Pfeilen.",
+				"en": "Just zoom in on an area with indoor data (numbered bubbles on map), and then navigate through levels using Up and Down arrows on the side panel.",
+				"zh-TW": "在有室內資料的地方(地圖上的數字圓圈處)放大，然後用左側的上下箭頭瀏覽各樓層。"
+			},
+			"osmlink": {
+				"fr": "Voir la zone sur OpenStreetMap",
+				"de": "Betrachte diese Region auf OpenStreetMap",
+				"en": "See this area on OpenStreetMap",
+				"zh-TW": "在 OpenStreetMap 查看此區域"
+			},
+			"qr": {
+				"fr": "QR Code pour cette zone",
+				"de": "QR Code für diesen Ort",
+				"en": "QR Code for this map area",
+				"zh-TW": "此地圖區域的 QR Code"
+			},
+			"shortlink": {
+				"fr": "Lien court pour cette zone",
+				"de": "Kurz-Link für diesen Ort",
+				"en": "Short URL for this map area",
+				"zh-TW": "此地圖區域的短網址"
+			}
+		},
+		"params": {
+			"buildings": {
+				"fr": "Cache tous les objets qui ne sont pas des bâtiments (sans tag building=*)",
+				"de": "Verstecke alle Objekte die keine Gebäude sind (kein building=* Tag)",
+				"en": "Hides all objects that aren't buildings (no building=* tag)",
+				"zh-TW": "隱藏所有不是建築的物件(沒有 building=* 標籤)"
+			},
+			"notes": {
+				"fr": "Les notes OpenStreetMap permettent d'indiquer aux contributeurs qu'une donnée est manquante ou qu'une erreur existe.",
+				"de": "OpenStreetMap Hinweise können anderen Nutzern Informationen zu Verbesserungen in den Daten geben.",
+				"en": "OpenStreetMap notes allow other users to know that there is some edits to do in data.",
+				"zh-TW": "OpenStreetMap 註記能讓其他使用者知道那裡的資料還需編輯。"
+			},
+			"pictures": {
+				"fr": "Affiche un marqueur sur les objets associés à une photo",
+				"de": "Ergänzt Marker für Objekte mit zugehörigen Bildern",
+				"en": "Adds markers on objects which have an associated photo",
+				"zh-TW": "標記出有關聯照片的物件"
+			},
+			"transcend": {
+				"fr": "Objets traversant les étages, par exemples les escaliers ou ascenseurs",
+				"de": "Objekte die Stockwerke verbinden, wie Treppen oder Aufzüge",
+				"en": "Objects passing through levels, such as stairs or elevators",
+				"zh-TW": "穿透樓層的物件，像是樓梯或電梯"
+			},
+			"unrendered": {
+				"fr": "Objets associés à une valeur de niveau mais sans rendu défini. Cela signifie que l'objet n'a pas vocation à être affiché ou alors que certaines informations sont manquantes.",
+				"de": "Objekte welche bisher unbekannte Gebäudedaten haben. Es ist möglich, dass das Objekte nicht gezeichnet werden soll oder Informationen fehlen.",
+				"en": "Objects containing indoor data, but without a defined style in our rendering rules. It means that the object is not meant to be rendered or it misses some needed information.",
+				"zh-TW": "包含室內資料，但不在我們的繪圖規則裡的物件。代表該物件不必被繪圖出來或遺漏所需資訊。"
+			},
+			"implicitlvl": {
+				"fr": "Objets sans valeur de niveau définie, donc à priori au rez-de-chaussée.",
+				"en": "Objects without defined level value, so implicitly on ground level."
+			}
+		},
+		"routing": {
+			"changelevel": {
+				"fr": "Cliquez pour changer de niveau",
+				"de": "Klicke um das Stockwerk zu wechseln",
+				"en": "Click to change level",
+				"zh-TW": "點擊以變更樓層"
+			}
+		}
+	},
+	"value": {
+		"general": {
+			"search": {
+				"fr": "Rechercher",
+				"de": "Suche",
+				"en": "Search",
+				"zh-TW": "搜尋"
+			}
+		}
+	}
+}
