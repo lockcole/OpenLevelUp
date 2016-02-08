@@ -39,6 +39,9 @@ var View = function(ctrl, mode) {
 	/** The map **/
 	this._map = null;
 	
+	/** The level slider on map **/
+	this._lvlSlider = null;
+	
 	/** Delay before firing onMove event to Ctrl **/
 	this._delayMove = null;
 
@@ -117,7 +120,11 @@ var View = function(ctrl, mode) {
 		var osmData = this._ctrl._data._osmData;
 		
 		//Init level control
-		L.control.levelSlider(
+		if(this._lvlSlider != null) {
+			this._map.removeControl(this._lvlSlider);
+		}
+		
+		this._lvlSlider = L.control.levelSlider(
 			function(lvl) {
 				console.log("Level: "+lvl);
 			},
@@ -126,5 +133,6 @@ var View = function(ctrl, mode) {
 				orientation: 'vertical',
 				position: 'bottomright'
 			}
-		).addTo(this._map);
+		);
+		this._lvlSlider.addTo(this._map);
 	};
