@@ -17,8 +17,14 @@
 			{
 				"name": "Area",
 				"description": "Indoor areas",
-				"onTags": [ { "indoor": "area|corridor" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|hall|entry|gallery|collection" } ],
+				"onTags": [ { "indoor": "area" } ],
 				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 0.8, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -6, "label": "name", "labelStyle": "area" }
+			},
+			{
+				"name": "Hall",
+				"description": "Indoor hall with walls",
+				"onTags": [ { "indoor": "corridor" }, { "buildingpart": "corridor|hall" }, { "room": "corridor|hall|entry|gallery|collection" } ],
+				"style": { "color": "#AAAAAA", "opacity": 1, "weight": 2.5, "fillColor": "#EEEEEE", "fillOpacity": 1, "layer": -5, "label": "name", "labelStyle": "area" }
 			},
 			{
 				"name": "Entrance",
@@ -48,7 +54,7 @@
 				"name": "Vertical passage",
 				"description": "Elevetor, stairs (as polygons)",
 				"onTags": [ { "buildingpart": "verticalpassage" }, { "room": "stairs|escalator" }, { "indoor": "elevator" }, { "stairs": "yes" } ],
-				"style": { "color": "#7495DA", "fillColor": "#AEBDDA", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1 }
+				"style": { "color": "#7495DA", "fillColor": "#AEBDDA", "opacity": 1, "fillOpacity": 1, "weight": 2.5, "levelup": true, "layer": -1 }
 			},
 			{
 				"name": "Elevator",
@@ -185,7 +191,7 @@
 				"name": "Vertical passage",
 				"description": "Elevetor, stairs",
 				"onTags": [ { "highway": "elevator|lift" }, { "highway": "steps", "area": "yes" } ],
-				"style": { "color": "#7495DA", "fillColor": "#AEBDDA", "opacity": 1, "fillOpacity": 1, "weight": 1, "levelup": true, "layer": -1, "dashArray": "null" }
+				"style": { "color": "#7495DA", "fillColor": "#AEBDDA", "opacity": 1, "fillOpacity": 1, "weight": 2.5, "levelup": true, "layer": -1, "dashArray": "null" }
 			},
 			{
 				"name": "Elevator",
