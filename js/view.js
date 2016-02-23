@@ -105,6 +105,9 @@ var MainView = function(ctrl) {
 		$("#sidebar").addClass("collapsed");
 		$("#sidebar li.active").removeClass("active");
 	}
+	
+	//Export link
+	$("#icon-export").click(this._ctrl.onExportLevel.bind(this._ctrl));
 };
 
 //ACCESSORS
@@ -696,6 +699,29 @@ var MapView = function(main) {
 		this.changeTilesOpacity();
 		
 		//console.log("[Time] View update: "+((new Date().getTime()) - timeStart));
+	};
+	
+	/**
+	 * Get data currently shown on map
+	 */
+	MapView.prototype.getData = function() {
+		//Create data (specific to level)
+		var result = L.layerGroup();
+		
+		if(this._map.getZoom() >= CONFIG.view.map.data_min_zoom) {
+			var fullData = this._createFullData();
+			
+			//Add data to map
+			if(fullData != null) {
+				//Order layers
+				var featureLayersKeys = Object.keys(fullData);
+				for(var i=0; i < featureLayersKeys.length; i++) {
+					result.addLayer(fullData[featureLayersKeys[i]]);
+				}
+			}
+		}
+		
+		return result;
 	};
 	
 	/**

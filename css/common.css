@@ -183,9 +183,10 @@ header, footer, #home > div {
 	text-align: left;
 }
 
-#icon-star {
+#icon-star, #icon-export {
 	height: 16px;
 	vertical-align: middle;
+	cursor: pointer;
 }
 
 /* Room list sidebar */

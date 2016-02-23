@@ -519,6 +519,17 @@ var Feature = function(f) {
 	Feature.prototype.getGeometry = function() {
 		return this._geometry;
 	};
+	
+	/**
+	 * @return The feature as GeoJSON
+	 */
+	Feature.prototype.getGeoJSON = function() {
+		return {
+			"type": "Feature",
+			"properties": this._tags,
+			"geometry": this._geometry._geom
+		};
+	};
 
 
 

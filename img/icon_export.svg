@@ -15,7 +15,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="export_icon.svg">
+   sodipodi:docname="icon_export.svg">
   <defs
      id="defs4">
     <marker
@@ -43,7 +43,7 @@
       <path
          id="path4292"
          d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "
-         style="fill-rule:evenodd;stroke:#ffffff;stroke-width:1pt;stroke-opacity:1;fill:#ffffff;fill-opacity:1"
+         style="fill-rule:evenodd;stroke:#007bfe;stroke-width:1pt;stroke-opacity:1;fill:#007bfe;fill-opacity:1"
          transform="scale(0.2)" />
     </marker>
     <marker
@@ -124,16 +124,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="11.2"
-     inkscape:cx="13.671063"
-     inkscape:cy="15.505054"
+     inkscape:cx="-3.1592941"
+     inkscape:cy="15.326483"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      units="px"
-     inkscape:window-width="1600"
-     inkscape:window-height="843"
-     inkscape:window-x="1440"
-     inkscape:window-y="464"
+     inkscape:window-width="1366"
+     inkscape:window-height="661"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata7">
@@ -143,7 +143,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -153,13 +153,13 @@
      id="layer1"
      transform="translate(0,-1020.3622)">
     <path
-       style="opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#007bfe;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 22.732144,1032.4872 0,16.6429 -19.2857155,0 0,-19.2857 10.1425715,-2e-4"
        id="rect4136"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccc" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:3.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#TriangleOutS)"
+       style="fill:none;fill-rule:evenodd;stroke:#007bfe;stroke-width:3.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#TriangleOutS);fill-opacity:1"
        d="m 12.910714,1039.3979 c 0,0 0.982143,-8.8393 12.321429,-13.9286"
        id="path4138"
        inkscape:connector-curvature="0" />

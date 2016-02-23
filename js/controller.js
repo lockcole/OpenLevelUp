@@ -214,6 +214,39 @@ var Ctrl = function() {
 	Ctrl.prototype.implicitLevelChanged = function() {
 		controller.onMapUpdate(true);
 	};
+	
+	/**
+	 * This function is called when user wants to export the currently shown level
+	 */
+	Ctrl.prototype.onExportLevel = function() {
+		var level = this._view.getLevelView().get();
+		
+		if(
+			this._view.getMapView().get().getZoom() >= CONFIG.view.map.data_min_zoom
+			&& level != null
+			&& this._view.getMapView()._dataLayer != null
+		) {
+			//Get data for given level
+			var levelData = [];
+			var data = this._data.getFeatures();
+			for(var d in data) {
+				if(data[d].isOnLevel(level)) {
+					levelData.push(data[d].getGeoJSON());
+				}
+			}
+			
+			//Create GeoJSON
+			var geojson = { type: "FeatureCollection", features: levelData };
+			var file = new Blob(
+				[JSON.stringify(geojson, null, '\t')],
+				{ type: "application/json;charset=utf-8;" }
+			);
+			saveAs(file, "level_"+level+".geojson");
+		}
+		else {
+			this._view.getMessagesView().displayMessage("No level available for export", "alert");
+		}
+	}
 
 
 /*******************
