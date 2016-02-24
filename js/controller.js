@@ -573,7 +573,7 @@ var Ctrl = function() {
 	 */
 	Ctrl.prototype.requestMapillaryData = function(id, isLast) {
 		isLast = isLast || false;
-		var params = 'g/'+id+'?client_id='+CONFIG.images.mapillary.clientId;
+		var params = 'im/'+id+'?client_id='+CONFIG.images.mapillary.clientId;
 		var url = CONFIG.images.mapillary.api+params;
 		
 		//Download
@@ -592,9 +592,9 @@ var Ctrl = function() {
 	Ctrl.prototype.setMapillaryData = function(data) {
 		try {
 			if(this._data.isInitialized()) {
-				if(data.nodes.length > 0) {
-					var key = data.nodes[0].key;
-					this._mapillaryData.add(key, data.nodes[0]);
+				if(data.key != undefined) {
+					var key = data.key;
+					this._mapillaryData.add(key, data);
 				}
 				else {
 					console.error("[Mapillary] Error: received corrupted data");
