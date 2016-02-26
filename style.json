@@ -44,9 +44,10 @@
 			{
 				"name": "${area} (area)",
 				"description": "Areas",
-				"onTags": [ { "area": "waiting" } ],
+				"onTags": [ { "area": "*" } ],
 				"style": {
 					"icon": "room_${area}.png",
+					"iconAlias": { "amphitheatre": "auditorium", "reception": "administration", "refectory": "restaurant", "checkroom": "locker" },
 					"showMissingIcon": false
 				}
 			},
