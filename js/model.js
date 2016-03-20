@@ -452,6 +452,13 @@ var Feature = function(f) {
 	};
 	
 	/**
+	 * @return The OSM Id
+	 */
+	Feature.prototype.getIdForEdit = function() {
+		return this._id.replace('/','=');
+	};
+	
+	/**
 	 * @return True if the feature has related images
 	 */
 	Feature.prototype.hasImages = function() {

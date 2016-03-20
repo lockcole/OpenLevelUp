@@ -114,5 +114,9 @@
 			"speed": 1.39,
 			"avoid": [ "elevator", "escalator" ]
 		}
+	},
+	
+	"edit": {
+		"id_url": "https://www.openstreetmap.org/edit?"
 	}
 }

@@ -491,6 +491,12 @@
 			"en": "If you like this project and wish to support it, you can make a donation using one of the following ways."
 		}
 	},
+	"edit": {
+		"link": {
+			"en": "Edit",
+			"fr": "Éditer"
+		}
+	},
 	"details": {
 		"access": {
 			"en": "Access",
@@ -681,6 +687,12 @@
 				"de": "Kurz-Link für diesen Ort",
 				"en": "Short URL for this map area",
 				"zh-TW": "此地圖區域的短網址"
+			}
+		},
+		"edit": {
+			"link": {
+				"en": "Edit",
+				"fr": "Éditer"
 			}
 		},
 		"params": {

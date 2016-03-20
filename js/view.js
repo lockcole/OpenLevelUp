@@ -1609,7 +1609,7 @@ var FeatureView = function(main, feature, details) {
 		}
 		
 		//Tags and OSM links
-		text += '<a href="#" id="tags-open" class="i18n-title title.general.tags" title="'+this._mainView.getTranslation("title", "general", "tags")+'" onclick="controller.getView().getTagsView().open(\''+this._feature.getId()+'\')"><img src="img/icon_tags.svg" alt="Tags" /></a><a href="http://www.openstreetmap.org/'+this._feature.getId()+'" class="i18n-title title.feature.seeosm" title="'+this._mainView.getTranslation("title", "feature", "seeosm")+'" target="_blank"><img src="img/icon_osm.svg" alt="OSM.org" /></a></div>';
+		text += '<a href="#" id="tags-open" class="i18n-title title.general.tags" title="'+this._mainView.getTranslation("title", "general", "tags")+'" onclick="controller.getView().getTagsView().open(\''+this._feature.getId()+'\')"><img src="img/icon_tags.svg" alt="Tags" /></a><a href="http://www.openstreetmap.org/'+this._feature.getId()+'" class="i18n-title title.feature.seeosm" title="'+this._mainView.getTranslation("title", "feature", "seeosm")+'" target="_blank"><img src="img/icon_osm.svg" alt="OSM.org" /></a><a href="'+CONFIG.edit.id_url+this._feature.getIdForEdit()+'&level='+this._mainView.getLevelView().get()+'" class="i18n-title title.edit.link" title="'+this._mainView.getTranslation("title", "edit", "link")+'" target="_blank"><img src="img/icon_edit.svg" alt="Edit" /></a></div>';
 		
 		return L.popup({ autoPan: false }).setContent(text);
 	}
@@ -2521,6 +2521,9 @@ var URLView = function(main) {
 		
 		//Update OSM link
 		$("#osm-link").attr('href', "http://openstreetmap.org/#map="+this._zoom+"/"+this._lat+"/"+this._lon);
+		
+		//Update edit link
+		$("#edit-link").attr('href', CONFIG.edit.id_url+"#map="+this._zoom+"/"+this._lat+"/"+this._lon);
 	};
 	
 	/**
