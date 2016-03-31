@@ -1206,6 +1206,9 @@ var Graph = function() {
 //ATTRIBUTES
 	/** The graph **/
 	this._graph = null;
+
+	// cache walkable area/room
+	this._areas = null;
 };
 
 //CONSTRUCTORS
@@ -1215,8 +1218,10 @@ var Graph = function() {
 	 * @param avoidTransitions The transitions to avoid, as a string array
 	 */
 	Graph.prototype.createFromOSMData = function(osmData, avoidTransitions) {
+		console.log('create graph', osmData, osmData.getData());
 		var data = osmData.getData();
 		var nodes = {};
+		var areas = [];
 		avoidTransitions = avoidTransitions || [];
 		var avoidElevator = contains(avoidTransitions, "elevator");
 		
@@ -1231,6 +1236,7 @@ var Graph = function() {
 				
 				var levels = listLevels(currentElement.tags);
 				if(currentElement.tags != undefined && levels.length > 0) {
+					// console.log('node with levels', currentElement);
 					isElevator = this._isElevator(currentElement.tags);
 					
 					for(var j=0; j < levels.length; j++) {
@@ -1258,6 +1264,9 @@ var Graph = function() {
 					}
 				}
 			}
+			// if(currentElement.id == 85) {
+			// 	console.log('node corridor', currentElement, nodes[currentElement.id]);
+			// }
 		}
 		
 		//Parse ways
@@ -1273,12 +1282,14 @@ var Graph = function() {
 					elevatorEntries = {}; //TODO Handle multiple entries for a given level
 					
 					if(levels.length > 0) {
+						// console.log('elevator way', currentElement);
 						//Read each node
 						for(var j=0, lj=currentElement.nodes.length; j < lj; j++) {
 							nodeId = currentElement.nodes[j];
 							
 							//If levels were read on node
 							if(nodes[nodeId].default.getType() == "door" && Object.keys(nodes[nodeId]).length > 1) {
+								// console.log('door = yes', nodeId, nodes[nodeId]);
 								//Read each level
 								for(var k in nodes[nodeId]) {
 									if(k != "default" && contains(levels, parseFloat(k))) {
@@ -1326,6 +1337,20 @@ var Graph = function() {
 				
 				//Walkable paths
 				else if(currentElement.type == "way" && this._isWalkable(currentElement.tags)) {
+					var isArea = (currentElement.tags && currentElement.tags.area == 'yes') ? true: false;
+
+					// store area nodes for later calculation
+					if(isArea) {
+						// console.log('is walkable area', currentElement);
+						var areaNodes = [];
+						for(var j = 0; j < currentElement.nodes.length ; ++j) {
+							var nodeId = currentElement.nodes[j];
+							areaNodes.push(nodes[nodeId]);
+						}
+						// console.log('area node', areaNodes);
+						areas.push(areaNodes);
+					}
+
 					//Check transition
 					transition = this._transition(currentElement.tags);
 					
@@ -1352,6 +1377,11 @@ var Graph = function() {
 									//Create node on current level
 									if(!isNaN(level) && nodes[nodeId][level] == undefined) {
 										nodes[nodeId][level] = new Node(nodes[nodeId].default.getLatLng(), level, nodes[nodeId].default._name);
+										if(isArea) {
+
+											nodes[nodeId][level].area = currentElement;
+											// console.log('name', nodes[nodeId][level]._name);
+										}
 									}
 								}
 								//Transition ways with several intermediate nodes
@@ -1416,7 +1446,7 @@ var Graph = function() {
 						}
 					}
 				}
-			}
+			}	// end of if(_isAccessible())
 		}
 		
 		//Store final graph
@@ -1428,13 +1458,15 @@ var Graph = function() {
 				}
 			}
 		}
+		this._areas = areas;
+		console.log('graph', this._graph);
 	};
 	
 	/**
 	 * @return True if the object can be walked on
 	 */
 	Graph.prototype._isWalkable = function(tags) {
-		return tags != null && tags.highway != undefined && tags.area == undefined;
+		return tags != null && tags.highway != undefined;// && tags.area == undefined;
 	};
 	
 	/**
@@ -1519,30 +1551,38 @@ var Graph = function() {
 	 * @return The path to follow (as an array of nodes)
 	 */
 	Graph.prototype.findShortestPath = function(startPt, startLvl, endPt, endLvl) {
+		var startArea = this._findContainingArea(startPt, startLvl);
+		var endArea = this._findContainingArea(endPt, endLvl);
+
+		// console.log('start area', startArea);
+		// console.log('end area', endArea);
+
 		//Find start and end nodes near given coordinates
-		var start = this._findNearestNode(startPt, startLvl);
+		var start = this._findNearestNode(startPt, startLvl, startArea);
 		if(start == null) { throw Error("No start node found"); }
 		
-		var end = this._findNearestNode(endPt, endLvl);
+		var end = this._findNearestNode(endPt, endLvl, endArea);
 		if(end == null) { throw Error("No end node found"); }
 		
 		return this._process(start, end);
 	};
-	
+
 	/**
 	 * Finds the nearest node in graph from given coordinates at given level
 	 * @param coords The coordinates
 	 * @param lvl The level
+	 * @param nodes if specified, will find in this node array instead of this._graph
 	 * @return The nearest node in graph, or null if no one found
 	 */
-	Graph.prototype._findNearestNode = function(coords, lvl) {
+	Graph.prototype._findNearestNode = function(coords, lvl, nodes) {
 		var minDistNode = null;
 		var minDist = null;
 		var current = null;
 		var currentDist = null;
+		if(!nodes) nodes = this._graph;
 		
-		for(var i=0, l=this._graph.length; i < l; i++) {
-			current = this._graph[i];
+		for(var i=0, l=nodes.length; i < l; i++) {
+			current = nodes[i];
 			if(current.getLevel() == lvl) {
 				currentDist = current.getLatLng().distanceTo(coords);
 				if(minDist == null || minDist > currentDist) {
@@ -1553,6 +1593,103 @@ var Graph = function() {
 		}
 		
 		return minDistNode;
+	};
+
+	Graph.prototype._findContainingArea = function(coords, lvl) {
+
+		for(var i = 0; i < this._areas.length; ++i) {
+			var area = this._areas[i];
+			var polygon = [];
+			var nodes = [];
+			for(var j = 0; j < area.length - 1; ++j) {	// exclude last repeating node
+				var node = area[j];
+				if(node[lvl]) {
+					var latlng = node[lvl].getLatLng();
+					polygon.push([latlng.lat, latlng.lng]);
+					nodes.push(node[lvl]);
+				}
+			}
+			if(polygon.length == area.length -1) {
+				var isInside = this._isInside([coords.lat, coords.lng], polygon);
+				// console.log('_isInArea', isInside, coords, lvl, area, polygon);
+				if(isInside) return nodes;
+			}
+		}
+		// console.log('_isInArea', coords, lvl, this._areas);
+		return null;
+	}
+
+	/**
+	 * point should be a 2-item array of coordinates.
+
+	 * polygon should be an array of 2-item arrays of coordinates.
+	 */
+	Graph.prototype._isInside = function (point, vs) {
+		// ray-casting algorithm based on
+		// http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+		
+		var x = point[0], y = point[1];
+		
+		var inside = false;
+		for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+			var xi = vs[i][0], yi = vs[i][1];
+			var xj = vs[j][0], yj = vs[j][1];
+			
+			var intersect = ((yi > y) != (yj > y))
+				&& (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+			if (intersect) inside = !inside;
+		}
+		
+		return inside;
+	};
+
+	/**
+	 * normalize path in room / walkable areas
+	 */
+	Graph.prototype.normalizePath = function(path, startPt, startLvl, endPt, endLvl) {
+		var currentNode = null, prevNode = null ;
+		var fakeId = 0;
+		var resultPath = [];
+		for(var i = 0; i < path.length; ++i) {
+			// console.log(i);
+			currentNode = path[i];
+			if(currentNode.area) {
+				// console.log(i, currentNode.area.id);
+				if(prevNode) {
+					if(!prevNode.area) {
+						// prevNode outside room, connect it
+						resultPath.push(currentNode);
+					} else {
+						if(prevNode.area.id == currentNode.area.id) {
+							// skip intermediate node
+							// TODO: deal with room with different shape. it will be a very complex task
+
+						} else {
+							// different room, connect it
+							resultPath.push(currentNode);
+						}
+					}
+				} else {
+					// first node in a room
+					// create a fake node using startPt
+					resultPath.push(new Node(startPt, startLvl, --fakeId));
+				}
+			} else {
+				if(prevNode && prevNode.area) {
+					// leaving a room, connect the last node of the room
+					resultPath.push(prevNode);
+				}
+				resultPath.push(currentNode);
+				prevNode = currentNode;
+			}
+			prevNode = currentNode;
+		}
+		if(prevNode && prevNode.area) {
+			// last node is in a room
+			// create a fake node using endPt
+			resultPath.push(new Node(endPt, endLvl, --fakeId));
+		}
+		return resultPath;
 	};
 	
 	/**
@@ -1566,6 +1703,7 @@ var Graph = function() {
 		var frontier = new PriorityQueue({ comparator: function(a, b) { return a.priority - b.priority } });
 		var cameFrom = new HashMap();
 		var costSoFar = new HashMap();
+		// var comeTo = new HashMap();
 		var current = null, neighbors = null, next = null, newCost = null, priority = null;
 		
 		//Add start node
@@ -1589,24 +1727,56 @@ var Graph = function() {
 					costSoFar.set(next, newCost);
 					priority = newCost + this._heuristic(end, next);
 					frontier.queue({ node: next, priority: priority });
+					// console.log('found '+current._name+' => '+next._name+' - '+priority);
 					cameFrom.set(next, current);
+					// comeTo.set(current, next);
 				}
 			}
 		}
+
+		// var printPath = function(path) {
+		// 	var result = '';
+		// 	var sep = '';
+		// 	for(var i = 0; i < path.length; ++i) {
+		// 		var node = path[i];
+		// 		if(!node) {
+		// 			result += sep + '??';
+		// 		} else {
+		// 			result += sep + node._name;
+		// 		}
+		// 		sep = ' => ';
+		// 	}
+		// 	return result;
+		// }
+
+		// // construct forward path
+		// current = start;
+		// var path2 = [current];
+		// while(comeTo.get(current)) {
+		// 	current = comeTo.get(current);
+		// 	path2.push(current);
+		// }
+		// console.log('path2', path2, printPath(path2));
 		
 		//Reconstruct path
 		current = end;
 		var path = [ current ];
+		// console.log('start => end', start, end);
 		
 		if(!cameFrom.has(end)) {
-			throw Error("No route found");
+			// throw Error("No route found");
+			console.warn('end route not found in path', cameFrom);
 		}
 		
 		while(!current.equals(start)) {
 			current = cameFrom.get(current);
 			path.push(current);
+			if(!current) break;
 		}
 		path.reverse();
+
+		// console.log('path', path, printPath(path));
+
 		
 		return path;
 	};
@@ -1702,6 +1872,7 @@ var Node = function(latlng, level, name, type) {
 	 */
 	Node.prototype.equals = function(n) {
 		if(this === n) { return true; }
+		if(this._name != n._name) return false;
 		if(this._level != n._level) return false;
 		if(this._type != n._type) return false;
 		if(!this._latLng.equals(n._latLng)) return false;

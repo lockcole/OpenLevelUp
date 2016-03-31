@@ -734,6 +734,7 @@ var Ctrl = function() {
 	 * @param endLvl The end level
 	 */
 	Ctrl.prototype.startRouting = function(mode, startPt, startLvl, endPt, endLvl) {
+		// console.log('startRouting', mode, startPt, startLvl, endPt, endLvl);
 		//Create graph if not available
 		if(this._graphs[mode] == undefined) {
 			this._graphs[mode] = new Graph();
@@ -743,6 +744,8 @@ var Ctrl = function() {
 		//Launch routing
 		try {
 			var path = this._graphs[mode].findShortestPath(startPt, startLvl, endPt, endLvl);
+			console.log('path', path);
+			path = this._graphs[mode].normalizePath(path, startPt, startLvl, endPt, endLvl);
 			this.getView().getRoutingView().showRoute(path);
 		}
 		catch(e) {
