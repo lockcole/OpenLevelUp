@@ -22,6 +22,50 @@
  *
  * Model JS classes
  */
+"use strict";
+
+var has_require = typeof require !== 'undefined';
+if(has_require) {
+	var utils = require('./utils');
+	var PriorityQueue = require('../lib/priority-queue.min.js');
+	var HashMap = require('../lib/hashmap.js');
+	// global.test = 'test';
+	// console.log(test);
+	// console.log('??', utils);
+	// console.log(this, module);
+	// var js = '';
+	for(var fn in utils) {
+		global[fn] = utils[fn];
+	// 	this[fn] = utils[fn];
+		// js += 'var '+fn+ ' = utils.'+fn+';';
+		// console.log(fn);
+	}
+	// console.log(js);
+	// eval(js);
+	// var parseOsmData = utils.parseOsmData;
+	// eval('var parseOsmData = "test";');
+	// console.log(typeof parseOsmData);
+	// console.log(typeof this.parseOsmData);
+	// console.log(parseOsmData == this.parseOsmData);
+	// console.log(typeof global.parseOsmData);
+
+	var $ = $ || {};
+	// copied from jQuery source code
+	// https://github.com/jquery/jquery/blob/master/src/core.js
+	if(!$.merge) $.merge = function( first, second ) {
+		var len = +second.length,
+			j = 0,
+			i = first.length;
+
+		for ( ; j < len; j++ ) {
+			first[ i++ ] = second[ j ];
+		}
+
+		first.length = i;
+
+		return first;
+	};
+}
 
 /**
  * The OSM global data container.
@@ -1218,7 +1262,7 @@ var Graph = function() {
 	 * @param avoidTransitions The transitions to avoid, as a string array
 	 */
 	Graph.prototype.createFromOSMData = function(osmData, avoidTransitions) {
-		console.log('create graph', osmData, osmData.getData());
+		// console.log('create graph', osmData, osmData.getData());
 		var data = osmData.getData();
 		var nodes = {};
 		var areas = [];
@@ -1279,7 +1323,7 @@ var Graph = function() {
 				if(currentElement.type == "way" && this._isElevator(currentElement.tags) && !avoidElevator) {
 					//Check levels
 					levels = listLevels(currentElement.tags);
-					elevatorEntries = {}; //TODO Handle multiple entries for a given level
+					var elevatorEntries = {}; //TODO Handle multiple entries for a given level
 					
 					if(levels.length > 0) {
 						// console.log('elevator way', currentElement);
@@ -1459,7 +1503,7 @@ var Graph = function() {
 			}
 		}
 		this._areas = areas;
-		console.log('graph', this._graph);
+		// console.log('graph', this._graph);
 	};
 	
 	/**
@@ -1892,3 +1936,25 @@ var Node = function(latlng, level, name, type) {
 		this._costs.push(w);
 		this._transition.push(t || null);
 	};
+
+
+// define models for Node module pattern loaders
+if (typeof define === 'function' && define.amd) {
+	// AMD. Register as an anonymous module.
+	// define([], factory);
+} else if (typeof module === 'object') {
+	// Node js environment
+	module.exports.OSMData = OSMData;
+	module.exports.OSMClusterData = OSMClusterData;
+	module.exports.MapillaryData = MapillaryData;
+	module.exports.NotesData = NotesData;
+	module.exports.Feature = Feature;
+	module.exports.FeatureGeometry = FeatureGeometry;
+	module.exports.FeatureStyle = FeatureStyle;
+	module.exports.FeatureImages = FeatureImages;
+	module.exports.Graph = Graph;
+	module.exports.Node = Node;
+} else {
+	// Browser globals (this is window)
+	// this.HashMap = factory();
+}

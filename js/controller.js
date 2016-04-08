@@ -744,8 +744,8 @@ var Ctrl = function() {
 		//Launch routing
 		try {
 			var path = this._graphs[mode].findShortestPath(startPt, startLvl, endPt, endLvl);
-			console.log('path', path);
-			path = this._graphs[mode].normalizePath(path, startPt, startLvl, endPt, endLvl);
+			// console.log('path', path);
+			// path = this._graphs[mode].normalizePath(path, startPt, startLvl, endPt, endLvl);
 			this.getView().getRoutingView().showRoute(path);
 		}
 		catch(e) {

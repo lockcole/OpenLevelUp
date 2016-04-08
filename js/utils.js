@@ -22,6 +22,15 @@
  *
  * Utility JS functions
  */
+"use strict";
+
+var has_require = typeof require !== 'undefined';
+if(has_require) {
+	// var utils = require('./utils');
+	// var parseOsmData = utils.parseOsmData;
+
+	var osmtogeojson = require('../lib/osmtogeojson.js');
+}
 
 /**
  * Parses raw OSM data, and return result.
@@ -781,3 +790,41 @@ function utf8_encode(argString) {
 	
 	return utftext;
 };
+
+// define utils for Node module pattern loaders
+if (typeof define === 'function' && define.amd) {
+	// AMD. Register as an anonymous module.
+	// define([], factory);
+} else if (typeof module === 'object') {
+	// Node js environment
+	module.exports.parseOsmData = parseOsmData;
+	module.exports.addCompatibility = addCompatibility;
+	module.exports.mergeArrays = mergeArrays;
+	module.exports.contains = contains;
+	module.exports.sortNumberArray = sortNumberArray;
+	module.exports.rmDuplicatesSortedArray = rmDuplicatesSortedArray;
+	module.exports.listLevels = listLevels;
+	module.exports.parseLevelsFloat = parseLevelsFloat;
+	module.exports.boundsString = boundsString;
+	module.exports.addDimensionUnit = addDimensionUnit;
+	module.exports.removeUscore = removeUscore;
+	module.exports.asWebLink = asWebLink;
+	module.exports.correctWebLink = correctWebLink;
+	module.exports.distanceLevels = distanceLevels;
+	module.exports.filterFloat = filterFloat;
+	module.exports.angle360toAngle180 = angle360toAngle180;
+	module.exports.decToBase62 = decToBase62;
+	module.exports.base62toDec = base62toDec;
+	module.exports.intToLetter = intToLetter;
+	module.exports.letterToInt = letterToInt;
+	module.exports.intToBitArray = intToBitArray;
+	module.exports.bitArrayToBase62 = bitArrayToBase62;
+	module.exports.normLat = normLat;
+	module.exports.normLon = normLon;
+	module.exports.normAbs = normAbs;
+	module.exports.md5 = md5;
+	module.exports.utf8_encode = utf8_encode;
+} else {
+	// Browser globals (this is window)
+	// this.HashMap = factory();
+}
